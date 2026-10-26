@@ -1,0 +1,2299 @@
+From: Zhiyi Zhang <zzhang@codeweavers.com>
+Subject: Experimental ALPC connection and message backport to Wine 10.20
+
+Source: https://gitlab.winehq.org/zhiyi/wine/tree/bug-23698-react-native-alpc
+Revision: 5505b7de0ea3f76dedaa19728f3d0581dc28d35f
+Selected ALPC files only. Not merged/released upstream and not enabled in launchers.
+Local changes: retain all stock server request IDs, explicit request-data object
+attribute decoder, reject invalid creation attributes before sending the request.
+Known draft limitations include token/sequence placeholders and unchecked message
+sizes; isolated research build only, not a claim of complete Windows semantics.
+Apply after patches 0003 and 0004; regenerate tools/make_requests and tools/make_specfiles.
+
+diff --git a/server/alpc.c b/server/alpc.c
+--- a/server/alpc.c
++++ b/server/alpc.c
+@@ -32,9 +32,11 @@
+ #include "ntstatus.h"
+ 
+ #include "handle.h"
++#include "process.h"
+ #include "thread.h"
+ #include "security.h"
+ #include "request.h"
++#include "wine/alpc.h"
+ 
+ static const WCHAR alpc_port_name[] = {'A','L','P','C',' ','P','o','r','t'};
+ 
+@@ -66,18 +68,51 @@
+ 
+ struct alpc_port
+ {
+-    struct object            obj;                   /* object header */
+-    enum alpc_port_enum_type type;                  /* communication port or connection port */
+-    enum alpc_port_status    status;                /* port status */
+-    struct thread           *thread;                /* thread owning the port */
+-    unsigned int             flags;                 /* flags in port attributes */
+-    struct list              message_queue;         /* messages pending receipt */
+-    mem_size_t               max_msg_len;           /* max message length in port attributes */
++    struct object            obj;          /* object header */
++    enum alpc_port_enum_type type;         /* communication port or connection port */
++    enum alpc_port_status    status;       /* port status */
++    struct thread           *thread;       /* thread owning the port */
++    struct list              msg_list;     /* list of ALPC messages */
++    struct alpc_port        *dst_port;     /* destination port if it's a communication port */
++    client_ptr_t             port_context; /* opaque port context set by NtAlpcAcceptConnectPort() */
++    struct alpc_port_attr_t  port_attr;    /* port attributes */
+ };
+ 
++struct alpc_msg_entry
++{
++    struct list entry;
++    struct alpc_msg_t *msg;
++    struct alpc_msg_attr_t msg_attr;
++    struct alpc_security_attr_t *security_attr;
++    struct alpc_view_attr_t *view_attr;
++    struct alpc_context_attr_t *context_attr;
++    struct alpc_handle_attr_t *handle_attr;
++    struct alpc_token_attr_t *token_attr;
++    struct alpc_direct_attr_t *direct_attr;
++    struct alpc_work_on_behalf_attr_t *work_on_behalf_attr;
++};
++
++#define ALPC_MSG_ID_OFFSET 1                     /* offset for first msg ID value */
++
++struct alpc_msg_id_entry
++{
++    struct alpc_port *src_port;   /* src ALPC port that sent the msg */
++    unsigned int next;            /* next free entry */
++};
++
++static struct alpc_msg_id_entry *msg_id_entries; /* array of msg id entries */
++static unsigned int used_msg_id_entries;         /* number of entries in use */
++static unsigned int allocated_msg_id_entries;    /* number of allocated entries */
++static unsigned int next_free_msg_id;            /* next free entry */
++static unsigned int last_free_msg_id;            /* last free entry */
++static unsigned int num_free_msg_id;             /* number of free msg id */
++
+ static void alpc_port_dump( struct object *obj, int verbose );
++static int alpc_port_signaled( struct object *obj, struct wait_queue_entry *entry );
+ static void alpc_port_destroy( struct object *obj );
+-static int alpc_port_signaled( struct object *obj, struct wait_queue_entry *entry );
++
++static void free_msg_id( unsigned int id );
++static void free_msg_record( const struct alpc_port *port, struct alpc_msg_entry *record );
+ 
+ static const struct object_ops alpc_port_ops =
+ {
+@@ -86,7 +121,7 @@
+     alpc_port_dump,                /* dump */
+     add_queue,                     /* add_queue */
+     remove_queue,                  /* remove_queue */
+-    alpc_port_signaled,             /* signaled */
++    alpc_port_signaled,            /* signaled */
+     no_satisfied,                  /* satisfied */
+     no_signal,                     /* signal */
+     no_get_fd,                     /* get_fd */
+@@ -111,26 +146,351 @@
+     fprintf( stderr, "ALPC Port type=%d status=%d\n", port->type, port->status );
+ }
+ 
+-/* A new connection port has no pending messages. Connection/message delivery
+- * remains unimplemented; those APIs must return NOT_IMPLEMENTED until enqueue,
+- * dequeue, notification and cancellation semantics are implemented together. */
+ static int alpc_port_signaled( struct object *obj, struct wait_queue_entry *entry )
+ {
+     struct alpc_port *port = (struct alpc_port *)obj;
+-    return !list_empty( &port->message_queue );
++
++    return !list_empty( &port->msg_list );
++}
++
++static void alpc_port_disconnect( struct alpc_port *port )
++{
++    struct alpc_msg_entry *record, *record2;
++
++    if (port->dst_port) release_object(port->dst_port);
++    port->dst_port = NULL;
++    port->status = DISCONNECTED;
++    LIST_FOR_EACH_ENTRY_SAFE( record, record2, &port->msg_list, struct alpc_msg_entry, entry )
++    {
++        list_remove( &record->entry );
++        free_msg_record( port, record );
++    }
++    for (unsigned int i = 0; i < used_msg_id_entries; i++)
++        if (msg_id_entries[i].src_port == port) free_msg_id(i + ALPC_MSG_ID_OFFSET);
+ }
+ 
+ static void alpc_port_destroy( struct object *obj )
+ {
+     struct alpc_port *port = (struct alpc_port *)obj;
+     assert( obj->ops == &alpc_port_ops );
++    alpc_port_disconnect( port );
+     release_object( port->thread );
++}
++
++/* allocate a new ALPC msg id */
++static unsigned int alloc_msg_id( struct alpc_port *src_port )
++{
++    struct alpc_msg_id_entry *entry;
++    unsigned int id;
++
++    if (used_msg_id_entries < allocated_msg_id_entries)
++    {
++        id = used_msg_id_entries + ALPC_MSG_ID_OFFSET;
++        entry = &msg_id_entries[used_msg_id_entries++];
++    }
++    else if (next_free_msg_id && num_free_msg_id >= 256)
++    {
++        id = next_free_msg_id;
++        entry = &msg_id_entries[id - ALPC_MSG_ID_OFFSET];
++        if (!(next_free_msg_id = entry->next)) last_free_msg_id = 0;
++        num_free_msg_id--;
++    }
++    else  /* need to grow the array */
++    {
++        unsigned int count = allocated_msg_id_entries + (allocated_msg_id_entries / 2);
++        if (!count) count = 512;
++        if (!(entry = realloc( msg_id_entries, count * sizeof(*entry) )))
++        {
++            set_error( STATUS_NO_MEMORY );
++            return 0;
++        }
++        msg_id_entries = entry;
++        allocated_msg_id_entries = count;
++        id = used_msg_id_entries + ALPC_MSG_ID_OFFSET;
++        entry = &msg_id_entries[used_msg_id_entries++];
++    }
++
++    entry->src_port = src_port;
++    return id;
++}
++
++/* free an ALPC message id */
++static void free_msg_id( unsigned int id )
++{
++    struct alpc_msg_id_entry *entry;
++
++    if (id < ALPC_MSG_ID_OFFSET) return;
++    if (id - ALPC_MSG_ID_OFFSET >= used_msg_id_entries) return;
++    if (!msg_id_entries[id - ALPC_MSG_ID_OFFSET].src_port) return;
++
++    entry = &msg_id_entries[id - ALPC_MSG_ID_OFFSET];
++    entry->src_port = NULL;
++    entry->next = 0;
++
++    /* append to end of free list so that we don't reuse it too early */
++    if (last_free_msg_id) msg_id_entries[last_free_msg_id - ALPC_MSG_ID_OFFSET].next = id;
++    else next_free_msg_id = id;
++    last_free_msg_id = id;
++    num_free_msg_id++;
++}
++
++/* retrieve the src port corresponding to a msg */
++struct alpc_port *get_alpc_msg_id_entry( unsigned int id )
++{
++    if (id < ALPC_MSG_ID_OFFSET) return NULL;
++    if (id - ALPC_MSG_ID_OFFSET >= used_msg_id_entries) return NULL;
++    if (!msg_id_entries[id - ALPC_MSG_ID_OFFSET].src_port) return NULL;
++    return (struct alpc_port *)grab_object(msg_id_entries[id - ALPC_MSG_ID_OFFSET].src_port);
++}
++
++static void get_msg_attr_from_record( const struct alpc_port *port, unsigned int want_attributes,
++                                      struct alpc_msg_attr_t *msg_attr, const struct alpc_msg_entry *record )
++{
++    struct alpc_security_attr_t *security_attr;
++    struct alpc_view_attr_t *view_attr;
++    struct alpc_context_attr_t *context_attr;
++    struct alpc_handle_attr_t *handle_attr;
++    struct alpc_token_attr_t *token_attr;
++    struct alpc_direct_attr_t *direct_attr;
++    struct alpc_work_on_behalf_attr_t *work_on_behalf_attr;
++
++    msg_attr->attributes = want_attributes & record->msg_attr.attributes;
++
++    if ((security_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_SECURITY_ATTRIBUTE)))
++    {
++        memcpy(security_attr, record->security_attr, sizeof(*record->security_attr));
++        if (record->security_attr->context_handle)
++            security_attr->context_handle = duplicate_handle( port->thread->process, record->security_attr->context_handle,
++                                                              current->process, 0, 0, DUPLICATE_SAME_ACCESS );
++    }
++
++    if ((view_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_VIEW_ATTRIBUTE)))
++    {
++        memcpy(view_attr, record->view_attr, sizeof(*record->view_attr));
++        if (record->view_attr->section_handle)
++            view_attr->section_handle = duplicate_handle( port->thread->process, record->view_attr->section_handle,
++                                                          current->process, 0, 0, DUPLICATE_SAME_ACCESS );
++    }
++
++    if ((context_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_CONTEXT_ATTRIBUTE)))
++        memcpy(context_attr, record->context_attr, sizeof(*record->context_attr));
++
++    if ((handle_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_HANDLE_ATTRIBUTE)))
++    {
++        memcpy(handle_attr, record->handle_attr, sizeof(*record->handle_attr));
++        if (record->handle_attr->handle)
++            handle_attr->handle = duplicate_handle( port->thread->process, record->handle_attr->handle,
++                                                    current->process, 0, 0, DUPLICATE_SAME_ACCESS );
++    }
++
++    if ((token_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_TOKEN_ATTRIBUTE)))
++        memcpy(token_attr, record->token_attr, sizeof(*record->token_attr));
++
++    if ((direct_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_DIRECT_ATTRIBUTE)))
++    {
++        memcpy(direct_attr, record->direct_attr, sizeof(*record->direct_attr));
++        if (record->direct_attr->event)
++            direct_attr->event = duplicate_handle( port->thread->process, record->direct_attr->event,
++                                                   current->process, 0, 0, DUPLICATE_SAME_ACCESS );
++    }
++
++    if ((work_on_behalf_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE)))
++        memcpy(work_on_behalf_attr, record->work_on_behalf_attr, sizeof(*record->work_on_behalf_attr));
++}
++
++static int add_msg_attr_to_record(struct alpc_msg_entry *record, const struct alpc_port *port,
++                                  const struct alpc_msg_attr_t *msg_attr, unsigned int id,
++                                  int add_port_context, client_ptr_t port_context)
++{
++    record->msg_attr.attributes = 0;
++
++    /* Add ALPC_MESSAGE_CONTEXT_ATTRIBUTE when add_port_context is TRUE */
++    if (add_port_context)
++    {
++        if (!(record->context_attr = calloc(1, sizeof(*record->context_attr)))) goto failed;
++
++        record->context_attr->port_context = port_context;
++        record->context_attr->msg_id = id;
++        record->msg_attr.attributes |= ALPC_MESSAGE_CONTEXT_ATTRIBUTE;
++    }
++
++    /* Add ALPC_MESSAGE_TOKEN_ATTRIBUTE on the server side. Current initialized to zero because of
++     * no idea how to use it */
++    if (port->type == CONNECTION_PORT)
++    {
++        if (!(record->token_attr = calloc(1, sizeof(*record->token_attr)))) goto failed;
++
++        record->msg_attr.attributes |= ALPC_MESSAGE_TOKEN_ATTRIBUTE;
++    }
++
++    if (!msg_attr) return 1;
++
++    assert(!(msg_attr->attributes & (ALPC_MESSAGE_CONTEXT_ATTRIBUTE | ALPC_MESSAGE_TOKEN_ATTRIBUTE)));
++    record->msg_attr.attributes |= msg_attr->attributes;
++
++    if (msg_attr->attributes & ALPC_MESSAGE_SECURITY_ATTRIBUTE)
++    {
++        const struct alpc_security_attr_t *src_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_SECURITY_ATTRIBUTE);
++
++        if (!(record->security_attr = malloc(sizeof(*record->security_attr)))) goto failed;
++
++        memcpy(record->security_attr, src_attr, sizeof(*record->security_attr));
++        if (src_attr->context_handle)
++            record->security_attr->context_handle = duplicate_handle( current->process, src_attr->context_handle,
++                                                                      port->thread->process, 0, 0, DUPLICATE_SAME_ACCESS );
++    }
++
++    if (msg_attr->attributes & ALPC_MESSAGE_VIEW_ATTRIBUTE)
++    {
++        const struct alpc_view_attr_t *src_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_VIEW_ATTRIBUTE);
++
++        if (!(record->view_attr = malloc(sizeof(*record->view_attr)))) goto failed;
++
++        memcpy(record->view_attr, src_attr, sizeof(*record->view_attr));
++        if (src_attr->section_handle)
++            record->view_attr->section_handle = duplicate_handle( current->process, src_attr->section_handle,
++                                                                  port->thread->process, 0, 0, DUPLICATE_SAME_ACCESS );
++    }
++
++    if (msg_attr->attributes & ALPC_MESSAGE_HANDLE_ATTRIBUTE)
++    {
++        const struct alpc_handle_attr_t *src_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_HANDLE_ATTRIBUTE);
++
++        if (!(record->handle_attr = malloc(sizeof(*record->handle_attr)))) goto failed;
++
++        memcpy(record->handle_attr, src_attr, sizeof(*record->handle_attr));
++        if (src_attr->handle)
++            record->handle_attr->handle = duplicate_handle( current->process, src_attr->handle,
++                                                            port->thread->process, 0, 0, DUPLICATE_SAME_ACCESS );
++    }
++
++    if (msg_attr->attributes & ALPC_MESSAGE_DIRECT_ATTRIBUTE)
++    {
++        const struct alpc_direct_attr_t *src_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_DIRECT_ATTRIBUTE);
++
++        if (!(record->direct_attr = calloc(1, sizeof(*record->direct_attr)))) goto failed;
++
++        if (src_attr->event)
++            record->direct_attr->event = duplicate_handle( current->process, src_attr->event,
++                                                           port->thread->process, 0, 0, DUPLICATE_SAME_ACCESS );
++    }
++
++    if (msg_attr->attributes & ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE)
++    {
++        const struct alpc_work_on_behalf_attr_t *src_attr = wine_server_alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE);
++
++        if (!(record->work_on_behalf_attr = malloc(sizeof(*record->work_on_behalf_attr))))
++            goto failed;
++
++        memcpy(record->work_on_behalf_attr, src_attr, sizeof(*record->work_on_behalf_attr));
++    }
++
++    return 1;
++
++failed:
++    record->msg_attr.attributes = 0;
++    if (record->security_attr && record->security_attr->context_handle)
++        close_handle(port->thread->process, record->security_attr->context_handle);
++    if (record->view_attr && record->view_attr->section_handle)
++        close_handle(port->thread->process, record->view_attr->section_handle);
++    if (record->handle_attr && record->handle_attr->handle)
++        close_handle(port->thread->process, record->handle_attr->handle);
++    if (record->direct_attr && record->direct_attr->event)
++        close_handle(port->thread->process, record->direct_attr->event);
++    free(record->security_attr);
++    free(record->view_attr);
++    free(record->context_attr);
++    free(record->handle_attr);
++    free(record->token_attr);
++    free(record->direct_attr);
++    free(record->work_on_behalf_attr);
++    return 0;
++}
++
++static int add_msg_record(struct alpc_port *dst_port, struct alpc_port *src_port,
++                          unsigned short msg_type, const struct alpc_msg_t *msg,
++                          data_size_t msg_size, const struct alpc_msg_attr_t *msg_attr,
++                          int add_port_context, client_ptr_t port_context)
++{
++    struct alpc_msg_entry *entry = NULL;
++    unsigned int id = 0;
++
++    if (!msg) return 0;
++
++    /* Don't allocate a message ID for refused or disconnected ports */
++    if (!(dst_port->status == REFUSED || dst_port->status == DISCONNECTED) && !(id = alloc_msg_id(src_port)))
++        return 0;
++
++    if (msg->data_len + sizeof(ALPC_PORT_MESSAGE) > dst_port->port_attr.max_msg_len)
++    {
++        set_error( STATUS_PORT_MESSAGE_TOO_LONG );
++        goto failed;
++    }
++
++    if (!(entry = calloc(1, sizeof(*entry))))
++    {
++        set_error( STATUS_NO_MEMORY );
++        goto failed;
++    }
++
++    if (!(entry->msg = malloc(msg_size)))
++    {
++        set_error( STATUS_NO_MEMORY );
++        goto failed;
++    }
++
++    memcpy(entry->msg, msg, msg_size);
++    if (!add_msg_attr_to_record(entry, dst_port, msg_attr, id, add_port_context, port_context))
++    {
++        set_error( STATUS_NO_MEMORY );
++        goto failed;
++    }
++    entry->msg->type = msg_type;
++    /* Add tests for this */
++    if (dst_port->type == CONNECTION_PORT && (entry->msg->type == ALPC_MESSAGE_TYPE_REQUEST
++        || entry->msg->type == ALPC_MESSAGE_TYPE_CONNECTION_REQUEST))
++        entry->msg->type |= 0x2000;
++    entry->msg->id = id;
++    entry->msg->unique_thread = current->id;
++    entry->msg->unique_process = current->process->id;
++    list_add_tail(&dst_port->msg_list, &entry->entry);
++    wake_up(&dst_port->obj, 1);
++    return 1;
++
++failed:
++    if (id) free_msg_id(id);
++    if (entry) free(entry->msg);
++    free(entry);
++    return 0;
++}
++
++static void free_msg_record( const struct alpc_port *port, struct alpc_msg_entry *record )
++{
++    if (!record) return;
++
++    if (record->security_attr && record->security_attr->context_handle)
++        close_handle(port->thread->process, record->security_attr->context_handle);
++    if (record->view_attr && record->view_attr->section_handle)
++        close_handle(port->thread->process, record->view_attr->section_handle);
++    if (record->handle_attr && record->handle_attr->handle)
++        close_handle(port->thread->process, record->handle_attr->handle);
++    if (record->direct_attr && record->direct_attr->event)
++        close_handle(port->thread->process, record->direct_attr->event);
++    free(record->msg);
++    free(record->security_attr);
++    free(record->view_attr);
++    free(record->context_attr);
++    free(record->handle_attr);
++    free(record->token_attr);
++    free(record->direct_attr);
++    free(record->work_on_behalf_attr);
++    free(record);
+ }
+ 
+ static struct alpc_port *alpc_create_port( struct object *root, const struct unicode_str *name,
+                                            unsigned int attr, const struct security_descriptor *sd,
+-                                           enum alpc_port_enum_type type, unsigned int flags,
+-                                           mem_size_t max_msg_len )
++                                           enum alpc_port_enum_type type,
++                                           const struct alpc_port_attr_t *port_attr )
+ {
+     struct alpc_port *port;
+ 
+@@ -139,12 +499,13 @@
+     {
+         if (get_error() != STATUS_OBJECT_NAME_EXISTS)
+         {
+-            list_init( &port->message_queue );
+             port->type = type;
+             port->status = UNINITIALIZED;
+             port->thread = (struct thread *)grab_object( current );
+-            port->flags = flags;
+-            port->max_msg_len = max_msg_len;
++            list_init( &port->msg_list );
++            port->dst_port = NULL;
++            port->port_context = 0;
++            port->port_attr = *port_attr;
+         }
+         else
+         {
+@@ -156,23 +517,443 @@
+     return port;
+ }
+ 
++static struct alpc_port *get_alpc_port_obj( struct process *process, obj_handle_t handle, unsigned int access )
++{
++    return (struct alpc_port *)get_handle_obj( process, handle, access, &alpc_port_ops );
++}
++
+ /* Create an ALPC port */
+ DECL_HANDLER(alpc_create_port)
+ {
++    const unsigned char *data_ptr = get_req_data();
++    const struct alpc_port_attr_t *port_attr = NULL;
++    const struct object_attributes *obj_attr = NULL;
++    const struct security_descriptor *sd = NULL;
++    struct unicode_str obj_attr_name = {0};
+     struct alpc_port *alpc_port;
+-    const struct security_descriptor *sd;
+-    struct unicode_str name;
+-    struct object *root;
+-    const struct object_attributes *objattr = get_req_object_attributes( &sd, &name, &root );
+-
++    struct object *root = NULL;
++
++    obj_attr = get_req_object_attributes_data( data_ptr, req->obj_attr_size, &sd, &obj_attr_name, &root );
++    if (!obj_attr) return;
++
++    data_ptr += req->obj_attr_size;
++    port_attr = (struct alpc_port_attr_t *)data_ptr;
++
++    if ((alpc_port = alpc_create_port( root, &obj_attr_name, obj_attr->attributes, sd, CONNECTION_PORT, port_attr )))
++    {
++        reply->handle = alloc_handle( current->process, alpc_port, ALPC_PORT_ALL_ACCESS, obj_attr->attributes );
++        release_object( alpc_port );
++    }
++
++    if (root) release_object( root );
++}
++
++/* Connect to an ALPC object */
++DECL_HANDLER(alpc_connect_port)
++{
++    const unsigned char *data_ptr = get_req_data();
++    struct alpc_port *connection_port, *communication_port;
++    const struct object_attributes *objattr = NULL;
++    const struct alpc_port_attr_t *alpc_port_attr = NULL;
++    struct unicode_str name, objattr_name = {0};
++    const struct alpc_msg_attr_t *send_msg_attr = NULL;
++    const struct security_descriptor *sd = NULL;
++    const struct alpc_msg_t *send_msg = NULL;
++    const struct sid *sid = NULL;
++    struct object *root = NULL;
++
++    name.str = (const WCHAR *)data_ptr;
++    name.len = (req->name_size / sizeof(WCHAR)) * sizeof(WCHAR);
++    data_ptr += req->name_size;
++
++    connection_port = open_named_object( NULL, &alpc_port_ops, &name, OBJ_CASE_INSENSITIVE | OBJ_OPENIF );
++    if (!connection_port) return;
++
++    objattr = get_req_object_attributes_data( data_ptr, req->obj_attr_size, &sd, &objattr_name, &root );
++    if (!objattr)
++    {
++        release_object( connection_port );
++        return;
++    }
++    data_ptr += req->obj_attr_size;
++
++    alpc_port_attr = (const struct alpc_port_attr_t *)data_ptr;
++    data_ptr += sizeof(struct alpc_port_attr_t);
++
++    if (req->sid_size)
++    {
++        sid = (const struct sid *)data_ptr;
++        data_ptr += req->sid_size;
++
++        if (!sid_valid_size( sid, req->sid_size ))
++        {
++            if (root) release_object( root );
++            release_object( connection_port );
++            set_error( STATUS_INVALID_PARAMETER );
++            return;
++        }
++
++        if (!token_sid_present( connection_port->thread->process->token, sid, FALSE ))
++        {
++            if (root) release_object( root );
++            release_object( connection_port );
++            set_error( STATUS_SERVER_SID_MISMATCH );
++            return;
++        }
++    }
++
++    assert(req->msg_size);
++
++    send_msg = (const struct alpc_msg_t *)data_ptr;
++    data_ptr += req->msg_size;
++
++    assert(req->msg_attr_size == (get_req_data_size() - req->name_size - req->obj_attr_size - sizeof(struct alpc_port_attr_t) - req->sid_size - req->msg_size));
++
++    if (req->msg_attr_size) send_msg_attr = (const struct alpc_msg_attr_t *)data_ptr;
++
++    communication_port = alpc_create_port( root, &objattr_name, objattr->attributes, sd, COMMUNICATION_PORT, alpc_port_attr );
++    if (!communication_port)
++    {
++        if (root) release_object( root );
++        release_object( connection_port );
++        return;
++    }
++
++    if (add_msg_record( connection_port, communication_port, ALPC_MESSAGE_TYPE_CONNECTION_REQUEST,
++                        send_msg, req->msg_size, send_msg_attr, 0, 0 ))
++        reply->handle = alloc_handle( current->process, communication_port, ALPC_PORT_ALL_ACCESS, objattr->attributes );
++
++    if (root) release_object( root );
++    release_object( communication_port );
++    release_object( connection_port );
++}
++
++/* Accept or reject an incoming ALPC connection request */
++DECL_HANDLER(alpc_accept_connect_port)
++{
++    struct alpc_port *dst_port, *communication_port, *connection_port;
++    const struct alpc_port_attr_t *alpc_port_attr = NULL;
++    const struct object_attributes *objattr = NULL;
++    const unsigned char *data_ptr = get_req_data();
++    const struct alpc_msg_attr_t *msg_attr = NULL;
++    const struct security_descriptor *sd = NULL;
++    struct unicode_str objattr_name = {0};
++    const struct alpc_msg_t *msg = NULL;
++    struct object *root = NULL;
++
++    objattr = get_req_object_attributes_data( data_ptr, req->obj_attr_size, &sd, &objattr_name, &root );
+     if (!objattr) return;
+-
+-    if ((alpc_port = alpc_create_port( root, &name, objattr->attributes, sd, CONNECTION_PORT,
+-                                       req->flags, req->max_msg_len )))
+-    {
+-        reply->handle = alloc_handle( current->process, alpc_port, ALPC_PORT_ALL_ACCESS, objattr->attributes );
+-        release_object( alpc_port );
++    data_ptr += req->obj_attr_size;
++
++    connection_port = get_alpc_port_obj( current->process, req->handle, ALPC_PORT_QUERY_STATE);
++    if (!connection_port)
++    {
++        if (root) release_object( root );
++        return;
++    }
++
++    alpc_port_attr = (const struct alpc_port_attr_t *)data_ptr;
++    data_ptr += sizeof(struct alpc_port_attr_t);
++
++    assert(req->msg_size);
++    msg = (const struct alpc_msg_t *)data_ptr;
++    data_ptr += req->msg_size;
++
++    if (req->msg_attr_size) msg_attr = (const struct alpc_msg_attr_t *)data_ptr;
++
++    dst_port = get_alpc_msg_id_entry(msg->id);
++    if (!dst_port)
++    {
++        if (root) release_object( root );
++        release_object(connection_port);
++        set_error(STATUS_OBJECTID_NOT_FOUND);
++        return;
++    }
++
++    if (req->accept == 0)
++    {
++        dst_port->status = REFUSED;
++        if (add_msg_record(dst_port, connection_port, ALPC_MESSAGE_TYPE_CONNECTION_REPLY, msg, req->msg_size, msg_attr, 0, 0))
++            free_msg_id(msg->id);
++    }
++    else
++    {
++        communication_port = alpc_create_port( root, &objattr_name, objattr->attributes, sd, COMMUNICATION_PORT, alpc_port_attr );
++        if (!communication_port)
++        {
++            if (root) release_object( root );
++            release_object(dst_port);
++            release_object(connection_port);
++            return;
++        }
++        if (add_msg_record( dst_port, connection_port, ALPC_MESSAGE_TYPE_CONNECTION_REPLY, msg,
++                            req->msg_size, msg_attr, 1, req->port_context ))
++        {
++            communication_port->dst_port = (struct alpc_port *)grab_object(dst_port);
++            communication_port->status = CONNECTED;
++            dst_port->dst_port = (struct alpc_port *)grab_object(connection_port);
++            dst_port->status = CONNECTED;
++            dst_port->port_context = req->port_context;
++            reply->handle = alloc_handle( current->process, communication_port, ALPC_PORT_ALL_ACCESS, objattr->attributes );
++            free_msg_id( msg->id );
++        }
++        release_object( communication_port );
+     }
+ 
+     if (root) release_object( root );
+-}
++    release_object( dst_port );
++    release_object( connection_port );
++}
++
++/* Send a message and attributes to an ALPC object */
++DECL_HANDLER(alpc_send_port)
++{
++    struct alpc_port *port, *dst_port = NULL;
++    const struct alpc_msg_t *msg = NULL;
++    const struct alpc_msg_attr_t *msg_attr = NULL;
++    const unsigned char *data_ptr = get_req_data();
++    unsigned short msg_type;
++
++    port = get_alpc_port_obj( current->process, req->handle, ALPC_PORT_QUERY_STATE);
++    if (!port) return;
++
++    assert(req->msg_size);
++    msg = (const struct alpc_msg_t *)data_ptr;
++    data_ptr += req->msg_size;
++
++    if (req->msg_attr_size) msg_attr = (const struct alpc_msg_attr_t *)data_ptr;
++
++    if (port->type == CONNECTION_PORT)
++    {
++        /* Send to itself if message ID is zero */
++        if (!msg->id)
++            dst_port = (struct alpc_port *)grab_object(port);
++        else
++            dst_port = get_alpc_msg_id_entry( msg->id );
++
++        if (!dst_port)
++        {
++            release_object(port);
++            set_error(STATUS_ACCESS_DENIED);
++            return;
++        }
++    }
++    else
++    {
++        dst_port = port->dst_port;
++
++        if (port->status == UNINITIALIZED)
++        {
++            set_error( STATUS_LPC_REQUESTS_NOT_ALLOWED );
++            goto failed;
++        }
++        else if (port->status == REFUSED)
++        {
++            set_error( STATUS_PORT_CONNECTION_REFUSED );
++            goto failed;
++        }
++        else if (port->status == DISCONNECTED || (dst_port->type == CONNECTION_PORT && dst_port->status == DISCONNECTED))
++        {
++            set_error( STATUS_PORT_DISCONNECTED );
++            goto failed;
++        }
++        /* If sending with the server side communication port and no valid message ID */
++        else if (dst_port->type == COMMUNICATION_PORT && !msg->id)
++        {
++            set_error( STATUS_LPC_REQUESTS_NOT_ALLOWED );
++            goto failed;
++        }
++    }
++
++    if (req->flags & ALPC_MSGFLG_REPLY_MESSAGE)
++        msg_type = dst_port->type == CONNECTION_PORT ? ALPC_MESSAGE_TYPE_DATAGRAM : ALPC_MESSAGE_TYPE_REPLY;
++    else
++        msg_type = ALPC_MESSAGE_TYPE_REQUEST;
++
++    if (add_msg_record(dst_port, port, msg_type, msg, req->msg_size, msg_attr, 1, port->port_context))
++        free_msg_id(msg->id);
++
++failed:
++    if (port->type == CONNECTION_PORT && dst_port) release_object( dst_port );
++    release_object( port );
++}
++
++/* Receive a message and attributes from an ALPC object */
++DECL_HANDLER(alpc_receive_port)
++{
++    data_size_t size, msg_size = 0, msg_attr_size = 0;
++    unsigned char *reply_data;
++    struct alpc_msg_entry *record;
++    struct alpc_port *port;
++
++    port = get_alpc_port_obj( current->process, req->handle, ALPC_PORT_QUERY_STATE );
++    if (!port) return;
++
++    if (port->type == COMMUNICATION_PORT)
++    {
++        if (port->status == UNINITIALIZED)
++        {
++            if (port->port_attr.flags & ALPC_PORTFLG_NON_BLOCKING_RECEIVE)
++            {
++                set_error( STATUS_UNSUCCESSFUL );
++                reply->wait = FALSE;
++            }
++            else
++            {
++                set_error( STATUS_LPC_REQUESTS_NOT_ALLOWED );
++                reply->wait = TRUE;
++            }
++            goto failed;
++        }
++        else if (port->status == REFUSED)
++        {
++            set_error( STATUS_PORT_CONNECTION_REFUSED );
++            goto failed;
++        }
++        else if (port->status == DISCONNECTED)
++        {
++            set_error( STATUS_PORT_DISCONNECTED );
++            goto failed;
++        }
++    }
++
++    if (list_empty(&port->msg_list))
++    {
++        reply->wait = !(port->port_attr.flags & ALPC_PORTFLG_NON_BLOCKING_RECEIVE);
++        set_error( STATUS_UNSUCCESSFUL );
++        goto failed;
++    }
++
++    /* receive message */
++    record = LIST_ENTRY(list_head(&port->msg_list), struct alpc_msg_entry, entry);
++    msg_size = sizeof(*record->msg) + record->msg->data_len;
++    /* Compare with ALPC_PORT_MESSAGE as well */
++    if (req->msg_size < msg_size || req->msg_size  < sizeof(ALPC_PORT_MESSAGE) + record->msg->data_len)
++    {
++        set_error( STATUS_BUFFER_TOO_SMALL );
++        reply->required_size = sizeof(ALPC_PORT_MESSAGE) + record->msg->data_len;
++        goto failed;
++    }
++
++    size = msg_size;
++    if (req->msg_attributes)
++    {
++        msg_attr_size = wine_server_alpc_get_header_size(req->msg_attributes & record->msg_attr.attributes);
++        size += msg_attr_size;
++    }
++
++    if (get_reply_max_size() < size)
++    {
++        set_error( STATUS_BUFFER_TOO_SMALL );
++        reply->required_size = sizeof(ALPC_PORT_MESSAGE) + record->msg->data_len;
++        goto failed;
++    }
++
++    reply_data = set_reply_data_size(size);
++    if (!reply_data)
++    {
++        set_error( STATUS_NO_MEMORY );
++        goto failed;
++    }
++
++    memcpy( reply_data, record->msg, msg_size );
++    if (msg_attr_size)
++        get_msg_attr_from_record( port, req->msg_attributes, (struct alpc_msg_attr_t *)(reply_data + msg_size), record );
++    list_remove( &record->entry );
++    free_msg_record( port, record );
++
++failed:
++    release_object( port );
++}
++
++/* Disconnect an ALPC object */
++DECL_HANDLER(alpc_disconnect_port)
++{
++    struct alpc_port *port;
++
++    port = get_alpc_port_obj( current->process, req->handle, DELETE);
++    if (!port) return;
++
++    alpc_port_disconnect( port );
++    release_object( port );
++}
++
++/* Impersonate the client of an ALPC port */
++DECL_HANDLER(alpc_impersonate_client_of_port)
++{
++    struct alpc_port *port, *impersonate_port;
++    struct token *token;
++
++    port = get_alpc_port_obj( current->process, req->handle, ALPC_PORT_QUERY_STATE);
++    if (!port) return;
++
++    if (port->type == COMMUNICATION_PORT)
++    {
++        if (port->status != CONNECTED)
++        {
++            release_object( port );
++            set_error( STATUS_INVALID_PARAMETER );
++            return;
++        }
++
++        if (port->dst_port->type == CONNECTION_PORT)
++        {
++            if (!(port->dst_port->port_attr.flags & ALPC_PORTFLG_ALLOWIMPERSONATION))
++            {
++                release_object( port );
++                set_error( STATUS_ACCESS_DENIED );
++                return;
++            }
++        }
++        else
++        {
++            if (!(port->dst_port->port_attr.flags & ALPC_PORTFLG_ALLOWIMPERSONATION &&
++                port->dst_port->port_attr.qos.context_tracking_mode == SECURITY_STATIC_TRACKING))
++            {
++                release_object( port );
++                set_error( STATUS_ACCESS_DENIED );
++                return;
++            }
++
++            if (port->dst_port->port_attr.qos.impersonation_level == SecurityAnonymous)
++            {
++                release_object( port );
++                return;
++            }
++        }
++
++        impersonate_port = (struct alpc_port *)grab_object( port->dst_port );
++    }
++    else
++    {
++        if (!(port->port_attr.flags & ALPC_PORTFLG_ALLOWIMPERSONATION))
++        {
++            release_object( port );
++            set_error( STATUS_ACCESS_DENIED );
++            return;
++        }
++
++        impersonate_port = get_alpc_msg_id_entry( req->msg_id );
++        if (!impersonate_port)
++        {
++            release_object( port );
++            set_error( STATUS_INVALID_PARAMETER );
++            return;
++        }
++    }
++
++    if (!(token = token_duplicate( impersonate_port->thread->token ?
++                                   impersonate_port->thread->token : impersonate_port->thread->process->token,
++                                   0, SecurityImpersonation, NULL, NULL, 0, NULL, 0 )))
++    {
++        release_object( impersonate_port );
++        release_object( port );
++        return;
++    }
++
++    if (current->token) release_object( current->token );
++    current->token = token;
++
++    release_object( impersonate_port );
++    release_object( port );
++}
+diff --git a/dlls/ntdll/unix/alpc.c b/dlls/ntdll/unix/alpc.c
+--- a/dlls/ntdll/unix/alpc.c
++++ b/dlls/ntdll/unix/alpc.c
+@@ -25,9 +25,425 @@
+ #include "ntstatus.h"
+ #include "wine/debug.h"
+ #include "wine/server.h"
++#include "wine/alpc.h"
++#include "alpc_private.h"
+ #include "unix_private.h"
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(alpc);
++
++/* Free ret_obj_attr when it's done */
++static unsigned int wine_server_add_object_attributes( void *req, const OBJECT_ATTRIBUTES *obj_attr,
++                                                       struct object_attributes **ret_obj_attr )
++{
++    data_size_t size = 0;
++
++    if (alloc_object_attributes( obj_attr, ret_obj_attr, &size ))
++    {
++        *ret_obj_attr = NULL;
++        return 0;
++    }
++
++    wine_server_add_data( req, *ret_obj_attr, size );
++    return size;
++}
++
++static unsigned int wine_server_add_alpc_port_attr( void *req, const ALPC_PORT_ATTRIBUTES *from,
++                                                    struct alpc_port_attr_t *to )
++{
++    if (from)
++    {
++        to->flags = from->Flags;
++        to->qos.impersonation_level = from->SecurityQos.ImpersonationLevel;
++        to->qos.context_tracking_mode = from->SecurityQos.ContextTrackingMode;
++        to->qos.effective_only = from->SecurityQos.EffectiveOnly;
++        to->max_msg_len = from->MaxMessageLength;
++        to->mem_bandwidth = from->MemoryBandwidth;
++        to->max_pool_usage = from->MaxPoolUsage;
++        to->max_section_size = from->MaxSectionSize;
++        to->max_view_size = from->MaxViewSize;
++        to->max_total_section_size = from->MaxTotalSectionSize;
++        to->dup_object_types = from->DupObjectTypes;
++    }
++    else
++    {
++        to->flags = 0;
++        to->max_msg_len = 65535;
++        to->mem_bandwidth = 0xffffffff;
++        to->max_pool_usage = 0xffffffff;
++        to->max_section_size = 0xffffffff;
++        to->max_view_size = 0xffffffff;
++        to->max_total_section_size = 0xffffffff;
++        to->dup_object_types = 0xffffffff;
++        to->qos.impersonation_level = SecurityAnonymous;
++        to->qos.context_tracking_mode = SECURITY_STATIC_TRACKING;
++        to->qos.effective_only = 0;
++    }
++    wine_server_add_data( req, to, sizeof(*to) );
++    return sizeof(*to);
++}
++
++/* Free ret_msg when it's done */
++static unsigned int wine_server_add_alpc_msg( void *req, struct alpc_msg_t **ret_msg, const ALPC_PORT_MESSAGE *msg )
++{
++    unsigned int size;
++    if (!msg)
++    {
++        *ret_msg = NULL;
++        return 0;
++    }
++
++    size = sizeof(struct alpc_msg_t) + msg->DataLength;
++    *ret_msg = malloc(size);
++    if (!*ret_msg)
++        return 0;
++
++    (*ret_msg)->data_len = msg->DataLength;
++    (*ret_msg)->type = msg->Type;
++    (*ret_msg)->id = msg->MessageId;
++    memcpy( (unsigned char *)(*ret_msg) + sizeof(struct alpc_msg_t),
++            (unsigned char *)msg + sizeof(*msg), msg->DataLength );
++    wine_server_add_data( req, *ret_msg, size );
++    return size;
++}
++
++/* Free ret_msg_attr when it's done */
++static unsigned int wine_server_add_alpc_msg_attr( void *req, struct alpc_msg_attr_t **ret_msg_attr,
++                                                   ALPC_MESSAGE_ATTRIBUTES *msg_attr, ULONG mask )
++{
++    unsigned int size;
++    ULONG attributes;
++
++    if (!msg_attr)
++    {
++        *ret_msg_attr = NULL;
++        return 0;
++    }
++
++    /* ALPC_MESSAGE_CONTEXT_ATTRIBUTE and ALPC_MESSAGE_TOKEN_ATTRIBUTE are added by wineserver */
++    mask = mask & ALPC_MESSAGE_ATTRIBUTE_ALL & ~(ALPC_MESSAGE_CONTEXT_ATTRIBUTE | ALPC_MESSAGE_TOKEN_ATTRIBUTE);
++    attributes = msg_attr->ValidAttributes & mask;
++
++    size = wine_server_alpc_get_header_size(attributes);
++    *ret_msg_attr = malloc(size);
++    if (!*ret_msg_attr)
++        return 0;
++
++    (*ret_msg_attr)->attributes = attributes;
++
++    if (attributes & ALPC_MESSAGE_SECURITY_ATTRIBUTE)
++    {
++        const ALPC_SECURITY_ATTR *src = alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_SECURITY_ATTRIBUTE);
++        struct alpc_security_attr_t *dst = wine_server_alpc_get_message_attribute(*ret_msg_attr, ALPC_MESSAGE_SECURITY_ATTRIBUTE);
++
++        dst->flags = src->Flags;
++        dst->context_handle = wine_server_obj_handle(src->ContextHandle);
++        if (src->QoS)
++        {
++            dst->qos.impersonation_level = src->QoS->ImpersonationLevel;
++            dst->qos.context_tracking_mode = src->QoS->ContextTrackingMode;
++            dst->qos.effective_only = src->QoS->EffectiveOnly;
++        }
++        else
++        {
++            dst->qos.impersonation_level = SecurityAnonymous;
++            dst->qos.context_tracking_mode = SECURITY_STATIC_TRACKING;
++            dst->qos.effective_only = FALSE;
++        }
++    }
++
++    if (attributes & ALPC_MESSAGE_VIEW_ATTRIBUTE)
++    {
++        const ALPC_VIEW_ATTR *src = alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_VIEW_ATTRIBUTE);
++        struct alpc_view_attr_t *dst = wine_server_alpc_get_message_attribute(*ret_msg_attr, ALPC_MESSAGE_VIEW_ATTRIBUTE);
++
++        dst->flags = src->Flags;
++        dst->section_handle = wine_server_obj_handle(src->SectionHandle);
++        dst->view_base = wine_server_client_ptr(src->ViewBase);
++        dst->view_size = src->ViewSize;
++    }
++
++    if (attributes & ALPC_MESSAGE_HANDLE_ATTRIBUTE)
++    {
++        const ALPC_HANDLE_ATTR *src = alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_HANDLE_ATTRIBUTE);
++        struct alpc_handle_attr_t *dst = wine_server_alpc_get_message_attribute(*ret_msg_attr, ALPC_MESSAGE_HANDLE_ATTRIBUTE);
++
++        dst->flags = src->Flags;
++        dst->handle = wine_server_obj_handle(src->Handle);
++        dst->obj_type = src->ObjectType;
++        dst->desired_access = src->DesiredAccess;
++    }
++
++    if (attributes & ALPC_MESSAGE_DIRECT_ATTRIBUTE)
++    {
++        const ALPC_DIRECT_ATTR *src = alpc_get_message_attribute(msg_attr, ALPC_MESSAGE_DIRECT_ATTRIBUTE);
++        struct alpc_direct_attr_t *dst = wine_server_alpc_get_message_attribute(*ret_msg_attr, ALPC_MESSAGE_DIRECT_ATTRIBUTE);
++
++        dst->event = wine_server_obj_handle(src->Event);
++    }
++
++    if (attributes & ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE)
++    {
++        struct alpc_work_on_behalf_attr_t *dst = wine_server_alpc_get_message_attribute(*ret_msg_attr, ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE);
++
++        /* Should use source ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE attribute and non-zero but don't
++         * know how to use it. The receiving side always got zero somehow */
++        dst->ticket = 0;
++    }
++
++    wine_server_add_data( req, *ret_msg_attr, size );
++    return size;
++}
++
++static void get_alpc_msg_from_server(ALPC_PORT_MESSAGE *dst, const struct alpc_msg_t *src)
++{
++    memset(dst, 0, sizeof(*dst));
++    dst->DataLength = src->data_len;
++    dst->TotalLength = src->data_len + sizeof(*dst);
++    dst->Type = src->type;
++    dst->MessageId = src->id;
++    dst->ClientId.UniqueProcess = wine_server_ptr_handle( src->unique_process );
++    dst->ClientId.UniqueThread = wine_server_ptr_handle( src->unique_thread );
++    memcpy((unsigned char *)dst + sizeof(*dst), (const unsigned char *)src + sizeof(*src), src->data_len);
++}
++
++static void get_alpc_msg_attr_from_server(ALPC_MESSAGE_ATTRIBUTES *dst, const struct alpc_msg_attr_t *src)
++{
++    const struct alpc_security_attr_t *security_src;
++    const struct alpc_view_attr_t *view_src;
++    const struct alpc_context_attr_t *context_src;
++    const struct alpc_handle_attr_t *handle_src;
++    const struct alpc_token_attr_t *token_src;
++    const struct alpc_direct_attr_t *direct_src;
++    const struct alpc_work_on_behalf_attr_t *work_on_behalf_src;
++
++    dst->ValidAttributes = src->attributes & dst->AllocatedAttributes;
++
++    if ((security_src = wine_server_alpc_get_message_attribute(src, ALPC_MESSAGE_SECURITY_ATTRIBUTE))
++        && (dst->ValidAttributes & ALPC_MESSAGE_SECURITY_ATTRIBUTE))
++    {
++        ALPC_SECURITY_ATTR *security_dst = alpc_get_message_attribute(dst, ALPC_MESSAGE_SECURITY_ATTRIBUTE);
++
++        security_dst->Flags = security_src->flags;
++        security_dst->ContextHandle = wine_server_ptr_handle(security_src->context_handle);
++        if (security_dst->QoS)
++        {
++            security_dst->QoS->ImpersonationLevel = security_src->qos.impersonation_level;
++            security_dst->QoS->ContextTrackingMode = security_src->qos.context_tracking_mode;
++            security_dst->QoS->EffectiveOnly = security_src->qos.effective_only;
++        }
++    }
++
++    if ((view_src = wine_server_alpc_get_message_attribute(src, ALPC_MESSAGE_VIEW_ATTRIBUTE))
++        && (dst->ValidAttributes & ALPC_MESSAGE_VIEW_ATTRIBUTE))
++    {
++        ALPC_VIEW_ATTR *view_dst = alpc_get_message_attribute(dst, ALPC_MESSAGE_VIEW_ATTRIBUTE);
++
++        view_dst->Flags = view_src->flags;
++        view_dst->SectionHandle = wine_server_ptr_handle(view_src->section_handle);
++        view_dst->ViewBase = wine_server_get_ptr(view_src->view_base);
++        view_dst->ViewSize = view_src->view_size;
++    }
++
++    if ((context_src = wine_server_alpc_get_message_attribute(src, ALPC_MESSAGE_CONTEXT_ATTRIBUTE))
++        && (dst->ValidAttributes & ALPC_MESSAGE_CONTEXT_ATTRIBUTE))
++    {
++        ALPC_CONTEXT_ATTR *context_dst = alpc_get_message_attribute(dst, ALPC_MESSAGE_CONTEXT_ATTRIBUTE);
++
++        context_dst->PortContext = wine_server_get_ptr(context_src->port_context);
++        context_dst->MessageContext = wine_server_get_ptr(context_src->msg_context);
++        context_dst->Sequence = context_src->sequence;
++        context_dst->MessageId = context_src->msg_id;
++        context_dst->CallbackId = context_src->callback_id;
++    }
++
++    if ((handle_src = wine_server_alpc_get_message_attribute(src, ALPC_MESSAGE_HANDLE_ATTRIBUTE))
++        && (dst->ValidAttributes & ALPC_MESSAGE_HANDLE_ATTRIBUTE))
++    {
++        ALPC_HANDLE_ATTR *handle_dst = alpc_get_message_attribute(dst, ALPC_MESSAGE_HANDLE_ATTRIBUTE);
++
++        handle_dst->Flags = handle_src->flags;
++        handle_dst->Handle = wine_server_ptr_handle(handle_src->handle);
++        handle_dst->ObjectType = handle_src->obj_type;
++        handle_dst->DesiredAccess = handle_src->desired_access;
++    }
++
++    if ((token_src = wine_server_alpc_get_message_attribute(src, ALPC_MESSAGE_TOKEN_ATTRIBUTE))
++        && (dst->ValidAttributes & ALPC_MESSAGE_TOKEN_ATTRIBUTE))
++    {
++        ALPC_TOKEN_ATTR *token_dst = alpc_get_message_attribute(dst, ALPC_MESSAGE_TOKEN_ATTRIBUTE);
++
++        token_dst->TokenId = token_src->token_id;
++        token_dst->AuthenticationId = token_src->auth_id;
++        token_dst->ModifiedId = token_src->modified_id;
++    }
++
++    if ((direct_src = wine_server_alpc_get_message_attribute(src, ALPC_MESSAGE_DIRECT_ATTRIBUTE))
++        && (dst->ValidAttributes & ALPC_MESSAGE_DIRECT_ATTRIBUTE))
++    {
++        ALPC_DIRECT_ATTR *direct_dst = alpc_get_message_attribute(dst, ALPC_MESSAGE_DIRECT_ATTRIBUTE);
++
++        direct_dst->Event = wine_server_ptr_handle(direct_src->event);
++    }
++
++    if ((work_on_behalf_src = wine_server_alpc_get_message_attribute(src, ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE))
++        && (dst->ValidAttributes & ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE))
++    {
++        ALPC_WORK_ON_BEHALF_ATTR *work_on_behalf_dst = alpc_get_message_attribute(dst, ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE);
++
++        work_on_behalf_dst->Ticket = work_on_behalf_src->ticket;
++    }
++}
++
++static void dump_msg(BOOL send, const ALPC_PORT_MESSAGE *message)
++{
++    unsigned char *ptr;
++
++    if (!TRACE_ON(alpc))
++        return;
++
++    if (!message)
++    {
++        TRACE("%s NULL\n", send ? "sending" : "receiving");
++        return;
++    }
++
++    TRACE("%s %p offset %#x\n", send ? "sending" : "receiving", message,
++          (unsigned int)(message->TotalLength - message->DataLength - sizeof(ALPC_PORT_MESSAGE)));
++    TRACE("header:\n");
++    TRACE("DataLength: %#x\n", message->DataLength);
++    TRACE("TotalLength: %#x\n", message->TotalLength);
++    TRACE("Type: %#x\n", message->Type);
++    TRACE("DataInfoOffset: %#x\n", message->DataInfoOffset);
++    TRACE("ClientId: %p %p\n", message->ClientId.UniqueProcess, message->ClientId.UniqueThread);
++    TRACE("MessageId: %#x\n", message->MessageId);
++    TRACE("ClientViewSize: %#lx\n", message->ClientViewSize);
++
++    TRACE("data:\n");
++    ptr = (unsigned char *)message + sizeof(*message);
++    for (unsigned int i = 0; i < message->DataLength; i++)
++    {
++        if (i && i % 16 == 0)
++            TRACE("\n");
++        TRACE("%02x ", ptr[i]);
++    }
++    TRACE("\n");
++}
++
++static void dump_msg_attr(BOOL send, ALPC_MESSAGE_ATTRIBUTES *attributes)
++{
++    if (!TRACE_ON(alpc))
++        return;
++
++    if (!attributes)
++    {
++        TRACE("%s NULL\n", send ? "sending" : "receiving");
++        return;
++    }
++
++    TRACE("%s %p allocated %#x valid %#x\n", send ? "sending" : "receiving", attributes, attributes->AllocatedAttributes, attributes->ValidAttributes);
++
++    if (attributes->ValidAttributes & ALPC_MESSAGE_SECURITY_ATTRIBUTE)
++    {
++        ALPC_SECURITY_ATTR *attr = alpc_get_message_attribute(attributes, ALPC_MESSAGE_SECURITY_ATTRIBUTE);
++
++        TRACE("ALPC_MESSAGE_SECURITY_ATTRIBUTE: Flags %#x ContextHandle %p QoS %p",
++              attr->Flags, attr->ContextHandle, attr->QoS);
++        if (attr->QoS)
++            TRACE( "(Length %#x ImpersonationLevel %d ContextTrackingMode %d EffectiveOnly %d)",
++                   attr->QoS->Length, attr->QoS->ImpersonationLevel, attr->QoS->ContextTrackingMode,
++                   attr->QoS->EffectiveOnly );
++        TRACE("\n");
++    }
++
++    if (attributes->ValidAttributes & ALPC_MESSAGE_VIEW_ATTRIBUTE)
++    {
++        ALPC_VIEW_ATTR *attr = alpc_get_message_attribute(attributes, ALPC_MESSAGE_VIEW_ATTRIBUTE);
++
++        TRACE("ALPC_MESSAGE_VIEW_ATTRIBUTE: Flags %#x SectionHandle %p ViewBase %p ViewSize %#lx\n",
++              attr->Flags, attr->SectionHandle, attr->ViewBase, attr->ViewSize);
++    }
++
++    if (attributes->ValidAttributes & ALPC_MESSAGE_CONTEXT_ATTRIBUTE)
++    {
++        ALPC_CONTEXT_ATTR *attr = alpc_get_message_attribute(attributes, ALPC_MESSAGE_CONTEXT_ATTRIBUTE);
++
++        TRACE("ALPC_MESSAGE_CONTEXT_ATTRIBUTE: PortContext %p MessageContext %p Sequence %#x "
++              "MessageId %#x CallbackId %#x\n",
++              attr->PortContext, attr->MessageContext, attr->Sequence, attr->MessageId,
++              attr->CallbackId);
++    }
++
++    if (attributes->ValidAttributes & ALPC_MESSAGE_HANDLE_ATTRIBUTE)
++    {
++        ALPC_HANDLE_ATTR *attr = alpc_get_message_attribute(attributes, ALPC_MESSAGE_HANDLE_ATTRIBUTE);
++
++        TRACE("ALPC_MESSAGE_HANDLE_ATTRIBUTE: Flags %#x Handle %p ObjectType %#x DesiredAccess %#x\n",
++              attr->Flags, attr->Handle, attr->ObjectType, attr->DesiredAccess);
++    }
++
++    if (attributes->ValidAttributes & ALPC_MESSAGE_TOKEN_ATTRIBUTE)
++    {
++        ALPC_TOKEN_ATTR *attr = alpc_get_message_attribute(attributes, ALPC_MESSAGE_TOKEN_ATTRIBUTE);
++
++        TRACE("ALPC_MESSAGE_TOKEN_ATTRIBUTE: TokenId %s AuthenticationId %s ModifiedId %s\n",
++              wine_dbgstr_longlong(attr->TokenId), wine_dbgstr_longlong(attr->AuthenticationId),
++              wine_dbgstr_longlong(attr->ModifiedId));
++    }
++
++    if (attributes->ValidAttributes & ALPC_MESSAGE_DIRECT_ATTRIBUTE)
++    {
++        ALPC_DIRECT_ATTR *attr = alpc_get_message_attribute(attributes, ALPC_MESSAGE_DIRECT_ATTRIBUTE);
++
++        TRACE("ALPC_MESSAGE_DIRECT_ATTRIBUTE: Event %p\n", attr->Event);
++    }
++
++    if (attributes->ValidAttributes & ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE)
++    {
++        ALPC_WORK_ON_BEHALF_ATTR *attr = alpc_get_message_attribute(attributes, ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE);
++
++        TRACE("ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE: Ticket %s\n", wine_dbgstr_longlong(attr->Ticket));
++    }
++}
++
++static NTSTATUS alpc_receive_port( HANDLE port_handle, ULONG flags, ALPC_PORT_MESSAGE *recv_msg,
++                                   SIZE_T *recv_buffer_size, ALPC_MESSAGE_ATTRIBUTES *recv_msg_attr,
++                                   void *reply_data, data_size_t reply_data_size, BOOL *wait)
++{
++    NTSTATUS status;
++
++    if (wait) *wait = FALSE;
++
++    SERVER_START_REQ( alpc_receive_port )
++    {
++        req->handle = wine_server_obj_handle(port_handle);
++        req->flags = flags;
++        req->msg_size = recv_buffer_size ? *recv_buffer_size : 65535;
++        req->msg_attributes = recv_msg_attr ? recv_msg_attr->AllocatedAttributes : 0;
++        wine_server_set_reply( req, reply_data, reply_data_size );
++        if (!(status = wine_server_call( req )))
++        {
++            struct alpc_msg_attr_t *server_recv_msg_attr;
++            struct alpc_msg_t *server_recv_msg;
++
++            server_recv_msg = reply_data;
++            server_recv_msg_attr = (struct alpc_msg_attr_t *)((unsigned char *)server_recv_msg
++                                   + sizeof(*server_recv_msg) + server_recv_msg->data_len);
++            if (recv_msg) get_alpc_msg_from_server( recv_msg, server_recv_msg );
++            if (recv_msg_attr) get_alpc_msg_attr_from_server( recv_msg_attr, server_recv_msg_attr );
++        }
++        else if (status == STATUS_BUFFER_TOO_SMALL)
++        {
++            if (recv_buffer_size) *recv_buffer_size = reply->required_size;
++        }
++        else
++        {
++            if (wait) *wait = reply->wait;
++        }
++    }
++    SERVER_END_REQ;
++
++    return status;
++}
+ 
+ NTSTATUS WINAPI NtAlpcAcceptConnectPort( HANDLE *communication_port, HANDLE connection_port,
+                                          DWORD flags, OBJECT_ATTRIBUTES *obj_attr,
+@@ -35,9 +451,54 @@
+                                          ALPC_PORT_MESSAGE *send_msg,
+                                          ALPC_MESSAGE_ATTRIBUTES *send_msg_attr, BOOLEAN accept )
+ {
+-    FIXME( "%p, %p, %#x, %p, %p, %p, %p, %p, %d stub!\n", communication_port, connection_port,
++    struct object_attributes *server_obj_attr = NULL;
++    struct alpc_msg_attr_t *server_msg_attr = NULL;
++    struct alpc_port_attr_t server_port_attr;
++    struct alpc_msg_t *server_msg = NULL;
++    NTSTATUS status;
++
++    TRACE( "%p, %p, %#x, %p, %p, %p, %p, %p, %d.\n", communication_port, connection_port,
+            (unsigned int)flags, obj_attr, port_attr, port_context, send_msg, send_msg_attr, accept );
+-    return STATUS_NOT_IMPLEMENTED;
++
++    if (!communication_port || !send_msg)
++        return STATUS_ACCESS_VIOLATION;
++
++    if (!connection_port)
++        return STATUS_INVALID_CONNECTION;
++
++    if (!send_msg->MessageId)
++        return STATUS_REPLY_MESSAGE_MISMATCH;
++
++    dump_msg(TRUE, send_msg);
++
++    SERVER_START_REQ( alpc_accept_connect_port )
++    {
++        req->handle = wine_server_obj_handle( connection_port );
++        req->flags = flags;
++        req->obj_attr_size = wine_server_add_object_attributes( req, obj_attr, &server_obj_attr );
++        wine_server_add_alpc_port_attr( req, port_attr, &server_port_attr );
++        req->port_context = wine_server_client_ptr( port_context );
++        req->msg_size = wine_server_add_alpc_msg( req, &server_msg, send_msg );
++        req->msg_attr_size = wine_server_add_alpc_msg_attr( req, &server_msg_attr, send_msg_attr, ALPC_MESSAGE_ATTRIBUTE_ALL );
++        req->accept = accept;
++        if (!(status = wine_server_call(req)))
++        {
++            if (accept)
++            {
++                *communication_port = wine_server_ptr_handle(reply->handle);
++                TRACE("created communication port %p\n", *communication_port);
++            }
++        }
++        else
++        {
++            WARN("status %#x\n", status);
++        }
++    }
++    SERVER_END_REQ;
++    free( server_obj_attr );
++    free( server_msg );
++    free( server_msg_attr );
++    return status;
+ }
+ 
+ NTSTATUS WINAPI NtAlpcConnectPort( HANDLE *port_handle, UNICODE_STRING *port_name,
+@@ -47,23 +508,133 @@
+                                    ALPC_MESSAGE_ATTRIBUTES *send_msg_attr,
+                                    ALPC_MESSAGE_ATTRIBUTES *recv_msg_attr, LARGE_INTEGER *timeout )
+ {
+-    FIXME( "%p, %s, %p, %p, %#x, %p, %p, %p, %p, %p, %p stub!\n", port_handle,
+-           debugstr_us( port_name ), obj_attr, port_attr, (unsigned int)flags, required_server_sid,
++    ALPC_PORT_MESSAGE *send_msg, *recv_msg, empty_message = {0};
++    struct object_attributes *server_obj_attr = NULL;
++    struct alpc_msg_attr_t *server_msg_attr = NULL;
++    struct alpc_port_attr_t server_port_attr;
++    data_size_t reply_data_size = 0;
++    struct alpc_msg_t *server_msg;
++    void *reply_data = NULL;
++    HANDLE ret_handle;
++    NTSTATUS status;
++
++    TRACE( "%p, %s, %p, %p, %#x, %p, %p, %p, %p, %p, %p.\n", port_handle,
++           debugstr_us(port_name), obj_attr, port_attr, (unsigned int)flags, required_server_sid,
+            connect_msg, connect_msg_size, send_msg_attr, recv_msg_attr, timeout );
+-    return STATUS_NOT_IMPLEMENTED;
+-}
+-
+-NTSTATUS WINAPI NtAlpcCreatePort( HANDLE *port_handle, OBJECT_ATTRIBUTES *attr, ALPC_PORT_ATTRIBUTES *port_attr )
+-{
+-    struct object_attributes *objattr = NULL;
+-    unsigned int status;
+-    data_size_t len = 0;
+-
+-    TRACE( "%p, %p, %p.\n", port_handle, attr, port_attr );
+ 
+     if (!port_handle) return STATUS_ACCESS_VIOLATION;
++    if (!port_name) return STATUS_OBJECT_NAME_INVALID;
++    if (port_attr && (!port_attr->MaxMessageLength || port_attr->MaxMessageLength > 65535))
++        return STATUS_INVALID_PARAMETER;
++
++    send_msg = connect_msg;
++    recv_msg = connect_msg;
++    if (!send_msg)
++    {
++        empty_message.TotalLength = sizeof(empty_message);
++        send_msg = &empty_message;
++    }
++
++    dump_msg(TRUE, send_msg);
++    dump_msg_attr(TRUE, send_msg_attr);
++
++    SERVER_START_REQ( alpc_connect_port )
++    {
++        req->flags = flags;
++        wine_server_add_data( req, port_name->Buffer, port_name->Length );
++        req->name_size = port_name->Length;
++        req->obj_attr_size = wine_server_add_object_attributes( req, obj_attr, &server_obj_attr );
++        wine_server_add_alpc_port_attr( req, port_attr, &server_port_attr );
++        if (required_server_sid)
++        {
++            req->sid_size = offsetof( SID, SubAuthority[((SID *)required_server_sid)->SubAuthorityCount] );
++            wine_server_add_data( req, required_server_sid, req->sid_size );
++        }
++        else
++        {
++            req->sid_size = 0;
++        }
++        req->msg_size = wine_server_add_alpc_msg( req, &server_msg, send_msg );
++        /* Not all attributes are accepted by NtAlpcConnectPort() */
++        req->msg_attr_size = wine_server_add_alpc_msg_attr( req, &server_msg_attr, send_msg_attr, ~ALPC_MESSAGE_HANDLE_ATTRIBUTE );
++        status = wine_server_call(req);
++        if (!status)
++            ret_handle = wine_server_ptr_handle(reply->handle);
++    }
++    SERVER_END_REQ;
++    free( server_obj_attr );
++    free( server_msg );
++    free( server_msg_attr );
++
++    if (status || !(flags & ALPC_SYNC_CONNECTION))
++    {
++        if (!status)
++        {
++            *port_handle = ret_handle;
++            TRACE("created %p\n", *port_handle);
++        }
++        else
++        {
++            WARN("status %#x\n", status);
++        }
++        return status;
++    }
++
++    /* Wait for connection to be established, even when recv_msg is NULL. NtAlpcAcceptConnectPort()
++     * must send a message regardless of the port being accepted or not. So wait for the result
++     * from NtAlpcAcceptConnectPort() when in synchronous mode and receive the message even if
++     * recv_msg is NULL so that the server reply is removed from the port */
++    status = NtWaitForSingleObject(ret_handle, FALSE, timeout);
++    if (status)
++    {
++        NtClose(ret_handle);
++        return status;
++    }
++
++    reply_data_size = connect_msg_size ? *connect_msg_size : 65535;
++    if (recv_msg_attr)
++        reply_data_size += wine_server_alpc_get_header_size(recv_msg_attr->AllocatedAttributes);
++
++    reply_data = calloc(1, reply_data_size);
++    if (!reply_data)
++    {
++        NtClose(ret_handle);
++        return STATUS_NO_MEMORY;
++    }
++
++    status = alpc_receive_port( ret_handle, flags, recv_msg, connect_msg_size, recv_msg_attr,
++                                reply_data, reply_data_size, NULL );
++    if (!status)
++        *port_handle = ret_handle;
++    else
++        NtClose( ret_handle );
++    free( reply_data );
++    return status;
++}
++
++NTSTATUS WINAPI NtAlpcCreatePort( HANDLE *port_handle, OBJECT_ATTRIBUTES *obj_attr, ALPC_PORT_ATTRIBUTES *port_attr )
++{
++    struct object_attributes *server_obj_attr = NULL;
++    struct alpc_port_attr_t server_port_attr;
++    NTSTATUS status;
++
++    TRACE( "%p, %p, %p.\n", port_handle, obj_attr, port_attr );
++
++    if (!port_handle) return STATUS_ACCESS_VIOLATION;
+ 
+     *port_handle = NULL;
++
++    if (obj_attr)
++    {
++        data_size_t attr_size;
++        status = alloc_object_attributes( obj_attr, &server_obj_attr, &attr_size );
++        if (status) return status;
++        free( server_obj_attr );
++        server_obj_attr = NULL;
++    }
++
++    if (obj_attr && obj_attr->ObjectName)
++        TRACE( "name %s.\n", debugstr_us( obj_attr->ObjectName ) );
+ 
+     if (port_attr)
+         TRACE( "port attributes: flags %#x qos (length %#x impersonation_level %d tracking_mode %d "
+@@ -76,25 +647,10 @@
+ 
+     if (port_attr && port_attr->Flags & 0x100000) return STATUS_INVALID_PARAMETER;
+ 
+-    if (attr)
+-    {
+-        if (attr->ObjectName) TRACE( "name %s.\n", debugstr_us( attr->ObjectName ) );
+-        if ((status = alloc_object_attributes( attr, &objattr, &len ))) return status;
+-    }
+-
+     SERVER_START_REQ( alpc_create_port )
+     {
+-        if (port_attr)
+-        {
+-            req->flags = port_attr->Flags;
+-            req->max_msg_len = port_attr->MaxMessageLength;
+-        }
+-        else
+-        {
+-            req->flags = 0;
+-            req->max_msg_len = 65535;
+-        }
+-        wine_server_add_data( req, objattr, len );
++        req->obj_attr_size = wine_server_add_object_attributes( req, obj_attr, &server_obj_attr );
++        wine_server_add_alpc_port_attr( req, port_attr, &server_port_attr );
+         if (!(status = wine_server_call( req )))
+         {
+             *port_handle = wine_server_ptr_handle( reply->handle );
+@@ -106,14 +662,29 @@
+         }
+     }
+     SERVER_END_REQ;
+-    free( objattr );
++    free( server_obj_attr );
+     return status;
+ }
+ 
+ NTSTATUS WINAPI NtAlpcDisconnectPort( HANDLE port_handle, ULONG flags )
+ {
+-    FIXME( "%p, %#x stub!\n", port_handle, (unsigned int)flags );
+-    return STATUS_NOT_IMPLEMENTED;
++    NTSTATUS status;
++
++    TRACE( "%p, %#x.\n", port_handle, (unsigned int)flags );
++
++    if (!port_handle)
++        return STATUS_INVALID_HANDLE;
++
++    SERVER_START_REQ( alpc_disconnect_port )
++    {
++        req->handle = wine_server_obj_handle( port_handle );
++        req->flags = flags;
++        status = wine_server_call( req );
++    }
++    SERVER_END_REQ;
++    if (status)
++        WARN( "status %#x\n", status );
++    return status;
+ }
+ 
+ NTSTATUS WINAPI NtAlpcSendWaitReceivePort( HANDLE port_handle, ULONG flags,
+@@ -123,13 +694,112 @@
+                                            ALPC_MESSAGE_ATTRIBUTES *recv_msg_attr,
+                                            LARGE_INTEGER *timeout )
+ {
+-    FIXME( "%p, %#x, %p, %p, %p, %p, %p, %p stub!\n", port_handle, (unsigned int)flags, send_msg,
++    data_size_t reply_data_size = 0;
++    struct alpc_msg_attr_t *server_msg_attr = NULL;
++    struct alpc_msg_t *server_msg;
++    void *reply_data = NULL;
++    NTSTATUS status = STATUS_SUCCESS;
++    BOOL wait = FALSE;
++
++    TRACE( "%p, %#x, %p, %p, %p, %p, %p, %p.\n", port_handle, (unsigned int)flags, send_msg,
+            send_msg_attr, recv_msg, recv_buffer_size, recv_msg_attr, timeout );
+-    return STATUS_NOT_IMPLEMENTED;
+-}
+-
+-NTSTATUS WINAPI NtAlpcImpersonateClientOfPort( HANDLE port_handle, ALPC_PORT_MESSAGE *msg, void *reserved )
+-{
+-    FIXME( "%p, %p, %p stub!\n", port_handle, msg, reserved );
+-    return STATUS_NOT_IMPLEMENTED;
+-}
++
++    if (flags & ~(ALPC_MSGFLG_REPLY_MESSAGE | ALPC_MSGFLG_SYNC_REQUEST))
++        FIXME( "unsupported flags %#x.\n", flags & ~(ALPC_MSGFLG_REPLY_MESSAGE | ALPC_MSGFLG_SYNC_REQUEST) );
++
++    if (!port_handle)
++        return STATUS_INVALID_HANDLE;
++
++    if (flags & ALPC_MSGFLG_SYNC_REQUEST)
++    {
++        if (!recv_msg)
++            return STATUS_LPC_RECEIVE_BUFFER_EXPECTED;
++
++        if (!send_msg)
++            return STATUS_INVALID_PARAMETER_2;
++    }
++
++    if (send_msg)
++    {
++        dump_msg(TRUE, send_msg);
++        dump_msg_attr(TRUE, send_msg_attr);
++
++        SERVER_START_REQ(alpc_send_port)
++        {
++            req->handle = wine_server_obj_handle(port_handle);
++            req->flags = flags;
++            req->msg_size = wine_server_add_alpc_msg(req, &server_msg, send_msg);
++            req->msg_attr_size = wine_server_add_alpc_msg_attr(req, &server_msg_attr, send_msg_attr, ALPC_MESSAGE_ATTRIBUTE_ALL);
++            status = wine_server_call(req);
++        }
++        SERVER_END_REQ;
++        free( server_msg );
++        free( server_msg_attr );
++    }
++
++    if (status)
++    {
++        WARN( "status %#x\n", status );
++        return status;
++    }
++
++    if (!recv_msg)
++        return status;
++
++    if (flags & ALPC_MSGFLG_SYNC_REQUEST)
++    {
++        status = NtWaitForSingleObject(port_handle, FALSE, timeout);
++        if (status) return status;
++    }
++
++    reply_data_size = recv_buffer_size ? *recv_buffer_size : 65535;
++    if (recv_msg_attr)
++        reply_data_size += wine_server_alpc_get_header_size(recv_msg_attr->AllocatedAttributes);
++    if (!(reply_data = calloc(1, reply_data_size))) return STATUS_NO_MEMORY;
++
++    status = alpc_receive_port(port_handle, flags, recv_msg, recv_buffer_size, recv_msg_attr,
++                               reply_data, reply_data_size, &wait);
++
++    if (wait && !(flags & ALPC_MSGFLG_SYNC_REQUEST) && status != STATUS_BUFFER_TOO_SMALL)
++    {
++        /* Wait and try again */
++        status = NtWaitForSingleObject(port_handle, FALSE, timeout);
++        if (status)
++        {
++            free( reply_data );
++            return status;
++        }
++
++        status = alpc_receive_port( port_handle, flags, recv_msg, recv_buffer_size, recv_msg_attr,
++                                    reply_data, reply_data_size, &wait );
++    }
++
++    free( reply_data );
++
++    if (!status)
++    {
++        dump_msg(FALSE, recv_msg);
++        dump_msg_attr(FALSE, recv_msg_attr);
++    }
++    return status;
++}
++
++NTSTATUS WINAPI NtAlpcImpersonateClientOfPort( HANDLE handle, ALPC_PORT_MESSAGE *msg, void *reserved )
++{
++    NTSTATUS status;
++
++    TRACE( "%p, %p, %p.\n", handle, msg, reserved );
++
++    /* TODO: Check message ID on the server side */
++    if (msg && !msg->MessageId)
++        return STATUS_INVALID_PARAMETER;
++
++    SERVER_START_REQ( alpc_impersonate_client_of_port )
++    {
++        req->handle = wine_server_obj_handle( handle );
++        req->msg_id = msg ? msg->MessageId : 0;
++        status = wine_server_call( req );
++    }
++    SERVER_END_REQ;
++    return status;
++}
+diff --git a/dlls/ntdll/alpc.c b/dlls/ntdll/alpc.c
+--- a/dlls/ntdll/alpc.c
++++ b/dlls/ntdll/alpc.c
+@@ -18,81 +18,26 @@
+  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+  */
+ 
+-#include <stdarg.h>
+-#include <windef.h>
+-#include <winternl.h>
+-#include <ntstatus.h>
+ #include "wine/debug.h"
++#include "alpc_private.h"
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(alpc);
+ 
+ SIZE_T WINAPI AlpcGetHeaderSize(ULONG attribute_flags)
+ {
+-    static const struct
+-    {
+-        ULONG attribute;
+-        SIZE_T size;
+-    } attribute_sizes[] =
+-    {
+-        /* Attribute with a higher bit is stored before that with a lower bit */
+-        {ALPC_MESSAGE_SECURITY_ATTRIBUTE, sizeof(ALPC_SECURITY_ATTR)},
+-        {ALPC_MESSAGE_VIEW_ATTRIBUTE, sizeof(ALPC_VIEW_ATTR)},
+-        {ALPC_MESSAGE_CONTEXT_ATTRIBUTE, sizeof(ALPC_CONTEXT_ATTR)},
+-        {ALPC_MESSAGE_HANDLE_ATTRIBUTE, sizeof(ALPC_HANDLE_ATTR)},
+-        {ALPC_MESSAGE_TOKEN_ATTRIBUTE, sizeof(ALPC_TOKEN_ATTR)},
+-        {ALPC_MESSAGE_DIRECT_ATTRIBUTE, sizeof(ALPC_DIRECT_ATTR)},
+-        {ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE, sizeof(ALPC_WORK_ON_BEHALF_ATTR)},
+-    };
+-    unsigned int i;
+-    SIZE_T size;
+-
+     TRACE("%#lx.\n", attribute_flags);
+-
+-    size = sizeof(ALPC_MESSAGE_ATTRIBUTES);
+-    for (i = 0; i < ARRAY_SIZE(attribute_sizes); i++)
+-    {
+-        if (attribute_flags & attribute_sizes[i].attribute)
+-            size += attribute_sizes[i].size;
+-    }
+-
+-    return size;
++    return alpc_get_header_size(attribute_flags);
+ }
+ 
+ void * WINAPI AlpcGetMessageAttribute(ALPC_MESSAGE_ATTRIBUTES *attributes, ULONG attribute_flag)
+ {
+     TRACE("%p, %lx.\n", attributes, attribute_flag);
+-
+-    /* If no flag is specified */
+-    if (!attribute_flag)
+-        return NULL;
+-
+-    /* If more than one flag is specified */
+-    if (attribute_flag & (attribute_flag - 1))
+-        return NULL;
+-
+-    /* If the specified flag is not in allocated attributes */
+-    if ((attribute_flag & attributes->AllocatedAttributes & ALPC_MESSAGE_ATTRIBUTE_ALL) != attribute_flag)
+-        return NULL;
+-
+-    return (unsigned char *)attributes + AlpcGetHeaderSize(attributes->AllocatedAttributes & ~(attribute_flag | (attribute_flag - 1)));
++    return alpc_get_message_attribute(attributes, attribute_flag);
+ }
+ 
+ NTSTATUS WINAPI AlpcInitializeMessageAttribute(ULONG attribute_flags, ALPC_MESSAGE_ATTRIBUTES *buffer,
+                                                SIZE_T buffer_size, SIZE_T *required_buffer_size)
+ {
+     TRACE("%#lx, %p, %Ix, %p.\n", attribute_flags, buffer, buffer_size, required_buffer_size);
+-
+-    *required_buffer_size = AlpcGetHeaderSize(attribute_flags);
+-
+-    if (buffer_size < *required_buffer_size)
+-        return STATUS_BUFFER_TOO_SMALL;
+-
+-    if (buffer)
+-    {
+-        buffer->AllocatedAttributes = attribute_flags;
+-        buffer->ValidAttributes = 0;
+-    }
+-
+-    return STATUS_SUCCESS;
+-
++    return alpc_initialize_message_attribute(attribute_flags, buffer, buffer_size, required_buffer_size);
+ }
+diff --git a/dlls/ntdll/alpc_private.h b/dlls/ntdll/alpc_private.h
+--- /dev/null
++++ b/dlls/ntdll/alpc_private.h
+@@ -0,0 +1,95 @@
++/*
++ * ALPC helpers for PE and Unix side
++ *
++ * Copyright 2026 Zhiyi Zhang for CodeWeavers
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++#ifndef __NTDLL_ALPC_PRIVATE_H
++#define __NTDLL_ALPC_PRIVATE_H
++
++#include <stdarg.h>
++#include <windef.h>
++#include <winternl.h>
++#include <ntstatus.h>
++
++static inline SIZE_T alpc_get_header_size( ULONG attribute_flags )
++{
++    static const struct
++    {
++        ULONG attribute;
++        SIZE_T size;
++    }
++    attribute_sizes[] =
++    {
++        /* Attribute with a higher bit is stored before that with a lower bit */
++        {ALPC_MESSAGE_SECURITY_ATTRIBUTE, sizeof(ALPC_SECURITY_ATTR)},
++        {ALPC_MESSAGE_VIEW_ATTRIBUTE, sizeof(ALPC_VIEW_ATTR)},
++        {ALPC_MESSAGE_CONTEXT_ATTRIBUTE, sizeof(ALPC_CONTEXT_ATTR)},
++        {ALPC_MESSAGE_HANDLE_ATTRIBUTE, sizeof(ALPC_HANDLE_ATTR)},
++        {ALPC_MESSAGE_TOKEN_ATTRIBUTE, sizeof(ALPC_TOKEN_ATTR)},
++        {ALPC_MESSAGE_DIRECT_ATTRIBUTE, sizeof(ALPC_DIRECT_ATTR)},
++        {ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE, sizeof(ALPC_WORK_ON_BEHALF_ATTR)},
++    };
++    unsigned int i;
++    SIZE_T size;
++
++    size = sizeof(ALPC_MESSAGE_ATTRIBUTES);
++    for (i = 0; i < ARRAY_SIZE(attribute_sizes); i++)
++    {
++        if (attribute_flags & attribute_sizes[i].attribute)
++            size += attribute_sizes[i].size;
++    }
++
++    return size;
++}
++
++static inline void *alpc_get_message_attribute( ALPC_MESSAGE_ATTRIBUTES *attributes, ULONG attribute_flag )
++{
++    /* If no flag is specified */
++    if (!attribute_flag)
++        return NULL;
++
++    /* If more than one flag is specified */
++    if (attribute_flag & (attribute_flag - 1))
++        return NULL;
++
++    /* If the specified flag is not in allocated attributes */
++    if ((attribute_flag & attributes->AllocatedAttributes & ALPC_MESSAGE_ATTRIBUTE_ALL) != attribute_flag)
++        return NULL;
++
++    return (unsigned char *)attributes + alpc_get_header_size(attributes->AllocatedAttributes & ~(attribute_flag | (attribute_flag - 1)));
++}
++
++static inline NTSTATUS alpc_initialize_message_attribute( ULONG attribute_flags,
++                                                          ALPC_MESSAGE_ATTRIBUTES *buffer,
++                                                          SIZE_T buffer_size,
++                                                          SIZE_T *required_buffer_size )
++{
++    *required_buffer_size = alpc_get_header_size(attribute_flags);
++
++    if (buffer_size < *required_buffer_size)
++        return STATUS_BUFFER_TOO_SMALL;
++
++    if (buffer)
++    {
++        buffer->AllocatedAttributes = attribute_flags;
++        buffer->ValidAttributes = 0;
++    }
++
++    return STATUS_SUCCESS;
++}
++
++#endif /* __NTDLL_ALPC_PRIVATE_H */
+diff --git a/include/wine/alpc.h b/include/wine/alpc.h
+--- /dev/null
++++ b/include/wine/alpc.h
+@@ -0,0 +1,71 @@
++/*
++ * ALPC helpers shared between ntdll and wineserver
++ *
++ * Copyright 2026 Zhiyi Zhang for CodeWeavers
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++#ifndef __WINE_WINE_ALPC_H
++#define __WINE_WINE_ALPC_H
++
++/* Same as AlpcGetHeaderSize() but for the corresponding wine server data types */
++static inline unsigned int wine_server_alpc_get_header_size( unsigned int attribute_flags )
++{
++    static const struct
++    {
++        unsigned int attribute;
++        unsigned int size;
++    } attribute_sizes[] =
++    {
++        /* Attribute with a higher bit is stored before that with a lower bit */
++        {ALPC_MESSAGE_SECURITY_ATTRIBUTE, sizeof(struct alpc_security_attr_t)},
++        {ALPC_MESSAGE_VIEW_ATTRIBUTE, sizeof(struct alpc_view_attr_t)},
++        {ALPC_MESSAGE_CONTEXT_ATTRIBUTE, sizeof(struct alpc_context_attr_t)},
++        {ALPC_MESSAGE_HANDLE_ATTRIBUTE, sizeof(struct alpc_handle_attr_t)},
++        {ALPC_MESSAGE_TOKEN_ATTRIBUTE, sizeof(struct alpc_token_attr_t)},
++        {ALPC_MESSAGE_DIRECT_ATTRIBUTE, sizeof(struct alpc_direct_attr_t)},
++        {ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE, sizeof(struct alpc_work_on_behalf_attr_t)},
++    };
++    unsigned int i, size;
++
++    size = sizeof(struct alpc_msg_attr_t);
++    for (i = 0; i < ARRAY_SIZE(attribute_sizes); i++)
++    {
++        if (attribute_flags & attribute_sizes[i].attribute)
++            size += attribute_sizes[i].size;
++    }
++
++    return size;
++}
++
++/* Same as AlpcGetMessageAttribute() but for the corresponding wine server data types */
++static inline void *wine_server_alpc_get_message_attribute( const struct alpc_msg_attr_t *attributes, unsigned int attribute_flag )
++{
++    /* If no flag is specified */
++    if (!attribute_flag)
++        return NULL;
++
++    /* If more than one flag is specified */
++    if (attribute_flag & (attribute_flag - 1))
++        return NULL;
++
++    /* If the specified flag is not in allocated attributes */
++    if ((attribute_flag & attributes->attributes & ALPC_MESSAGE_ATTRIBUTE_ALL) != attribute_flag)
++        return NULL;
++
++    return (unsigned char *)attributes + wine_server_alpc_get_header_size(attributes->attributes & ~(attribute_flag | (attribute_flag - 1)));
++}
++
++#endif /* __WINE_WINE_ALPC_H */
+diff --git a/include/Makefile.in b/include/Makefile.in
+--- a/include/Makefile.in
++++ b/include/Makefile.in
+@@ -957,6 +957,7 @@
+ 	windowscontracts.idl \
+ 	windowsx.h \
+ 	wine/afd.h \
++	wine/alpc.h \
+ 	wine/asm.h \
+ 	wine/atsvc.idl \
+ 	wine/condrv.h \
+diff --git a/server/protocol.def b/server/protocol.def
+--- a/server/protocol.def
++++ b/server/protocol.def
+@@ -1080,6 +1080,99 @@
+ } session_shm_t;
+ 
+ /****************************************************************/
++struct alpc_msg_t
++{
++    unsigned short       data_len;         /* message data length */
++    unsigned short       type;             /* message type */
++    unsigned int         id;               /* message id */
++    obj_handle_t         unique_process;   /* unique process handle */
++    obj_handle_t         unique_thread;    /* unique thread handle */
++    /* VARARG(data,bytes,data_len) */      /* message data */
++};
++
++struct security_quality_of_service_t
++{
++    int impersonation_level;
++    int context_tracking_mode;
++    int effective_only;
++};
++
++struct alpc_security_attr_t
++{
++    unsigned int         flags;
++    obj_handle_t         context_handle;
++    struct security_quality_of_service_t qos;
++};
++
++struct alpc_view_attr_t
++{
++    unsigned int         flags;
++    obj_handle_t         section_handle;
++    client_ptr_t         view_base;
++    mem_size_t           view_size;
++};
++
++struct alpc_context_attr_t
++{
++    client_ptr_t         port_context;
++    client_ptr_t         msg_context;
++    unsigned int         sequence;
++    unsigned int         msg_id;
++    unsigned int         callback_id;
++};
++
++struct alpc_handle_attr_t
++{
++    unsigned int         flags;
++    obj_handle_t         handle;
++    unsigned int         obj_type;
++    unsigned int         desired_access;
++};
++
++struct alpc_token_attr_t
++{
++    unsigned __int64     token_id;
++    unsigned __int64     auth_id;
++    unsigned __int64     modified_id;
++};
++
++struct alpc_direct_attr_t
++{
++    obj_handle_t         event;
++};
++
++struct alpc_work_on_behalf_attr_t
++{
++    unsigned __int64     ticket;
++};
++
++struct alpc_msg_attr_t
++{
++    unsigned int         attributes;                             /* flags for attributes contained in this message */
++    /* VARARG(security_attr,alpc_security_attr_t) */             /* security attribute */
++    /* VARARG(view_attr,alpc_view_attr_t) */                     /* view attribute */
++    /* VARARG(context_attr,alpc_context_attr_t) */               /* context attribute */
++    /* VARARG(handle_attr,alpc_handle_attr_t) */                 /* handle attribute */
++    /* VARARG(token_attr,alpc_token_attr_t) */                   /* token attribute */
++    /* VARARG(direct_attr,alpc_direct_attr_t) */                 /* direct attribute */
++    /* VARARG(work_on_behalf_attr,alpc_work_on_behalf_attr_t) */ /* work on behalf attribute */
++};
++
++/* structure to specify ALPC port attributes */
++struct alpc_port_attr_t
++{
++    unsigned int         flags;
++    struct security_quality_of_service_t qos;
++    mem_size_t           max_msg_len;
++    mem_size_t           mem_bandwidth;
++    mem_size_t           max_pool_usage;
++    mem_size_t           max_section_size;
++    mem_size_t           max_view_size;
++    mem_size_t           max_total_section_size;
++    unsigned int         dup_object_types;
++};
++
++
+ /* Request declarations */
+ 
+ /* Create a new process from the context of the parent */
+@@ -4302,9 +4395,79 @@
+ 
+ /* Create a new ALPC object (appended to preserve existing client request IDs). */
+ @REQ(alpc_create_port)
+-    unsigned int flags;
+-    mem_size_t max_msg_len;
+-    VARARG(obj_attr,object_attributes);
+-@REPLY
+-    obj_handle_t handle;
+-@END
++    unsigned int obj_attr_size;               /* object attribute size */
++    VARARG(obj_attr,object_attributes);       /* object attributes */
++    VARARG(port_attr,alpc_port_attr_t);       /* port attributes */
++@REPLY
++    obj_handle_t        handle;               /* handle to the ALPC port */
++@END
++
++
++@REQ(alpc_accept_connect_port)
++    obj_handle_t handle;                      /* ALPC connection port handle */
++    unsigned int flags;                       /* flags */
++    unsigned int obj_attr_size;               /* object attribute size */
++    client_ptr_t port_context;                /* opaque port context */
++    unsigned int msg_size;                    /* size of the message to be sent, including message data */
++    unsigned int msg_attr_size;               /* size of the message attributes to be sent */
++    int          accept;                      /* whether to accept or reject */
++    /* VARARG(objattr,object_attributes); */  /* optional, object attributes */
++    VARARG(port_attr,alpc_port_attr_t);       /* port attributes */
++    VARARG(msg,alpc_msg_t);                   /* connection message for clients */
++    /* VARARG(msg_attr,alpc_msg_attr_t); */   /* optional, connection message attribute for clients */
++@REPLY
++    obj_handle_t handle;                      /* ALPC communication port handle */
++@END
++
++
++@REQ(alpc_connect_port)
++    unsigned int flags;                       /* flags */
++    unsigned int name_size;                   /* port name size */
++    unsigned int obj_attr_size;               /* object attribute size */
++    unsigned int sid_size;                    /* sid size */
++    unsigned int msg_size;                    /* size of the message to be sent, including message data */
++    unsigned int msg_attr_size;               /* size of the message attributes to be sent */
++    VARARG(name,unicode_str);                 /* name for the port to connect */
++    /* VARARG(obj_attr,object_attributes); */ /* optional, object attributes */
++    VARARG(port_attr,alpc_port_attr_t);       /* port attributes */
++    /* VARARG(sid,sid); */                    /* optional, required server SID */
++    VARARG(msg,alpc_msg_t);                   /* connection message for servers */
++    /* VARARG(msg_attr,alpc_msg_attr_t); */   /* optional, connection message attribute for servers */
++@REPLY
++    obj_handle_t handle;                      /* ALPC communication port handle */
++@END
++
++
++@REQ(alpc_disconnect_port)
++    obj_handle_t  handle;                     /* ALPC port handle */
++    unsigned int  flags;                      /* flags */
++@END
++
++
++@REQ(alpc_send_port)
++    obj_handle_t  handle;                     /* ALPC port handle */
++    unsigned int  flags;                      /* flags */
++    unsigned int  msg_size;                   /* size of the message to be sent, including message data */
++    unsigned int  msg_attr_size;              /* size of the message attributes to be sent */
++    VARARG(msg,alpc_msg_t);                   /* message to be sent */
++    /* VARARG(msg_attr,alpc_msg_attr_t); */   /* optional, message attributes to be sent */
++@END
++
++
++@REQ(alpc_receive_port)
++    obj_handle_t  handle;                     /* ALPC port handle */
++    unsigned int  flags;                      /* flags */
++    data_size_t   msg_size;                   /* receive message buffer size, including message data */
++    unsigned int  msg_attributes;             /* flags for which message attributes to receive */
++@REPLY
++    data_size_t   required_size;              /* required message buffer size for receiving the message */
++    unsigned int  wait;                       /* whether caller should wait for the port to be signaled */
++    VARARG(msg,alpc_msg_t);                   /* received message */
++    /* VARARG(msg_attr,alpc_msg_attr_t); */   /* optional, received message attributes */
++@END
++
++
++@REQ(alpc_impersonate_client_of_port)
++    obj_handle_t  handle;                     /* ALPC port handle */
++    unsigned int  msg_id;                     /* ALPC message ID */
++@END
+diff --git a/server/request.c b/server/request.c
+--- a/server/request.c
++++ b/server/request.c
+@@ -165,12 +165,12 @@
+ static const struct object_attributes empty_attributes;
+ 
+ /* return object attributes from the current request */
+-const struct object_attributes *get_req_object_attributes( const struct security_descriptor **sd,
+-                                                           struct unicode_str *name,
+-                                                           struct object **root )
+-{
+-    const struct object_attributes *attr = get_req_data();
+-    data_size_t size = get_req_data_size();
++const struct object_attributes *get_req_object_attributes_data( const void *data, data_size_t size,
++                                                                const struct security_descriptor **sd,
++                                                                struct unicode_str *name,
++                                                                struct object **root )
++{
++    const struct object_attributes *attr = data;
+ 
+     if (root) *root = NULL;
+ 
+@@ -205,6 +205,14 @@
+     name->len = attr->name_len;
+     name->str = (const WCHAR *)(attr + 1) + attr->sd_len / sizeof(WCHAR);
+     return attr;
++}
++
++/* return object attributes from the current request */
++const struct object_attributes *get_req_object_attributes( const struct security_descriptor **sd,
++                                                           struct unicode_str *name,
++                                                           struct object **root )
++{
++    return get_req_object_attributes_data( get_req_data(), get_req_data_size(), sd, name, root );
+ }
+ 
+ /* return a pointer to the request data following an object attributes structure */
+diff --git a/server/request.h b/server/request.h
+--- a/server/request.h
++++ b/server/request.h
+@@ -46,6 +46,10 @@
+ 
+ extern const char *get_config_dir(void);
+ extern void *set_reply_data_size( data_size_t size );
++extern const struct object_attributes *get_req_object_attributes_data( const void *data, data_size_t size,
++                                                                       const struct security_descriptor **sd,
++                                                                       struct unicode_str *name,
++                                                                       struct object **root );
+ extern const struct object_attributes *get_req_object_attributes( const struct security_descriptor **sd,
+                                                                   struct unicode_str *name,
+                                                                   struct object **root );
+diff --git a/server/trace.c b/server/trace.c
+--- a/server/trace.c
++++ b/server/trace.c
+@@ -1558,6 +1558,39 @@
+     remove_data( size );
+ }
+ 
++static void dump_varargs_alpc_msg_t( const char *prefix, data_size_t size )
++{
++    const struct alpc_msg_t *msg = cur_data;
++
++    fprintf( stderr, "%s{", prefix );
++    fprintf( stderr, "data_len=%u", msg->data_len );
++    fprintf( stderr, " type=%u", msg->type );
++    fprintf( stderr, " id=%u", msg->id );
++    remove_data( sizeof(*msg) );
++    dump_varargs_bytes( ", data=", msg->data_len );
++    fputc( '}', stderr );
++}
++
++static void dump_varargs_alpc_port_attr_t( const char *prefix, data_size_t size )
++{
++    const struct alpc_port_attr_t *attr = cur_data;
++
++    fprintf( stderr, "%s{", prefix );
++    fprintf( stderr, "flags=%08x", attr->flags );
++    fprintf( stderr, " qos{impersonation_level=%d, context_tracking_mode=%d, effective_only=%d}",
++             attr->qos.impersonation_level, attr->qos.context_tracking_mode, attr->qos.effective_only );
++    dump_uint64( " max_msg_len=", &attr->max_msg_len );
++    dump_uint64( " mem_bandwidth=", &attr->mem_bandwidth );
++    dump_uint64( " max_pool_usage=", &attr->max_pool_usage );
++    dump_uint64( " max_section_size=", &attr->max_section_size );
++    dump_uint64( " max_view_size=", &attr->max_view_size );
++    dump_uint64( " max_total_section_size=", &attr->max_total_section_size );
++    fprintf( stderr, " dup_object_types=%08x}", attr->dup_object_types );
++    fputc( '}', stderr );
++    remove_data( sizeof(*attr) );
++}
++
++
+ void trace_request(void)
+ {
+     enum request req = current->req.request_header.req;

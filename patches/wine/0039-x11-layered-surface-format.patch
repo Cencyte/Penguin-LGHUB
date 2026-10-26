@@ -1,0 +1,15 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: Recreate the X11 surface when composition requires an alpha visual
+
+--- a/dlls/winex11.drv/bitblt.c
++++ b/dlls/winex11.drv/bitblt.c
+@@ -1985,7 +1985,8 @@
+     if ((previous = *surface) && previous->funcs == &x11drv_surface_funcs)
+     {
+         Window window = get_x11_surface(previous)->window;
+-        if (data->whole_window == window && !enable_direct_drawing( data, layered )) goto done; /* use default surface */
++        if (data->whole_window == window && (!layered || data->use_alpha) &&
++            !enable_direct_drawing( data, layered )) goto done; /* use default surface */
+         /* re-create window surface is window has changed, which can happen when changing visual */
+         TRACE( "re-creating hwnd %p surface with new window %lx\n", data->hwnd, data->whole_window );
+     }

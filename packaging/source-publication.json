@@ -1,0 +1,1999 @@
+{
+  "schema": 1,
+  "prepared_on": "2026-10-26",
+  "development_revision": "b99cbea76563c3cc9584fd070201d8917284a9a3",
+  "github_base_commit": "8826e20018f39a2acdcc11aee0ba46a3822dcf90",
+  "repository": "https://github.com/Cencyte/Penguin-LGHUB",
+  "scope": "Source snapshot; no compiled runtime or proprietary inputs",
+  "include_roots": [
+    "assets/",
+    "docs/architecture/",
+    "docs/packaging/",
+    "docs/dragonshard/",
+    "packaging/",
+    "patches/wine/",
+    "tests/packaging/",
+    "tools/wine/",
+    "tools/packaging/",
+    "tools/dragonshard-2/"
+  ],
+  "include_files": [
+    "LICENSE",
+    "NOTICE.md",
+    "README.md"
+  ],
+  "exclude_roots": [],
+  "exclude_files": [],
+  "self_excluded": "packaging/source-publication.json",
+  "files": [
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "sha256": "c21fc8cb9165b59e33b5022d3622741ee86d1409e080ac6fd6a11c24f337fc3d",
+      "bytes": 403,
+      "source": "packaging/source.gitignore"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "bytes": 35149
+    },
+    {
+      "path": "NOTICE.md",
+      "mode": "100644",
+      "sha256": "728e35362d20d30a5b70555a457a1bb9de486079eff9d88a8ee059cd48596c04",
+      "bytes": 2533
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "sha256": "c6614799b391c9f9bb3678622014981789f287589e98cb67ab8d4e107b840cd4",
+      "bytes": 39755
+    },
+    {
+      "path": "assets/penguin-lghub-logo.png",
+      "mode": "100644",
+      "sha256": "47ba6052f644b643a5f5204e25fe20e34b1217cabc9e08f07f6aae848b9e9c9e",
+      "bytes": 17639
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-overview.png",
+      "mode": "100644",
+      "sha256": "e8a38b3dfcecb0f712f87a794875c571632995b747e320cfd72489a229dce62f",
+      "bytes": 54891
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-system.mmd",
+      "mode": "100644",
+      "sha256": "1065c01cba7d33406eccdd57c01f5529f123e072d763f261ab0d0827a2aeb86d",
+      "bytes": 7456
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-views.md",
+      "mode": "100644",
+      "sha256": "6bad05dd5be5a4c39e9e2bec48e66a8f51d1803aed96849bb45bd61177fa807e",
+      "bytes": 8229
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-views.mmd",
+      "mode": "100644",
+      "sha256": "ded7ed7745bca122a97503c3e3a75c70fa1a0a10fafb2acac462322ee20ff7a1",
+      "bytes": 5501
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-views.png",
+      "mode": "100644",
+      "sha256": "0ff8b4b3862faec1629bd3b9977fdfc733fd29c7ecc4a6caf1991d75eb3cd98c",
+      "bytes": 690659
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-composition-handoff.md",
+      "mode": "100644",
+      "sha256": "d699dbb57f9a19bf51d89d86db88f55aa52029fc5cedb0a63951dbd07b05634a",
+      "bytes": 3405
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-composition-input-binding.md",
+      "mode": "100644",
+      "sha256": "d03d3fb6d207b71e8c6dbe9032dbf6ee04b18fe15e11a1a5384cab00887d612b",
+      "bytes": 7499
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-composition-input-routing.md",
+      "mode": "100644",
+      "sha256": "4d9a40702a22cb8ef5452f09e9fa332bddbe0c794384859ef4efcba894887786",
+      "bytes": 10047
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-composition-sampling.md",
+      "mode": "100644",
+      "sha256": "b25ea63e586a8b5eaf998d5c24976233434df0dd30ab3545d2d7b5b34249bb01",
+      "bytes": 6660
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-dispatch-recovery.md",
+      "mode": "100644",
+      "sha256": "2512e516b4f8a0780ccaf56c98a0ed7de06b53715496bfedc7342a1f81ac2acb",
+      "bytes": 7067
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-dxgi-adapter-notifications.md",
+      "mode": "100644",
+      "sha256": "ecc27e73c79e2412a6caf40f8a13e9b3d84bef128352406872db43d5a2938a91",
+      "bytes": 8487
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-journey.md",
+      "mode": "100644",
+      "sha256": "c3eadd8d1871ec17658c368cd9c53f172494339c2dfe187a92631afcf8ec3dc6",
+      "bytes": 4618
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-overlay-runtime.md",
+      "mode": "100644",
+      "sha256": "5b73c1caf8eff487864923f28404cc6585e474471d0d54bdcba45b1cba8b1ebd",
+      "bytes": 8055
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-runtime-dispatch.md",
+      "mode": "100644",
+      "sha256": "5519da182d58d54cae5a5763201f38abac7bb2327cca4695eb6c3a898192fce7",
+      "bytes": 5396
+    },
+    {
+      "path": "docs/dragonshard/2026-10-11-threadpool-timer.md",
+      "mode": "100644",
+      "sha256": "c4caf408f9769526dc60a316543afab4d2b8da2f31bccca82af466a98ae0c0bf",
+      "bytes": 8650
+    },
+    {
+      "path": "docs/dragonshard/2026-10-12-desktop-agent-profiles.md",
+      "mode": "100644",
+      "sha256": "9019a8a5c99593131c645d5bd21fda6e563b805121369a521c5ed1320f1adbd5",
+      "bytes": 12928
+    },
+    {
+      "path": "docs/dragonshard/2026-10-12-desktop-crash-drag-redraw.md",
+      "mode": "100644",
+      "sha256": "f8597d2b5a71b1cbc7c87654895268ea2d87aba2e4f78d3f391b00829e3c7ed4",
+      "bytes": 6347
+    },
+    {
+      "path": "docs/dragonshard/2026-10-12-shared-consumer-refresh.md",
+      "mode": "100644",
+      "sha256": "00e70ffe053248360dd3350629e19f8247f5835790cf31f1c88f32f4020cd81f",
+      "bytes": 7382
+    },
+    {
+      "path": "docs/dragonshard/2026-10-12-surface-resize.md",
+      "mode": "100644",
+      "sha256": "252aaa1b3022c22cdb0df161de3aa5d01d40dc7c3b5b3f832e9298308e68afe7",
+      "bytes": 8202
+    },
+    {
+      "path": "docs/dragonshard/2026-10-12-tray-menu-surfaces.md",
+      "mode": "100644",
+      "sha256": "0142e5e2f178f0aae0bfeec04d79d2992c1150ebf607648987e31fe1165a50ab",
+      "bytes": 8904
+    },
+    {
+      "path": "docs/dragonshard/2026-10-12-update-freeze-color-latency.md",
+      "mode": "100644",
+      "sha256": "b37c29fa2a0802a97b1518e458bcb92b1561d019a88241160b69a56daa4d3f05",
+      "bytes": 12253
+    },
+    {
+      "path": "docs/dragonshard/2026-10-13-card-hover-presentation.md",
+      "mode": "100644",
+      "sha256": "e623c45a481801a3a8784ddb8f42c6eaffb4601a31826c637dd0946be5ef7cd2",
+      "bytes": 6528
+    },
+    {
+      "path": "docs/dragonshard/2026-10-13-color-picker-local-state.md",
+      "mode": "100644",
+      "sha256": "2dd3e51344ab9f5cb606382020fd3ada6a8dac0407a93b433e1d308583b9cdb0",
+      "bytes": 7142
+    },
+    {
+      "path": "docs/dragonshard/2026-10-13-desktop-reopen.md",
+      "mode": "100644",
+      "sha256": "cb8806db5576e720a84a4d51bb508ce4cd80af16b317601442aeb8ea78009fc8",
+      "bytes": 5004
+    },
+    {
+      "path": "docs/dragonshard/2026-10-14-tray-cursor-and-acrylic.md",
+      "mode": "100644",
+      "sha256": "488f1379c56fa2c2d2f19dc0da8d3915a6d92bdb5085e6a1f41ff7c5e2bf0df3",
+      "bytes": 13628
+    },
+    {
+      "path": "docs/dragonshard/2026-10-14-tray-pointer-and-placement.md",
+      "mode": "100644",
+      "sha256": "950c675f8bcc13eda20ea1e63c39b4524ea0d794d5f2797406ea8e49bd3009f5",
+      "bytes": 9486
+    },
+    {
+      "path": "docs/dragonshard/MANUSCRIPT.md",
+      "mode": "100644",
+      "sha256": "fba97fb7773c8d231f15931d32edf989ec73626875a46e81f5a89f5b0f405e2d",
+      "bytes": 16375
+    },
+    {
+      "path": "docs/packaging/dockur-acquisition.md",
+      "mode": "100644",
+      "sha256": "aa5bf625230f407c33f3a2b43cfa056f0d9eda0a9039ddff08a4c601f99c608b",
+      "bytes": 16824
+    },
+    {
+      "path": "docs/packaging/source-publication.md",
+      "mode": "100644",
+      "sha256": "f96b1bcb4d85b769124b143c3d82b0c56d1a6a9d1d094809ec7cbb8fc57e5760",
+      "bytes": 3583
+    },
+    {
+      "path": "docs/packaging/third-party-use.md",
+      "mode": "100644",
+      "sha256": "a2003545b5ded100090a5d7136beae85586940fe0120b012edeff3d5ef9b538d",
+      "bytes": 7784
+    },
+    {
+      "path": "packaging/clean-prefix-verification.json",
+      "mode": "100644",
+      "sha256": "bac83cca12dad56add29b92ee0db4175eeb977592c1d914c854bf26cdccbd2e2",
+      "bytes": 4853
+    },
+    {
+      "path": "packaging/dockur/Dockur-LICENSE.txt",
+      "mode": "100644",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "bytes": 1036
+    },
+    {
+      "path": "packaging/dockur/collect.ps1",
+      "mode": "100644",
+      "sha256": "575de3dc19e39974b71e180c86e4b04c82781c1021ffa6f91dc613c7d7f219e3",
+      "bytes": 2748
+    },
+    {
+      "path": "packaging/dockur/install.bat",
+      "mode": "100644",
+      "sha256": "35c6dab7953e28ed37a65e0f5b2e79198246c0c740d5bea26b9817ca41f5fd62",
+      "bytes": 106
+    },
+    {
+      "path": "packaging/dockur/lock.json",
+      "mode": "100644",
+      "sha256": "24e5aac95b3190e863365a0a952010027f605f023693e5a4cdcf7b6fb009fac8",
+      "bytes": 1208
+    },
+    {
+      "path": "packaging/licenses/Wine-LGPL-2.1.txt",
+      "mode": "100644",
+      "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c",
+      "bytes": 26434
+    },
+    {
+      "path": "packaging/logitech-depots-verification.json",
+      "mode": "100644",
+      "sha256": "10a5146865fe8b4890e2593dc2ff1f46f4413aaf21be9b65640c0b3c182fb3dc",
+      "bytes": 3826
+    },
+    {
+      "path": "packaging/logitech-depots.lock.json",
+      "mode": "100644",
+      "sha256": "8a0128c8cf4456355828a8bfadc4e1aa3df272f2c250c5c66ec4a85adb4e7d66",
+      "bytes": 68468
+    },
+    {
+      "path": "packaging/runtime-baseline.json",
+      "mode": "100644",
+      "sha256": "4087869f8d10b45dc1f30a13ef262eebe3c8bbe471143a1bef70d7effd6c1866",
+      "bytes": 10647
+    },
+    {
+      "path": "packaging/source.gitignore",
+      "mode": "100644",
+      "sha256": "c21fc8cb9165b59e33b5022d3622741ee86d1409e080ac6fd6a11c24f337fc3d",
+      "bytes": 403
+    },
+    {
+      "path": "packaging/windows-acquisition-GPL-3.0.txt",
+      "mode": "100644",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "bytes": 35149
+    },
+    {
+      "path": "packaging/windows-acquisition-verification.json",
+      "mode": "100644",
+      "sha256": "a02b456ec2f75dda3c792b46f03306266aea9d0647577801b7855669a14f345e",
+      "bytes": 3054
+    },
+    {
+      "path": "packaging/windows-acquisition.lock.json",
+      "mode": "100644",
+      "sha256": "a427e2350a75ae3112def6da0ac861b721da4219194449b70993536de984a41b",
+      "bytes": 7104
+    },
+    {
+      "path": "packaging/wine-runtime-verification.json",
+      "mode": "100644",
+      "sha256": "d3fb29a818042f7133043ea64e841254b5cfacbb10c836abe2d0e092f1989fa5",
+      "bytes": 4343
+    },
+    {
+      "path": "packaging/wine-runtime.lock.json",
+      "mode": "100644",
+      "sha256": "e6240889c5f1eb5532cfe815a447c9a553a133aa7b23c4cda6a77085964efe24",
+      "bytes": 8436
+    },
+    {
+      "path": "patches/wine/0001-findfirst-share-delete.patch",
+      "mode": "100644",
+      "sha256": "05bc4f78cb7fa52301825b1f9a3ef062802d4e15886ddb2e3fb94cb415541ecc",
+      "bytes": 547
+    },
+    {
+      "path": "patches/wine/0002-device-parent-relationships.patch",
+      "mode": "100644",
+      "sha256": "f75882a4cf2730d6771b6551fdc1bc711293f43c0d74a79140fc444c786fd4d9",
+      "bytes": 3937
+    },
+    {
+      "path": "patches/wine/0003-wait-completion-packets.patch",
+      "mode": "100644",
+      "sha256": "a3e4cef6e1a6a7562174beca2537eba3f75bf5b495fef9c075e64c293e6f5468",
+      "bytes": 89871
+    },
+    {
+      "path": "patches/wine/0004-alpc-ports-and-attributes.patch",
+      "mode": "100644",
+      "sha256": "c4fa07e05142edf943aa77626782cf0d6143983be685b6f66a073eada7b2e50c",
+      "bytes": 25923
+    },
+    {
+      "path": "patches/wine/0005-alpc-message-experiment.patch",
+      "mode": "100644",
+      "sha256": "9a720885ad65e28d1635bfafa5cbd64bacd3277febbf33bcb896096a346336ac",
+      "bytes": 88451
+    },
+    {
+      "path": "patches/wine/0006-d3d11-creation-flags.patch",
+      "mode": "100644",
+      "sha256": "d9e12419c0826d400689c25a9dc6e71db5e07b6640224ca57ebcfa353019b237",
+      "bytes": 1254
+    },
+    {
+      "path": "patches/wine/0007-d3d11-partner-diagnostic.patch",
+      "mode": "100644",
+      "sha256": "a9c3f31f2db01cc0fc30799f8b3dc0296a011792ef6bfeaf8bd2885eae3f6bbf",
+      "bytes": 6025
+    },
+    {
+      "path": "patches/wine/0008-d2d-private-flush-counter.patch",
+      "mode": "100644",
+      "sha256": "5361abdc88151d3cfd49608b0c4147b9fb03ad3db5aabffb91e2402f815a4d51",
+      "bytes": 5311
+    },
+    {
+      "path": "patches/wine/0009-d3d11-immediate-context.patch",
+      "mode": "100644",
+      "sha256": "948d2f6c35c01e7ea883c0e4e5969b90440c8652826ef9df19da5f1d7c21fdfb",
+      "bytes": 1200
+    },
+    {
+      "path": "patches/wine/0010-d3d11-shader-resource-view1.patch",
+      "mode": "100644",
+      "sha256": "33de2d95fe385952af9701a06b05fdf6ae5e960da50b1c2630a58e17cb7c539e",
+      "bytes": 12545
+    },
+    {
+      "path": "patches/wine/0011-wnf-subscription-failure.patch",
+      "mode": "100644",
+      "sha256": "f845634145a5ca5b89d20ed89a38327ce486a286391c23698bccc0ae7bbd7339",
+      "bytes": 1362
+    },
+    {
+      "path": "patches/wine/0012-corewindow-desktop-query.patch",
+      "mode": "100644",
+      "sha256": "8265866a27e38d5ded1fc2530e3acf1a80451f72fc91241597c7477d09d311a6",
+      "bytes": 11250
+    },
+    {
+      "path": "patches/wine/0013-retained-child-composition.patch",
+      "mode": "100644",
+      "sha256": "e7123c5012fa05f12e976ef73b82ffd975bff4a67276c8bbf729d5a5b26ec2f4",
+      "bytes": 21265
+    },
+    {
+      "path": "patches/wine/0014-composition-input-sink.patch",
+      "mode": "100644",
+      "sha256": "571991792563ff39cab0a99142501f067ae808fa15838c295b7021e909632c84",
+      "bytes": 16715
+    },
+    {
+      "path": "patches/wine/0015-delegated-spatial-input.patch",
+      "mode": "100644",
+      "sha256": "d3dad8a352379d5d52e4fc4f3ab8b828c7dc880a8334eec6a2bcb46de1efc148",
+      "bytes": 22663
+    },
+    {
+      "path": "patches/wine/0016-window-bound-composition.patch",
+      "mode": "100644",
+      "sha256": "4dd79c8b01d86ced46f9ac3d7aa14e03a17fbb508abf0f5435c7c4c7c1e89e63",
+      "bytes": 9137
+    },
+    {
+      "path": "patches/wine/0017-window-destruction-state.patch",
+      "mode": "100644",
+      "sha256": "5a8b3aaad1d2dca0eced6686bb78a334ec8899ac408d7091c83039d9a6a18a56",
+      "bytes": 4838
+    },
+    {
+      "path": "patches/wine/0018-memory-stream.patch",
+      "mode": "100644",
+      "sha256": "2f8a17ce06dcdcb15dd3d21d532aec94d6bb26318e83ae94ccc1c5f51bd166f5",
+      "bytes": 106593
+    },
+    {
+      "path": "patches/wine/0019-data-writer.patch",
+      "mode": "100644",
+      "sha256": "4bb16863027f3b1450efa70e2874c45b59ef2496710821ebcd08fbda5db4d68c",
+      "bytes": 67136
+    },
+    {
+      "path": "patches/wine/0020-private-text-analyzer.patch",
+      "mode": "100644",
+      "sha256": "8fa9dce7d0b80a4b6b38301cab2d2879d8ac01581899160c2a0f5478aa67ad9a",
+      "bytes": 6404
+    },
+    {
+      "path": "patches/wine/0021-uisettings-animations.patch",
+      "mode": "100644",
+      "sha256": "a0c63bb1c195206aefb41bbe733c248fbe5c2b744b942294183967b929d847e8",
+      "bytes": 1197
+    },
+    {
+      "path": "patches/wine/0022-private-dwrite-factory.patch",
+      "mode": "100644",
+      "sha256": "25bfab9942f464e2fa3f9f72359a864aca570938c3997de49a420848c8f091c0",
+      "bytes": 30010
+    },
+    {
+      "path": "patches/wine/0023-d3d11-guard-rectangles.patch",
+      "mode": "100644",
+      "sha256": "26b73745ffb2e9325677719bbe8af35ac834640ca7192d78a11591019d49a098",
+      "bytes": 21008
+    },
+    {
+      "path": "patches/wine/0024-d3d11-shared-textures.patch",
+      "mode": "100644",
+      "sha256": "ccdbdaeabb85ed02fa72241cc3ac924a89f754400c3d669ce89a689bba08a970",
+      "bytes": 25197
+    },
+    {
+      "path": "patches/wine/0025-dxgi-enqueue-set-event.patch",
+      "mode": "100644",
+      "sha256": "7004fb8a3daadf31ecf816bafa6877ab18af85257a28769181643cbfc61114c9",
+      "bytes": 9061
+    },
+    {
+      "path": "patches/wine/0026-inputsite-sink-identity.patch",
+      "mode": "100644",
+      "sha256": "950edfd4d2b4aa3cb4dd2e977255b0739c509b618abc39e3204bd18383d78ccb",
+      "bytes": 13805
+    },
+    {
+      "path": "patches/wine/0027-activation-configuration.patch",
+      "mode": "100644",
+      "sha256": "c561706f3d23abe001c88cbd4e7ab5737a3d27266baa85b98cfe5156207232e4",
+      "bytes": 12287
+    },
+    {
+      "path": "patches/wine/0028-composition-input-routing.patch",
+      "mode": "100644",
+      "sha256": "ceb1d06ffa2bae799dfc780f17c94e5534d1e318237a19d5c1be0911746036cc",
+      "bytes": 23906
+    },
+    {
+      "path": "patches/wine/0029-wined3d-backup-context-format.patch",
+      "mode": "100644",
+      "sha256": "4d1755b664e42113114f921e60ffdeb12ba2f0cb26d7c99797365c46dc40ac08",
+      "bytes": 1994
+    },
+    {
+      "path": "patches/wine/0030-threadpoolwinrt-timer.patch",
+      "mode": "100644",
+      "sha256": "db9c430628f8b19a98781b36661212c6df62efa48279407adbacb49a61b6aaa0",
+      "bytes": 17816
+    },
+    {
+      "path": "patches/wine/0031-dxgi-adapter-notifications.patch",
+      "mode": "100644",
+      "sha256": "ccc80a34316e88b012a1e1871461f6322d898d29c6c8c8e39767b10f50bab6a5",
+      "bytes": 12295
+    },
+    {
+      "path": "patches/wine/0032-shcore-record-feature-usage.patch",
+      "mode": "100644",
+      "sha256": "2c509661901c845edb489e46b70f1e6786648a367668dfbfdd5e0ffc3b95adc8",
+      "bytes": 1431
+    },
+    {
+      "path": "patches/wine/0033-x11-ignore-released-mouse-moveresize.patch",
+      "mode": "100644",
+      "sha256": "fb17d6b23d9b6c0e8492d59858e15cae0b358cb2de41be97081c3b8fd24614c3",
+      "bytes": 2530
+    },
+    {
+      "path": "patches/wine/0034-lazy-retained-window-composition.patch",
+      "mode": "100644",
+      "sha256": "d5ccea5dc3556ed98abcf35e506a4b07c0ee89933ec7d11e0868c7acccb17b69",
+      "bytes": 4353
+    },
+    {
+      "path": "patches/wine/0035-x11-flush-direct-image-upload.patch",
+      "mode": "100644",
+      "sha256": "c7740f6d5d3ec837aa4d3584935915917670ae544283d1f25099b367700e6a27",
+      "bytes": 1455
+    },
+    {
+      "path": "patches/wine/0036-pointer-input-transform-fallback.patch",
+      "mode": "100644",
+      "sha256": "368a59fc405ce87987da2588478c67bed17d95400beb1ecaa664e91079415d5b",
+      "bytes": 1674
+    },
+    {
+      "path": "patches/wine/0037-composition-host-cursor.patch",
+      "mode": "100644",
+      "sha256": "688636a8cc38b82b030b90b40bc0f09001bc9ff5fb3a832e1a7837f1b2d5b6f0",
+      "bytes": 2055
+    },
+    {
+      "path": "patches/wine/0038-composition-transparent-host.patch",
+      "mode": "100644",
+      "sha256": "976a4ed475f1460fddd93c63039d9f7e2f3e9ba05cade2a73f1446c7e20c1052",
+      "bytes": 2937
+    },
+    {
+      "path": "patches/wine/0039-x11-layered-surface-format.patch",
+      "mode": "100644",
+      "sha256": "18d7db452f1398d1718deffa86caf00df0baa67994f87e97599fdb978ab04fcb",
+      "bytes": 851
+    },
+    {
+      "path": "patches/wine/0040-composition-mouse-pointer.patch",
+      "mode": "100644",
+      "sha256": "c607d39cf8928102f2c57656ed805e5b5d0479a11d7ba6cbf8d262efe3a4cd0e",
+      "bytes": 9695
+    },
+    {
+      "path": "patches/wine/0041-native-input-compatibility.patch",
+      "mode": "100644",
+      "sha256": "de3deba04020cd758e073eaf4e50fa6fbf45a1c540b9679cb8c5610d051872ad",
+      "bytes": 2772
+    },
+    {
+      "path": "patches/wine/0042-dwm-contact-feedback.patch",
+      "mode": "100644",
+      "sha256": "7e63b6f00e697af6d4da95074afa643c9cdceb5eb4e485ae4118735c53e8f843",
+      "bytes": 1430
+    },
+    {
+      "path": "patches/wine/0043-ghub-host-keyboard-output.patch",
+      "mode": "100644",
+      "sha256": "5a1bc3d1486dfc0ea46a98ab545ad50610669afb7542c13b34f0bcb5b2b5634b",
+      "bytes": 6480
+    },
+    {
+      "path": "patches/wine/experiments/composition-mouse-pointer.patch",
+      "mode": "100644",
+      "sha256": "c46954a9a2e640ab6dabd2e4434a5e036e73158badcaf262f770ea4b278e0d88",
+      "bytes": 8663
+    },
+    {
+      "path": "patches/wine/experiments/dwm-contact-feedback.patch",
+      "mode": "100644",
+      "sha256": "12677f6a5175a2e074291170754b8fa18e7c0af895bac6dc44132bfebdbc4003",
+      "bytes": 1435
+    },
+    {
+      "path": "patches/wine/experiments/ninput-feedback-property.patch",
+      "mode": "100644",
+      "sha256": "85c5bda94b48ab9987d66dd4c3f6731574534964a7057dc9bcffe3bd3309694c",
+      "bytes": 1713
+    },
+    {
+      "path": "patches/wine/experiments/ninput-native-lab-ordinals.patch",
+      "mode": "100644",
+      "sha256": "ab89d85e800998abd7a0d95ce22a1b726af9073af349be22cdf7ccb5751fb94d",
+      "bytes": 2646
+    },
+    {
+      "path": "tests/packaging/test_clean_prefix.py",
+      "mode": "100644",
+      "sha256": "caed7af3c465f067611553e075a4f3e0bb8b586ba021c34f50864d035d25038b",
+      "bytes": 7637
+    },
+    {
+      "path": "tests/packaging/test_dockur_acquire.py",
+      "mode": "100644",
+      "sha256": "114f7426aaf37521d658893a3c19c4b261e98629ecca223814ca9bb2e90b2d71",
+      "bytes": 6081
+    },
+    {
+      "path": "tests/packaging/test_logitech_depots.py",
+      "mode": "100644",
+      "sha256": "fa8a915e50c4900de02ebf12acf62b89f492f0b0533a222e572b40ffd9e9a408",
+      "bytes": 10209
+    },
+    {
+      "path": "tests/packaging/test_windows_media_acquire.py",
+      "mode": "100644",
+      "sha256": "2973d776149f2332160af81022730037182dc49d1dc0bfde9b59a76b3660e44a",
+      "bytes": 5155
+    },
+    {
+      "path": "tests/packaging/test_windows_media_reconstruct.py",
+      "mode": "100644",
+      "sha256": "b51e52ea9c79c21cfeab1e2d22149b28404f081252b33c0817d3d66d1d6fab54",
+      "bytes": 4584
+    },
+    {
+      "path": "tests/packaging/test_wine_runtime.py",
+      "mode": "100644",
+      "sha256": "930e138b6dd508cc49d8ba60ab264fd836afaa34155a982a7e22747c3305a739",
+      "bytes": 8156
+    },
+    {
+      "path": "tools/dragonshard-2/SKILL.md",
+      "mode": "100644",
+      "sha256": "a54e27722db5035630f34e28a368eb8c658f193bf9c6b137d574905ea94c6cbc",
+      "bytes": 35862
+    },
+    {
+      "path": "tools/dragonshard-2/agents/openai.yaml",
+      "mode": "100644",
+      "sha256": "505d4d240222b66baa87402e60b8233f808be52a94e06db7bd12fb9d02f4a47c",
+      "bytes": 209
+    },
+    {
+      "path": "tools/dragonshard-2/assets/systemsage/mcp-wrapper-systemsage",
+      "mode": "100755",
+      "sha256": "64844e619237511d2e84eacf4dbca9e7b7b16f39a26991de0122e5582996ecc5",
+      "bytes": 215
+    },
+    {
+      "path": "tools/dragonshard-2/assets/systemsage/requirements-frozen.txt",
+      "mode": "100644",
+      "sha256": "7cd66861cb02b41153c1b5a230b7a691ba627ec5cfb09eb229f7e8b06b9de040",
+      "bytes": 1294
+    },
+    {
+      "path": "tools/dragonshard-2/assets/systemsage/serve.py",
+      "mode": "100644",
+      "sha256": "8511362f698740380c3e68871d2bdee9a5446d783ab521c1f599dbadd775f644",
+      "bytes": 272
+    },
+    {
+      "path": "tools/dragonshard-2/manifests/ghub-all21.json",
+      "mode": "100644",
+      "sha256": "8b7e1445b6d0ab232e752ea1e5d70c5fa5fca3ff19d2ea86da57d06a728c82d3",
+      "bytes": 14377
+    },
+    {
+      "path": "tools/dragonshard-2/manifests/ghub-tray.json",
+      "mode": "100644",
+      "sha256": "ca87b87b1f9d054a5ece0c51fcbc37664941c8360a303bdfb0b423311fd110d6",
+      "bytes": 13655
+    },
+    {
+      "path": "tools/dragonshard-2/provenance.json",
+      "mode": "100644",
+      "sha256": "b72efe7b2055441ef5a622b9b95b85b6de51b4a1ccb5b113f1223d9a792aca05",
+      "bytes": 585
+    },
+    {
+      "path": "tools/dragonshard-2/references/dispatch-recovery-20261011.json",
+      "mode": "100644",
+      "sha256": "1637427747257afd20962e0a3905fa8dc6d5a346a261ab6b0750e30565933666",
+      "bytes": 1689
+    },
+    {
+      "path": "tools/dragonshard-2/references/final-analysis-audit-20261010.json",
+      "mode": "100644",
+      "sha256": "fd95f95c4e69fc9a7382a8d02aedf08ee8904a99d99344a1c106a66f207b97fd",
+      "bytes": 7410
+    },
+    {
+      "path": "tools/dragonshard-2/references/ghub-agent-reviewed-switches.json",
+      "mode": "100644",
+      "sha256": "841347dd9757b1a49dfe761182fa39e6bda41d9a0f4b63a2fa0cb9dda633a04b",
+      "bytes": 48173
+    },
+    {
+      "path": "tools/dragonshard-2/references/ghub-inventory.json",
+      "mode": "100644",
+      "sha256": "b17f3614de7c2e4811e8da7b60378916c82c65c3f5ec67583cb414c1f4e11d30",
+      "bytes": 15199
+    },
+    {
+      "path": "tools/dragonshard-2/references/ghub-reviewed-fragments.json",
+      "mode": "100644",
+      "sha256": "2224efc9c96bccd69f8a6ecdc27e32384729bbf399224579fc54d81bb5e6d192",
+      "bytes": 18737
+    },
+    {
+      "path": "tools/dragonshard-2/references/ghub-reviewed-width-cycle.json",
+      "mode": "100644",
+      "sha256": "6aec8b8319691e8b604038416740f7c9becabba0ef3502db29b54db36760aa93",
+      "bytes": 1298
+    },
+    {
+      "path": "tools/dragonshard-2/references/ghub-roadmap.md",
+      "mode": "100644",
+      "sha256": "e833b1cdc10ee599fc360895954abe76ecd44d26af109fea6297963530a7ebfe",
+      "bytes": 17721
+    },
+    {
+      "path": "tools/dragonshard-2/references/launch-20261006.json",
+      "mode": "100644",
+      "sha256": "3e9104ab04db7b4e5938c0e4234af7ac95e034ee3fd5167e96a40e45780ff1fe",
+      "bytes": 51714
+    },
+    {
+      "path": "tools/dragonshard-2/references/readiness.json",
+      "mode": "100644",
+      "sha256": "8e0fa56be9d5352dac24c953da7f6cc6f7fe3cd6730f52a6492cf0012762b0d9",
+      "bytes": 4537
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardAnalyze.java",
+      "mode": "100644",
+      "sha256": "0fc8482c9195f6dd9aa1e43be4f113fc326dc1c2c5bb7a3ba2d6e8928d65cf16",
+      "bytes": 36237
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardDeepen.java",
+      "mode": "100644",
+      "sha256": "d96522431da1a30d1662514892cbd4e21fb7b550428bd051c5f54b72ab5ed280",
+      "bytes": 7598
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardExceptionEvidence.java",
+      "mode": "100644",
+      "sha256": "18bc930abe1ff21dd01632fa38c00d959d40840229c1a385a391c9ee2060321a",
+      "bytes": 8181
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardExport.java",
+      "mode": "100644",
+      "sha256": "9a91b165c2503e74802080b739c7b6f2aed1f146e8b78e71d847a1f99a8dd464",
+      "bytes": 12356
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardFid.java",
+      "mode": "100644",
+      "sha256": "a864aad31f676798334476e8a453df87f76144912eeec50d37ada2c4a66acd74",
+      "bytes": 6844
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardFragmentRecovery.java",
+      "mode": "100644",
+      "sha256": "b042bcd09e5289c9c965971dcc8cd7ece962a119215cbb14e97ffebab49dcf5a",
+      "bytes": 5832
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardGaps.java",
+      "mode": "100644",
+      "sha256": "f4f2d69a365d64b9cc19e584c1ed401b50160e3796a3a76424b603154b64e0e2",
+      "bytes": 9799
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardIndirect.java",
+      "mode": "100644",
+      "sha256": "501478467874a23bfc1d09a5ac33fb571511ab53d8c25269b552b6a30c00d70f",
+      "bytes": 20260
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardStage.java",
+      "mode": "100644",
+      "sha256": "ab2c2de49a0a847b3284f3362004ea956a9a4dbb99f8a206fd87dee9a0d9ef70",
+      "bytes": 4382
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/DragonShardSwitchRecovery.java",
+      "mode": "100644",
+      "sha256": "b51047f27e452fa1604e03180b28f3cc09d77c098ba77e06bf3562be18cfc904",
+      "bytes": 6608
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/analyze_ahead.py",
+      "mode": "100644",
+      "sha256": "11ca69028dbf59304098273b4e3fb1422067db9891453454da15652e6f6070dd",
+      "bytes": 3516
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/campaign.py",
+      "mode": "100644",
+      "sha256": "526a647b9c84e0b3ae7db8c2362db5c15d0f63bc8571765399253317e80f374a",
+      "bytes": 11098
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/complete_storage_move.py",
+      "mode": "100644",
+      "sha256": "133feca9d23e15d15cc590be0ea10bb9425d0918a84cfda331ba63647d5cae96",
+      "bytes": 7127
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/corpus.py",
+      "mode": "100644",
+      "sha256": "70be27b4460cbd9be31112b47fb03bfc2c970d5c9f2dc6533fdd6213cfcf2103",
+      "bytes": 15335
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/decompiler_guard.py",
+      "mode": "100644",
+      "sha256": "a2ca143a197b36ffcc4a93cf2a4e95caa55640a2d3c92487da506071b53ccea3",
+      "bytes": 2254
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/depth_campaign.py",
+      "mode": "100644",
+      "sha256": "0bd9c7367889181b0953fbee216c104a7e68127e918e2388c6dbc6e88293b404",
+      "bytes": 14239
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/disk_guard.py",
+      "mode": "100644",
+      "sha256": "bfc2bfbe0931a9e7a6d8047969253e9d4ce0e2573256cf92636373c5ec586d45",
+      "bytes": 2669
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/dispatch_corpus.py",
+      "mode": "100644",
+      "sha256": "bb4228e459851605a4f98fa22cf57a3a4b29649cc4c602e85c3381a6c387e547",
+      "bytes": 8331
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/dispatch_recovery.py",
+      "mode": "100644",
+      "sha256": "48e155ab77f81a4cf3fed11bdcae4e0e3fde0125d9862cddea57064d72b204e7",
+      "bytes": 8982
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/dragonshard-notify@.service",
+      "mode": "100644",
+      "sha256": "49ef0baf2cfe860274ce9483a3e054120b0731322ecca714c7251052620ca689",
+      "bytes": 431
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/dragonshard.py",
+      "mode": "100644",
+      "sha256": "e56c6980fbfdad828c6e2ac790ae3ce1493ae085b7d95b47d9d48e603c9fd53a",
+      "bytes": 14819
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/enrich_campaign.py",
+      "mode": "100644",
+      "sha256": "841ca935ce2543d6637e7af90af9401aa6919040569f4dd47531b73ce8a74952",
+      "bytes": 16883
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/enrichment_index.py",
+      "mode": "100644",
+      "sha256": "c8e17545e124cdb7a53d1a5ebea81b110f4ed4613ccbb60ff27e609e1be184c8",
+      "bytes": 7913
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/finalize_saved_analysis.py",
+      "mode": "100644",
+      "sha256": "129c1e6b4afd295d595fc0a0dd1b5e5b92f949a57bde935877eb4632faf35cdf",
+      "bytes": 5570
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/handoff_analysis_storage.py",
+      "mode": "100644",
+      "sha256": "2ae3446f6f8b702a02d2e3cf52f7f7fefaef4770a33c1f43389aeba05cbac303",
+      "bytes": 10665
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/live_fd_gdb.py",
+      "mode": "100644",
+      "sha256": "7a2e4b27ed461a6fa92561c816e352933c69c25540c74b28662b61987b4fcb9b",
+      "bytes": 3367
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/live_fd_storage.py",
+      "mode": "100644",
+      "sha256": "a44e50c04d318053177393b1e87c59f41e20be0e07c5f00fe678d8bf83ad5d4c",
+      "bytes": 12501
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/notify_completion.py",
+      "mode": "100644",
+      "sha256": "0a337813b698db3a7a36c6329e6a73e804d4a2992249d9da2f541356a6b64cbd",
+      "bytes": 7211
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/packed_export.py",
+      "mode": "100644",
+      "sha256": "a5846cc11937d8ee983c3b8845104c8b39815b331abb4d2dcc798540b1f65a9b",
+      "bytes": 11854
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/packed_indirect.py",
+      "mode": "100644",
+      "sha256": "31f7008c7080b52067acb8b40cbc7d7102b8d874eb2490c46f65b7f2f0e03d9a",
+      "bytes": 6412
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/parallel_analysis.py",
+      "mode": "100644",
+      "sha256": "c143624a712193029556d523f9533276be433b7b774b12924e86c3ba94429de0",
+      "bytes": 29459
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/pdb_overlay.py",
+      "mode": "100644",
+      "sha256": "38194d78d8e85368467ce28046c4488bc878c08917e15209b0f8ec5ab5b1fbdf",
+      "bytes": 13457
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/preallocate_scratch.py",
+      "mode": "100644",
+      "sha256": "ecadb94e0eaf940748ae03aa4a844e327cc63d254c1f3a34383e3a9d761f7801",
+      "bytes": 2863
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/reconcile_dispatch.py",
+      "mode": "100644",
+      "sha256": "4abbe7da28f1b73e99fde7bf7ecaaa93864e78961bc5adf8214932d1bff3cfb7",
+      "bytes": 12530
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/recover_packed_export.py",
+      "mode": "100644",
+      "sha256": "3c327dccb845b9bc23d0e4ee588c872f2550c0b85562794ff3de9562293dbba3",
+      "bytes": 17900
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/relocate_campaign.py",
+      "mode": "100644",
+      "sha256": "a15fa847ba5bb636f5a52ecc953a199710e80063fecbf7a0184ff567dea93221",
+      "bytes": 7515
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/resume_convergence.py",
+      "mode": "100644",
+      "sha256": "4ce8d15e1a0856c47adddcc01b5647f7c21d4745878b4e57da4682503c45a23e",
+      "bytes": 5967
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/retry_symbol_export.py",
+      "mode": "100644",
+      "sha256": "6bc70f191aa2284f0dcecb21593344fc2d4e4a202279ba8a0b8d2d7cae0c6bde",
+      "bytes": 5950
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/sage_probe.py",
+      "mode": "100644",
+      "sha256": "d303bf6c3b0e5a1bfc5dca2ad561398b1bd7676a2ce03cdd96cb0235ed4600f9",
+      "bytes": 1240
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/static_evidence.py",
+      "mode": "100644",
+      "sha256": "4be9a57254c492a55a882537a83c51299af185cbe56c81af0f786815b8eecf13",
+      "bytes": 22012
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/swarm.py",
+      "mode": "100644",
+      "sha256": "19cad29ad8afb295efbef7be054eec046b3bfcf94b3e0a81108c302fbc5f22f6",
+      "bytes": 30092
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/swarm_tasks.py",
+      "mode": "100644",
+      "sha256": "01b37f3213480535e1f5d9f3a657622a0203fd02bbf1fc467bf5b90cfec76a1d",
+      "bytes": 10598
+    },
+    {
+      "path": "tools/dragonshard-2/scripts/watch_campaign.py",
+      "mode": "100644",
+      "sha256": "c5a70d56441219414eb2089a25e224a8a2ffc3f761b53f4449e760434044fe8e",
+      "bytes": 25557
+    },
+    {
+      "path": "tools/dragonshard-2/tests/DragonShardConflictFixture.java",
+      "mode": "100644",
+      "sha256": "589c0df8499e48a11b32ec52a616ee874fb57e136e2badf53aa18386853fc275",
+      "bytes": 4282
+    },
+    {
+      "path": "tools/dragonshard-2/tests/DragonShardPackFixture.java",
+      "mode": "100644",
+      "sha256": "08c76c48d5d6183251878c7499df194d2568ae3ff6aaff09dd81a924d1188554",
+      "bytes": 953
+    },
+    {
+      "path": "tools/dragonshard-2/tests/LiveFileMoveFixture.java",
+      "mode": "100644",
+      "sha256": "4815dc854b6f424b877f6f36dc245d25197f18032541ffdabb20de2ce61d232e",
+      "bytes": 674
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_campaign.py",
+      "mode": "100644",
+      "sha256": "89b4782182219db5e9e04c9dfdeb5b3440123e8143dca04a75be2329066096bd",
+      "bytes": 3891
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_completion_notification.py",
+      "mode": "100644",
+      "sha256": "9fa0a0c4e445de08ad0e8684808fa2b5de1db6be2a07fbb1b63f9f4ec07dc226",
+      "bytes": 2457
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_convergence_recovery.py",
+      "mode": "100644",
+      "sha256": "e8d014d067ff6569da8e92df662370cca06161797a6f223d243562932d868569",
+      "bytes": 2386
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_corpus.py",
+      "mode": "100644",
+      "sha256": "23f642e6ebf5edb6dbe024b3ae2e13ea0b360f7869e0d4295a23c202b0ea021f",
+      "bytes": 9242
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_dispatch.py",
+      "mode": "100644",
+      "sha256": "f2b95890050e4e07c55d46ad70e0373c6ffb871430b4e9b4b3ae1a39be369f18",
+      "bytes": 3165
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_enrichment_index.py",
+      "mode": "100644",
+      "sha256": "70cbcf3a96d2b743e8f2ca8210a11ce7ca65a70121175a089060c4a36572ae19",
+      "bytes": 3771
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_export_recovery.py",
+      "mode": "100644",
+      "sha256": "c22105d762dcbd292895a3c8d3be4ec6da76b18603d8e085c34cd6d98b02e9d0",
+      "bytes": 3223
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_final_analysis.py",
+      "mode": "100644",
+      "sha256": "a60f7d8b7f9de31e28ca1a05ca9bee897c3034964818e6fe4b75d23a30917916",
+      "bytes": 2461
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_packed_export.py",
+      "mode": "100644",
+      "sha256": "ec9bed68bb7bc5f2b0ae3015146a81339444f8d9f84e33beb332185ef97c2470",
+      "bytes": 2345
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_parallel_analysis.py",
+      "mode": "100644",
+      "sha256": "53aad83ceba394a14c5ca1ab4dc5094dc40feab7244385fc5dbbe1fe6bba3d10",
+      "bytes": 4624
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_pdb_overlay.py",
+      "mode": "100644",
+      "sha256": "cd55fd949ea6aba5f23d2ae3fb690838e80e839f9b342f8a6d161e80a114c8fc",
+      "bytes": 2667
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_static_evidence.py",
+      "mode": "100644",
+      "sha256": "9aeb40be51a4073fa1972fb6a15c9659e1852697d38e7dff65e5612715b48dcd",
+      "bytes": 3828
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_storage.py",
+      "mode": "100644",
+      "sha256": "aee666383bc63c9d2f46d26ed7cce7d90b0c696e8cbdaca2ee108db8e580eac7",
+      "bytes": 4291
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_storage_handoff.py",
+      "mode": "100644",
+      "sha256": "0dce501cce7408b3a166f0461bbd824ae76d77aab953427c78e47f8cad865d5d",
+      "bytes": 3146
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_swarm.py",
+      "mode": "100644",
+      "sha256": "7fcb65e71baac4790c5dcf4abe942cbcd4752c244919bec21e7acc200f0d8cbc",
+      "bytes": 7801
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_symbol_retry.py",
+      "mode": "100644",
+      "sha256": "e356660ea9999912185c5dd2fad7d451a536dd3d62a8748064341aafd4f68ebf",
+      "bytes": 1307
+    },
+    {
+      "path": "tools/dragonshard-2/tests/test_watcher.py",
+      "mode": "100644",
+      "sha256": "4217773c27811991d06fd2a73c6ed879547d307d9a1aeb4e064df43afc876041",
+      "bytes": 2477
+    },
+    {
+      "path": "tools/dragonshard-2/tests/validate_packed_swarm.py",
+      "mode": "100644",
+      "sha256": "fdf4cee43e51b6f6f6751f6e7f6e99985c1618922dac4f9b5ae3e5547142cf8f",
+      "bytes": 2665
+    },
+    {
+      "path": "tools/dragonshard-2/tests/validate_width_cycles.py",
+      "mode": "100644",
+      "sha256": "7bfc913df73e44e3ffbff0e3f37deb780adf793be1f0ae523c7398dd4aba0e86",
+      "bytes": 4371
+    },
+    {
+      "path": "tools/packaging/apply_windows_delta.c",
+      "mode": "100644",
+      "sha256": "003f60834bcc6d06e4a31dc7f80dc1b0b4c69b13766add070f9bec5d589a2bfc",
+      "bytes": 4270
+    },
+    {
+      "path": "tools/packaging/clean_prefix_probe.cpp",
+      "mode": "100644",
+      "sha256": "e154d30614e85b29517c0b4819fb908a48183d581aa23789eaa9c09beaf65aea",
+      "bytes": 3665
+    },
+    {
+      "path": "tools/packaging/dockur_acquire.py",
+      "mode": "100644",
+      "sha256": "df01b9f00dc2dae0b8cb34b6d1606213d068768d990ede6b1e3e87d76b4e7263",
+      "bytes": 18204
+    },
+    {
+      "path": "tools/packaging/logitech_capsule.py",
+      "mode": "100644",
+      "sha256": "56343706d1fdb20e99e4c8327822e07a70f9dcdf16f1174a8e4f05ff45cc7303",
+      "bytes": 5030
+    },
+    {
+      "path": "tools/packaging/logitech_depots.py",
+      "mode": "100644",
+      "sha256": "21385135a45569d6e159dbc82ad3fc10bfc92d040a40f8c6b04423acede5d97a",
+      "bytes": 18176
+    },
+    {
+      "path": "tools/packaging/prepare_clean_prefix.py",
+      "mode": "100644",
+      "sha256": "8fb2994ee94411f166044ff6b7f492410d8fb2d446520102ae0eb63f373269d5",
+      "bytes": 24770
+    },
+    {
+      "path": "tools/packaging/probe_clean_agent.py",
+      "mode": "100644",
+      "sha256": "d7fd5079471d1a65a26c35ad4ca125dc026be7a866ca336cc76cec4676addaf4",
+      "bytes": 7717
+    },
+    {
+      "path": "tools/packaging/windows_media_acquire.py",
+      "mode": "100644",
+      "sha256": "ebff2b5a690cb555f50a98f478c7f2d8282c788a63cb650c0e958bc017d79c2c",
+      "bytes": 9578
+    },
+    {
+      "path": "tools/packaging/windows_media_reconstruct.py",
+      "mode": "100644",
+      "sha256": "4a16c1d92fb30df590cdb8e2ddd0cfcdf6f6f85c819d5366d73c7ff43b221fbb",
+      "bytes": 11250
+    },
+    {
+      "path": "tools/packaging/wine_runtime.py",
+      "mode": "100644",
+      "sha256": "1e68d341ddd8b0d5f6f73a5b705cc360d5b28d8ccc9b2b5652a86dad42a991ea",
+      "bytes": 14807
+    },
+    {
+      "path": "tools/packaging/xpress_acquisition_bridge.h",
+      "mode": "100644",
+      "sha256": "3fe5c1e7ea4e1e31688618c904cce25a5295f1cbc4181e2fc655fe24c76b65a4",
+      "bytes": 4368
+    },
+    {
+      "path": "tools/wine/activation_config_test.cpp",
+      "mode": "100644",
+      "sha256": "6024662937c59a1cff4f0a8d9e1661d1c14129b22782d963375be94496bbd2f1",
+      "bytes": 11479
+    },
+    {
+      "path": "tools/wine/agent_snapshot.cjs",
+      "mode": "100644",
+      "sha256": "c84d5f0bbc629cc1609e9c2ad18b9ec8f6db54c00b98adb658c9f639173f82ad",
+      "bytes": 2353
+    },
+    {
+      "path": "tools/wine/alpc_message_test.c",
+      "mode": "100644",
+      "sha256": "8f71d9083f89f12dd5848ef07eb9545df26cded8bd92312cdc0baf6c2ac4e6aa",
+      "bytes": 8706
+    },
+    {
+      "path": "tools/wine/alpc_port_test.c",
+      "mode": "100644",
+      "sha256": "7656c84347eced50208e5d5aaadc65662d660ffb32ca3b1072b67eca0f0f350a",
+      "bytes": 6359
+    },
+    {
+      "path": "tools/wine/api_information_abi.h",
+      "mode": "100644",
+      "sha256": "c7bfb5acee59ac88f422a9fedfbbc49abe813a21a15df9164ecf3a366e427d6a",
+      "bytes": 1432
+    },
+    {
+      "path": "tools/wine/api_information_proxy.cpp",
+      "mode": "100644",
+      "sha256": "017de20fcdcf3ad134da5feebca20e14c7e11db3dea4820bdf5203dd95064ff9",
+      "bytes": 5357
+    },
+    {
+      "path": "tools/wine/apply_patch_series.py",
+      "mode": "100644",
+      "sha256": "6aaabb360766a945e59685db117bf4ab0e006413cf128250cc0a3ada26258907",
+      "bytes": 3215
+    },
+    {
+      "path": "tools/wine/build_core_application_experiment.sh",
+      "mode": "100644",
+      "sha256": "d5c031591c1afc53068d3ee5c0893363154067c84237a4546157133c26023265",
+      "bytes": 589
+    },
+    {
+      "path": "tools/wine/build_coremessaging_adapter.sh",
+      "mode": "100644",
+      "sha256": "94c6d8f9d9d43346b8b2e669d3bf1423fcdf3e1b90a99298d9ad81c76b5fe59c",
+      "bytes": 1604
+    },
+    {
+      "path": "tools/wine/build_dcomp_device_probe.sh",
+      "mode": "100755",
+      "sha256": "6cdd85638cc521069a3ec1f25a47085ffe9abaf7f95a3fc06a6954d7965af6f4",
+      "bytes": 329
+    },
+    {
+      "path": "tools/wine/build_dcomp_experiment.sh",
+      "mode": "100644",
+      "sha256": "f72c5691e57d4ec6ee6180b510c62c22b77782b340c0f2f6bc899f0863be3a5d",
+      "bytes": 866
+    },
+    {
+      "path": "tools/wine/build_private_d3d11.sh",
+      "mode": "100755",
+      "sha256": "063c5e423347778c446aa26261c0b93c8b03824044f106bc18455abb9af3873f",
+      "bytes": 4458
+    },
+    {
+      "path": "tools/wine/build_private_dwrite.sh",
+      "mode": "100755",
+      "sha256": "30c3afa76102a72dc82a60d05ef2064291f57f3186e78ffea4427307bc588e81",
+      "bytes": 1458
+    },
+    {
+      "path": "tools/wine/build_private_host_keyboard.sh",
+      "mode": "100755",
+      "sha256": "3d3b0b28ddbe244584c5e6f3073a2a2ad0ca0dcb6b66c3ceb476dbb9b90ec466",
+      "bytes": 640
+    },
+    {
+      "path": "tools/wine/build_private_ntdll.sh",
+      "mode": "100755",
+      "sha256": "6379efb697c3731c5a2cf952965bf267dd22776202a6d299ca833394b45cbb33",
+      "bytes": 2016
+    },
+    {
+      "path": "tools/wine/build_private_pointer.sh",
+      "mode": "100644",
+      "sha256": "0cec3492fb22b66d9ebf187b21167789e273147b67e1ed5dc1128a3353ea9b20",
+      "bytes": 1113
+    },
+    {
+      "path": "tools/wine/build_private_shcore.sh",
+      "mode": "100755",
+      "sha256": "0429b9fa94a35aff2c7ce9e801d1a262bd00db6f8c09a3d712820de2d7de0ceb",
+      "bytes": 945
+    },
+    {
+      "path": "tools/wine/build_private_threadpool.sh",
+      "mode": "100755",
+      "sha256": "66dd9f8a1a49d529783b6678996562ec84b2f7d13c41c5176a71990c984c2be4",
+      "bytes": 1225
+    },
+    {
+      "path": "tools/wine/build_private_window.sh",
+      "mode": "100755",
+      "sha256": "874d01eb4649648658588793feb805bb2c8c8f55efda6c19985119edfc5fdb33",
+      "bytes": 4765
+    },
+    {
+      "path": "tools/wine/build_private_windows_storage.sh",
+      "mode": "100755",
+      "sha256": "bb06c9c30b00741e79a476488c0ffb6543e083e6b6d5b256e83701ed3d4be43c",
+      "bytes": 1106
+    },
+    {
+      "path": "tools/wine/build_private_windows_ui.sh",
+      "mode": "100644",
+      "sha256": "f684c7c3892b24a4c4fc8ce75d253d74ac54c93eff67ba0f90ceb1a5360a0691",
+      "bytes": 1993
+    },
+    {
+      "path": "tools/wine/build_private_wine.sh",
+      "mode": "100644",
+      "sha256": "66df246fbced0f5ec84e8fd7586cbbe406c03c73bc59685286742f085ab713cb",
+      "bytes": 1353
+    },
+    {
+      "path": "tools/wine/build_private_x11.sh",
+      "mode": "100755",
+      "sha256": "e0ac9546a39d238bcef28411422a06bf25a03c3821045f159d94c36265814a8c",
+      "bytes": 867
+    },
+    {
+      "path": "tools/wine/build_runtime_bridges.sh",
+      "mode": "100644",
+      "sha256": "7362d7c399bb1b766b4d9c4f4de1fdb5ea4268072999c379688f715cdb142f3d",
+      "bytes": 752
+    },
+    {
+      "path": "tools/wine/card_hover_fixture/index.html",
+      "mode": "100644",
+      "sha256": "8d79206e96132d095686f27356a9f99b853710ab04cbfcb643aa532deff059c5",
+      "bytes": 2473
+    },
+    {
+      "path": "tools/wine/card_hover_fixture/main.js",
+      "mode": "100644",
+      "sha256": "5f4e712c72278185a750d42c5b50c6b1639ba26ff73bc911412e64877c6010fc",
+      "bytes": 761
+    },
+    {
+      "path": "tools/wine/color_picker_benchmark/index.html",
+      "mode": "100644",
+      "sha256": "c5afbe300ecd5be3f5b13a2dc6e253a34c1cf2afbfd89bb5c608f45f9c24f277",
+      "bytes": 4709
+    },
+    {
+      "path": "tools/wine/color_picker_benchmark/main.js",
+      "mode": "100644",
+      "sha256": "254fc9393e2b7bc5ccd17ba3d0939ab46d034b2fa28f0fba22f07b965dae1e9e",
+      "bytes": 583
+    },
+    {
+      "path": "tools/wine/color_picker_monitor.cjs",
+      "mode": "100644",
+      "sha256": "2291870e211ccbcf63592819c1fa6fecebb0871267b68a86a0d545184d5765d5",
+      "bytes": 7859
+    },
+    {
+      "path": "tools/wine/composition_input_test.c",
+      "mode": "100644",
+      "sha256": "6471dbc8c556692878c39c29ef45091647bd35e1fe03e4634408ad7a47f2ac10",
+      "bytes": 10228
+    },
+    {
+      "path": "tools/wine/configure_runtime.py",
+      "mode": "100644",
+      "sha256": "03a9ba81441949ec7ffcfb8c8e1eec67f6d3aa4f6ead546017dc7a8d11853e69",
+      "bytes": 5799
+    },
+    {
+      "path": "tools/wine/core_application_experiment.cpp",
+      "mode": "100644",
+      "sha256": "fa26db1f3dc9297d2246c9ab0edbca79eb5203e645a7b7584c3a0b299d9f18df",
+      "bytes": 6785
+    },
+    {
+      "path": "tools/wine/core_application_private_abi.h",
+      "mode": "100644",
+      "sha256": "33484e9b2934f737970eddf8ec553d817ebe0c1d9f93f837e0700d4a2f2c1c68",
+      "bytes": 1727
+    },
+    {
+      "path": "tools/wine/core_application_test.cpp",
+      "mode": "100644",
+      "sha256": "40f086272c3b6d62873dc99c50bad4776ce53e4fa8ce1eeb07f4563bc609e4fa",
+      "bytes": 4434
+    },
+    {
+      "path": "tools/wine/coremessaging_adapter_test.c",
+      "mode": "100644",
+      "sha256": "ed1953d0541ce18024199f06604470cc8b2c4a687d385909e56989db75b143c4",
+      "bytes": 5030
+    },
+    {
+      "path": "tools/wine/coremessaging_xp_adapter.c",
+      "mode": "100644",
+      "sha256": "0384c2f573c50efb337a3b29683ed23ecc72ebe39711fbab3f6ff76c0d52b63c",
+      "bytes": 9459
+    },
+    {
+      "path": "tools/wine/coremessaging_xp_adapter.def",
+      "mode": "100644",
+      "sha256": "b833fdf6c3e63d16ce694474a66c510b3bf72f43441ed9436bc11390ffb8916a",
+      "bytes": 2343
+    },
+    {
+      "path": "tools/wine/coreui_probe.c",
+      "mode": "100644",
+      "sha256": "113885966926591a5d0ecfd32017e2949ae87666eca83126207520d3830165f0",
+      "bytes": 7744
+    },
+    {
+      "path": "tools/wine/corewindow_test.c",
+      "mode": "100644",
+      "sha256": "c2af9b6685df33cfd5e71de8aed861f0403f57bc08c8306c3a496be6a683177a",
+      "bytes": 7334
+    },
+    {
+      "path": "tools/wine/d2d_native_render_test.cpp",
+      "mode": "100644",
+      "sha256": "561251d9c6cc81e0d4fa473d1ecc8f73be064e8072cbca148aab17e2232f7abd",
+      "bytes": 4948
+    },
+    {
+      "path": "tools/wine/d2d_private_info_test.c",
+      "mode": "100644",
+      "sha256": "3a5a7c5684bfc5922717797360d947a561ae907959ac936d0e59fd3018e72556",
+      "bytes": 5889
+    },
+    {
+      "path": "tools/wine/d3d11_creation_flags_test.c",
+      "mode": "100644",
+      "sha256": "98bcfd5d9adaaa06464dc4212735ee805028da8f86aacc4a84c248e062b88d04",
+      "bytes": 6512
+    },
+    {
+      "path": "tools/wine/d3d11_guard_rect_test.cpp",
+      "mode": "100644",
+      "sha256": "48475f2b171b0f6ce305dac9090f1690837b7175dffcc0a6d61830bd4c0417a0",
+      "bytes": 19762
+    },
+    {
+      "path": "tools/wine/d3d11_shared_texture_test.cpp",
+      "mode": "100644",
+      "sha256": "8a2ca4cfb488e3d9689ae88aefdfe8722332332d610bb153ea8d7be93dc02cab",
+      "bytes": 20307
+    },
+    {
+      "path": "tools/wine/d3d11_srv1_test.c",
+      "mode": "100644",
+      "sha256": "cc050ddc09e84048b029db2258f5a98de4ca677db82b0e0dc0ad0948cf07fef3",
+      "bytes": 8296
+    },
+    {
+      "path": "tools/wine/dcomp_child_test.h",
+      "mode": "100644",
+      "sha256": "83f3c68b425c605763b1dfe32199dfbe7c87f926406b8c90158c6e3d78c81218",
+      "bytes": 12564
+    },
+    {
+      "path": "tools/wine/dcomp_clock.cpp",
+      "mode": "100644",
+      "sha256": "955164c24c2ab567339d111af7d58a9e8772daf0b71baef709757ee661822530",
+      "bytes": 2645
+    },
+    {
+      "path": "tools/wine/dcomp_clock_test.cpp",
+      "mode": "100644",
+      "sha256": "1e2fce35cd26b322fa517df4530c0feb2ce759dc44843eabbe953a3beb6b0176",
+      "bytes": 5645
+    },
+    {
+      "path": "tools/wine/dcomp_device_probe.cpp",
+      "mode": "100644",
+      "sha256": "8aea30f734e8a2bb7e2b24f6e4044c4f9998952ad3bd5c5b2aac7fb79e49d624",
+      "bytes": 11166
+    },
+    {
+      "path": "tools/wine/dcomp_experiment.cpp",
+      "mode": "100644",
+      "sha256": "43ad43ebd05e520d90db0a4d9c87e9bef82a697a678cfc21de75fd90670cdbab",
+      "bytes": 87581
+    },
+    {
+      "path": "tools/wine/dcomp_experiment.def",
+      "mode": "100644",
+      "sha256": "fca0d79c8a7c20bcad03f3e4d55945f98ac0d2876c43aefa47f83fc078c116b1",
+      "bytes": 305
+    },
+    {
+      "path": "tools/wine/dcomp_formats_test.h",
+      "mode": "100644",
+      "sha256": "2cacd89cb37b38b1ed6045044be84b966498eceb24d4907536b155d3d0753aba",
+      "bytes": 7510
+    },
+    {
+      "path": "tools/wine/dcomp_input_binding.h",
+      "mode": "100644",
+      "sha256": "290d409e29d54085d5f15ee4e87fbd0f211ab249c8e03863877f1f7cc085bfba",
+      "bytes": 1971
+    },
+    {
+      "path": "tools/wine/dcomp_input_routing_test.h",
+      "mode": "100644",
+      "sha256": "f81b953a89296d9fac37b1c9f3315a281dc4fc6078e805f286c15903f1ab6699",
+      "bytes": 16622
+    },
+    {
+      "path": "tools/wine/dcomp_input_scene.h",
+      "mode": "100644",
+      "sha256": "32c9a4fb57adbf5ab106f32ce75fd53a163bcdd10b77e4985dfd1e58ab1c7bc3",
+      "bytes": 4972
+    },
+    {
+      "path": "tools/wine/dcomp_input_test.h",
+      "mode": "100644",
+      "sha256": "c27b2250be0afae5cda5a3a116f093bc7396645fcf67174c53a6f30ef4cdad6d",
+      "bytes": 9453
+    },
+    {
+      "path": "tools/wine/dcomp_layout_test.h",
+      "mode": "100644",
+      "sha256": "821a8cb597adaa778b5bf9f4917d1c27de683476cb2d3f05b109083e90fb050d",
+      "bytes": 7454
+    },
+    {
+      "path": "tools/wine/dcomp_raster.h",
+      "mode": "100644",
+      "sha256": "662f08733836740c3e30b6e1d232801b454283119860fe9f34b86111de2f9b5d",
+      "bytes": 5440
+    },
+    {
+      "path": "tools/wine/dcomp_render_test.cpp",
+      "mode": "100644",
+      "sha256": "163e6ac367fa6c18f8ddcafae265926beb3850328debf9c5ab896ebbd54699db",
+      "bytes": 16845
+    },
+    {
+      "path": "tools/wine/dcomp_resize_test.h",
+      "mode": "100644",
+      "sha256": "7c3efdb430b7afa10f681aac80eff5f89de36d8ccb4df5f52248e3d9f27641de",
+      "bytes": 8630
+    },
+    {
+      "path": "tools/wine/dcomp_sampling_test.h",
+      "mode": "100644",
+      "sha256": "8a88bff6df194f004e78a69b80c2b6c6418271ae33e0247e4b880e13e3b861cb",
+      "bytes": 7557
+    },
+    {
+      "path": "tools/wine/dcomp_shared_resource.h",
+      "mode": "100644",
+      "sha256": "c9323631d4e4f738a1771ebe3a300a7f238da8ddedcadc22c936084532bb5cc6",
+      "bytes": 7921
+    },
+    {
+      "path": "tools/wine/dcomp_shared_test.h",
+      "mode": "100644",
+      "sha256": "436ab8d2b30b896a13e12ff181f7bd2247016db8257ab9b8c194244bcbbe7a75",
+      "bytes": 18921
+    },
+    {
+      "path": "tools/wine/dcomp_window_surface.h",
+      "mode": "100644",
+      "sha256": "a90cb37dcf90d10c2e41a0610d4ff1f4a6ae6f529d3a66505912d29cce1d60e1",
+      "bytes": 651
+    },
+    {
+      "path": "tools/wine/delegated_input_test.c",
+      "mode": "100644",
+      "sha256": "bf245717e0f557892e2f78391ee363613b1cd1305a42f1c74696e7fd76dbe549",
+      "bytes": 14614
+    },
+    {
+      "path": "tools/wine/desktop_launch.py",
+      "mode": "100644",
+      "sha256": "accbdda24b484a52cdc38dc112be38f2a6be8d061f0fa32191a959cd5ed0ff04",
+      "bytes": 5804
+    },
+    {
+      "path": "tools/wine/device_parent_test.c",
+      "mode": "100644",
+      "sha256": "94818ec91d7f5268ce14ad448ccf268d59c2468874ad1fb2446cad2de0906f36",
+      "bytes": 2935
+    },
+    {
+      "path": "tools/wine/dispatcher_queue_experiment.cpp",
+      "mode": "100644",
+      "sha256": "526b2536e403952ba9ec5d7197e0e271a6ab05b1501b005c597798169aada59f",
+      "bytes": 27666
+    },
+    {
+      "path": "tools/wine/dispatcher_queue_experiment.def",
+      "mode": "100644",
+      "sha256": "f6b9d86210a4330ef2b7fcb32fa6b4d00416fe1c290e6764bec9d74d49aca959",
+      "bytes": 122
+    },
+    {
+      "path": "tools/wine/dispatcher_queue_test.c",
+      "mode": "100644",
+      "sha256": "97e6ac91a701c4411d9e96123a912076d4d14732a1c2f0425641f3aa7cab6e51",
+      "bytes": 16833
+    },
+    {
+      "path": "tools/wine/dwrite_d2d_render_test.cpp",
+      "mode": "100644",
+      "sha256": "b25a2167307afcc9031d7b5cc4902df65299a5d79f0acb673ad24ba6b1c4d17a",
+      "bytes": 7267
+    },
+    {
+      "path": "tools/wine/dxgi_adapter_notifications_test.cpp",
+      "mode": "100644",
+      "sha256": "fc11744950e1a7979a80d4e260130c2f0c971f9054fd6fbdd4c6ed1f54928f4e",
+      "bytes": 11858
+    },
+    {
+      "path": "tools/wine/dxgi_enqueue_event_test.cpp",
+      "mode": "100644",
+      "sha256": "334d43a576e2d62ff2cb8268d754b6ecd41adefcca93be46e8ddf5b981b47179",
+      "bytes": 12473
+    },
+    {
+      "path": "tools/wine/electron_window_fixture/main.js",
+      "mode": "100644",
+      "sha256": "8e49a93f9cc43a9f76dd9a363161d1f9b7a1a2020989f00ddcc7cdbcafe39948",
+      "bytes": 1653
+    },
+    {
+      "path": "tools/wine/feature_usage_test.c",
+      "mode": "100644",
+      "sha256": "e40173d965f9b3adb2cf31f7224cb2f7159f636e740f0a4f6aee3c7b0f018bab",
+      "bytes": 1777
+    },
+    {
+      "path": "tools/wine/findfirst_delete_share.c",
+      "mode": "100644",
+      "sha256": "9baced4d2142443069d264f552a8f55fc6dc2803f6609a92cc35c54c44b6c437",
+      "bytes": 1555
+    },
+    {
+      "path": "tools/wine/hid_inventory.c",
+      "mode": "100644",
+      "sha256": "73abbd228a83094ec5bcbe2550119c5c3661c8402e3527206052387926486deb",
+      "bytes": 4687
+    },
+    {
+      "path": "tools/wine/host_keyboard_probe.c",
+      "mode": "100644",
+      "sha256": "19ad380db8da36de9fe810f2654d3e86884b50c66cefb82159b054d1edbadf72",
+      "bytes": 2777
+    },
+    {
+      "path": "tools/wine/host_keyboard_receiver.c",
+      "mode": "100644",
+      "sha256": "aa37e09a04b5705c4e16d7e83b9c883b0658a12f69f34eac876608b3a6b716cd",
+      "bytes": 1238
+    },
+    {
+      "path": "tools/wine/inputsite_test.cpp",
+      "mode": "100644",
+      "sha256": "24f9e03a71bf2fbc626e9ee561cec85cf1ab83536c5e5884dd9fdfaba5d2df7a",
+      "bytes": 13553
+    },
+    {
+      "path": "tools/wine/install_desktop_launchers.py",
+      "mode": "100644",
+      "sha256": "f04b7faf915452f9453e4dca2c5ab740a4260582bc317b2e553f5dc41a38ae36",
+      "bytes": 1843
+    },
+    {
+      "path": "tools/wine/installation_probe_results.json",
+      "mode": "100644",
+      "sha256": "9d7a5e4c0149ef6ab5aab4318c1e22c9438915953bb8b2d84c93887ddd4eb0f4",
+      "bytes": 198785
+    },
+    {
+      "path": "tools/wine/ninput_native_probe.cpp",
+      "mode": "100644",
+      "sha256": "7e835283b133acf8e3b445d0debebae7fbe2dc26c89d578ba4228b99ada054b7",
+      "bytes": 4801
+    },
+    {
+      "path": "tools/wine/prepare_card_hover_fixture.py",
+      "mode": "100644",
+      "sha256": "35e1e77496cc15c27085c0e5bf67f640251668747dbe4af48e1ef0786409e1d1",
+      "bytes": 2621
+    },
+    {
+      "path": "tools/wine/prepare_color_picker_benchmark.py",
+      "mode": "100644",
+      "sha256": "3e7966fd1415c127c86374317694f7bd6c4955889075fbb16cd16f33af5b4233",
+      "bytes": 4325
+    },
+    {
+      "path": "tools/wine/prepare_color_picker_fix.py",
+      "mode": "100644",
+      "sha256": "15ef7b7cb8ea2744527d323c3c2270680bac039b583f7d0d6acb264eb4a16357",
+      "bytes": 4813
+    },
+    {
+      "path": "tools/wine/prepare_electron_window_fixture.py",
+      "mode": "100755",
+      "sha256": "514df9b223dfdfdebaafe460a725f61b06bc25a122662a4859241d061bb63ab8",
+      "bytes": 1858
+    },
+    {
+      "path": "tools/wine/prepare_kernelbase_probe.py",
+      "mode": "100644",
+      "sha256": "2b026e97138463364efbbe4179d12176c43938f64726d86e8e7c11633f9a72c7",
+      "bytes": 1667
+    },
+    {
+      "path": "tools/wine/prepare_tested_desktop.py",
+      "mode": "100644",
+      "sha256": "c946bcb7693a122eba2b65bdd74d7b0b61a958d1bca436f48568518713cb050d",
+      "bytes": 12270
+    },
+    {
+      "path": "tools/wine/prepare_tray_background.py",
+      "mode": "100644",
+      "sha256": "c595079bf1b4fb3c9b4ff191970f80a29740aaf3ba06c63a56de67252877d55e",
+      "bytes": 5775
+    },
+    {
+      "path": "tools/wine/private_dwrite_test.c",
+      "mode": "100644",
+      "sha256": "33ddc4f0a8fd7ce19407fc904c1341fb0d9817120e6b7aeae108038e6c1fd795",
+      "bytes": 20627
+    },
+    {
+      "path": "tools/wine/private_tray_watcher.py",
+      "mode": "100644",
+      "sha256": "a880960eb3b6f87653ca9e99aeeb8a4a421fb9331dd16f6a60810556ba764e09",
+      "bytes": 2027
+    },
+    {
+      "path": "tools/wine/private_two_monitor_xorg.conf",
+      "mode": "100644",
+      "sha256": "16a5fd8a24af23ccbc90e86571fd1890733aefcef315c4259f767904ce1c1e9f",
+      "bytes": 971
+    },
+    {
+      "path": "tools/wine/run_card_hover_test.py",
+      "mode": "100644",
+      "sha256": "58f634967294ed508e04f2db616a3f622d7ff390a0f7f01f3e6a83df22af0bac",
+      "bytes": 9699
+    },
+    {
+      "path": "tools/wine/run_color_picker_benchmark.py",
+      "mode": "100644",
+      "sha256": "278e1b96bef038e81e93e4de8a1c45d7e7f0d42d94a62e8c6b18db4af2662aed",
+      "bytes": 9312
+    },
+    {
+      "path": "tools/wine/run_composition_input_test.py",
+      "mode": "100755",
+      "sha256": "759324beb10d08159cdc1d1f2b911b36ff69303bb85a6852f8fcb6d53dff86c9",
+      "bytes": 3988
+    },
+    {
+      "path": "tools/wine/run_corewindow_test.py",
+      "mode": "100644",
+      "sha256": "7b9c2582fe35bc182b3cf28a9dde2a87f17c044add38db435d7b41b23423fc87",
+      "bytes": 3548
+    },
+    {
+      "path": "tools/wine/run_dcomp_tests.py",
+      "mode": "100644",
+      "sha256": "5b4a47cb5001c879c88b94022785c680925e9d65efadebe883cb8f7426eb0ac1",
+      "bytes": 15073
+    },
+    {
+      "path": "tools/wine/run_dispatcher_queue_test.py",
+      "mode": "100644",
+      "sha256": "fcb3fdcd8f896f25922f2b8441debe8a99aee3568bc4ed140ac4478ba93e6da2",
+      "bytes": 5129
+    },
+    {
+      "path": "tools/wine/run_electron_window_test.py",
+      "mode": "100755",
+      "sha256": "0c9a0dad435b3d7a452326e2fbca22af874e97250e41a9142cc13d3f6045ff3d",
+      "bytes": 12377
+    },
+    {
+      "path": "tools/wine/run_graphics_tests.py",
+      "mode": "100644",
+      "sha256": "896002cbf97801d76672a273df0042ab0819326d1fbc363bd60f17907ffdf949",
+      "bytes": 4910
+    },
+    {
+      "path": "tools/wine/run_host_keyboard_test.py",
+      "mode": "100644",
+      "sha256": "6e0152f3686fbaaaba68336878a52a09e34cb8c632900d9c971e530d6c7f8d14",
+      "bytes": 7362
+    },
+    {
+      "path": "tools/wine/run_inputsite_test.py",
+      "mode": "100644",
+      "sha256": "03d01cdaee2521c36d8ac34a08991f53790e03fc7a5ccb1aa314d936fc47b7bd",
+      "bytes": 5130
+    },
+    {
+      "path": "tools/wine/run_memory_stream_test.py",
+      "mode": "100755",
+      "sha256": "28fafa9da68b1aa94f14a77a686d56db736654ef49efe119a4670f49d810d93f",
+      "bytes": 4757
+    },
+    {
+      "path": "tools/wine/run_native_input_checks.py",
+      "mode": "100644",
+      "sha256": "c7237dc2527bc82f7a177c02a0d7f7595d82e4543482f65768b0fe4514882024",
+      "bytes": 3507
+    },
+    {
+      "path": "tools/wine/run_overlay_trace.py",
+      "mode": "100644",
+      "sha256": "80f9c8ff82d3e302c0e221896e871c990a661e96565b4e442472783ba7d1a657",
+      "bytes": 11451
+    },
+    {
+      "path": "tools/wine/run_private_build.py",
+      "mode": "100644",
+      "sha256": "0002ec23c3da95a9cdd93a9113c9dd2f19f50c582532610d1eab8c61ae009c7f",
+      "bytes": 16751
+    },
+    {
+      "path": "tools/wine/run_private_kernelbase.sh",
+      "mode": "100644",
+      "sha256": "fe2c8575102c2ec9ebfb73478a6837ad5b58560bacfee6e707212ec20f4f2180",
+      "bytes": 1547
+    },
+    {
+      "path": "tools/wine/run_text_reading_direction_test.py",
+      "mode": "100755",
+      "sha256": "fa6f2609af45c7e5684eb5abcc402be805eaa23c9160b6afeea6da59b1724ab8",
+      "bytes": 4361
+    },
+    {
+      "path": "tools/wine/run_threadpool_tests.py",
+      "mode": "100644",
+      "sha256": "d4a22c0853ae4225a9571c6cd6040d100bfb3b824c5cc19f8c580e05fba93aae",
+      "bytes": 3368
+    },
+    {
+      "path": "tools/wine/run_tray_input_checks.py",
+      "mode": "100644",
+      "sha256": "a8de10fe1bbe0ff953c81abd052e85a22ef1a726c071fffb553e9770c25993e6",
+      "bytes": 2244
+    },
+    {
+      "path": "tools/wine/run_tray_menu_test.py",
+      "mode": "100644",
+      "sha256": "af98388b1725e7e7b286da81280275ef7605aebeca9ff8d69dd01e8ee327b9c8",
+      "bytes": 19436
+    },
+    {
+      "path": "tools/wine/runtime_bridge_test.cpp",
+      "mode": "100644",
+      "sha256": "959e65ab2d673050ade74539b2f12544fe1fce3242ae3e99548e01efa045fd4d",
+      "bytes": 2945
+    },
+    {
+      "path": "tools/wine/sensor_monitor_unavailable.c",
+      "mode": "100644",
+      "sha256": "75975d5e178a816fc7ce1274a9ff41cb4b326270d2ec3c36ff805690fa3fec14",
+      "bytes": 484
+    },
+    {
+      "path": "tools/wine/test_desktop_device_policy.py",
+      "mode": "100644",
+      "sha256": "fb55224df461c223c6cf41e8179fd059039f7b007fe8531d00f05f7795873967",
+      "bytes": 3157
+    },
+    {
+      "path": "tools/wine/test_desktop_reopen.py",
+      "mode": "100644",
+      "sha256": "27d1d85daf78102ede8229fd4e21a661e69b2540fa7dcbfee18b38196797390c",
+      "bytes": 8815
+    },
+    {
+      "path": "tools/wine/test_update_freeze.py",
+      "mode": "100644",
+      "sha256": "b99ccffc623cac5eaea62a92d92cfdf8399b021fa4cad509439484fe45076775",
+      "bytes": 10027
+    },
+    {
+      "path": "tools/wine/tested_desktop_launch.py",
+      "mode": "100644",
+      "sha256": "4c05d93d7ff5876d00ac24c004728e5a10ac8fc050400128a31f49a56e32ba96",
+      "bytes": 21218
+    },
+    {
+      "path": "tools/wine/text_reading_direction_test.c",
+      "mode": "100644",
+      "sha256": "68e9bdfcd58d8dbb8ff907625384da87caeac5baa3171195e510f861d3a97d98",
+      "bytes": 11294
+    },
+    {
+      "path": "tools/wine/threadpool_timer_test.c",
+      "mode": "100644",
+      "sha256": "a06ca1ee8518816c7cb623ee094c8808e605800f74a99f2753feb99bb0c8a97c",
+      "bytes": 16142
+    },
+    {
+      "path": "tools/wine/tray_anchor_test.cpp",
+      "mode": "100644",
+      "sha256": "2d08968d932354bd9d8669c3fe7071cd94d3dc951f29d6da1369e33995c0aebc",
+      "bytes": 3469
+    },
+    {
+      "path": "tools/wine/tray_menu_test.cpp",
+      "mode": "100644",
+      "sha256": "379d77e44fc0ec866ad9b335ba1c0c6be044bf4c36ef722847c1a5902478aa09",
+      "bytes": 16613
+    },
+    {
+      "path": "tools/wine/tray_overlay_trace.cpp",
+      "mode": "100644",
+      "sha256": "574f3348875d8bf7ff02ae368eba8e7fcdd5e9b3870dbb4421e2417fee8de675",
+      "bytes": 26005
+    },
+    {
+      "path": "tools/wine/tray_pointer_test.c",
+      "mode": "100644",
+      "sha256": "5722bc284acb2140a8c7183f29f4c52f991543c2cd81ea7def485fec5b90727e",
+      "bytes": 1978
+    },
+    {
+      "path": "tools/wine/tray_popup_anchor.cpp",
+      "mode": "100644",
+      "sha256": "ffb2607f87c3792089e73d944e2f1aea5e237ce29d63bb69bf19f81a3db7a0aa",
+      "bytes": 6665
+    },
+    {
+      "path": "tools/wine/uisettings_test.c",
+      "mode": "100644",
+      "sha256": "9b9a756171c90ce22b921a9707848f2b9f62f54814e065f2e43156840f0741d1",
+      "bytes": 3020
+    },
+    {
+      "path": "tools/wine/update_policy.cjs",
+      "mode": "100644",
+      "sha256": "c7ec1b4d9c9b3961aec6c5d61cb700bfac303dfd2e2e9778724eebe38da292b3",
+      "bytes": 3030
+    },
+    {
+      "path": "tools/wine/wait_completion_test.c",
+      "mode": "100644",
+      "sha256": "5303f35184d93f401e4f37eebe402b3d5915d5d2e2a29f87f020d44d4b34e233",
+      "bytes": 2844
+    },
+    {
+      "path": "tools/wine/window_command_probe.c",
+      "mode": "100644",
+      "sha256": "b6e639aa7d474b248e211d3617130e072f066383b9fc2c91a5efd7e86d5f35b5",
+      "bytes": 604
+    },
+    {
+      "path": "tools/wine/window_destroy_test.c",
+      "mode": "100644",
+      "sha256": "e5ba4d406486498ce424e01a0d123fd73098ff4458d36bf0974076409480d57a",
+      "bytes": 5558
+    },
+    {
+      "path": "tools/wine/window_protocol_test.c",
+      "mode": "100644",
+      "sha256": "f8d87c67164de6f1b08307af43abfb575624dac5d6b7ee2646f539ee29d74b3e",
+      "bytes": 1266
+    },
+    {
+      "path": "tools/wine/wnf_unavailable_test.c",
+      "mode": "100644",
+      "sha256": "b2fa0bef3df4380de8a4be04ceb5ff53db1b42e579fc296d628c62ead7a52181",
+      "bytes": 1474
+    }
+  ]
+}

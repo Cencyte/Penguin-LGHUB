@@ -1,0 +1,52 @@
+<!doctype html><html><head><meta charset="utf-8"><title>GHUB Color Benchmark</title>
+<style>body{margin:0;background:#222;color:white}#root{position:absolute;left:100px;top:100px;width:500px;height:400px}</style>
+</head><body><div id="root"></div><script src="mode.js"></script><script src="vendor.js"></script><script>
+const React=ghubRequire(67294), ReactDOM=ghubRequire(20745), flushSync=ghubRequire(73935).flushSync, Saturation=ghubRequire(76659).Saturation;
+const record={moves:[],changes:[],frames:[],longTasks:[],dots:[],commits:[]};
+let recording=false, lastFrame, finish, held=false, releasedAt=null;
+new PerformanceObserver(list=>{if(recording) for(const e of list.getEntries()) record.longTasks.push(e.duration)}).observe({type:'longtask'});
+function frame(t){if(recording && lastFrame)record.frames.push(t-lastFrame);lastFrame=t;requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+function stats(values){const sorted=[...values].sort((a,b)=>a-b);return {n:sorted.length,
+  median:sorted[Math.floor(sorted.length*.5)]??null,p95:sorted[Math.floor(sorted.length*.95)]??null,max:sorted.at(-1)??null};}
+function end(){recording=false; const intervals=record.changes.slice(1).map((e,i)=>e.at-record.changes[i].at);
+  console.log('BENCHMARK_RESULT '+JSON.stringify({pointer_events:record.moves.length,color_updates:record.changes.length,
+  callback_intervals_ms:stats(intervals),callback_event_age_ms:stats(record.changes.map(e=>e.age)),
+  pointer_event_age_ms:stats(record.moves.map(e=>e.age)),frame_intervals_ms:stats(record.frames),long_tasks_ms:stats(record.longTasks),
+  dot_updates_while_held:record.dots.filter(e=>e.held).length,dot_updates_total:record.dots.length,
+  backend_commit_count:record.commits.length,backend_commits_while_held:record.commits.filter(e=>e.held).length,
+  final_dot:record.dots.at(-1)??null,final_committed_color:record.commits.at(-1)?.color??null,
+  final_color:record.changes.at(-1)?.color,raw:record}));}
+document.addEventListener('mousedown',()=>{recording=true;held=true;releasedAt=null;for(const key in record)record[key]=[];clearTimeout(finish);finish=setTimeout(end,15000)},true);
+document.addEventListener('mousemove',e=>{if(recording)record.moves.push({at:performance.now(),age:performance.now()-e.timeStamp})},true);
+document.addEventListener('mouseup',()=>{held=false;releasedAt=performance.now();if(recording){clearTimeout(finish);finish=setTimeout(end,350)}},true);
+new MutationObserver(records=>{if(!recording)return;for(const e of new Set(records.map(m=>m.target))){
+  if(e.parentElement?.classList.contains('saturation-white')&&e.style.position==='absolute')
+    record.dots.push({at:performance.now(),held,left:e.style.left,top:e.style.top});
+}}).observe(document.getElementById('root'),{subtree:true,attributes:true,attributeFilter:['style']});
+function Picker(){const [hsv,set]=React.useState({h:180,s:.5,v:.5,a:1});
+  return React.createElement(Saturation,{hsl:{h:hsv.h,s:.5,l:.5,a:1},hsv,
+    onChange:(color,event)=>{if(recording)record.changes.push({at:performance.now(),age:performance.now()-event.timeStamp,color});set(color)}});}
+const ColorWrap=ghubRequire(88288).ColorWrap;
+const Wrapped=ColorWrap(props=>React.createElement(Saturation,{...props,onChange:(color,event)=>{
+  if(recording)record.changes.push({at:performance.now(),age:performance.now()-event.timeStamp,color});
+  props.onChange(color,event);
+}}));
+if(window.pickerParentMode==='preview'){
+  const initial=Wrapped.getDerivedStateFromProps({color:'#883349',ghubLocalPreview:true},{oldHue:344});
+  const local={...initial,hex:'#ff0000',hsv:{h:344,s:1,v:1,a:1}};
+  const unchanged=Wrapped.getDerivedStateFromProps({color:'#883349',ghubLocalPreview:true},local);
+  const changed=Wrapped.getDerivedStateFromProps({color:'#00ff00',ghubLocalPreview:true},local);
+  const normal=Wrapped.getDerivedStateFromProps({color:'#883349'},local);
+  const ok=unchanged===null&&changed.hex==='#00ff00'&&changed.__ghubParentColor==='#00ff00'&&normal.hex==='#883349';
+  console.log((ok?'PREVIEW_STATE_CHECKS ':'BENCHMARK_FAILED ')+JSON.stringify({same_parent_retains_local:unchanged===null,
+    external_color_applied:changed.hex==='#00ff00',unflagged_behavior_preserved:normal.hex==='#883349'}));
+}
+function Controlled(){const [color,set]=React.useState('#883349');
+  return React.createElement(Wrapped,{color,
+    ghubLocalPreview:window.pickerParentMode==='preview',
+    onChangeComplete:c=>{flushSync(()=>set(c.hex));if(recording)record.commits.push({at:performance.now(),held,color:c.hex})}});
+}
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(window.pickerParentMode==='none'?Picker:Controlled));
+console.log('BENCHMARK_READY');
+</script></body></html>

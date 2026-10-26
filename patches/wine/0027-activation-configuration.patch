@@ -1,0 +1,241 @@
+--- a/dlls/windows.ui/main.c
++++ b/dlls/windows.ui/main.c
+@@ -33,0 +34 @@
++extern HRESULT activation_config_get_factory(IActivationFactory **out);
+@@ -41,0 +43,2 @@
++    if (!wcscmp(buffer, L"Windows.UI.Internal.Input.ActivationConfigurationInputObject"))
++        return activation_config_get_factory(factory);
+--- a/dlls/windows.ui/inputsite.c
++++ b/dlls/windows.ui/inputsite.c
+@@ -56,0 +57,26 @@
++    struct activation_config *configuration; /* Weak, under sites_lock. */
++};
++
++typedef struct activation_config_iface activation_config_iface;
++typedef struct activation_config_vtbl
++{
++    HRESULT (WINAPI *QueryInterface)(activation_config_iface *, REFIID, void **);
++    ULONG (WINAPI *AddRef)(activation_config_iface *);
++    ULONG (WINAPI *Release)(activation_config_iface *);
++    HRESULT (WINAPI *GetIids)(activation_config_iface *, ULONG *, IID **);
++    HRESULT (WINAPI *GetRuntimeClassName)(activation_config_iface *, HSTRING *);
++    HRESULT (WINAPI *GetTrustLevel)(activation_config_iface *, TrustLevel *);
++    HRESULT (WINAPI *get_ActivatePolicy)(activation_config_iface *, INT32 *);
++    HRESULT (WINAPI *put_ActivatePolicy)(activation_config_iface *, INT32);
++    HRESULT (WINAPI *get_EatPolicy)(activation_config_iface *, INT32 *);
++    HRESULT (WINAPI *put_EatPolicy)(activation_config_iface *, INT32);
++} activation_config_vtbl;
++struct activation_config_iface { const activation_config_vtbl *lpVtbl; };
++struct activation_config
++{
++    activation_config_iface iface;
++    IClosable IClosable_iface;
++    LONG ref;
++    struct site *site; /* Strong. The site's cache does not hold a reference. */
++    BOOL closed;
++    INT32 activate_policy, eat_policy;
+@@ -321,0 +348,204 @@
++
++/* Native RS5/current policy ABI, backed by the retained InputSite. This is
++ * the configuration facade; Bamo/compositor input delivery is separate. */
++static const WCHAR config_name[] = L"Windows.UI.Internal.Input.ActivationConfigurationInputObject";
++static const GUID iid_config_statics = {0x4c8421ca,0x3863,0x5236,{0xb0,0x9a,0x75,0x7c,0xf6,0x8c,0x5f,0xa5}};
++static const GUID iid_config = {0x773ebb88,0x99de,0x4a39,{0xb9,0xfa,0x02,0xad,0xae,0xc2,0x5d,0x4d}};
++
++static struct activation_config *impl_from_config(activation_config_iface *iface)
++{ return CONTAINING_RECORD(iface, struct activation_config, iface); }
++static ULONG WINAPI config_AddRef(activation_config_iface *iface)
++{ return InterlockedIncrement(&impl_from_config(iface)->ref); }
++static ULONG WINAPI config_Release(activation_config_iface *iface)
++{
++    struct activation_config *impl = impl_from_config(iface);
++    ULONG ref;
++    AcquireSRWLockExclusive(&sites_lock);
++    ref = InterlockedDecrement(&impl->ref);
++    if (!ref && impl->site->configuration == impl) impl->site->configuration = NULL;
++    ReleaseSRWLockExclusive(&sites_lock);
++    if (!ref)
++    {
++        site_Release(&impl->site->IInspectable_iface);
++        free(impl);
++    }
++    return ref;
++}
++static HRESULT WINAPI config_QueryInterface(activation_config_iface *iface, REFIID iid, void **out)
++{
++    struct activation_config *impl = impl_from_config(iface);
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) || IsEqualGUID(iid, &iid_config))
++        *out = iface;
++    else if (IsEqualGUID(iid, &IID_IClosable)) *out = &impl->IClosable_iface;
++    else return E_NOINTERFACE;
++    config_AddRef(iface);
++    return S_OK;
++}
++static HRESULT WINAPI config_GetIids(activation_config_iface *iface, ULONG *count, IID **out)
++{
++    IID ids[] = {iid_config, IID_IClosable};
++    return copy_iids(ids, ARRAY_SIZE(ids), count, out);
++}
++static HRESULT WINAPI config_GetRuntimeClassName(activation_config_iface *iface, HSTRING *out)
++{
++    if (!out) return E_POINTER;
++    return WindowsCreateString(config_name, ARRAY_SIZE(config_name) - 1, out);
++}
++static HRESULT WINAPI config_GetTrustLevel(activation_config_iface *iface, TrustLevel *out) { return get_trust(out); }
++static HRESULT config_policy(activation_config_iface *iface, BOOL eat, BOOL write, INT32 *value)
++{
++    struct activation_config *impl = impl_from_config(iface);
++    INT32 *policy = eat ? &impl->eat_policy : &impl->activate_policy;
++    HRESULT hr = S_OK;
++    if (!value) return E_POINTER;
++    AcquireSRWLockExclusive(&sites_lock);
++    if (impl->closed || !impl->site->sink) hr = RO_E_CLOSED;
++    else if (write) *policy = *value;
++    else *value = *policy;
++    ReleaseSRWLockExclusive(&sites_lock);
++    TRACE("ActivationConfiguration %p %s %s = %ld, hr %#lx.\n", iface,
++          write ? "put" : "get", eat ? "EatPolicy" : "ActivatePolicy", SUCCEEDED(hr) ? *value : 0, hr);
++    return hr;
++}
++static HRESULT WINAPI config_get_activate(activation_config_iface *iface, INT32 *value)
++{ return config_policy(iface, FALSE, FALSE, value); }
++static HRESULT WINAPI config_put_activate(activation_config_iface *iface, INT32 value)
++{ return config_policy(iface, FALSE, TRUE, &value); }
++static HRESULT WINAPI config_get_eat(activation_config_iface *iface, INT32 *value)
++{ return config_policy(iface, TRUE, FALSE, value); }
++static HRESULT WINAPI config_put_eat(activation_config_iface *iface, INT32 value)
++{ return config_policy(iface, TRUE, TRUE, &value); }
++static const activation_config_vtbl config_vtbl =
++{
++    config_QueryInterface, config_AddRef, config_Release, config_GetIids,
++    config_GetRuntimeClassName, config_GetTrustLevel,
++    config_get_activate, config_put_activate, config_get_eat, config_put_eat
++};
++static struct activation_config *config_from_closable(IClosable *iface)
++{ return CONTAINING_RECORD(iface, struct activation_config, IClosable_iface); }
++static HRESULT WINAPI config_close_qi(IClosable *iface, REFIID iid, void **out)
++{ return config_QueryInterface(&config_from_closable(iface)->iface, iid, out); }
++static ULONG WINAPI config_close_add(IClosable *iface) { return config_AddRef(&config_from_closable(iface)->iface); }
++static ULONG WINAPI config_close_release(IClosable *iface) { return config_Release(&config_from_closable(iface)->iface); }
++static HRESULT WINAPI config_close_iids(IClosable *iface, ULONG *count, IID **out)
++{ return config_GetIids(&config_from_closable(iface)->iface, count, out); }
++static HRESULT WINAPI config_close_name(IClosable *iface, HSTRING *out)
++{ return config_GetRuntimeClassName(&config_from_closable(iface)->iface, out); }
++static HRESULT WINAPI config_close_trust(IClosable *iface, TrustLevel *out) { return get_trust(out); }
++static HRESULT WINAPI config_Close(IClosable *iface)
++{
++    struct activation_config *impl = config_from_closable(iface);
++    AcquireSRWLockExclusive(&sites_lock);
++    impl->closed = TRUE;
++    if (impl->site->configuration == impl) impl->site->configuration = NULL;
++    ReleaseSRWLockExclusive(&sites_lock);
++    return S_OK;
++}
++static const IClosableVtbl config_closable_vtbl =
++{
++    config_close_qi, config_close_add, config_close_release,
++    config_close_iids, config_close_name, config_close_trust, config_Close
++};
++
++typedef struct config_statics_iface config_statics_iface;
++typedef struct config_statics_vtbl
++{
++    HRESULT (WINAPI *QueryInterface)(config_statics_iface *, REFIID, void **);
++    ULONG (WINAPI *AddRef)(config_statics_iface *);
++    ULONG (WINAPI *Release)(config_statics_iface *);
++    HRESULT (WINAPI *GetIids)(config_statics_iface *, ULONG *, IID **);
++    HRESULT (WINAPI *GetRuntimeClassName)(config_statics_iface *, HSTRING *);
++    HRESULT (WINAPI *GetTrustLevel)(config_statics_iface *, TrustLevel *);
++    HRESULT (WINAPI *GetForInputSite)(config_statics_iface *, IInspectable *, activation_config_iface **);
++} config_statics_vtbl;
++struct config_statics_iface { const config_statics_vtbl *lpVtbl; };
++static HRESULT WINAPI config_GetForInputSite(config_statics_iface *iface, IInspectable *site,
++                                            activation_config_iface **out)
++{
++    struct activation_config *config;
++    struct site *impl;
++    IInspectable *queried;
++    HRESULT hr;
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (!site) return E_INVALIDARG;
++    hr = IInspectable_QueryInterface(site, &iid_site_rs5, (void **)&queried);
++    if (FAILED(hr)) return hr;
++    /* Foreign COM objects must never be interpreted as our allocations. */
++    if (queried->lpVtbl != &site_vtbl) { IInspectable_Release(queried); return E_NOINTERFACE; }
++    impl = impl_from_IInspectable(queried);
++    AcquireSRWLockExclusive(&sites_lock);
++    if (!impl->sink) hr = RO_E_CLOSED;
++    else if ((config = impl->configuration))
++    {
++        config_AddRef(&config->iface);
++        *out = &config->iface;
++    }
++    else if ((config = calloc(1, sizeof(*config))))
++    {
++        config->iface.lpVtbl = &config_vtbl;
++        config->IClosable_iface.lpVtbl = &config_closable_vtbl;
++        config->ref = 1;
++        config->site = impl;
++        site_AddRef(queried);
++        impl->configuration = config;
++        *out = &config->iface;
++    }
++    else hr = E_OUTOFMEMORY;
++    ReleaseSRWLockExclusive(&sites_lock);
++    IInspectable_Release(queried);
++    TRACE("ActivationConfiguration GetForInputSite %p -> %p, hr %#lx.\n", site, *out, hr);
++    return hr;
++}
++static IActivationFactory config_factory;
++static config_statics_iface config_statics;
++static LONG config_factory_ref = 1;
++static HRESULT WINAPI config_factory_qi(IActivationFactory *iface, REFIID iid, void **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) ||
++        IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IActivationFactory)) *out = &config_factory;
++    else if (IsEqualGUID(iid, &iid_config_statics)) *out = &config_statics;
++    else return E_NOINTERFACE;
++    InterlockedIncrement(&config_factory_ref);
++    return S_OK;
++}
++static ULONG WINAPI config_factory_add(IActivationFactory *iface) { return InterlockedIncrement(&config_factory_ref); }
++static ULONG WINAPI config_factory_release(IActivationFactory *iface) { return InterlockedDecrement(&config_factory_ref); }
++static HRESULT WINAPI config_factory_iids(IActivationFactory *iface, ULONG *count, IID **out)
++{ return copy_iids(&iid_config_statics, 1, count, out); }
++static HRESULT WINAPI config_factory_name(IActivationFactory *iface, HSTRING *out)
++{ return config_GetRuntimeClassName(NULL, out); }
++static HRESULT WINAPI config_factory_trust(IActivationFactory *iface, TrustLevel *out) { return get_trust(out); }
++static const IActivationFactoryVtbl config_factory_vtbl =
++{
++    config_factory_qi, config_factory_add, config_factory_release, config_factory_iids,
++    config_factory_name, config_factory_trust, factory_ActivateInstance
++};
++static IActivationFactory config_factory = {&config_factory_vtbl};
++static HRESULT WINAPI config_statics_qi(config_statics_iface *iface, REFIID iid, void **out)
++{ return config_factory_qi(&config_factory, iid, out); }
++static ULONG WINAPI config_statics_add(config_statics_iface *iface) { return config_factory_add(&config_factory); }
++static ULONG WINAPI config_statics_release(config_statics_iface *iface) { return config_factory_release(&config_factory); }
++static HRESULT WINAPI config_statics_iids(config_statics_iface *iface, ULONG *count, IID **out)
++{ return config_factory_iids(&config_factory, count, out); }
++static HRESULT WINAPI config_statics_name(config_statics_iface *iface, HSTRING *out)
++{ return config_GetRuntimeClassName(NULL, out); }
++static HRESULT WINAPI config_statics_trust(config_statics_iface *iface, TrustLevel *out) { return get_trust(out); }
++static const config_statics_vtbl config_statics_vtable =
++{
++    config_statics_qi, config_statics_add, config_statics_release, config_statics_iids,
++    config_statics_name, config_statics_trust, config_GetForInputSite
++};
++static config_statics_iface config_statics = {&config_statics_vtable};
++HRESULT activation_config_get_factory(IActivationFactory **out)
++{
++    WCHAR enabled[2];
++    *out = NULL;
++    if (GetEnvironmentVariableW(L"WINE_GHUB_INPUT_SITE", enabled, ARRAY_SIZE(enabled)) != 1 || enabled[0] != '1')
++        return CLASS_E_CLASSNOTAVAILABLE;
++    return config_factory_qi(&config_factory, &IID_IActivationFactory, (void **)out);
++}

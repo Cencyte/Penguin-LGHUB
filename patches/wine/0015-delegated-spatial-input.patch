@@ -1,0 +1,591 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: Delegate spatial input between threads in the private Wine runtime
+
+Requires Wine10.20 patches0003,0004,0005,0011,0013,0014. Regenerate
+requests and syscall tables. Build/mount User32, Win32u, ntdll and
+wineserver together. WINE_GHUB_INPUT_DELEGATION=1 enables registration.
+
+Observed native contract: user32 ordinals2503/2504/2505 forward to
+NtUserDelegateInput/NtUserUndelegateInput/NtUserHandleDelegatedInput.
+Spatial mask0x1000 targets a separate GUI thread in the same process
+and desktop. A callback receives MSG/context; dispositions1/2/3 resume,
+discard or defer hardware input. Explicit resolution applies to the
+pending prefix, excluding an in-flight callback's message. Queued and
+deferred messages are cancelled/resumed when windows or threads exit.
+
+This opt-in x64 implementation supports the observed QS_POINTER route
+only. Keyboard/mouse masks, native gesture/pointer-history behavior,
+composition hit testing and general WinUI compatibility remain outside
+this patch. No native Windows differential execution was performed.
+
+--- a/dlls/user32/user32.spec
++++ b/dlls/user32/user32.spec
+@@ -14,9 +14,9 @@
+ 
+ 2010 stub -noname SlicerControl  # NtUserSlicerControl
+ 
+-2503 stub DelegateInput  # NtUserDelegateInput
+-2504 stub UndelegateInput  # NtUserUndelegateInput
+-2505 stub HandleDelegatedInput  # NtUserHandleDelegatedInput
++2503 stdcall DelegateInput(long ptr ptr long long) NtUserDelegateInput
++2504 stdcall UndelegateInput(long long) NtUserUndelegateInput
++2505 stdcall HandleDelegatedInput(ptr long) NtUserHandleDelegatedInput
+ 2506 stub @
+ 2507 stub -noname SetAutoRotation  # NtUserSetAutoRotation
+ 2508 stub -noname PromotePointer  # NtUserPromotePointer
+--- a/dlls/user32/user_main.c
++++ b/dlls/user32/user_main.c
+@@ -188,6 +188,16 @@
+     const struct drag_drop_post_params *params = args;
+     drag_drop_post( params->hwnd, params->drop_size, (DROPFILES *)&params->drop );
+     return STATUS_SUCCESS;
++}
++
++static NTSTATUS WINAPI User32CallInputDelegate( void *args, ULONG size )
++{
++    struct input_delegate_params *params = args;
++    ULONG (WINAPI *callback)( const MSG *, void * ) = (void *)(UINT_PTR)params->callback;
++    ULONG result;
++    if (size != sizeof(*params) || !callback) return STATUS_INVALID_PARAMETER;
++    result = callback( &params->msg, (void *)(UINT_PTR)params->context );
++    return NtCallbackReturn( &result, sizeof(result), STATUS_SUCCESS );
+ }
+ 
+ static KERNEL_CALLBACK_PROC kernel_callback_table[NtUserCallCount] =
+--- a/dlls/win32u/main.c
++++ b/dlls/win32u/main.c
+@@ -73,6 +73,21 @@
+ }
+ 
+ 
++BOOL SYSCALL_API NtUserDelegateInput( DWORD tid, void *callback, void *context, HWND hwnd, UINT mask )
++{
++    SYSCALL_FUNC( NtUserDelegateInput );
++}
++
++BOOL SYSCALL_API NtUserUndelegateInput( HWND hwnd, UINT disposition )
++{
++    SYSCALL_FUNC( NtUserUndelegateInput );
++}
++
++BOOL SYSCALL_API NtUserHandleDelegatedInput( const MSG *msg, UINT disposition )
++{
++    SYSCALL_FUNC( NtUserHandleDelegatedInput );
++}
++
+ INT SYSCALL_API NtGdiAbortDoc( HDC hdc )
+ {
+     SYSCALL_FUNC( NtGdiAbortDoc );
+--- a/dlls/win32u/win32u.spec
++++ b/dlls/win32u/win32u.spec
+@@ -886,7 +886,7 @@
+ @ stdcall -syscall NtUserDeferWindowPosAndBand(long long long long long long long long long long)
+ @ stub -syscall NtUserDeferredDesktopRotation
+ @ stub -syscall NtUserDelegateCapturePointers
+-@ stub -syscall NtUserDelegateInput
++@ stdcall -syscall NtUserDelegateInput(long ptr ptr long long)
+ @ stdcall -syscall NtUserDeleteMenu(long long long)
+ @ stub -syscall NtUserDeleteWindowGroup
+ @ stub -syscall NtUserDeregisterShellHookWindow
+@@ -1128,7 +1128,7 @@
+ @ stub -syscall NtUserGetWindowThreadProcessId
+ @ stub -syscall NtUserGetWindowTrackInfoAsync
+ @ stub -syscall NtUserGhostWindowFromHungWindow
+-@ stub -syscall NtUserHandleDelegatedInput
++@ stdcall -syscall NtUserHandleDelegatedInput(ptr long)
+ @ stub -syscall NtUserHandleSystemThreadCreationFailure
+ @ stub -syscall NtUserHardErrorControl
+ @ stdcall -syscall NtUserHideCaret(long)
+@@ -1496,7 +1496,7 @@
+ @ stub -syscall NtUserTransformRect
+ @ stdcall -syscall NtUserTranslateAccelerator(long long ptr)
+ @ stdcall -syscall NtUserTranslateMessage(ptr long)
+-@ stub -syscall NtUserUndelegateInput
++@ stdcall -syscall NtUserUndelegateInput(long long)
+ @ stdcall -syscall NtUserUnhookWinEvent(long)
+ @ stdcall -syscall NtUserUnhookWindowsHook(long ptr)
+ @ stdcall -syscall NtUserUnhookWindowsHookEx(long)
+--- a/dlls/win32u/message.c
++++ b/dlls/win32u/message.c
+@@ -2846,6 +2846,104 @@
+  * available; -1 on error.
+  * All pending sent messages are processed before returning.
+  */
++/* Spatial input delegation for the isolated G HUB runtime. */
++BOOL WINAPI NtUserDelegateInput( DWORD tid, void *callback, void *context, HWND hwnd, UINT mask )
++{
++    const char *enabled = getenv( "WINE_GHUB_INPUT_DELEGATION" );
++    BOOL ret;
++    if (!enabled || strcmp( enabled, "1" ) || sizeof(void *) != 8)
++    {
++        RtlSetLastWin32Error( ERROR_CALL_NOT_IMPLEMENTED );
++        return FALSE;
++    }
++    SERVER_START_REQ( delegate_input )
++    {
++        req->tid = tid;
++        req->win = wine_server_user_handle( hwnd );
++        req->mask = mask;
++        req->callback = wine_server_client_ptr( callback );
++        req->context = wine_server_client_ptr( context );
++        ret = !wine_server_call_err( req );
++    }
++    SERVER_END_REQ;
++    TRACE( "delegate tid=%u hwnd=%p callback=%p context=%p mask=%x ret=%u error=%u\n",
++           tid, hwnd, callback, context, mask, ret, RtlGetLastWin32Error() );
++    return ret;
++}
++
++BOOL WINAPI NtUserUndelegateInput( HWND hwnd, UINT disposition )
++{
++    BOOL ret;
++    SERVER_START_REQ( undelegate_input )
++    {
++        req->win = wine_server_user_handle( hwnd );
++        req->disposition = disposition;
++        ret = !wine_server_call_err( req );
++    }
++    SERVER_END_REQ;
++    return ret;
++}
++
++BOOL WINAPI NtUserHandleDelegatedInput( const MSG *message, UINT disposition )
++{
++    MSG msg = {0};
++    BOOL ret;
++    if (disposition < 1 || disposition > 3)
++    {
++        RtlSetLastWin32Error( ERROR_INVALID_PARAMETER );
++        return FALSE;
++    }
++    /* Disposition 3 leaves the pending input alone, without probing MSG. */
++    if (disposition != 3 && NtReadVirtualMemory( GetCurrentProcess(), message, &msg, sizeof(msg), NULL ))
++    {
++        RtlSetLastWin32Error( ERROR_NOACCESS );
++        return FALSE;
++    }
++    SERVER_START_REQ( handle_delegated_input )
++    {
++        req->id = 0;
++        req->disposition = disposition;
++        req->win = wine_server_user_handle( msg.hwnd );
++        req->msg = msg.message;
++        req->wparam = msg.wParam;
++        req->lparam = msg.lParam;
++        req->time = msg.time;
++        req->x = msg.pt.x;
++        req->y = msg.pt.y;
++        ret = !wine_server_call_err( req );
++    }
++    SERVER_END_REQ;
++    return ret;
++}
++
++static void call_input_delegate( const MSG *msg, const struct delegated_msg_data *data )
++{
++    struct input_delegate_params params;
++    void *ret_ptr;
++    ULONG ret_len, disposition = 3;
++    unsigned int id = data->id;
++    params.callback = data->callback;
++    params.context = data->context;
++    memset( &params.msg, 0, sizeof(params.msg) );
++    params.msg.hwnd = msg->hwnd;
++    params.msg.message = msg->message;
++    params.msg.wParam = msg->wParam;
++    params.msg.lParam = msg->lParam;
++    params.msg.time = msg->time;
++    params.msg.pt = msg->pt;
++    if (!KeUserModeCallback( NtUserCallInputDelegate, &params, sizeof(params), &ret_ptr, &ret_len ) &&
++        ret_len == sizeof(ULONG))
++        disposition = *(ULONG *)ret_ptr;
++    if (disposition != 1 && disposition != 2) disposition = 3;
++    SERVER_START_REQ( handle_delegated_input )
++    {
++        req->id = id;
++        req->disposition = disposition;
++        wine_server_call( req ); /* Unregister/destroy during callback may already have cancelled it. */
++    }
++    SERVER_END_REQ;
++}
++
+ static int peek_message( MSG *msg, const struct peek_message_filter *filter )
+ {
+     LRESULT result;
+@@ -2942,6 +3040,10 @@
+ 
+         switch(info.type)
+         {
++        case MSG_DELEGATED_INPUT:
++            if (size >= sizeof(msg_data->delegated))
++                call_input_delegate( &info.msg, &msg_data->delegated );
++            continue;
+         case MSG_ASCII:
+         case MSG_UNICODE:
+             info.flags = ISMEX_SEND;
+--- a/include/ntuser.h
++++ b/include/ntuser.h
+@@ -95,7 +95,8 @@
+     USER32_CALLBACK_ENTRY(DragDropLeave) \
+     USER32_CALLBACK_ENTRY(DragDropDrag) \
+     USER32_CALLBACK_ENTRY(DragDropDrop) \
+-    USER32_CALLBACK_ENTRY(DragDropPost)
++    USER32_CALLBACK_ENTRY(DragDropPost) \
++    USER32_CALLBACK_ENTRY(CallInputDelegate)
+ 
+ enum
+ {
+@@ -104,6 +105,16 @@
+ #undef USER32_CALLBACK_ENTRY
+     NtUserCallCount = 256
+ };
++
++/* x64 input-delegation callback transport; appended callback ID preserves existing IDs. */
++struct input_delegate_params
++{
++    UINT64 callback, context;
++    MSG msg;
++};
++W32KAPI BOOL WINAPI NtUserDelegateInput( DWORD tid, void *callback, void *context, HWND hwnd, UINT mask );
++W32KAPI BOOL WINAPI NtUserUndelegateInput( HWND hwnd, UINT disposition );
++W32KAPI BOOL WINAPI NtUserHandleDelegatedInput( const MSG *msg, UINT disposition );
+ 
+ /* NtUserCallDispatchCallback params */
+ struct dispatch_callback_params
+--- a/server/queue.c
++++ b/server/queue.c
+@@ -230,6 +230,9 @@
+ 
+ static void queue_hardware_message( struct desktop *desktop, struct message *msg, int always_queue );
+ static void free_message( struct message *msg );
++static void cleanup_input_delegations( struct thread *thread, user_handle_t win );
++static int queue_delegated_input( struct message *msg, user_handle_t win );
++static void receive_delegated_input( struct message *msg );
+ 
+ /* set the caret window in a given thread input, requires write lock on the thread input shared member */
+ static void set_caret_window( struct thread_input *input, input_shm_t *shared, user_handle_t win )
+@@ -363,6 +366,7 @@
+ /* free the message queue of a thread at thread exit */
+ void free_msg_queue( struct thread *thread )
+ {
++    cleanup_input_delegations( thread, 0 );
+     remove_thread_hooks( thread );
+     if (!thread->queue) return;
+     release_object( thread->queue );
+@@ -1129,6 +1133,7 @@
+     reply->y      = msg->y;
+     reply->time   = msg->time;
+ 
++    if (msg->type == MSG_DELEGATED_INPUT) receive_delegated_input( msg );
+     if (msg->data) set_reply_data_ptr( msg->data, msg->data_size );
+ 
+     list_remove( &msg->entry );
+@@ -1942,6 +1947,12 @@
+         return;
+     }
+ 
++    if ((flags = queue_delegated_input( msg, win )))
++    {
++        if (flags < 0) free_message( msg ); /* Report allocation failure; never bypass the delegate. */
++        release_object( thread );
++        return;
++    }
+     if (win != msg->win) always_queue = 1;
+     if (!always_queue || merge_message( input, msg )) free_message( msg );
+     else
+@@ -2837,6 +2848,8 @@
+     int i;
+ 
+     if (!queue) return;
++
++    cleanup_input_delegations( thread, win );
+ 
+     /* remove timers */
+ 
+@@ -4217,3 +4230,223 @@
+ 
+     release_object( desktop );
+ }
++
++/* Input delegation is owned by live threads/windows, never by client memory.
++ * Only QS_POINTER is implemented; other native masks fail explicitly. */
++struct input_delegation
++{
++    struct list entry;
++    struct thread *owner, *delegate; /* cleared by free_msg_queue before thread destruction */
++    user_handle_t win;
++    client_ptr_t callback, context;
++};
++struct delegated_input
++{
++    struct list entry;
++    struct input_delegation *binding;
++    struct message *message, *notification;
++    unsigned int id;
++    unsigned int state; /* 0=queued callback, 1=in flight, 2=deferred */
++};
++static struct list input_delegations = LIST_INIT(input_delegations);
++static struct list delegated_inputs = LIST_INIT(delegated_inputs);
++
++static struct input_delegation *find_input_delegation( user_handle_t win )
++{
++    struct input_delegation *binding;
++    LIST_FOR_EACH_ENTRY( binding, &input_delegations, struct input_delegation, entry )
++        if (binding->win == win) return binding;
++    return NULL;
++}
++
++static void finish_delegated_input( struct delegated_input *input, unsigned int disposition )
++{
++    struct input_delegation *binding = input->binding;
++    struct message *msg = input->message;
++    if (input->notification)
++        remove_queue_message( binding->delegate->queue, input->notification, SEND_MESSAGE );
++    list_remove( &input->entry );
++    if (disposition == 1 && binding->owner->queue && get_user_object( binding->win, NTUSER_OBJ_WINDOW ))
++    {
++        /* Resume the original hardware path. Do not re-inject or delegate a second time. */
++        list_add_tail( &binding->owner->queue->input->msg_list, &msg->entry );
++        set_queue_bits( binding->owner->queue, QS_POINTER );
++    }
++    else free_message( msg );
++    free( input );
++}
++
++static void remove_input_delegation( struct input_delegation *binding, unsigned int disposition )
++{
++    struct delegated_input *input, *next;
++    LIST_FOR_EACH_ENTRY_SAFE( input, next, &delegated_inputs, struct delegated_input, entry )
++        if (input->binding == binding) finish_delegated_input( input, disposition );
++    list_remove( &binding->entry );
++    free( binding );
++}
++
++static void cleanup_input_delegations( struct thread *thread, user_handle_t win )
++{
++    struct input_delegation *binding, *next;
++    LIST_FOR_EACH_ENTRY_SAFE( binding, next, &input_delegations, struct input_delegation, entry )
++    {
++        if (win ? binding->win == win : (binding->owner == thread || binding->delegate == thread))
++            remove_input_delegation( binding, !win && binding->owner != thread ? 1 : 2 );
++    }
++}
++
++static int queue_delegated_input( struct message *msg, user_handle_t win )
++{
++    struct input_delegation *binding;
++    struct delegated_input *input;
++    struct delegated_msg_data *data;
++    struct message *notice;
++    if (get_hardware_msg_bit( msg->msg ) != QS_POINTER || !(binding = find_input_delegation( win ))) return 0;
++    if (!(input = mem_alloc( sizeof(*input) ))) return -1;
++    if (!(notice = mem_alloc( sizeof(*notice) ))) { free(input); return -1; }
++    if (!(data = mem_alloc( sizeof(*data) ))) { free(notice); free(input); return -1; }
++    memset( notice, 0, sizeof(*notice) );
++    input->binding = binding;
++    input->message = msg;
++    input->notification = notice;
++    input->state = 0;
++    input->id = get_unique_id();
++    msg->win = win;
++    msg->unique_id = 0;
++    data->callback = binding->callback;
++    data->context = binding->context;
++    data->id = input->id;
++    data->__pad = 0;
++    notice->type = MSG_DELEGATED_INPUT;
++    notice->win = win;
++    notice->msg = msg->msg;
++    notice->wparam = msg->wparam;
++    notice->lparam = msg->lparam;
++    notice->x = msg->x;
++    notice->y = msg->y;
++    notice->time = msg->time;
++    notice->data = data;
++    notice->data_size = sizeof(*data);
++    list_add_tail( &delegated_inputs, &input->entry );
++    list_add_tail( &binding->delegate->queue->msg_list[SEND_MESSAGE], &notice->entry );
++    set_queue_bits( binding->delegate->queue, QS_SENDMESSAGE );
++    return 1;
++}
++
++static void receive_delegated_input( struct message *notice )
++{
++    struct delegated_input *input;
++    LIST_FOR_EACH_ENTRY( input, &delegated_inputs, struct delegated_input, entry )
++        if (input->notification == notice)
++        {
++            input->notification = NULL;
++            input->state = 1;
++            return;
++        }
++}
++
++DECL_HANDLER(delegate_input)
++{
++    struct thread *owner, *delegate;
++    struct input_delegation *binding, *existing;
++    struct message *msg, *next;
++    user_handle_t win = get_user_full_handle( req->win );
++    if (!(owner = get_window_thread( win ))) { set_win32_error( ERROR_INVALID_WINDOW_HANDLE ); return; }
++    if (!req->mask || (req->mask & ~0x1006u) || !req->callback)
++    { set_win32_error( ERROR_INVALID_PARAMETER ); goto done_owner; }
++    if (req->mask != QS_POINTER) { set_win32_error( ERROR_NOT_SUPPORTED ); goto done_owner; }
++    if (!(delegate = get_thread_from_id( req->tid ? req->tid : current->id )))
++    { set_win32_error( ERROR_INVALID_PARAMETER ); goto done_owner; }
++    if (!delegate->queue || delegate->state == TERMINATED)
++    { set_win32_error( ERROR_INVALID_PARAMETER ); goto done_delegate; }
++    if (owner->process != current->process || delegate->process != current->process || owner == delegate ||
++        owner->queue->input->desktop != delegate->queue->input->desktop)
++    { set_win32_error( ERROR_ACCESS_DENIED ); goto done_delegate; }
++    if ((existing = find_input_delegation( win )))
++    {
++        set_win32_error( !req->context && !existing->context && existing->delegate == delegate &&
++                        existing->callback == req->callback ? ERROR_ALREADY_REGISTERED : ERROR_ACCESS_DENIED );
++        goto done_delegate;
++    }
++    LIST_FOR_EACH_ENTRY( binding, &input_delegations, struct input_delegation, entry )
++        if (binding->delegate == owner || (binding->delegate == delegate &&
++            (binding->callback != req->callback || binding->context != req->context)))
++        { set_win32_error( ERROR_ACCESS_DENIED ); goto done_delegate; }
++    if (!(binding = mem_alloc( sizeof(*binding) ))) goto done_delegate;
++    binding->owner = owner;
++    binding->delegate = delegate;
++    binding->win = win;
++    binding->callback = req->callback;
++    binding->context = req->context;
++    list_add_tail( &input_delegations, &binding->entry );
++    /* Already queued, unconsumed pointer messages also become delegated. */
++    LIST_FOR_EACH_ENTRY_SAFE( msg, next, &owner->queue->input->msg_list, struct message, entry )
++        if (msg->win == win && get_hardware_msg_bit( msg->msg ) == QS_POINTER)
++        {
++            struct list *prev = list_prev( &owner->queue->input->msg_list, &msg->entry );
++            list_remove( &msg->entry );
++            if (queue_delegated_input( msg, win ) < 1)
++            {
++                if (prev) list_add_after( prev, &msg->entry );
++                else list_add_head( &owner->queue->input->msg_list, &msg->entry );
++                remove_input_delegation( binding, 1 );
++                goto done_delegate;
++            }
++        }
++done_delegate:
++    release_object( delegate );
++done_owner:
++    release_object( owner );
++}
++
++DECL_HANDLER(undelegate_input)
++{
++    struct input_delegation *binding = find_input_delegation( get_user_full_handle( req->win ) );
++    struct delegated_input *input, *next;
++    if (!get_user_object( get_user_full_handle( req->win ), NTUSER_OBJ_WINDOW ))
++    { set_win32_error( ERROR_INVALID_WINDOW_HANDLE ); return; }
++    if (!binding || req->disposition < 1 || req->disposition > 2)
++    { set_win32_error( ERROR_INVALID_PARAMETER ); return; }
++    if (binding->owner->process != current->process) { set_win32_error( ERROR_ACCESS_DENIED ); return; }
++    LIST_FOR_EACH_ENTRY_SAFE( input, next, &delegated_inputs, struct delegated_input, entry )
++        if (input->binding->delegate == binding->delegate && input->state != 1)
++            finish_delegated_input( input, req->disposition );
++    remove_input_delegation( binding, req->disposition );
++}
++
++DECL_HANDLER(handle_delegated_input)
++{
++    struct delegated_input *input, *next, *target = NULL;
++    struct input_delegation *binding;
++    int active = 0;
++    if (req->disposition < 1 || req->disposition > 3)
++    { set_win32_error( ERROR_INVALID_PARAMETER ); return; }
++    LIST_FOR_EACH_ENTRY( binding, &input_delegations, struct input_delegation, entry )
++        if (binding->delegate == current) active = 1;
++    if (!active) { set_win32_error( ERROR_ACCESS_DENIED ); return; }
++    if (!req->id && req->disposition == 3) return;
++    LIST_FOR_EACH_ENTRY( input, &delegated_inputs, struct delegated_input, entry )
++    {
++        struct message *msg = input->message;
++        if (input->binding->delegate != current || !input->state) continue;
++        if (req->id ? input->id == req->id : (msg->win == req->win && msg->msg == req->msg &&
++            msg->wparam == req->wparam && msg->lparam == req->lparam && msg->time == req->time &&
++            msg->x == req->x && msg->y == req->y)) { target = input; break; }
++        if (!req->id && input->state == 1) break;
++    }
++    if (!target) { set_win32_error( ERROR_INVALID_PARAMETER ); return; }
++    if (req->id)
++    {
++        if (req->disposition == 3) target->state = 2;
++        else finish_delegated_input( target, req->disposition );
++        return;
++    }
++    LIST_FOR_EACH_ENTRY_SAFE( input, next, &delegated_inputs, struct delegated_input, entry )
++    {
++        int last = input == target;
++        if (input->binding->delegate != current) continue;
++        if (input->state == 1) break; /* Current callback resolves itself on return. */
++        finish_delegated_input( input, req->disposition );
++        if (last) break;
++    }
++}
+--- a/server/protocol.def
++++ b/server/protocol.def
+@@ -314,6 +314,14 @@
+     struct rawinput      rawinput;  /* rawinput message data */
+ };
+ 
++struct delegated_msg_data
++{
++    client_ptr_t callback;
++    client_ptr_t context;
++    unsigned int id;
++    unsigned int __pad;
++};
++
+ struct callback_msg_data
+ {
+     client_ptr_t    callback;   /* callback function */
+@@ -367,6 +375,7 @@
+     struct hardware_msg_data hardware;
+     struct callback_msg_data callback;
+     struct winevent_msg_data winevent;
++    struct delegated_msg_data delegated;
+ };
+ 
+ /* structure returned in filesystem events */
+@@ -2460,7 +2469,8 @@
+     MSG_POSTED,         /* posted message (from PostMessageW), always Unicode */
+     MSG_HARDWARE,       /* hardware message */
+     MSG_WINEVENT,       /* winevent message */
+-    MSG_HOOK_LL         /* low-level hardware hook */
++    MSG_HOOK_LL,        /* low-level hardware hook */
++    MSG_DELEGATED_INPUT /* spatial input callback, independent of app message filters */
+ };
+ #define SEND_MSG_ABORT_IF_HUNG  0x01
+ 
+@@ -4492,3 +4502,27 @@
+     unsigned int view_id;
+     unsigned int flags;
+ @END
++
++/* Private spatial-input delegation requests; keep earlier request IDs intact. */
++@REQ(delegate_input)
++    thread_id_t tid;
++    user_handle_t win;
++    unsigned int mask;
++    client_ptr_t callback;
++    client_ptr_t context;
++@END
++@REQ(undelegate_input)
++    user_handle_t win;
++    unsigned int disposition;
++@END
++@REQ(handle_delegated_input)
++    unsigned int id;
++    unsigned int disposition;
++    user_handle_t win;
++    unsigned int msg;
++    lparam_t wparam;
++    lparam_t lparam;
++    unsigned int time;
++    int x;
++    int y;
++@END

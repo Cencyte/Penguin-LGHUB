@@ -1,0 +1,41 @@
+--- a/dlls/shcore/shcore.spec
++++ b/dlls/shcore/shcore.spec
+@@ -31,7 +31,7 @@
+ # @ stub IsProcessInIsolatedContainer
+ # @ stub IsProcessInWDAGContainer
+ # @ stub RecordFeatureError
+-# @ stub RecordFeatureUsage
++@ stdcall RecordFeatureUsage(long long long str)
+ @ stdcall RegisterScaleChangeEvent(ptr ptr)
+ @ stdcall RegisterScaleChangeNotifications(long ptr long ptr)
+ @ stub RevokeScaleChangeNotifications
+--- a/dlls/shcore/main.c
++++ b/dlls/shcore/main.c
+@@ -2521,6 +2521,16 @@
+ }
+ 
+ /*************************************************************************
++ * RecordFeatureUsage        [SHCORE.@]
++ */
++void WINAPI RecordFeatureUsage(UINT32 feature, UINT32 kind, UINT32 addend, const char *origin)
++{
++    /* Wine has no Windows feature-usage telemetry service. Accept the report
++     * without changing feature state or scheduling infrastructure callbacks. */
++    TRACE("(%u, %u, %u, %s)\n", feature, kind, addend, debugstr_a(origin));
++}
++
++/*************************************************************************
+  * RegisterScaleChangeEvent        [SHCORE.@]
+  */
+ HRESULT WINAPI RegisterScaleChangeEvent(HANDLE handle, DWORD_PTR *cookie)
+--- a/include/featurestagingapi.h
++++ b/include/featurestagingapi.h
+@@ -42,6 +42,8 @@
+     FEATURE_ENABLED_STATE_ENABLED
+ } FEATURE_ENABLED_STATE;
+ 
++void WINAPI RecordFeatureUsage(UINT32 feature, UINT32 kind, UINT32 addend, const char *origin);
++
+ #ifdef __cplusplus
+ }
+ #endif

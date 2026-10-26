@@ -1,0 +1,594 @@
+--- a/server/protocol.def
++++ b/server/protocol.def
+@@ -4532,3 +4532,38 @@
+ @REQ(mark_window_destroying)
+     user_handle_t handle;
+ @END
++
++/* Private immutable composition input snapshots, code29 client bridge. */
++#define COMPOSITION_INPUT_ROUTED 0x80000000u
++struct composition_scene_region
++{
++    unsigned __int64 left;
++    unsigned __int64 top;
++    unsigned __int64 right;
++    unsigned __int64 bottom;
++    obj_handle_t sink;
++    unsigned int reserved;
++};
++@REQ(create_composition_scene)
++    VARARG(regions,bytes);
++@REPLY
++    obj_handle_t handle;
++@END
++@REQ(read_composition_scene)
++    obj_handle_t handle;
++@REPLY
++    unsigned int count;
++    VARARG(regions,bytes);
++@END
++@REQ(mapping_composition_scene)
++    obj_handle_t mapping;
++    obj_handle_t scene;
++    unsigned int set;
++@REPLY
++    obj_handle_t handle;
++@END
++@REQ(bind_composition_scene)
++    user_handle_t win;
++    obj_handle_t scene;
++    client_ptr_t owner;
++@END
+--- a/server/composition.c
++++ b/server/composition.c
+@@ -31,6 +31,7 @@
+ #include "user.h"
+ #include "security.h"
+ #include "request.h"
++#include "wine/list.h"
+ 
+ static const WCHAR composition_name[] = {'C','o','m','p','o','s','i','t','i','o','n'};
+ struct type_descr composition_type =
+@@ -120,3 +121,218 @@
+     reply->flags = sink->flags;
+     release_object(sink);
+ }
++
++/* Immutable geometry plus retained sink objects. Section ownership preserves
++ * a published snapshot across producer handle closure and cross-process opens. */
++#define SCENE_MAX_REGIONS 4096
++struct scene_entry
++{
++    double left, top, right, bottom;
++    struct composition_sink *sink;
++};
++struct composition_scene
++{
++    struct object obj;
++    unsigned int count;
++    struct scene_entry *entries;
++};
++static const WCHAR scene_name[] = {'C','o','m','p','o','s','i','t','i','o','n','S','c','e','n','e'};
++static struct type_descr scene_type =
++{
++    {scene_name, sizeof(scene_name)}, STANDARD_RIGHTS_REQUIRED | 1,
++    {STANDARD_RIGHTS_READ | 1, STANDARD_RIGHTS_WRITE, STANDARD_RIGHTS_EXECUTE, STANDARD_RIGHTS_REQUIRED | 1}
++};
++static void scene_dump(struct object *obj, int verbose)
++{
++    fprintf(stderr, "Composition scene regions=%u\n", ((struct composition_scene *)obj)->count);
++}
++static void scene_destroy(struct object *obj)
++{
++    struct composition_scene *scene = (struct composition_scene *)obj;
++    unsigned int i;
++    for (i = 0; i < scene->count; ++i) release_object(scene->entries[i].sink);
++    free(scene->entries);
++}
++static const struct object_ops scene_ops =
++{
++    sizeof(struct composition_scene), &scene_type, scene_dump,
++    no_add_queue, NULL, NULL, NULL, no_signal, no_get_fd, default_get_sync,
++    default_map_access, default_get_sd, default_set_sd, default_get_full_name,
++    no_lookup_name, directory_link_name, default_unlink_name, no_open_file,
++    no_kernel_obj_list, no_close_handle, scene_destroy
++};
++static int uniform_routes(const struct composition_sink *sink)
++{
++    unsigned int i;
++    if (sink->flags || (sink->routes[0].type != 0 && sink->routes[0].type != 2)) return 0;
++    for (i = 1; i < 4; ++i)
++        if (sink->routes[i].type != sink->routes[0].type || sink->routes[i].window != sink->routes[0].window) return 0;
++    return !sink->routes[4].type || (sink->routes[4].type == sink->routes[0].type &&
++                                   sink->routes[4].window == sink->routes[0].window);
++}
++static int valid_scene_rect(const struct scene_entry *entry)
++{
++    /* These comparisons reject NaN, infinity, inverted and oversized bounds. */
++    return entry->left >= -129000000.0 && entry->top >= -129000000.0 &&
++           entry->right <= 129000000.0 && entry->bottom <= 129000000.0 &&
++           entry->left < entry->right && entry->top < entry->bottom;
++}
++DECL_HANDLER(create_composition_scene)
++{
++    const struct composition_scene_region *regions = get_req_data();
++    struct composition_scene *scene;
++    unsigned int count = get_req_data_size() / sizeof(*regions), i;
++    if (count > SCENE_MAX_REGIONS || get_req_data_size() != count * sizeof(*regions))
++    { set_error(STATUS_INVALID_PARAMETER); return; }
++    if (!(scene = alloc_object(&scene_ops))) return;
++    scene->count = 0;
++    scene->entries = count ? mem_alloc(count * sizeof(*scene->entries)) : NULL;
++    if (count && !scene->entries) goto done;
++    for (i = 0; i < count; ++i)
++    {
++        struct scene_entry *entry = &scene->entries[i];
++        memcpy(&entry->left, &regions[i].left, sizeof(double));
++        memcpy(&entry->top, &regions[i].top, sizeof(double));
++        memcpy(&entry->right, &regions[i].right, sizeof(double));
++        memcpy(&entry->bottom, &regions[i].bottom, sizeof(double));
++        if (regions[i].reserved || !valid_scene_rect(entry))
++        { set_error(STATUS_INVALID_PARAMETER); goto done; }
++        entry->sink = (struct composition_sink *)get_handle_obj(current->process, regions[i].sink, 1, &sink_ops);
++        if (!entry->sink) goto done;
++        ++scene->count;
++        if (!uniform_routes(entry->sink)) { set_error(STATUS_NOT_SUPPORTED); goto done; }
++    }
++    reply->handle = alloc_handle(current->process, scene, STANDARD_RIGHTS_READ | 1, 0);
++done:
++    release_object(scene);
++}
++DECL_HANDLER(read_composition_scene)
++{
++    struct composition_scene *scene;
++    struct composition_scene_region *regions;
++    unsigned int i, status;
++    if (!(scene = (struct composition_scene *)get_handle_obj(current->process, req->handle, 1, &scene_ops))) return;
++    reply->count = scene->count;
++    if (get_reply_max_size() < scene->count * sizeof(*regions))
++    { set_error(STATUS_BUFFER_TOO_SMALL); goto done; }
++    if (!scene->count) goto done;
++    if (!(regions = set_reply_data_size(scene->count * sizeof(*regions)))) goto done;
++    memset(regions, 0, scene->count * sizeof(*regions));
++    for (i = 0; i < scene->count; ++i)
++    {
++        const struct scene_entry *entry = &scene->entries[i];
++        memcpy(&regions[i].left, &entry->left, sizeof(double));
++        memcpy(&regions[i].top, &entry->top, sizeof(double));
++        memcpy(&regions[i].right, &entry->right, sizeof(double));
++        memcpy(&regions[i].bottom, &entry->bottom, sizeof(double));
++        if (!(regions[i].sink = alloc_handle(current->process, entry->sink, STANDARD_RIGHTS_READ | 1, 0)))
++        {
++            status = get_error();
++            while (i) close_handle(current->process, regions[--i].sink);
++            set_error(status);
++            break;
++        }
++    }
++done:
++    release_object(scene);
++}
++DECL_HANDLER(mapping_composition_scene)
++{
++    struct object *scene = NULL;
++    if (req->set)
++    {
++        if (req->scene && !(scene = get_handle_obj(current->process, req->scene, 1, &scene_ops))) return;
++        set_mapping_composition(current->process, req->mapping, scene);
++    }
++    else if ((scene = get_mapping_composition(current->process, req->mapping)))
++        reply->handle = alloc_handle(current->process, scene, STANDARD_RIGHTS_READ | 1, 0);
++    if (scene) release_object(scene);
++}
++struct scene_binding
++{
++    struct list entry;
++    struct thread *owner; /* removed at queue/window destruction before thread release */
++    user_handle_t win;
++    client_ptr_t cookie;
++    struct composition_scene *scene;
++};
++static struct list scene_bindings = LIST_INIT(scene_bindings);
++static void free_binding(struct scene_binding *binding)
++{
++    list_remove(&binding->entry);
++    release_object(binding->scene);
++    free(binding);
++}
++void cleanup_composition_input(struct thread *thread, user_handle_t win)
++{
++    struct scene_binding *binding, *next;
++    LIST_FOR_EACH_ENTRY_SAFE(binding, next, &scene_bindings, struct scene_binding, entry)
++        if (win ? binding->win == win : binding->owner == thread) free_binding(binding);
++}
++DECL_HANDLER(bind_composition_scene)
++{
++    struct scene_binding *binding = NULL, *iter;
++    struct composition_scene *scene = NULL;
++    struct thread *owner;
++    struct desktop *desktop = NULL, *other;
++    user_handle_t win = get_user_full_handle(req->win);
++    unsigned int i;
++    if (!req->owner) { set_error(STATUS_INVALID_PARAMETER); return; }
++    if (!(owner = get_window_thread(win))) { set_error(STATUS_INVALID_HANDLE); return; }
++    if (owner->process != current->process || (req->scene && owner != current))
++    { set_error(STATUS_ACCESS_DENIED); goto done; }
++    LIST_FOR_EACH_ENTRY(iter, &scene_bindings, struct scene_binding, entry)
++        if (iter->win == win) { binding = iter; break; }
++    if (binding && binding->cookie != req->owner) { set_error(STATUS_ACCESS_DENIED); goto done; }
++    if (!req->scene)
++    {
++        if (binding) free_binding(binding);
++        goto done;
++    }
++    if (!(scene = (struct composition_scene *)get_handle_obj(current->process, req->scene, 1, &scene_ops))) goto done;
++    if (!(desktop = get_thread_desktop(owner, 0))) goto done;
++    for (i = 0; i < scene->count; ++i)
++    {
++        struct thread *route = scene->entries[i].sink->threads[0];
++        if (!route || route->state == TERMINATED) continue;
++        if (!(other = get_thread_desktop(route, 0))) goto done;
++        release_object(other);
++        if (other != desktop) { set_error(STATUS_ACCESS_DENIED); goto done; }
++    }
++    if (!binding)
++    {
++        if (!(binding = mem_alloc(sizeof(*binding)))) goto done;
++        binding->win = win; binding->owner = owner; binding->cookie = req->owner;
++        list_add_tail(&scene_bindings, &binding->entry);
++    }
++    else release_object(binding->scene);
++    binding->scene = (struct composition_scene *)grab_object(scene);
++done:
++    if (desktop) release_object(desktop);
++    if (scene) release_object(scene);
++    release_object(owner);
++}
++user_handle_t composition_target_at(user_handle_t win, int x, int y)
++{
++    struct scene_binding *binding;
++    LIST_FOR_EACH_ENTRY(binding, &scene_bindings, struct scene_binding, entry)
++    {
++        unsigned int i;
++        if (binding->win != win) continue;
++        for (i = binding->scene->count; i; --i)
++        {
++            const struct scene_entry *e = &binding->scene->entries[i - 1];
++            struct thread *thread;
++            user_handle_t target;
++            int valid;
++            if (!(x >= e->left && x < e->right && y >= e->top && y < e->bottom)) continue;
++            target = e->sink->routes[0].window;
++            if (!target || !(thread = get_window_thread(target))) continue;
++            valid = thread == e->sink->threads[0] && thread->state != TERMINATED && thread->queue;
++            release_object(thread);
++            if (valid) return target;
++        }
++        return 0;
++    }
++    return 0;
++}
+--- a/server/mapping.c
++++ b/server/mapping.c
+@@ -165,6 +165,7 @@
+     struct shared_map   *shared;     /* temp file for shared PE mapping */
+     char                *exp_name;   /* export name (for PE image mapping) */
+     data_size_t          exp_len;    /* length of export name (for PE image mapping) */
++    struct object      *composition_scene; /* immutable input snapshot, owned by section */
+ };
+ 
+ static void mapping_dump( struct object *obj, int verbose );
+@@ -1059,6 +1060,7 @@
+     mapping->committed   = NULL;
+     mapping->exp_name    = NULL;
+     mapping->exp_len     = 0;
++    mapping->composition_scene = NULL;
+ 
+     if (!(mapping->flags = get_mapping_flags( handle, flags ))) goto error;
+ 
+@@ -1150,6 +1152,7 @@
+     mapping->committed = NULL;
+     mapping->exp_name  = NULL;
+     mapping->exp_len   = 0;
++    mapping->composition_scene = NULL;
+     mapping->flags     = SEC_FILE;
+     mapping->fd        = (struct fd *)grab_object( fd );
+     set_fd_user( mapping->fd, &mapping_fd_ops, NULL );
+@@ -1261,6 +1264,7 @@
+     if (mapping->fd) release_object( mapping->fd );
+     if (mapping->committed) release_object( mapping->committed );
+     if (mapping->shared) release_object( mapping->shared );
++    if (mapping->composition_scene) release_object(mapping->composition_scene);
+     free( mapping->exp_name );
+ }
+ 
+@@ -1797,3 +1801,23 @@
+ 
+     release_object( process );
+ }
++
++struct object *get_mapping_composition(struct process *process, obj_handle_t handle)
++{
++    struct mapping *mapping = get_mapping_obj(process, handle, SECTION_MAP_READ);
++    struct object *scene;
++    if (!mapping) return NULL;
++    scene = mapping->composition_scene ? grab_object(mapping->composition_scene) : NULL;
++    release_object(mapping);
++    return scene;
++}
++void set_mapping_composition(struct process *process, obj_handle_t handle, struct object *scene)
++{
++    struct mapping *mapping = get_mapping_obj(process, handle, SECTION_MAP_WRITE);
++    struct object *old;
++    if (!mapping) return;
++    old = mapping->composition_scene;
++    mapping->composition_scene = scene ? grab_object(scene) : NULL;
++    if (old) release_object(old);
++    release_object(mapping);
++}
+--- a/server/object.h
++++ b/server/object.h
+@@ -380,4 +380,7 @@
+ #define KEYEDEVENT_WAKE       0x0002
+ #define KEYEDEVENT_ALL_ACCESS (STANDARD_RIGHTS_REQUIRED | 0x0003)
+ 
++extern struct object *get_mapping_composition(struct process *, obj_handle_t);
++extern void set_mapping_composition(struct process *, obj_handle_t, struct object *);
++
+ #endif  /* __WINE_SERVER_OBJECT_H */
+--- a/server/user.h
++++ b/server/user.h
+@@ -181,6 +181,9 @@
+ extern struct thread *get_window_thread( user_handle_t handle );
+ extern user_handle_t shallow_window_from_point( struct desktop *desktop, int x, int y );
+ extern struct thread *window_thread_from_point( user_handle_t scope, int x, int y );
++extern user_handle_t composition_input_from_point(user_handle_t scope, int x, int y);
++extern user_handle_t composition_target_at(user_handle_t win, int x, int y);
++extern void cleanup_composition_input(struct thread *thread, user_handle_t win);
+ extern user_handle_t find_window_to_repaint( user_handle_t parent, struct thread *thread );
+ extern struct window_class *get_window_class( user_handle_t window );
+ 
+--- a/server/window.c
++++ b/server/window.c
+@@ -1062,6 +1062,25 @@
+     return (struct thread *)grab_object( win->thread );
+ }
+ 
++/* Select only the foremost ordinary HWND. A child's HWND occludes its parent's
++ * below-child composition; do not walk through another application's window. */
++user_handle_t composition_input_from_point(user_handle_t scope, int x, int y)
++{
++    int raw_x = x, raw_y = y;
++    struct window *win = get_user_object(scope, NTUSER_OBJ_WINDOW);
++    if (!win || !is_visible(win) || (win->style & (WS_DISABLED | WS_MINIMIZE))) return 0;
++    map_point_raw_to_virt(win->desktop, &x, &y);
++    screen_to_client(win, &x, &y, 0);
++    win = child_window_from_point(win, x, y);
++    if (!win || (win->style & (WS_DISABLED | WS_MINIMIZE))) return 0;
++    x = raw_x; y = raw_y;
++    map_point_raw_to_virt(win->desktop, &x, &y);
++    screen_to_client(win, &x, &y, 0);
++    if (x < 0 || y < 0 || x >= win->client_rect.right - win->client_rect.left ||
++            y >= win->client_rect.bottom - win->client_rect.top) return 0;
++    return composition_target_at(win->handle, x, y);
++}
++
+ /* return list of all windows containing point (in absolute coords) */
+ static int all_windows_from_point( struct window *top, int x, int y, unsigned int dpi,
+                                    struct user_handle_array *array )
+--- a/server/queue.c
++++ b/server/queue.c
+@@ -366,6 +366,7 @@
+ /* free the message queue of a thread at thread exit */
+ void free_msg_queue( struct thread *thread )
+ {
++    cleanup_composition_input(thread, 0);
+     cleanup_input_delegations( thread, 0 );
+     remove_thread_hooks( thread );
+     if (!thread->queue) return;
+@@ -1820,6 +1821,12 @@
+ 
+     *thread = NULL;
+     *msg_code = msg->msg;
++    if (msg->type == MSG_HARDWARE && msg->data &&
++            (((struct hardware_msg_data *)msg->data)->flags & COMPOSITION_INPUT_ROUTED))
++    {
++        *thread = get_window_thread(msg->win);
++        return msg->win;
++    }
+     switch (get_hardware_msg_bit( msg->msg ))
+     {
+     case QS_POINTER:
+@@ -1934,6 +1941,19 @@
+     else input = desktop->foreground_input;
+ 
+     win = find_hardware_message_window( desktop, input, msg, &msg_code, &thread );
++    if (win && thread && (msg_bit & (QS_MOUSE | QS_POINTER)) &&
++            (!input || !input->shared->capture))
++    {
++        user_handle_t destination = composition_input_from_point(win, msg->x, msg->y);
++        struct thread *routed = destination ? get_window_thread(destination) : NULL;
++        if (routed)
++        {
++            release_object(thread);
++            thread = routed;
++            win = msg->win = destination;
++            msg_data->flags |= COMPOSITION_INPUT_ROUTED;
++        }
++    }
+     flags = thread ? get_rawinput_device_flags( thread->process, msg ) : 0;
+     if (thread) input = thread->queue->input;
+     if (input && (get_hardware_msg_bit( msg->msg ) & (QS_KEY | QS_MOUSEBUTTON)))
+@@ -2849,6 +2869,7 @@
+ 
+     if (!queue) return;
+ 
++    cleanup_composition_input(thread, win);
+     cleanup_input_delegations( thread, win );
+ 
+     /* remove timers */
+--- a/include/ntuser.h
++++ b/include/ntuser.h
+@@ -1438,6 +1438,7 @@
+     NtUserCallHwndParam_GetWinMonitorDpi,
+     NtUserCallHwndParam_SetRawWindowPos,
+     NtUserCallHwndParam_CompositionFrame, /* private lab ABI, code 28 */
++    NtUserCallHwndParam_CompositionInput, /* private lab ABI, code 29 */
+ };
+ 
+ struct composition_frame_params
+--- a/dlls/win32u/win32u_private.h
++++ b/dlls/win32u/win32u_private.h
+@@ -47,6 +47,7 @@
+ extern void dirty_child_composite_parent(HWND hwnd);
+ extern BOOL child_composition_enabled(void);
+ extern BOOL set_composition_frame(HWND hwnd, const struct composition_frame_params *params);
++extern BOOL composition_input_bridge(HWND hwnd, const void *params);
+ extern BOOL is_child_composite_surface(struct window_surface *surface);
+ extern void create_window_surface( HWND hwnd, BOOL create_layered, const RECT *surface_rect, UINT monitor_dpi,
+                                    struct window_surface **window_surface );
+--- a/dlls/win32u/window.c
++++ b/dlls/win32u/window.c
+@@ -6242,6 +6242,8 @@
+ 
+     case NtUserCallHwndParam_CompositionFrame:
+         return set_composition_frame(hwnd, (const struct composition_frame_params *)param);
++    case NtUserCallHwndParam_CompositionInput:
++        return composition_input_bridge(hwnd, (const void *)param);
+ 
+     case NtUserCallHwndParam_SetRawWindowPos:
+     {
+--- a/dlls/win32u/message.c
++++ b/dlls/win32u/message.c
+@@ -2555,7 +2555,7 @@
+  * returns TRUE if the contents of 'msg' should be passed to the application
+  */
+ static BOOL process_mouse_message( MSG *msg, UINT hw_id, ULONG_PTR extra_info, HWND hwnd_filter,
+-                                   UINT first, UINT last, BOOL remove )
++                                   UINT first, UINT last, BOOL remove, BOOL composition_routed )
+ {
+     static MSG clk_msg;
+ 
+@@ -2577,6 +2577,7 @@
+         hittest = HTCLIENT;
+         msg->hwnd = info.hwndCapture;
+     }
++    else if (composition_routed) hittest = HTCLIENT;
+     else
+     {
+         HWND orig = msg->hwnd;
+@@ -2791,7 +2792,8 @@
+     else if (is_keyboard_message( msg->message ))
+         ret = process_keyboard_message( msg, hw_id, hwnd_filter, first, last, remove );
+     else if (is_mouse_message( msg->message ))
+-        ret = process_mouse_message( msg, hw_id, msg_data->info, hwnd_filter, first, last, remove );
++        ret = process_mouse_message( msg, hw_id, msg_data->info, hwnd_filter, first, last, remove,
++                                     msg_data->flags & COMPOSITION_INPUT_ROUTED );
+     else if (msg->message >= WM_POINTERUPDATE && msg->message <= WM_POINTERLEAVE)
+         ret = process_pointer_message( msg, hw_id, msg_data );
+     else if (msg->message == WM_WINE_CLIPCURSOR)
+--- a/dlls/win32u/composition_input.c
++++ b/dlls/win32u/composition_input.c
+@@ -144,3 +144,102 @@
+     NTSTATUS status = query_sink(handle, &luid, &view_id, &flags);
+     return status ? status : write_user(out, &view_id, sizeof(view_id));
+ }
++
++/* Private x64 code29 bridge. This is not a Windows syscall contract. */
++struct composition_input_params
++{
++    UINT version, operation;
++    HANDLE object, scene;
++    UINT count, reserved;
++    void *regions;
++    ULONG_PTR owner;
++};
++C_ASSERT(sizeof(struct composition_input_params) == 48);
++BOOL composition_input_bridge(HWND hwnd, const void *address)
++{
++    struct composition_input_params p;
++    struct composition_scene_region *regions = NULL;
++    HANDLE created = NULL;
++    NTSTATUS status;
++    unsigned int i, count = 0;
++    const char *enabled = getenv("WINE_GHUB_INPUT_ROUTING");
++    if (!enabled || strcmp(enabled, "1")) { status = STATUS_NOT_SUPPORTED; goto done; }
++    if ((status = read_user(address, &p, sizeof(p)))) goto done;
++    if (p.version != 0x47484931 || p.reserved || p.count > 4096 || p.operation < 1 || p.operation > 5)
++    { status = STATUS_INVALID_PARAMETER; goto done; }
++    if (p.count)
++    {
++        if (!(regions = calloc(p.count, sizeof(*regions)))) { status = STATUS_NO_MEMORY; goto done; }
++        if (p.operation == 1 && (status = read_user(p.regions, regions, p.count * sizeof(*regions)))) goto done;
++    }
++    switch (p.operation)
++    {
++    case 1: /* create immutable snapshot from owned sink handles */
++        SERVER_START_REQ(create_composition_scene)
++        {
++            wine_server_add_data(req, regions, p.count * sizeof(*regions));
++            status = wine_server_call(req);
++            if (!status) created = wine_server_ptr_handle(reply->handle);
++        }
++        SERVER_END_REQ;
++        break;
++    case 2: /* read snapshot; each returned sink handle belongs to the caller */
++        SERVER_START_REQ(read_composition_scene)
++        {
++            req->handle = wine_server_obj_handle(p.scene);
++            wine_server_set_reply(req, regions, p.count * sizeof(*regions));
++            status = wine_server_call(req);
++            count = reply->count;
++        }
++        SERVER_END_REQ;
++        if (status == STATUS_BUFFER_TOO_SMALL)
++        {
++            p.count = count;
++            if (write_user((void *)address, &p, sizeof(p))) status = STATUS_ACCESS_VIOLATION;
++        }
++        else if (!status)
++        {
++            if (count > p.count) status = STATUS_INVALID_PARAMETER;
++            else
++            {
++                p.count = count;
++                status = write_user(p.regions, regions, count * sizeof(*regions));
++                if (!status) status = write_user((void *)address, &p, sizeof(p));
++            }
++            if (status) for (i = 0; i < count && i < p.count; ++i) NtClose(wine_server_ptr_handle(regions[i].sink));
++        }
++        break;
++    case 3: /* publish scene on the actual Section object */
++    case 4: /* get an owned scene handle from the Section object */
++        SERVER_START_REQ(mapping_composition_scene)
++        {
++            req->mapping = wine_server_obj_handle(p.object);
++            req->scene = wine_server_obj_handle(p.scene);
++            req->set = p.operation == 3;
++            status = wine_server_call(req);
++            if (!status && p.operation == 4) created = wine_server_ptr_handle(reply->handle);
++        }
++        SERVER_END_REQ;
++        break;
++    case 5: /* bind/unbind a target HWND to a retained scene */
++        SERVER_START_REQ(bind_composition_scene)
++        {
++            req->win = wine_server_user_handle(hwnd);
++            req->scene = wine_server_obj_handle(p.scene);
++            req->owner = p.owner;
++            status = wine_server_call(req);
++        }
++        SERVER_END_REQ;
++        break;
++    }
++    if (!status && (p.operation == 1 || p.operation == 4))
++    {
++        p.scene = created;
++        status = write_user((void *)address, &p, sizeof(p));
++        if (status && created) NtClose(created);
++    }
++done:
++    free(regions);
++    if (status) RtlSetLastWin32Error(RtlNtStatusToDosError(status));
++    return !status;
++}

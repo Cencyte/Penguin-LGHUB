@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-10-26T17:34:30.911337+00:00",
+  "scope": "Complete private Wine payload assembly, relocation and archive round-trip; isolated fresh-prefix backend validation on development host",
+  "wine_version": "10.20",
+  "base_package_version": "10.20-2",
+  "application_version": "2026.6.974819",
+  "package_source": {
+    "url": "https://archive.archlinux.org/packages/w/wine/wine-10.20-2-x86_64.pkg.tar.zst",
+    "local_name": "wine-10.20-2-x86_64.pkg.tar.zst",
+    "size": 58985180,
+    "sha256": "4fae9232a0d4c6ab600c2650f875118ed7009d09cb5be64fbac4d3660e92cae0"
+  },
+  "package_signature": {
+    "verified": true,
+    "signer": "D2E95FEC015CF1F911AAAB0C3D4C5008BB5C8D29",
+    "authority": "Installed Arch Linux keyring; verification in a separate temporary GPG home"
+  },
+  "bundle": {
+    "inventory_entries": 2571,
+    "regular_files": 2557,
+    "symlinks": 14,
+    "regular_file_bytes": 551442193,
+    "patched_wine_files": 20,
+    "supplementary_dlls": 7,
+    "protocol_markers": 5,
+    "vendor_payload_included": false,
+    "prefix_included": false,
+    "manifest_sha256": "00e7993690f9fa512e254787bff4ed6cdc968e735c79335db18cf13d96132394"
+  },
+  "archive": {
+    "bytes": 101488615,
+    "sha256": "2ebb3f89fbd50646ae25cc1c7f854274008d0229ae505671e1f9e8ae2a4ddc84",
+    "restoration_verified": true
+  },
+  "host_unix_audit": {
+    "elf_files": 46,
+    "missing_linked_sonames": [],
+    "maximum_glibc_symbol": "GLIBC_2.38",
+    "scope": "DT_NEEDED resolution on build host; dlopen names are candidates, not runtime coverage",
+    "unix_libraries_bundled": false,
+    "gpu_drivers_bundled": false
+  },
+  "fresh_prefix": {
+    "managed_files": 1574,
+    "activation_factories_passed": 8,
+    "activation_factories_total": 8,
+    "registry_checks_passed": 4,
+    "registry_checks_total": 4,
+    "service_configuration_passed": true,
+    "service_state": "stopped; demand start",
+    "system_wine_hidden_at_every_wine_step": true,
+    "sudo_overlay_runner_used": false,
+    "live_desktop_used": false,
+    "physical_devices_exposed": false
+  },
+  "backend_probe_cases": {
+    "original": {
+      "passed": true,
+      "host_wine_hidden": true,
+      "routes": [
+        "/devices/list",
+        "/input/gshift",
+        "/profile/active",
+        "/profiles",
+        "/profiles/auto_switching"
+      ],
+      "mapped_bundle_files": 127
+    },
+    "relocated_with_spaces": {
+      "passed": true,
+      "host_wine_hidden": true,
+      "routes": [
+        "/devices/list",
+        "/input/gshift",
+        "/profile/active",
+        "/profiles",
+        "/profiles/auto_switching"
+      ],
+      "mapped_bundle_files": 127
+    },
+    "restored_archive": {
+      "passed": true,
+      "host_wine_hidden": true,
+      "routes": [
+        "/devices/list",
+        "/input/gshift",
+        "/profile/active",
+        "/profiles",
+        "/profiles/auto_switching"
+      ],
+      "mapped_bundle_files": 127
+    }
+  },
+  "relocation_original_path_absent": true,
+  "tests": {
+    "command": "python -m unittest discover -s tests/packaging -q",
+    "passed": 55,
+    "runtime_specific": 10
+  },
+  "implementation_sha256": {
+    "tools/packaging/wine_runtime.py": "1e68d341ddd8b0d5f6f73a5b705cc360d5b28d8ccc9b2b5652a86dad42a991ea",
+    "tools/packaging/prepare_clean_prefix.py": "8fb2994ee94411f166044ff6b7f492410d8fb2d446520102ae0eb63f373269d5",
+    "tools/packaging/probe_clean_agent.py": "d7fd5079471d1a65a26c35ad4ca125dc026be7a866ca336cc76cec4676addaf4",
+    "tests/packaging/test_wine_runtime.py": "930e138b6dd508cc49d8ba60ab264fd836afaa34155a982a7e22747c3305a739",
+    "packaging/wine-runtime.lock.json": "e6240889c5f1eb5532cfe815a447c9a553a133aa7b23c4cda6a77085964efe24"
+  },
+  "remaining": [
+    "Complete corresponding-source and build-toolchain release audit for the compiled artifacts",
+    "Unix-library/plugin and graphics-driver portability; clean Manjaro and CachyOS validation",
+    "Fonts acquisition or qualified replacements, original UI/tray rendering and interaction",
+    "Real-device key mappings/macros/G-Shift/lighting/profile-switch validation in the new prefix",
+    "Remaining installer actions, service startup policy and packaged Desktop launcher"
+  ],
+  "independent_target_distributions_verified": 0,
+  "independent_initial_target_distributions": 2,
+  "public_release_ready": false
+}

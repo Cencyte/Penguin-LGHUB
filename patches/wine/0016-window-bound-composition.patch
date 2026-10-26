@@ -1,0 +1,220 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: Retain below-child composition on the target HWND without helper windows
+
+Requires patch0013 (and the matched patch0015 tree used by the lab build).
+The private x64 NtUserCallHwndParam code28 bridge has a versioned descriptor
+and an owner cookie. It attaches an immutable retained client-area frame to
+an existing HWND, without creating, hiding or filtering application HWNDs.
+Frames clip beneath ordinary children and follow ancestor geometry/visibility.
+Keep WINE_GHUB_CHILD_COMPOSITION=1 and the matched experimental dcomp DLL.
+
+--- a/dlls/win32u/child_composition.h
++++ b/dlls/win32u/child_composition.h
+@@ -97,6 +97,122 @@
+     } while (status == STATUS_BUFFER_OVERFLOW);
+     return !status;
+ }
++/* Private, versioned G HUB lab bridge. The retained frame belongs to the
++ * application's existing HWND; it never changes the public window tree.
++ * Attach/update run on the HWND thread; detach also supports COM final release
++ * on another thread. The owner cookie prevents stale targets replacing frames.
++ * Published surfaces are immutable and refcounted under the user lock. */
++BOOL set_composition_frame(HWND hwnd, const struct composition_frame_params *params)
++{
++    struct window_surface *next = NULL, *previous;
++    char buffer[FIELD_OFFSET(BITMAPINFO, bmiColors[256])];
++    BITMAPINFO *info = (BITMAPINFO *)buffer;
++    WND *win;
++    RECT rect;
++    void *bits;
++    if (!child_composition_enabled())
++    {
++        RtlSetLastWin32Error(ERROR_NOT_SUPPORTED);
++        return FALSE;
++    }
++    if (!params || params->version != 0x47484331 || !params->owner ||
++        params->operation < 1 || params->operation > 4)
++    {
++        RtlSetLastWin32Error(ERROR_INVALID_PARAMETER);
++        return FALSE;
++    }
++    if (params->operation != 3 && !is_current_thread_window(hwnd))
++    {
++        RtlSetLastWin32Error(ERROR_ACCESS_DENIED);
++        return FALSE;
++    }
++    if (params->operation == 2)
++    {
++        if (params->width > 16384 || params->height > 16384 ||
++            (params->width && params->height && !params->pixels))
++        {
++            RtlSetLastWin32Error(ERROR_INVALID_PARAMETER);
++            return FALSE;
++        }
++        if (params->width && params->height)
++        {
++            memset(buffer, 0, sizeof(buffer));
++            info->bmiHeader.biSize = sizeof(info->bmiHeader);
++            info->bmiHeader.biWidth = params->width;
++            info->bmiHeader.biHeight = -(LONG)params->height;
++            info->bmiHeader.biPlanes = 1;
++            info->bmiHeader.biBitCount = 32;
++            info->bmiHeader.biSizeImage = params->width * params->height * 4;
++            SetRect(&rect, 0, 0, params->width, params->height);
++            next = window_surface_create(sizeof(*next), &child_buffer_funcs, hwnd, &rect, info, 0);
++            if (!next) { RtlSetLastWin32Error(ERROR_NOT_ENOUGH_MEMORY); return FALSE; }
++            bits = window_surface_get_color(next, info);
++            memcpy(bits, params->pixels, params->width * params->height * 4);
++            next->alpha_mask = 0xff000000;
++        }
++    }
++    win = get_win_ptr(hwnd);
++    if (!win || win == WND_DESKTOP || win == WND_OTHER_PROCESS)
++    {
++        if (next) window_surface_release(next);
++        RtlSetLastWin32Error(ERROR_INVALID_WINDOW_HANDLE);
++        return FALSE;
++    }
++    if ((params->operation == 1 && win->composition_owner) ||
++        (params->operation != 1 && win->composition_owner != params->owner))
++    {
++        release_win_ptr(win);
++        if (next) window_surface_release(next);
++        RtlSetLastWin32Error(ERROR_INVALID_STATE);
++        return FALSE;
++    }
++    previous = NULL;
++    if (params->operation == 1) win->composition_owner = params->owner;
++    if (params->operation == 2 || params->operation == 3)
++    {
++        previous = win->composition_surface;
++        win->composition_surface = next;
++        if (params->operation == 3) win->composition_owner = 0;
++    }
++    release_win_ptr(win);
++    if (previous) window_surface_release(previous);
++    if (params->operation == 2 || params->operation == 3) dirty_child_composite_parent(hwnd);
++    return TRUE;
++}
++
++/* Snapshot the target's client-area frame before its children. Client DC
++ * clipping accounts for ancestors, siblings and ordinary opaque child HWNDs. */
++static BOOL snapshot_window_composition(HWND hwnd, struct child_frame ***tail)
++{
++    struct window_surface *surface;
++    struct child_frame *frame;
++    char buffer[FIELD_OFFSET(BITMAPINFO, bmiColors[256])];
++    BITMAPINFO *info = (BITMAPINFO *)buffer;
++    const void *bits;
++    BOOL ret = TRUE;
++    WND *win = get_win_ptr(hwnd);
++    if (!win || win == WND_DESKTOP || win == WND_OTHER_PROCESS) return TRUE;
++    surface = win->composition_surface;
++    if (surface) window_surface_add_ref(surface);
++    release_win_ptr(win);
++    if (!surface) return TRUE;
++    frame = calloc(1, sizeof(*frame));
++    if (!frame || !child_frame_region(hwnd, DCX_CLIPSIBLINGS | DCX_CLIPCHILDREN, frame)) ret = FALSE;
++    else if (frame->count)
++    {
++        bits = window_surface_get_color(surface, info);
++        frame->width = info->bmiHeader.biWidth;
++        frame->height = -info->bmiHeader.biHeight;
++        frame->surface = surface->rect;
++        if (!(frame->pixels = malloc(info->bmiHeader.biSizeImage))) ret = FALSE;
++        else memcpy(frame->pixels, bits, info->bmiHeader.biSizeImage);
++        if (ret) { **tail = frame; *tail = &frame->next; frame = NULL; }
++    }
++    free_child_frames(frame);
++    window_surface_release(surface);
++    return ret;
++}
++
+ /* A below-child composition target stays below every ordinary child even if
+  * that child is later inserted below our transparent helper HWND. The parent's
+  * client DC clip excludes all opaque children regardless of insertion order. */
+@@ -183,6 +299,7 @@
+             }
+             free_child_frames(frame);
+         }
++        if (ret) ret = snapshot_window_composition(hwnd, tail);
+         if (ret) ret = snapshot_child_frames(hwnd, tail, depth + 1);
+     }
+     free(children);
+@@ -196,7 +313,8 @@
+     if (*ok)
+     {
+         *screen = rects.visible;
+-        *ok = snapshot_child_frames(surface->hwnd, &tail, 0);
++        *ok = snapshot_window_composition(surface->hwnd, &tail);
++        if (*ok) *ok = snapshot_child_frames(surface->hwnd, &tail, 0);
+     }
+     return head;
+ }
+--- a/dlls/win32u/ntuser_private.h
++++ b/dlls/win32u/ntuser_private.h
+@@ -67,6 +67,8 @@
+     BOOL               has_icons;     /* window's icons have been initialized */
+     HIMC               imc;           /* window's input context */
+     struct window_surface *surface;   /* Window surface if any */
++    struct window_surface *composition_surface; /* immutable below-child frame */
++    ULONG_PTR composition_owner;      /* private target lifetime cookie */
+     struct opengl_drawable *current_drawable; /* current GL client surface for this window */
+     struct opengl_drawable *unused_drawable; /* unused GL client surface for this window */
+     struct tagDIALOGINFO *dlgInfo;    /* Dialog additional info (dialogs only) */
+--- a/dlls/win32u/win32u_private.h
++++ b/dlls/win32u/win32u_private.h
+@@ -46,6 +46,7 @@
+ extern struct window_surface dummy_surface;
+ extern void dirty_child_composite_parent(HWND hwnd);
+ extern BOOL child_composition_enabled(void);
++extern BOOL set_composition_frame(HWND hwnd, const struct composition_frame_params *params);
+ extern BOOL is_child_composite_surface(struct window_surface *surface);
+ extern void create_window_surface( HWND hwnd, BOOL create_layered, const RECT *surface_rect, UINT monitor_dpi,
+                                    struct window_surface **window_surface );
+--- a/dlls/win32u/window.c
++++ b/dlls/win32u/window.c
+@@ -5230,6 +5230,7 @@
+         }
+         SERVER_END_REQ;
+         user_unlock();
++        if (win->composition_surface) window_surface_release(win->composition_surface);
+         free( win->pScroll );
+         free( win->text );
+         free( win );
+@@ -5435,6 +5436,7 @@
+ 
+         free_dce( win->dce, win->handle, &drawables );
+         set_user_handle_ptr( handle, NULL );
++        if (win->composition_surface) window_surface_release(win->composition_surface);
+         free( win->pScroll );
+         free( win->text );
+ 
+@@ -6202,6 +6204,9 @@
+         UINT raw_dpi, dpi = get_win_monitor_dpi( hwnd, &raw_dpi );
+         return param == MDT_EFFECTIVE_DPI ? dpi : raw_dpi;
+     }
++
++    case NtUserCallHwndParam_CompositionFrame:
++        return set_composition_frame(hwnd, (const struct composition_frame_params *)param);
+ 
+     case NtUserCallHwndParam_SetRawWindowPos:
+     {
+--- a/include/ntuser.h
++++ b/include/ntuser.h
+@@ -1436,6 +1436,15 @@
+     NtUserCallHwndParam_ExposeWindowSurface,
+     NtUserCallHwndParam_GetWinMonitorDpi,
+     NtUserCallHwndParam_SetRawWindowPos,
++    NtUserCallHwndParam_CompositionFrame, /* private lab ABI, code 28 */
++};
++
++struct composition_frame_params
++{
++    UINT version, operation;
++    ULONG_PTR owner;
++    UINT width, height;
++    const void *pixels;
+ };
+ 
+ struct get_window_rects_params

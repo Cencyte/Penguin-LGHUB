@@ -1,0 +1,398 @@
+{
+  "schema": 2,
+  "project_dir": "/home/firesongz/Source2/Penguin-GHUB/ghidra_project",
+  "project_name": "ghub2remapper",
+  "ghidra": "/home/firesongz/ghidra_12.1.2_PUBLIC",
+  "run_dir": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/tray-full-20261003",
+  "sage_python": "/home/firesongz/Source2/AI/MCP/SystemSage/.venv/bin/python",
+  "sage_command": "/home/firesongz/bin/mcp-wrapper-systemsage",
+  "workers": 40,
+  "worker_rss_gib": 1.5,
+  "reserve_memory_gib": 8,
+  "export_budget_gib": 20,
+  "reserve_disk_gib": 10,
+  "heap": "900m",
+  "timeout_seconds": 12,
+  "programs": [
+    {
+      "name": "CoreMessagingXP.dll",
+      "project_path": "/CoreMessagingXP.dll",
+      "functions": 3707,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/prefix/drive_c/Program Files/LGHUB/system_tray/CoreMessagingXP.dll",
+      "image_base": "180000000",
+      "symbols": 3989,
+      "file_present": true,
+      "sha256": "024a7b4031098dec4a243d770f5b820d5d382ced61687263bb8dab4908425427",
+      "size": 1042584,
+      "analysis_status": {
+        "name": "CoreMessagingXP.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 3707
+      },
+      "priority_group": 1
+    },
+    {
+      "name": "CoreMessaging.dll",
+      "project_path": "/CoreMessaging.dll",
+      "functions": 5350,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/CoreMessaging.dll",
+      "image_base": "180000000",
+      "symbols": 5784,
+      "file_present": true,
+      "sha256": "775d93c0cf8256dc6046222828e12686e7e735926a6204e062da06b04d78985c",
+      "size": 1216328,
+      "analysis_status": {
+        "name": "CoreMessaging.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 5350
+      },
+      "priority_group": 1
+    },
+    {
+      "name": "Microsoft.Internal.FrameworkUdk.dll",
+      "project_path": "/Microsoft.Internal.FrameworkUdk.dll",
+      "functions": 4176,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/prefix/drive_c/Program Files/LGHUB/system_tray/Microsoft.Internal.FrameworkUdk.dll",
+      "image_base": "180000000",
+      "symbols": 4607,
+      "file_present": true,
+      "sha256": "988f37ceb00e6c17cc7c98ef22cce5304702c09d9e59f0ca96f5869fd8859cd4",
+      "size": 854168,
+      "analysis_status": {
+        "name": "Microsoft.Internal.FrameworkUdk.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 4176
+      },
+      "priority_group": 1
+    },
+    {
+      "name": "InputHost.dll",
+      "project_path": "/InputSinkReference/InputHost.dll",
+      "functions": 10440,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/InputHost.dll",
+      "image_base": "180000000",
+      "symbols": 11086,
+      "file_present": true,
+      "sha256": "2409d64759a449eb433ddbe0682cf55d2539876d0c69cfb4bc68fa336f004674",
+      "size": 2001416,
+      "analysis_status": {
+        "name": "InputHost.dll",
+        "analyzing": false,
+        "analyzed": true,
+        "should_ask_to_analyze": false,
+        "function_count": 10440
+      },
+      "priority_group": 1
+    },
+    {
+      "name": "Microsoft.InputStateManager.dll",
+      "project_path": "/Microsoft.InputStateManager.dll",
+      "functions": 1701,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/coreapp-prefix/drive_c/Program Files/LGHUB/system_tray/Microsoft.InputStateManager.dll",
+      "image_base": "180000000",
+      "symbols": 1903,
+      "file_present": true,
+      "sha256": "d82fe3b83251ed171b4b4771c59b9a367eef012de00d93ee4390ec70a32c56e6",
+      "size": 444568,
+      "analysis_status": {
+        "name": "Microsoft.InputStateManager.dll",
+        "analyzing": false,
+        "analyzed": true,
+        "should_ask_to_analyze": false,
+        "function_count": 1701
+      },
+      "priority_group": 1
+    },
+    {
+      "name": "Microsoft.UI.Input.dll",
+      "project_path": "/Microsoft.UI.Input.dll",
+      "functions": 6252,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/coreapp-prefix/drive_c/Program Files/LGHUB/system_tray/Microsoft.UI.Input.dll",
+      "image_base": "180000000",
+      "symbols": 6689,
+      "file_present": true,
+      "sha256": "942cf3f4b487eb1b512d359057968cfc0829468160b064793a04b476251ae29c",
+      "size": 1480856,
+      "analysis_status": {
+        "name": "Microsoft.UI.Input.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 6252
+      },
+      "priority_group": 1
+    },
+    {
+      "name": "lghub_system_tray.exe",
+      "project_path": "/DispatcherQueue/lghub_system_tray.exe",
+      "functions": 27462,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/coreapp-prefix/drive_c/Program Files/LGHUB/system_tray/lghub_system_tray.exe",
+      "image_base": "140000000",
+      "symbols": 28684,
+      "file_present": true,
+      "sha256": "07e3872b0b9cee9cb98ad39b53bff3b731e7ef34dea0785970676ea95aa44fc6",
+      "size": 28878488,
+      "analysis_status": {
+        "name": "lghub_system_tray.exe",
+        "analyzing": false,
+        "analyzed": true,
+        "should_ask_to_analyze": false,
+        "function_count": 27462
+      },
+      "priority_group": 1
+    },
+    {
+      "name": "dcomp.dll",
+      "project_path": "/dcomp.dll",
+      "functions": 9910,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/dcomp.dll",
+      "image_base": "180000000",
+      "symbols": 10381,
+      "file_present": true,
+      "sha256": "74d91c2545c5f0ad8cd3ac46f7b878e8e18d11b5bbc3261272b3891c766e2a9a",
+      "size": 2232816,
+      "analysis_status": {
+        "name": "dcomp.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 9910
+      },
+      "priority_group": 2
+    },
+    {
+      "name": "dcompi.dll",
+      "project_path": "/dcompi.dll",
+      "functions": 8182,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/coreapp-prefix/drive_c/Program Files/LGHUB/system_tray/dcompi.dll",
+      "image_base": "180000000",
+      "symbols": 8500,
+      "file_present": true,
+      "sha256": "d87b13197bc59e98d237738e9d038290fd121473b3461a66ab86aae39952ef5c",
+      "size": 1820824,
+      "analysis_status": {
+        "name": "dcompi.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 8182
+      },
+      "priority_group": 2
+    },
+    {
+      "name": "dwmcorei.dll",
+      "project_path": "/dwmcorei.dll",
+      "functions": 7465,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/coreapp-prefix/drive_c/Program Files/LGHUB/system_tray/dwmcorei.dll",
+      "image_base": "180000000",
+      "symbols": 7814,
+      "file_present": true,
+      "sha256": "833b78602b12d8f1d81c327158021a8548accef185718eb41acf24407c647cdd",
+      "size": 3016856,
+      "analysis_status": {
+        "name": "dwmcorei.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 7465
+      },
+      "priority_group": 2
+    },
+    {
+      "name": "d3d11.dll",
+      "project_path": "/d3d11.dll",
+      "functions": 7413,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/d3d11.dll",
+      "image_base": "180000000",
+      "symbols": 8075,
+      "file_present": true,
+      "sha256": "da24465d41f1a691d60743cbcb89997fcdaa55651df173648d8e8e15e71b0a92",
+      "size": 2509704,
+      "analysis_status": {
+        "name": "d3d11.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 7413
+      },
+      "priority_group": 2
+    },
+    {
+      "name": "d2d1.dll",
+      "project_path": "/d2d1.dll",
+      "functions": 12234,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/d2d1.dll",
+      "image_base": "180000000",
+      "symbols": 12609,
+      "file_present": true,
+      "sha256": "d1425b33d6816a03769f2d635bfee7abb6392c267abbca4f5bd27593841a39fc",
+      "size": 6592096,
+      "analysis_status": {
+        "name": "d2d1.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 12234
+      },
+      "priority_group": 2
+    },
+    {
+      "name": "wuceffectsi.dll",
+      "project_path": "/DispatcherQueue/wuceffectsi.dll",
+      "functions": 1775,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/coreapp-prefix/drive_c/Program Files/LGHUB/system_tray/wuceffectsi.dll",
+      "image_base": "180000000",
+      "symbols": 1945,
+      "file_present": true,
+      "sha256": "03c32482a297c8b43fa16a09577b29eed5c7a5cf467577ae5ba42e734209ae50",
+      "size": 485528,
+      "analysis_status": {
+        "name": "wuceffectsi.dll",
+        "analyzing": false,
+        "analyzed": true,
+        "should_ask_to_analyze": false,
+        "function_count": 1775
+      },
+      "priority_group": 2
+    },
+    {
+      "name": "DWrite.dll",
+      "project_path": "/TextAnalysisReference/DWrite.dll",
+      "functions": 6280,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/DWrite.dll",
+      "image_base": "180000000",
+      "symbols": 6665,
+      "file_present": true,
+      "sha256": "c44185a344257b748b28e73dddb772e922d8c560b17a8e861969cc18fb9efd81",
+      "size": 2486272,
+      "analysis_status": {
+        "name": "DWrite.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 6280
+      },
+      "priority_group": 2
+    },
+    {
+      "name": "Microsoft.ui.xaml.dll",
+      "project_path": "/Microsoft.ui.xaml.dll",
+      "functions": 61059,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/coreapp-prefix/drive_c/Program Files/LGHUB/system_tray/Microsoft.ui.xaml.dll",
+      "image_base": "180000000",
+      "symbols": 168006,
+      "file_present": true,
+      "sha256": "004c034e8d2b9214317cdd2eaea5da7c94099f0f2b733031469b4ed7bd5c90d4",
+      "size": 15174808,
+      "analysis_status": {
+        "name": "Microsoft.ui.xaml.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 61059
+      },
+      "priority_group": 3
+    },
+    {
+      "name": "twinapi.appcore.dll",
+      "project_path": "/twinapi.appcore.dll",
+      "functions": 12138,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/twinapi.appcore.dll",
+      "image_base": "180000000",
+      "symbols": 13271,
+      "file_present": true,
+      "sha256": "2be58806f3546a91c3daf6f39cdf8f40ba7602b3a1f2e59fc2bb9487d268f37b",
+      "size": 2439424,
+      "analysis_status": {
+        "name": "twinapi.appcore.dll",
+        "analyzing": false,
+        "analyzed": false,
+        "should_ask_to_analyze": false,
+        "function_count": 12138
+      },
+      "priority_group": 3
+    },
+    {
+      "name": "marshal.dll",
+      "project_path": "/marshal.dll",
+      "functions": 2248,
+      "binary_path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/coreapp-prefix/drive_c/Program Files/LGHUB/system_tray/marshal.dll",
+      "image_base": "180000000",
+      "symbols": 2433,
+      "file_present": true,
+      "sha256": "57c078371a1e0d72935ae28757f12514c8c94fa37976a76bff1aec815813d1a8",
+      "size": 563352,
+      "analysis_status": {
+        "name": "marshal.dll",
+        "analyzing": false,
+        "analyzed": true,
+        "should_ask_to_analyze": false,
+        "function_count": 2248
+      },
+      "priority_group": 3
+    },
+    {
+      "name": "user32.dll",
+      "project_path": "/InputSinkReference/user32.dll",
+      "functions": 2826,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/user32.dll",
+      "image_base": "180000000",
+      "symbols": 5340,
+      "file_present": true,
+      "sha256": "6fcd82185566db70ca0a7bc5cf08fbe448d407928990fd58eec32c06b240b1bc",
+      "size": 1881576,
+      "analysis_status": {
+        "name": "user32.dll",
+        "analyzing": false,
+        "analyzed": true,
+        "should_ask_to_analyze": false,
+        "function_count": 2826
+      },
+      "priority_group": 3
+    },
+    {
+      "name": "win32kbase.sys",
+      "project_path": "/InputSinkReference/win32kbase.sys",
+      "functions": 9252,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/win32kbase.sys",
+      "image_base": "140000000",
+      "symbols": 12861,
+      "file_present": true,
+      "sha256": "ae1e883d42407c1f610795b8ccdfc9c01547fef736182e22eb8a7664d0f413f0",
+      "size": 3350528,
+      "analysis_status": {
+        "name": "win32kbase.sys",
+        "analyzing": false,
+        "analyzed": true,
+        "should_ask_to_analyze": false,
+        "function_count": 9252
+      },
+      "priority_group": 3
+    },
+    {
+      "name": "win32kfull.sys",
+      "project_path": "/InputSinkReference/win32kfull.sys",
+      "functions": 10071,
+      "binary_path": "/mnt/firesongzpc_win11/Windows/System32/win32kfull.sys",
+      "image_base": "140000000",
+      "symbols": 15003,
+      "file_present": true,
+      "sha256": "dfe1b9f1448713adaca72913a580a14d1c4b7d1aa00971c79bb548ebdc30344e",
+      "size": 4255744,
+      "analysis_status": {
+        "name": "win32kfull.sys",
+        "analyzing": false,
+        "analyzed": true,
+        "should_ask_to_analyze": false,
+        "function_count": 10071
+      },
+      "priority_group": 3
+    }
+  ]
+}

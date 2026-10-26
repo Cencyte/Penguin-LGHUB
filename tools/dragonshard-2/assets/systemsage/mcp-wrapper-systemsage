@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+# Fixed local SystemSage 0.1 environment; stdout is reserved for MCP.
+exec /home/firesongz/Source2/AI/MCP/SystemSage/.venv/bin/python /home/firesongz/Source2/AI/MCP/SystemSage/serve.py

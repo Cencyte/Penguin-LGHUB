@@ -1,0 +1,4 @@
+interface:
+  display_name: "DragonShard-2"
+  short_description: "Parallel Ghidra corpus export and indexed investigation"
+  default_prompt: "Use $dragonshard-2 to export and search an analyzed binary corpus."

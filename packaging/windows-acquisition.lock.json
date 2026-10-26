@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "purpose": "Exact Windows dependency reproduction; acquisition is not runtime-use or redistribution clearance",
+  "windows_file_version": "10.0.26100.8737",
+  "architecture": "amd64",
+  "kb": "KB5095093",
+  "catalog_id": "dc5119c9-8d2c-4b77-9270-1e3b7fdd91bb",
+  "catalog_page": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5095093",
+  "support_page": "https://support.microsoft.com/en-gb/servicing/os/windows-11/2026/06/june-23-2026-kb5095093-os-builds-26200-8737-and-26100-8737-preview",
+  "file_list": {
+    "url": "https://download.microsoft.com/download/d31b5e29-b433-470a-9161-5328e28dd5f5/5095093.csv",
+    "sha256": "b81711d826a715449f35fed4a5a12c98b8c6e74a931045061ddc21741275c874"
+  },
+  "package": {
+    "url": "https://catalog.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/0c7a093a-ecf2-4386-afa5-75bcd763ae00/public/windows11.0-kb5095093-x64_871fd990cedd9d3da6c90ca8b1dd0cc62b42c330.msu",
+    "sha256": "f4d7044b461ecefed165f52b8ee307074b0af27ba84663dcc4607fc0ada72274",
+    "size": 5153252541,
+    "local_name": "windows11.0-kb5095093-x64.msu",
+    "hash_basis": "SHA-256 published in Microsoft Update Catalog download metadata"
+  },
+  "files": {
+    "d2d1.dll": {
+      "sha256": "d1425b33d6816a03769f2d635bfee7abb6392c267abbca4f5bd27593841a39fc",
+      "size": 6592096,
+      "version": "10.0.26100.8737",
+      "machine": "0x8664",
+      "hash_basis": "Working Wine baseline and Microsoft KB5095093 file list independently agree",
+      "symbol_server_debug_comparison_url": "https://msdl.microsoft.com/download/symbols/d2d1.dll/47184B8063a000/d2d1.dll"
+    },
+    "ninput.dll": {
+      "sha256": "0da856260c5bf440038bd7df9e0b002c55be5e540294635b87f44da0fecab90c",
+      "size": 512000,
+      "version": "10.0.26100.8737",
+      "machine": "0x8664",
+      "hash_basis": "Working Wine baseline and Microsoft KB5095093 file list independently agree",
+      "symbol_server_debug_comparison_url": "https://msdl.microsoft.com/download/symbols/ninput.dll/466F77B57e000/ninput.dll"
+    }
+  },
+  "base_media": {
+    "url": "https://catalog.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/009d9a0d-8e1a-45ce-9540-21377534803e/26100.4349.250607-1500.ge_release_svc_refresh_CLIENTCONSUMER_RET_x64FRE_en-us.esd",
+    "size": 4680320173,
+    "sha1": "8ceab2838f8e90180ac7490e8752157fb05588cb",
+    "publisher_hash_algorithm": "SHA1",
+    "catalog_url": "https://download.microsoft.com/download/8e0c23e7-ddc2-45c4-b7e1-85a808b408ee/Products-Win11-24H2-6B.cab",
+    "catalog_sha256": "ba2cf7e6024ebd4aed58b387b4ddf41cb18b87d32fa8b044884701ee2568c9ae",
+    "local_name": "26100.4349.250607-1500.ge_release_svc_refresh_CLIENTCONSUMER_RET_x64FRE_en-us.esd",
+    "catalog_original_url": "http://dl.delivery.mp.microsoft.com/filestreamingservice/files/009d9a0d-8e1a-45ce-9540-21377534803e/26100.4349.250607-1500.ge_release_svc_refresh_CLIENTCONSUMER_RET_x64FRE_en-us.esd",
+    "https_transport_note": "Same file ID/path served by Microsoft TLS-valid catalog CDN; verify catalog SHA1 and pinned SHA256 before use",
+    "sha256": "ca2d2e563b9700f7ba0569c9dc05321b81e1495c52da06861c3dc88ef9ce6eab",
+    "sha256_basis": "Locally computed after checking Microsoft catalog SHA1",
+    "image_index": 9,
+    "image_name": "Windows 11 Pro"
+  },
+  "extraction_tools": {
+    "wimlib_linux_container": "dockurr/windows@sha256:59f8bed19cfd49cf1701debe34f9df6311e61a4e2ae68aa9f41206e2184e31cc",
+    "UpdateCompression.dll": {
+      "source": "KB5095093 MSU / DesktopDeployment.cab",
+      "sha256": "76d2971b91b7bcceec51589835f8fad3b7c41e251998b3f1a5eaf4d53021e71f",
+      "size": 615920
+    },
+    "cabinet.dll": {
+      "source": "base_media / image 9 / Windows/System32/cabinet.dll",
+      "sha256": "074504cad602a2a69fceb0a4e62ba233525ad3114017948d2b7fa22b640046d5",
+      "size": 175024
+    },
+    "ms_compress": {
+      "repository": "https://github.com/coderforlife/ms-compress",
+      "commit": "a0fcab84a7918fa205d5f29bf03b71bd4abb19b4",
+      "url": "https://codeload.github.com/coderforlife/ms-compress/tar.gz/a0fcab84a7918fa205d5f29bf03b71bd4abb19b4",
+      "local_name": "ms-compress-a0fcab84a7918fa205d5f29bf03b71bd4abb19b4.tar.gz",
+      "size": 68126,
+      "sha256": "c7dab89d7bc9c9ef1c4ef75cba2a820e14b87a859b8ef3487f49c478f6d802b1",
+      "license": "GPL-3.0-or-later",
+      "copyright": "Copyright (C) 2012 Jeffrey Bush; retain upstream notices and corresponding source"
+    }
+  },
+  "recipe": {
+    "base_files": {
+      "d2d1.dll": {
+        "file": {
+          "path": "/Windows/System32/d2d1.dll",
+          "size": 6587888,
+          "sha256": "26dadf180200c9a7f9330a5561fd9d62f38a14bb18c11ac9f770ae89fce7935b"
+        },
+        "reverse": {
+          "path": "/Windows/WinSxS/amd64_microsoft-windows-d2d_31bf3856ad364e35_10.0.26100.3624_none_434acf6d0c068237/r/d2d1.dll",
+          "size": 685076,
+          "sha256": "4bfb9014d8e98f50f750157b9f16e6016316be88e6e005408a79258f106c4471"
+        }
+      },
+      "ninput.dll": {
+        "file": {
+          "path": "/Windows/System32/ninput.dll",
+          "size": 503808,
+          "sha256": "2ec4ba03aabea931e72a44f05f7fb7880690c5d907d8c2e745570c0972cb5b94"
+        },
+        "reverse": {
+          "path": "/Windows/WinSxS/amd64_microsoft-windows-t..atform-input-ninput_31bf3856ad364e35_10.0.26100.4202_none_5a9194f661c02205/r/ninput.dll",
+          "size": 79249,
+          "sha256": "b99bbca4e6007a76336d21462cc1b052b0f459166ffa4309bad77053f9c9c432"
+        }
+      }
+    },
+    "msu_resources": {
+      "desktop_deployment": {
+        "offset": 208,
+        "size": 13509433,
+        "sha1": "57b28deae7a0c487d815cabd1d8fd339bf232f73",
+        "local_name": "DesktopDeployment.cab"
+      },
+      "inner_wim": {
+        "offset": 2360452493,
+        "size": 143562332,
+        "sha1": "55253cf30055d3aacc23961c29840b1f007302a4",
+        "local_name": "update.wim"
+      },
+      "psf": {
+        "offset": 157374622,
+        "size": 2203077871
+      }
+    },
+    "cix": {
+      "size": 50067101,
+      "sha256": "574456bdfae4d7945ed499a1ad505fe6d7e3720f9630ce12e506456aeead2442"
+    },
+    "forward": {
+      "d2d1.dll": {
+        "path": "amd64_microsoft-windows-d2d_31bf3856ad364e35_10.0.26100.8737_none_4340c4f10c0df625\\f\\d2d1.dll",
+        "offset": 1567889965,
+        "size": 144685,
+        "sha256": "46a17ea7011c345e412a7df538da0c056aab51a0043565441e1bdbb7860c075f"
+      },
+      "ninput.dll": {
+        "path": "amd64_microsoft-windows-t..atform-input-ninput_31bf3856ad364e35_10.0.26100.8737_none_5a5e1be861e66e80\\f\\ninput.dll",
+        "offset": 1822980916,
+        "size": 41166,
+        "sha256": "b000a4ebaff0e3780d42098e643a205a3b9a70e0d6b0fe30d5917be8c015a693"
+      }
+    },
+    "checkpoint": {
+      "d2d1.dll": {
+        "version": "10.0.26100.1591",
+        "size": 6592024,
+        "sha256": "821b0d918936fab9e2c1b441cc0f615f59b1b61ef36011160213247ac5827be0"
+      },
+      "ninput.dll": {
+        "version": "10.0.26100.1591",
+        "size": 516096,
+        "sha256": "7b320a839c759e7d8cf58586a5c709c3dbff1d22ef9dae8898055e7eb4cf5ec1"
+      }
+    }
+  }
+}

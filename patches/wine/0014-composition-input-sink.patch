@@ -1,0 +1,460 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: Add opt-in composition input sink objects for the x64 G HUB lab
+
+Requires Wine10.20 patches0003,0004,0005,0011,0013. Regenerate requests
+and syscall tables with tools/make_requests and tools/make_specfiles.
+Build and mount Win32u, ntdll and wineserver as a matched set.
+
+Observed InputStateManager descriptor: four type2 routes to the same
+message-only HWND. Local Windows win32kbase reference establishes the
+Composition object type, LUID/view storage and ordinary NtClose lifetime.
+Only x64 zero-metadata routes0/1/2 and descriptor sizes0xe8/0x128 are
+accepted. Cross-process HWND creation is deliberately rejected in this
+prototype. WINE_GHUB_INPUT_SINK=1 enables creation. This provides the
+object/binding foundation, not composition hit testing or input dispatch.
+
+--- a/dlls/win32u/Makefile.in
++++ b/dlls/win32u/Makefile.in
+@@ -14,6 +14,7 @@
+ 	brush.c \
+ 	class.c \
+ 	clipboard.c \
++	composition_input.c \
+ 	clipping.c \
+ 	cursoricon.c \
+ 	d3dkmt.c \
+--- a/dlls/win32u/main.c
++++ b/dlls/win32u/main.c
+@@ -47,6 +47,32 @@
+ #define SYSCALL_API __attribute__((naked, hybrid_patchable))
+ #define SYSCALL_FUNC(name) __ASM_SYSCALL_FUNC( __id_##name, name )
+ 
++NTSTATUS SYSCALL_API NtCreateCompositionInputSink(const void *desc, HANDLE *handle)
++{
++    SYSCALL_FUNC(NtCreateCompositionInputSink);
++}
++
++NTSTATUS SYSCALL_API NtCreateImplicitCompositionInputSink(const void *desc, HANDLE *handle)
++{
++    SYSCALL_FUNC(NtCreateImplicitCompositionInputSink);
++}
++
++NTSTATUS SYSCALL_API NtCloseCompositionInputSink(HANDLE handle)
++{
++    SYSCALL_FUNC(NtCloseCompositionInputSink);
++}
++
++NTSTATUS SYSCALL_API NtQueryCompositionInputSinkLuid(HANDLE handle, LUID *out)
++{
++    SYSCALL_FUNC(NtQueryCompositionInputSinkLuid);
++}
++
++NTSTATUS SYSCALL_API NtQueryCompositionInputSinkViewId(HANDLE handle, UINT *out)
++{
++    SYSCALL_FUNC(NtQueryCompositionInputSinkViewId);
++}
++
++
+ INT SYSCALL_API NtGdiAbortDoc( HDC hdc )
+ {
+     SYSCALL_FUNC( NtGdiAbortDoc );
+--- a/dlls/win32u/win32u.spec
++++ b/dlls/win32u/win32u.spec
+@@ -1,6 +1,6 @@
+ @ extern -arch=win32 Wow64Transition __wine_syscall_dispatcher
+ @ stub -syscall NtBindCompositionSurface
+-@ stub -syscall NtCloseCompositionInputSink
++@ stdcall -syscall NtCloseCompositionInputSink(long)
+ @ stub -syscall NtCompositionInputThread
+ @ stub -syscall NtCompositionSetDropTarget
+ @ stub -syscall NtCompositorNotifyExitWindows
+@@ -8,9 +8,9 @@
+ @ stub -syscall NtCompositorUpdateLastInputTime
+ @ stub -syscall NtConfigureInputSpace
+ @ stub -syscall NtConfirmCompositionSurfaceIndependentFlipEntry
+-@ stub -syscall NtCreateCompositionInputSink
++@ stdcall -syscall NtCreateCompositionInputSink(ptr ptr)
+ @ stub -syscall NtCreateCompositionSurfaceHandle
+-@ stub -syscall NtCreateImplicitCompositionInputSink
++@ stdcall -syscall NtCreateImplicitCompositionInputSink(ptr ptr)
+ @ stub -syscall NtDCompositionAddCrossDeviceVisualChild
+ @ stub -syscall NtDCompositionBeginFrame
+ @ stub -syscall NtDCompositionBoostCompositorClock
+@@ -740,8 +740,8 @@
+ @ stub -syscall NtQueryCompositionInputIsImplicit
+ @ stub -syscall NtQueryCompositionInputQueueAndTransform
+ @ stub -syscall NtQueryCompositionInputSink
+-@ stub -syscall NtQueryCompositionInputSinkLuid
+-@ stub -syscall NtQueryCompositionInputSinkViewId
++@ stdcall -syscall NtQueryCompositionInputSinkLuid(long ptr)
++@ stdcall -syscall NtQueryCompositionInputSinkViewId(long ptr)
+ @ stub -syscall NtQueryCompositionSurfaceBinding
+ @ stub -syscall NtQueryCompositionSurfaceFrameRate
+ @ stub -syscall NtQueryCompositionSurfaceHDRMetaData
+--- a/include/ntuser.h
++++ b/include/ntuser.h
+@@ -473,6 +473,12 @@
+ #define COLOR_55AA_BRUSH  0x100
+ 
+ /* user object types */
++W32KAPI NTSTATUS WINAPI NtCreateCompositionInputSink(const void *desc, HANDLE *handle);
++W32KAPI NTSTATUS WINAPI NtCreateImplicitCompositionInputSink(const void *desc, HANDLE *handle);
++W32KAPI NTSTATUS WINAPI NtCloseCompositionInputSink(HANDLE handle);
++W32KAPI NTSTATUS WINAPI NtQueryCompositionInputSinkLuid(HANDLE handle, LUID *out);
++W32KAPI NTSTATUS WINAPI NtQueryCompositionInputSinkViewId(HANDLE handle, UINT *out);
++
+ #define NTUSER_OBJ_WINDOW   0x01
+ #define NTUSER_OBJ_MENU     0x02
+ #define NTUSER_OBJ_ICON     0x03
+--- a/server/Makefile.in
++++ b/server/Makefile.in
+@@ -8,6 +8,7 @@
+ 	class.c \
+ 	clipboard.c \
+ 	completion.c \
++	composition.c \
+ 	console.c \
+ 	d3dkmt.c \
+ 	debugger.c \
+--- a/server/protocol.def
++++ b/server/protocol.def
+@@ -4471,3 +4471,24 @@
+     obj_handle_t  handle;                     /* ALPC port handle */
+     unsigned int  msg_id;                     /* ALPC message ID */
+ @END
++
++/* Private composition input object requests, appended to preserve existing IDs. */
++struct composition_input_route
++{
++    unsigned int type;
++    user_handle_t window;
++};
++@REQ(create_composition_input_sink)
++    unsigned int view_id;
++    unsigned int flags;
++    VARARG(routes,bytes);
++@REPLY
++    obj_handle_t handle;
++@END
++@REQ(query_composition_input_sink)
++    obj_handle_t handle;
++@REPLY
++    struct luid luid;
++    unsigned int view_id;
++    unsigned int flags;
++@END
+--- a/server/object.h
++++ b/server/object.h
+@@ -374,6 +374,7 @@
+ extern struct type_descr completion_reserve_type;
+ extern struct type_descr alpc_port_type;
+ extern struct type_descr completion_packet_type;
++extern struct type_descr composition_type;
+ 
+ #define KEYEDEVENT_WAIT       0x0001
+ #define KEYEDEVENT_WAKE       0x0002
+--- a/server/directory.c
++++ b/server/directory.c
+@@ -167,6 +167,7 @@
+     &completion_reserve_type,
+     &alpc_port_type,
+     &completion_packet_type,
++    &composition_type,
+ };
+ 
+ static void object_type_dump( struct object *obj, int verbose )
+--- a/server/token.c
++++ b/server/token.c
+@@ -394,7 +394,7 @@
+     return (luid1.low_part == luid2.low_part && luid1.high_part == luid2.high_part);
+ }
+ 
+-static inline void allocate_luid( struct luid *luid )
++void allocate_luid( struct luid *luid )
+ {
+     prev_luid_value.low_part++;
+     *luid = prev_luid_value;
+--- a/server/security.h
++++ b/server/security.h
+@@ -23,6 +23,7 @@
+ 
+ #include <sys/types.h>
+ 
++extern void allocate_luid( struct luid *luid );
+ extern const struct luid SeIncreaseQuotaPrivilege;
+ extern const struct luid SeSecurityPrivilege;
+ extern const struct luid SeTakeOwnershipPrivilege;
+--- /dev/null
++++ b/dlls/win32u/composition_input.c
+@@ -0,0 +1,146 @@
++/*
++ * Composition input sink objects for the isolated G HUB runtime.
++ * Copyright 2026 Cencyte D
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++
++#if 0
++#pragma makedep unix
++#endif
++#include "ntstatus.h"
++#define WIN32_NO_STATUS
++#include "win32u_private.h"
++#include "wine/server.h"
++#include "wine/debug.h"
++WINE_DEFAULT_DEBUG_CHANNEL(composition);
++
++/* Observed x64 ABI: header followed by four (Win10) or five (Win11)
++ * 0x38-byte routing records, plus flags at 0x120 in the latter layout.
++ * No pointer in the caller's memory is retained. */
++struct sink_route
++{
++    UINT type, reserved;
++    UINT64 window;
++    UINT64 data[5];
++};
++struct sink_desc
++{
++    UINT size, view_id;
++    struct sink_route routes[5];
++    UINT flags, reserved;
++};
++C_ASSERT(sizeof(struct sink_route) == 0x38);
++C_ASSERT(sizeof(struct sink_desc) == 0x128);
++
++static NTSTATUS read_user(const void *src, void *dst, SIZE_T size)
++{
++    return NtReadVirtualMemory(GetCurrentProcess(), src, dst, size, NULL) ? STATUS_ACCESS_VIOLATION : STATUS_SUCCESS;
++}
++static NTSTATUS write_user(void *dst, const void *src, SIZE_T size)
++{
++    return NtWriteVirtualMemory(GetCurrentProcess(), dst, src, size, NULL) ? STATUS_ACCESS_VIOLATION : STATUS_SUCCESS;
++}
++static NTSTATUS create_sink(const void *descriptor, BOOL implicit, HANDLE *output)
++{
++    struct sink_desc desc = {0};
++    struct composition_input_route routes[5] = {{0}};
++    HANDLE handle = INVALID_HANDLE_VALUE;
++    const char *enabled = getenv("WINE_GHUB_INPUT_SINK");
++    NTSTATUS status;
++    unsigned int i, j, size;
++
++    if (!output) return STATUS_INVALID_PARAMETER;
++    if ((status = write_user(output, &handle, sizeof(handle)))) return status;
++    if (!descriptor) return STATUS_INVALID_PARAMETER;
++    if (!enabled || strcmp(enabled, "1") || sizeof(void *) != 8) return STATUS_NOT_IMPLEMENTED;
++    if ((status = read_user(descriptor, &size, sizeof(size)))) return status;
++    /* The reference kernel normalizes older descriptors to 0x128, but we
++     * intentionally reject unverified version sizes in this opt-in path. */
++    if (size != 0xe8 && size != sizeof(desc)) return STATUS_NOT_SUPPORTED;
++    if ((status = read_user(descriptor, &desc, size))) return status;
++    if (desc.reserved || (desc.flags & ~1u)) return STATUS_NOT_SUPPORTED;
++    for (i = 0; i < ARRAY_SIZE(routes); i++)
++    {
++        struct sink_route *route = &desc.routes[i];
++        if (route->type > 4) return STATUS_INVALID_PARAMETER;
++        if (route->type == 3 || route->type == 4 || route->reserved) return STATUS_NOT_SUPPORTED;
++        for (j = 0; j < ARRAY_SIZE(route->data); j++)
++            if (route->data[j]) return STATUS_NOT_SUPPORTED;
++        if (route->type == 2 && (!route->window || route->window > 0xffffffff))
++            return STATUS_INVALID_HANDLE;
++        if (route->type != 2 && route->window) return STATUS_INVALID_PARAMETER;
++        routes[i].type = route->type;
++        routes[i].window = route->window;
++    }
++    SERVER_START_REQ(create_composition_input_sink)
++    {
++        req->view_id = desc.view_id;
++        req->flags = desc.flags | !!implicit;
++        wine_server_add_data(req, routes, sizeof(routes));
++        if (!(status = wine_server_call(req))) handle = wine_server_ptr_handle(reply->handle);
++    }
++    SERVER_END_REQ;
++    TRACE("create size=%x view=%u implicit=%u route=%u hwnd=%p => %#x %p\n", size, desc.view_id,
++          implicit, routes[0].type, UlongToHandle(routes[0].window), status, handle);
++    if (status) return status;
++    if ((status = write_user(output, &handle, sizeof(handle)))) NtClose(handle);
++    return status;
++}
++NTSTATUS WINAPI NtCreateCompositionInputSink(const void *desc, HANDLE *handle)
++{
++    return create_sink(desc, FALSE, handle);
++}
++NTSTATUS WINAPI NtCreateImplicitCompositionInputSink(const void *desc, HANDLE *handle)
++{
++    return create_sink(desc, TRUE, handle);
++}
++NTSTATUS WINAPI NtCloseCompositionInputSink(HANDLE handle)
++{
++    /* Reference kernel logs the sink close then forwards directly to NtClose. */
++    TRACE("close %p\n", handle);
++    return NtClose(handle);
++}
++static NTSTATUS query_sink(HANDLE handle, LUID *luid, UINT *view_id, UINT *flags)
++{
++    NTSTATUS status;
++    SERVER_START_REQ(query_composition_input_sink)
++    {
++        req->handle = wine_server_obj_handle(handle);
++        if (!(status = wine_server_call(req)))
++        {
++            luid->LowPart = reply->luid.low_part;
++            luid->HighPart = reply->luid.high_part;
++            *view_id = reply->view_id;
++            *flags = reply->flags;
++        }
++    }
++    SERVER_END_REQ;
++    return status;
++}
++NTSTATUS WINAPI NtQueryCompositionInputSinkLuid(HANDLE handle, LUID *out)
++{
++    LUID luid;
++    UINT view_id, flags;
++    NTSTATUS status = query_sink(handle, &luid, &view_id, &flags);
++    return status ? status : write_user(out, &luid, sizeof(luid));
++}
++NTSTATUS WINAPI NtQueryCompositionInputSinkViewId(HANDLE handle, UINT *out)
++{
++    LUID luid;
++    UINT view_id, flags;
++    NTSTATUS status = query_sink(handle, &luid, &view_id, &flags);
++    return status ? status : write_user(out, &view_id, sizeof(view_id));
++}
+--- /dev/null
++++ b/server/composition.c
+@@ -0,0 +1,122 @@
++/*
++ * Composition input sink objects for the isolated G HUB runtime.
++ * Copyright 2026 Cencyte D
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++
++#include "config.h"
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include "ntstatus.h"
++#define WIN32_NO_STATUS
++#include "windef.h"
++#include "winternl.h"
++#include "handle.h"
++#include "process.h"
++#include "thread.h"
++#include "user.h"
++#include "security.h"
++#include "request.h"
++
++static const WCHAR composition_name[] = {'C','o','m','p','o','s','i','t','i','o','n'};
++struct type_descr composition_type =
++{
++    {composition_name, sizeof(composition_name)},
++    STANDARD_RIGHTS_REQUIRED | 3,
++    {STANDARD_RIGHTS_READ | 1, STANDARD_RIGHTS_WRITE | 2,
++     STANDARD_RIGHTS_EXECUTE, STANDARD_RIGHTS_REQUIRED | 3}
++};
++struct composition_sink
++{
++    struct object obj;
++    struct luid luid;
++    unsigned int view_id, flags;
++    struct composition_input_route routes[5];
++    struct thread *threads[5];
++};
++static void sink_dump(struct object *obj, int verbose)
++{
++    struct composition_sink *sink = (struct composition_sink *)obj;
++    fprintf(stderr, "Composition input sink luid=%08x:%08x view=%u flags=%x\n",
++            sink->luid.high_part, sink->luid.low_part, sink->view_id, sink->flags);
++}
++static void sink_destroy(struct object *obj)
++{
++    struct composition_sink *sink = (struct composition_sink *)obj;
++    unsigned int i;
++    for (i = 0; i < ARRAY_SIZE(sink->threads); i++)
++        if (sink->threads[i]) release_object(sink->threads[i]);
++}
++static const struct object_ops sink_ops =
++{
++    sizeof(struct composition_sink), &composition_type, sink_dump,
++    no_add_queue, NULL, NULL, NULL, no_signal, no_get_fd, default_get_sync,
++    default_map_access, default_get_sd, default_set_sd, default_get_full_name,
++    no_lookup_name, directory_link_name, default_unlink_name, no_open_file,
++    no_kernel_obj_list, no_close_handle, sink_destroy
++};
++DECL_HANDLER(create_composition_input_sink)
++{
++    struct composition_sink *sink;
++    const struct composition_input_route *routes = get_req_data();
++    unsigned int i;
++    if (get_req_data_size() != 5 * sizeof(*routes) || (req->flags & ~1u))
++    {
++        set_error(STATUS_INVALID_PARAMETER);
++        return;
++    }
++    if (!(sink = alloc_object(&sink_ops))) return;
++    memset(sink->threads, 0, sizeof(sink->threads));
++    memset(&sink->luid, 0, sizeof(sink->luid));
++    sink->view_id = req->view_id;
++    sink->flags = req->flags;
++    memcpy(sink->routes, routes, sizeof(sink->routes));
++    for (i = 0; i < ARRAY_SIZE(sink->routes); i++)
++    {
++        if (routes[i].type > 2 || (routes[i].type != 2 && routes[i].window))
++        {
++            set_error(STATUS_INVALID_PARAMETER);
++            goto done;
++        }
++        if (routes[i].type == 2)
++        {
++            if (!(sink->threads[i] = get_window_thread(routes[i].window)))
++            {
++                set_error(STATUS_INVALID_HANDLE);
++                goto done;
++            }
++            if (sink->threads[i]->process != current->process)
++            {
++                set_error(STATUS_ACCESS_DENIED);
++                goto done;
++            }
++        }
++    }
++    allocate_luid(&sink->luid);
++    reply->handle = alloc_handle(current->process, sink, STANDARD_RIGHTS_READ | STANDARD_RIGHTS_WRITE | 3, 0);
++done:
++    release_object(sink);
++}
++DECL_HANDLER(query_composition_input_sink)
++{
++    struct composition_sink *sink;
++    if (!(sink = (struct composition_sink *)get_handle_obj(current->process, req->handle, 1, &sink_ops))) return;
++    reply->luid = sink->luid;
++    reply->view_id = sink->view_id;
++    reply->flags = sink->flags;
++    release_object(sink);
++}

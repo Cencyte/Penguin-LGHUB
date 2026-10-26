@@ -1,0 +1,136 @@
+--- a/dlls/d3d11/d3d11_private.h
++++ b/dlls/d3d11/d3d11_private.h
+@@ -570,6 +570,7 @@
+ {
+     IUnknown IUnknown_inner;
+     IUnknown partner_probe;
++    IUnknown d2d_private_info;
+     ID3D11Device5 ID3D11Device5_iface;
+     ID3D10Device1 ID3D10Device1_iface;
+     ID3D10Multithread ID3D10Multithread_iface;
+--- a/dlls/d3d11/device.c
++++ b/dlls/d3d11/device.c
+@@ -5585,6 +5585,40 @@
+     partner_channel, partner_open, partner_flip, partner_cancel, partner_refresh, partner_flush
+ };
+ 
++/* ID2DPrivateInfo used by native Direct2D. The count follows real backend
++ * flushes and successful presentation submissions, not GPU completion. */
++static const GUID d2d_private_info_iid = {0xb79cc8da,0x337f,0x400f,{0xb0,0x9d,0xb2,0xed,0xf8,0xa8,0x4e,0x47}};
++static struct d3d_device *d2d_info_device(IUnknown *iface)
++{
++    return CONTAINING_RECORD(iface, struct d3d_device, d2d_private_info);
++}
++static HRESULT WINAPI d2d_info_query(IUnknown *iface, REFIID iid, void **out)
++{
++    if (!out) return E_POINTER;
++    return IUnknown_QueryInterface(d2d_info_device(iface)->outer_unk, iid, out);
++}
++static ULONG WINAPI d2d_info_addref(IUnknown *iface)
++{
++    return IUnknown_AddRef(d2d_info_device(iface)->outer_unk);
++}
++static ULONG WINAPI d2d_info_release(IUnknown *iface)
++{
++    return IUnknown_Release(d2d_info_device(iface)->outer_unk);
++}
++static UINT64 WINAPI d2d_info_flush_count(IUnknown *iface)
++{
++    UINT64 count = wined3d_device_get_conservative_flush_count(d2d_info_device(iface)->wined3d_device);
++    TRACE("iface %p, conservative flush count %I64u.\n", iface, count);
++    return count;
++}
++static const struct
++{
++    HRESULT (WINAPI *QueryInterface)(IUnknown *, REFIID, void **);
++    ULONG (WINAPI *AddRef)(IUnknown *);
++    ULONG (WINAPI *Release)(IUnknown *);
++    UINT64 (WINAPI *ConservativeFlushCount)(IUnknown *);
++} d2d_info_vtable = {d2d_info_query, d2d_info_addref, d2d_info_release, d2d_info_flush_count};
++
+ /* Inner IUnknown methods */
+ 
+ static inline struct d3d_device *impl_from_IUnknown(IUnknown *iface)
+@@ -5612,6 +5646,10 @@
+     {
+         ERR("GHUB partner probe: queried native partner interface\n");
+         *out = &device->partner_probe;
++    }
++    else if (IsEqualGUID(riid, &d2d_private_info_iid) && GetEnvironmentVariableA("GHUB_D3D11_PARTNER_PROBE", NULL, 0))
++    {
++        *out = &device->d2d_private_info;
+     }
+     else if (!device->d3d11_only
+             && (IsEqualGUID(riid, &IID_ID3D10Device1)
+@@ -8243,6 +8281,7 @@
+ {
+     device->IUnknown_inner.lpVtbl = &d3d_device_inner_unknown_vtbl;
+     device->partner_probe.lpVtbl = (const IUnknownVtbl *)partner_vtable;
++    device->d2d_private_info.lpVtbl = (const IUnknownVtbl *)&d2d_info_vtable;
+     device->ID3D11Device5_iface.lpVtbl = &d3d11_device_vtbl;
+     device->ID3D10Device1_iface.lpVtbl = &d3d10_device1_vtbl;
+     device->ID3D10Multithread_iface.lpVtbl = &d3d10_multithread_vtbl;
+--- a/dlls/wined3d/device.c
++++ b/dlls/wined3d/device.c
+@@ -4961,7 +4961,14 @@
+ 
+     wined3d_device_context_lock(context);
+     context->ops->flush(context);
++    if (context == &context->device->cs->c)
++        InterlockedIncrement64(&context->device->conservative_flush_count);
+     wined3d_device_context_unlock(context);
++}
++
++UINT64 CDECL wined3d_device_get_conservative_flush_count(const struct wined3d_device *device)
++{
++    return InterlockedCompareExchange64((LONG64 *)&device->conservative_flush_count, 0, 0);
+ }
+ 
+ static void update_swapchain_flags(struct wined3d_texture *texture)
+@@ -5500,6 +5507,7 @@
+     HRESULT hr;
+ 
+     device->ref = 1;
++    device->conservative_flush_count = 0;
+     device->wined3d = wined3d;
+     wined3d_incref(device->wined3d);
+     device->adapter = adapter;
+--- a/dlls/wined3d/swapchain.c
++++ b/dlls/wined3d/swapchain.c
+@@ -226,6 +226,7 @@
+ 
+     wined3d_cs_emit_present(swapchain->device->cs, swapchain, src_rect,
+             dst_rect, dst_window_override, swap_interval, flags);
++    InterlockedIncrement64(&swapchain->device->conservative_flush_count);
+ 
+     wined3d_mutex_unlock();
+ 
+--- a/dlls/wined3d/wined3d.spec
++++ b/dlls/wined3d/wined3d.spec
+@@ -400,3 +400,6 @@
+ @ cdecl vkd3d_shader_scan(ptr ptr)
+ @ cdecl vkd3d_shader_serialize_dxbc(long ptr ptr ptr)
+ @ cdecl vkd3d_shader_serialize_root_signature(ptr ptr ptr)
++
++# Append to preserve existing auto-assigned export ordinals.
++@ cdecl -ret64 wined3d_device_get_conservative_flush_count(ptr)
+--- a/dlls/wined3d/wined3d_private.h
++++ b/dlls/wined3d/wined3d_private.h
+@@ -3033,6 +3033,7 @@
+ struct wined3d_device
+ {
+     LONG ref;
++    LONG64 conservative_flush_count;
+ 
+     /* WineD3D Information  */
+     struct wined3d_device_parent *device_parent;
+--- a/include/wine/wined3d.h
++++ b/include/wine/wined3d.h
+@@ -2508,6 +2508,7 @@
+ void __cdecl wined3d_device_context_execute_command_list(struct wined3d_device_context *context,
+         struct wined3d_command_list *list, bool restore_state);
+ void __cdecl wined3d_device_context_flush(struct wined3d_device_context *context);
++UINT64 __cdecl wined3d_device_get_conservative_flush_count(const struct wined3d_device *device);
+ void __cdecl wined3d_device_context_flush_mapped_buffer(struct wined3d_device_context *context,
+         struct wined3d_buffer *buffer);
+ void __cdecl wined3d_device_context_generate_mipmaps(struct wined3d_device_context *context,

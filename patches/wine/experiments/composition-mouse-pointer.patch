@@ -1,0 +1,188 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: [EXPERIMENT] Experimental: only private routed left-button samples; not enabled on Desktop.
+
+--- a/dlls/win32u/input.c
++++ b/dlls/win32u/input.c
+@@ -2707,10 +2707,19 @@
+ BOOL WINAPI NtUserGetPointerInfoList( UINT32 id, POINTER_INPUT_TYPE type, UINT_PTR unk0, UINT_PTR unk1, SIZE_T size,
+                                       UINT32 *entry_count, UINT32 *pointer_count, void *pointer_info )
+ {
+-    FIXME( "id %#x, type %#x, unk0 %#lx, unk1 %#lx, size %#lx, entry_count %p, pointer_count %p, pointer_info %p stub!\n",
+-           id, type, (long)unk0, (long)unk1, size, entry_count, pointer_count, pointer_info );
+-    RtlSetLastWin32Error( ERROR_CALL_NOT_IMPLEMENTED );
+-    return FALSE;
++    POINTER_INFO *current = &get_user_thread_info()->composition_pointer;
++    const char *enabled = getenv("WINE_GHUB_POINTER_MOUSE");
++    if (!enabled || strcmp(enabled, "1") || !current->pointerId)
++    { RtlSetLastWin32Error(ERROR_CALL_NOT_IMPLEMENTED); return FALSE; }
++    if (id != current->pointerId || type != PT_POINTER || size != sizeof(*current) || !entry_count || !pointer_count)
++    { RtlSetLastWin32Error(ERROR_INVALID_PARAMETER); return FALSE; }
++    if (!pointer_info)
++    { *entry_count = *pointer_count = 1; return TRUE; }
++    if (*entry_count < 1 || *pointer_count < 1)
++    { *entry_count = *pointer_count = 1; RtlSetLastWin32Error(ERROR_INSUFFICIENT_BUFFER); return FALSE; }
++    *(POINTER_INFO *)pointer_info = *current;
++    *entry_count = *pointer_count = 1;
++    return TRUE;
+ }
+
+ static BOOL get_clip_cursor( RECT *rect, UINT dpi, MONITOR_DPI_TYPE type )
+--- a/dlls/win32u/message.c
++++ b/dlls/win32u/message.c
+@@ -2770,6 +2770,53 @@
+  *
+  * Process a hardware message; return TRUE if message should be passed on to the app
+  */
++/* The native composition input sink consumes WM_POINTER buttons, not legacy
++ * mouse buttons. Keep the legacy move path for hover and expose genuine mouse
++ * samples only for this explicitly enabled private sink route. */
++static BOOL composition_mouse_pointer(MSG *msg, const struct hardware_msg_data *data, BOOL remove)
++{
++    const char *enabled = getenv("WINE_GHUB_POINTER_MOUSE");
++    POINTER_INFO pointer = {0};
++    UINT message = msg->message;
++    if (!(data->flags & COMPOSITION_INPUT_ROUTED) || !enabled || strcmp(enabled, "1")) return FALSE;
++    if (message != WM_LBUTTONDOWN && message != WM_LBUTTONUP &&
++        message != WM_MOUSEMOVE) return FALSE;
++    if (message == WM_MOUSEMOVE && !(msg->wParam & MK_LBUTTON)) return FALSE;
++    pointer.pointerType = PT_MOUSE;
++    pointer.pointerId = 1;
++    pointer.sourceDevice = (HANDLE)(ULONG_PTR)0x47485542;
++    pointer.frameId = data->hw_id;
++    pointer.pointerFlags = POINTER_FLAG_INRANGE | POINTER_FLAG_PRIMARY | POINTER_FLAG_CONFIDENCE;
++    if (msg->wParam & MK_LBUTTON) pointer.pointerFlags |= POINTER_FLAG_INCONTACT | POINTER_FLAG_FIRSTBUTTON;
++    pointer.hwndTarget = msg->hwnd;
++    pointer.ptPixelLocation = pointer.ptPixelLocationRaw = msg->pt;
++    pointer.dwTime = msg->time;
++    pointer.historyCount = 1;
++    if (message == WM_LBUTTONDOWN)
++    {
++        pointer.pointerFlags |= POINTER_FLAG_DOWN;
++        pointer.ButtonChangeType = POINTER_CHANGE_FIRSTBUTTON_DOWN;
++        msg->message = WM_POINTERDOWN;
++    }
++    else if (message == WM_LBUTTONUP)
++    {
++        pointer.pointerFlags |= POINTER_FLAG_UP;
++        pointer.ButtonChangeType = POINTER_CHANGE_FIRSTBUTTON_UP;
++        msg->message = WM_POINTERUP;
++    }
++    else
++    {
++        pointer.pointerFlags |= POINTER_FLAG_UPDATE;
++        msg->message = WM_POINTERUPDATE;
++    }
++    if (remove) get_user_thread_info()->composition_pointer = pointer;
++    msg->wParam = MAKELONG(1, pointer.pointerFlags & 0xffff);
++    msg->lParam = MAKELONG(pointer.ptPixelLocation.x, pointer.ptPixelLocation.y);
++    TRACE("composition mouse pointer message=%x hwnd=%p point=%d,%d flags=%x\n", msg->message,
++          msg->hwnd, pointer.ptPixelLocation.x,pointer.ptPixelLocation.y,pointer.pointerFlags);
++    return TRUE;
++}
++
+ static BOOL process_hardware_message( MSG *msg, UINT hw_id, const struct hardware_msg_data *msg_data,
+                                       HWND hwnd_filter, UINT first, UINT last, BOOL remove )
+ {
+@@ -2787,7 +2834,12 @@
+     msg->pt.x = rect.left;
+     msg->pt.y = rect.top;
+
+-    if (msg->message == WM_INPUT || msg->message == WM_INPUT_DEVICE_CHANGE)
++    if (composition_mouse_pointer(msg, msg_data, remove))
++    {
++        ret = check_hwnd_filter(msg, hwnd_filter) && msg->message >= first && msg->message <= last;
++        if (ret && remove) accept_hardware_message(hw_id);
++    }
++    else if (msg->message == WM_INPUT || msg->message == WM_INPUT_DEVICE_CHANGE)
+         ret = process_rawinput_message( msg, hw_id, msg_data );
+     else if (is_keyboard_message( msg->message ))
+         ret = process_keyboard_message( msg, hw_id, hwnd_filter, first, last, remove );
+--- a/dlls/win32u/ntuser_private.h
++++ b/dlls/win32u/ntuser_private.h
+@@ -130,6 +130,7 @@
+     DWORD                         clipping_reset;         /* time when clipping was last reset */
+     struct session_thread_data   *session_data;           /* shared session thread data */
+     struct mouse_tracking_info   *mouse_tracking_info;    /* NtUserTrackMouseEvent handling */
++    POINTER_INFO                  composition_pointer;    /* Last delivered private mouse pointer */
+ };
+
+ C_ASSERT( sizeof(struct user_thread_info) <= sizeof(((TEB *)0)->Win32ClientInfo) );
+--- a/dlls/user32/input.c
++++ b/dlls/user32/input.c
+@@ -752,10 +752,20 @@
+
+ BOOL WINAPI GetPointerDeviceRects( HANDLE device, RECT *device_rect, RECT *display_rect )
+ {
+-    FIXME( "device %p, device_rect %p, display_rect %p stub!\n",
+-           device, device_rect, display_rect );
+-    SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
+-    return FALSE;
++    POINTER_INFO info;
++    RECT rect;
++    if (!device_rect || !display_rect)
++    { SetLastError(ERROR_INVALID_PARAMETER); return FALSE; }
++    /* Only the private composition mouse sample has pixel-native device
++     * coordinates. Do not invent geometry for an unknown hardware device. */
++    if (!device || !GetPointerInfo(1, &info) || info.pointerType != PT_MOUSE || info.sourceDevice != device)
++    { SetLastError(ERROR_INVALID_HANDLE); return FALSE; }
++    rect.left = GetSystemMetrics(SM_XVIRTUALSCREEN);
++    rect.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
++    rect.right = rect.left + GetSystemMetrics(SM_CXVIRTUALSCREEN);
++    rect.bottom = rect.top + GetSystemMetrics(SM_CYVIRTUALSCREEN);
++    *device_rect = *display_rect = rect;
++    return TRUE;
+ }
+
+ BOOL WINAPI GetPointerPenInfo( UINT32 id, POINTER_PEN_INFO *info )
+--- a/dlls/user32/misc.c
++++ b/dlls/user32/misc.c
+@@ -526,10 +526,24 @@
+
+ BOOL WINAPI GetPointerInfo(UINT32 id, POINTER_INFO *info)
+ {
+-    FIXME("(%d %p): stub\n", id, info);
+-
+-    SetLastError(ERROR_INVALID_PARAMETER);
+-    return FALSE;
++    UINT32 count = 1, pointers = 1;
++    if (!info) { SetLastError(ERROR_INVALID_PARAMETER); return FALSE; }
++    return NtUserGetPointerInfoList(id, PT_POINTER, 0, 0, sizeof(*info), &count, &pointers, info);
++}
++
++BOOL WINAPI GetPointerFrameInfo(UINT32 id, UINT32 *count, POINTER_INFO *info)
++{
++    UINT32 entries = 1;
++    return NtUserGetPointerInfoList(id, PT_POINTER, 0, 0, sizeof(*info), &entries, count, info);
++}
++BOOL WINAPI GetPointerInfoHistory(UINT32 id, UINT32 *entries, POINTER_INFO *info)
++{
++    UINT32 count = 1;
++    return NtUserGetPointerInfoList(id, PT_POINTER, 0, 0, sizeof(*info), entries, &count, info);
++}
++BOOL WINAPI GetPointerFrameInfoHistory(UINT32 id, UINT32 *entries, UINT32 *count, POINTER_INFO *info)
++{
++    return NtUserGetPointerInfoList(id, PT_POINTER, 0, 0, sizeof(*info), entries, count, info);
+ }
+
+ /**********************************************************************
+--- a/dlls/user32/user32.spec
++++ b/dlls/user32/user32.spec
+@@ -632,15 +632,15 @@
+ @ stdcall GetPointerDeviceProperties(ptr ptr ptr)
+ @ stdcall GetPointerDeviceRects(ptr ptr ptr)
+ @ stdcall GetPointerDevices(ptr ptr)
+-# @ stub GetPointerFrameInfo
+-# @ stub GetPointerFrameInfoHistory
++@ stdcall GetPointerFrameInfo(long ptr ptr)
++@ stdcall GetPointerFrameInfoHistory(long ptr ptr ptr)
+ # @ stub GetPointerFramePenInfo
+ # @ stub GetPointerFramePenInfoHistory
+ # @ stub GetPointerFrameTimes
+ # @ stub GetPointerFrameTouchInfo
+ # @ stub GetPointerFrameTouchInfoHistory
+ @ stdcall GetPointerInfo(long ptr)
+-# @ stub GetPointerInfoHistory
++@ stdcall GetPointerInfoHistory(long ptr ptr)
+ @ stdcall GetPointerInputTransform(long long ptr)
+ @ stdcall GetPointerPenInfo(long ptr)
+ # @ stub GetPointerPenInfoHistory

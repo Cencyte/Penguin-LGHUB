@@ -1,0 +1,13 @@
+[Unit]
+Description=DragonShard completion notification for %i
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/firesongz/Source2/Penguin-GHUB/tools/dragonshard-2/scripts/notify_completion.py /mnt/Captures/DragonShard-2/Penguin-GHUB/%i %h/.local/state/dragonshard-2/%i-notifications.json
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus
+Restart=on-failure
+RestartSec=30
+MemoryMax=256M
+
+[Install]
+WantedBy=default.target

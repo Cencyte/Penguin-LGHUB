@@ -1,0 +1,72 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: Preserve alpha on no-redirection composition hosts
+
+--- a/dlls/win32u/child_composition.h
++++ b/dlls/win32u/child_composition.h
+@@ -33,6 +33,7 @@
+     struct child_frame *frames;
+     RECT screen;
+     unsigned int generation;
++    BOOL transparent;
+ };
+ static const struct window_surface_funcs child_composite_funcs;
+ 
+@@ -342,7 +343,9 @@
+     dest = window_surface_get_color(target, target_info);
+     if (!dest || target_info->bmiHeader.biBitCount != 32 ||
+         target_info->bmiHeader.biWidth != width || -target_info->bmiHeader.biHeight != height) goto done;
+-    memcpy(dest, bits, info->bmiHeader.biSizeImage);
++    if (composite->transparent)
++        memset(dest, 0, info->bmiHeader.biSizeImage);
++    else memcpy(dest, bits, info->bmiHeader.biSizeImage);
+     for (frame = composite->frames; frame; frame = frame->next)
+     {
+         UINT i;
+@@ -376,7 +379,9 @@
+     window_surface_unlock(target);
+     if (ret)
+     {
+-        window_surface_set_layered(target, surface->color_key, surface->alpha_bits, surface->alpha_mask);
++        window_surface_set_layered(target, surface->color_key,
++            composite->transparent ? 0 : surface->alpha_bits,
++            composite->transparent ? 0 : surface->alpha_mask);
+         window_surface_set_shape(target, surface->shape_region);
+         window_surface_flush(target);
+     }
+--- a/dlls/win32u/dce.c
++++ b/dlls/win32u/dce.c
+@@ -287,6 +287,9 @@
+     }
+ 
+     monitor_rect = get_surface_rect( map_dpi_rect( *surface_rect, dpi, monitor_dpi ) );
++    if (child_composition_enabled() && NtUserGetAncestor(hwnd, GA_ROOT) == hwnd &&
++        (get_window_long(hwnd, GWL_EXSTYLE) & WS_EX_NOREDIRECTIONBITMAP) && needs_child_composition(hwnd, 0))
++        create_layered = TRUE;
+     if ((driver_surface = get_driver_window_surface( *window_surface, monitor_dpi )))
+     {
+         /* reuse the underlying driver surface only if it also matches the target monitor rect */
+@@ -637,7 +640,7 @@
+     struct child_frame *frames = NULL;
+     RECT screen;
+     unsigned int generation = 0;
+-    BOOL frames_ok = TRUE, child_dirty = FALSE;
++    BOOL frames_ok = TRUE, child_dirty = FALSE, transparent = FALSE;
+ 
+     if (surface->funcs == &child_composite_funcs)
+     {
+@@ -648,6 +651,7 @@
+         window_surface_unlock(surface);
+         if (!frames_ok) return;
+         frames = prepare_child_frames(surface, &screen, &frames_ok);
++        transparent = !!(get_window_long(surface->hwnd, GWL_EXSTYLE) & WS_EX_NOREDIRECTIONBITMAP);
+     }
+     if (!frames_ok) { free_child_frames(frames); return; }
+     window_surface_lock( surface );
+@@ -656,6 +660,7 @@
+         struct child_composite_surface *composite = (void *)surface;
+         composite->frames = frames;
+         composite->screen = screen;
++        composite->transparent = transparent;
+     }
+ 
+     /* align bounds / dirty rect to help with 1bpp shape bitmap updates */

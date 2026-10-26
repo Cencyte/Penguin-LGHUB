@@ -1,0 +1,729 @@
+--- a/dlls/dwrite/Makefile.in
++++ b/dlls/dwrite/Makefile.in
+@@ -20,0 +21 @@
++	private_factory.c \
+--- a/dlls/dwrite/main.c
++++ b/dlls/dwrite/main.c
+@@ -30,6 +30,7 @@
+ #include "initguid.h"
+
+ #include "dwrite_private.h"
++#include "private_factory.h"
+ #include "unixlib.h"
+ #include "wine/debug.h"
+
+@@ -595,6 +596,7 @@
+ struct dwritefactory
+ {
+     IDWriteFactory7 IDWriteFactory7_iface;
++    private_factory private_iface;
+     IDWriteFontDownloadQueue IDWriteFontDownloadQueue_iface;
+     LONG refcount;
+
+@@ -770,6 +772,13 @@
+         IsEqualIID(riid, &IID_IUnknown))
+    {
+         *obj = iface;
++        IDWriteFactory7_AddRef(iface);
++        return S_OK;
++    }
++
++    if (IsEqualIID(riid, &IID_private_factory))
++    {
++        *obj = &impl_from_IDWriteFactory7(iface)->private_iface;
+         IDWriteFactory7_AddRef(iface);
+         return S_OK;
+     }
+@@ -2235,6 +2244,8 @@
+     factory->IDWriteFactory7_iface.lpVtbl = type == DWRITE_FACTORY_TYPE_SHARED ?
+             &shareddwritefactoryvtbl : &dwritefactoryvtbl;
+     factory->IDWriteFontDownloadQueue_iface.lpVtbl = &dwritefontdownloadqueue_vtbl;
++    factory->private_iface.lpVtbl = &private_factory_vtbl;
++    factory->private_iface.public = &factory->IDWriteFactory7_iface;
+     factory->refcount = 1;
+     factory->localfontfileloader = get_local_fontfile_loader();
+
+--- /dev/null
++++ b/dlls/dwrite/private_factory.h
+@@ -0,0 +1,56 @@
++/* Private DirectWrite ABI recovered from the user's DWrite DLL and matching PDB. */
++#ifndef __WINE_DWRITE_PRIVATE_FACTORY_H
++#define __WINE_DWRITE_PRIVATE_FACTORY_H
++typedef struct private_factory private_factory;
++typedef struct glyph_cache glyph_cache;
++typedef struct cache_entry cache_entry;
++struct glyph_bitmap_info
++{
++    UINT16 width, height;
++    INT16 left, top;
++    BYTE flags, reserved;
++};
++struct merge_range
++{
++    UINT32 start, end;
++};
++struct fixed_axis
++{
++    UINT32 tag;
++    INT32 value;
++};
++struct private_factory_vtbl
++{
++    HRESULT(WINAPI *QueryInterface)(private_factory *, REFIID, void **);
++    ULONG(WINAPI *AddRef)(private_factory *);
++    ULONG(WINAPI *Release)(private_factory *);
++    HRESULT(WINAPI *CreateGlyphLookupCacheSingleThreaded)(private_factory *, glyph_cache **);
++    void(WINAPI *GetAlphaBlendParamsWithLightOnDarkAdjustment)(private_factory *, IDWriteRenderingParams *,
++                                                               IDWriteFontFace *, DWRITE_RENDERING_MODE1,
++                                                               DWRITE_TEXT_ANTIALIAS_MODE, BOOLEAN, float, float, float,
++                                                               float *, float *, float *);
++    HRESULT(WINAPI *ComputeGlyphOriginsInDIPs)(private_factory *, const DWRITE_GLYPH_RUN *, DWRITE_MEASURING_MODE,
++                                               D2D1_POINT_2F, float, const DWRITE_MATRIX *, D2D1_POINT_2F *);
++    HRESULT(WINAPI *GetMergeRanges)(private_factory *, const DWRITE_GLYPH_RUN *, struct merge_range *, UINT32 *);
++    void(WINAPI *OverrideSystemRenderingParams)(private_factory *);
++    float(WINAPI *GetCompatibleGammaOverride)(private_factory *);
++    void(WINAPI *SetCompatibleGammaOverride)(private_factory *, float);
++    HRESULT(WINAPI *CreateFontFaceReferenceFile)(private_factory *, IDWriteFontFile *, UINT32,
++                                                 const struct fixed_axis *, UINT32, DWRITE_FONT_SIMULATIONS,
++                                                 IDWriteFontFaceReference **);
++    HRESULT(WINAPI *CreateFontFaceReferencePath)(private_factory *, const WCHAR *, const FILETIME *, UINT32,
++                                                 const struct fixed_axis *, UINT32, DWRITE_FONT_SIMULATIONS,
++                                                 IDWriteFontFaceReference **);
++    HRESULT(WINAPI *CreateFontFaceReferenceKey)(private_factory *, REFGUID, const void *, UINT32, UINT32,
++                                                DWRITE_FONT_SIMULATIONS, IDWriteFontFaceReference **);
++    HRESULT(WINAPI *CreateBitmapRenderTarget)(private_factory *, UINT32 *, UINT32, UINT32,
++                                              IDWriteBitmapRenderTarget1 **);
++};
++struct private_factory
++{
++    const struct private_factory_vtbl *lpVtbl;
++    IDWriteFactory7 *public;
++};
++extern const struct private_factory_vtbl private_factory_vtbl;
++static const GUID IID_private_factory = {0xbd6f5199, 0xf548, 0x493f, {0xa8, 0x8e, 0xf9, 0x41, 0x98, 0x45, 0x91, 0x9b}};
++#endif
+--- /dev/null
++++ b/dlls/dwrite/private_factory.c
+@@ -0,0 +1,622 @@
++/* Private DirectWrite factory and single-threaded glyph cache for native D2D.
++ * Copyright 2026 Cencyte D
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ *
++ * Entries are cache-owned, non-COM objects. Client item data is borrowed.
++ * Cleanup drops raster payloads while retaining stable entries and item data.
++ * No Microsoft code/data is included; rasterization uses Wine's font engine.
++ */
++#define COBJMACROS
++#include <stdlib.h>
++#include <math.h>
++#include <limits.h>
++#include "dwrite_private.h"
++#include "private_factory.h"
++WINE_DEFAULT_DEBUG_CHANNEL(dwrite);
++struct cache_entry_vtbl
++{
++    void *(WINAPI *GetItemData)(cache_entry *);
++    void(WINAPI *SetItemData)(cache_entry *, void *);
++};
++struct glyph_bitmap
++{
++    struct list entry;
++    UINT16 glyph;
++    struct glyph_bitmap_info info;
++    UINT32 rows, pitch;
++    BYTE *bits;
++};
++struct cache_entry
++{
++    const struct cache_entry_vtbl *lpVtbl;
++    struct list entry, glyphs;
++    IDWriteFontFace *face;
++    void *item_data;
++    float em;
++    DWRITE_MATRIX transform;
++    UINT32 mode, grid, aa, raster;
++    BOOL sideways, outline;
++};
++struct glyph_cache_vtbl
++{
++    HRESULT(WINAPI *QueryInterface)(glyph_cache *, REFIID, void **);
++    ULONG(WINAPI *AddRef)(glyph_cache *);
++    ULONG(WINAPI *Release)(glyph_cache *);
++    HRESULT(WINAPI *GetLookupCacheBitmapEntry)(glyph_cache *, IDWriteFontFace *, float, BOOL, const DWRITE_MATRIX *,
++                                               UINT32, UINT32, UINT32, cache_entry **, UINT32 *, void **);
++    HRESULT(WINAPI *GetLookupCacheOutlineEntry)(glyph_cache *, IDWriteFontFace *, BOOL, cache_entry **, void **);
++    HRESULT(WINAPI *GetGlyphBitmapInfo)(glyph_cache *, IDWriteFontFace *, cache_entry *, UINT32, const UINT16 *,
++                                        struct glyph_bitmap_info *);
++    HRESULT(WINAPI *FillGlyphBitmap)(glyph_cache *, IDWriteFontFace *, cache_entry *, UINT16, UINT32, INT32, INT32,
++                                     UINT32, UINT32, void *);
++    HRESULT(WINAPI *GetGlyphOutlineW)(glyph_cache *, IDWriteFontFace *, cache_entry *, float, UINT16, BOOL, UINT32,
++                                      ID2D1SimplifiedGeometrySink *);
++    HRESULT(WINAPI *EnsureGlyphOutlineLongLived)(glyph_cache *, IDWriteFontFace *, cache_entry *, UINT16);
++    HRESULT(WINAPI *TryGetUncompressedBitmap)(glyph_cache *, IDWriteFontFace *, cache_entry *, UINT16, UINT32, UINT32 *,
++                                              UINT32 *, const void **);
++    void(WINAPI *Cleanup)(glyph_cache *);
++};
++struct glyph_cache
++{
++    const struct glyph_cache_vtbl *lpVtbl;
++    LONG refs;
++    IDWriteFactory7 *factory;
++    struct list entries;
++};
++static const GUID IID_glyph_cache = {0xd4e275f2, 0x7b28, 0x4d55, {0xa1, 0xe0, 0x54, 0x61, 0x0b, 0x55, 0xe8, 0x3d}};
++static const UINT32 scale_x[] = {1, 6, 6, 8, 4, 2}, scale_y[] = {1, 1, 5, 1, 4, 2};
++static LONG compatible_gamma;
++static void *WINAPI entry_get(cache_entry *entry)
++{
++    return entry->item_data;
++}
++static void WINAPI entry_set(cache_entry *entry, void *data)
++{
++    entry->item_data = data;
++}
++static const struct cache_entry_vtbl entry_vtbl = {entry_get, entry_set};
++static HRESULT WINAPI cache_qi(glyph_cache *cache, REFIID iid, void **out)
++{
++    if (!out)
++        return E_POINTER;
++    *out = NULL;
++    if (!IsEqualGUID(iid, &IID_IUnknown) && !IsEqualGUID(iid, &IID_glyph_cache))
++        return E_NOINTERFACE;
++    *out = cache;
++    InterlockedIncrement(&cache->refs);
++    return S_OK;
++}
++static ULONG WINAPI cache_addref(glyph_cache *cache)
++{
++    return InterlockedIncrement(&cache->refs);
++}
++static void clear_glyphs(cache_entry *entry)
++{
++    struct glyph_bitmap *bitmap, *next;
++    LIST_FOR_EACH_ENTRY_SAFE(bitmap, next, &entry->glyphs, struct glyph_bitmap, entry)
++    {
++        list_remove(&bitmap->entry);
++        free(bitmap->bits);
++        free(bitmap);
++    }
++}
++static ULONG WINAPI cache_release(glyph_cache *cache)
++{
++    ULONG refs = InterlockedDecrement(&cache->refs);
++    cache_entry *entry, *next;
++    if (!refs)
++    {
++        LIST_FOR_EACH_ENTRY_SAFE(entry, next, &cache->entries, cache_entry, entry)
++        {
++            clear_glyphs(entry);
++            list_remove(&entry->entry);
++            IDWriteFontFace_Release(entry->face);
++            free(entry);
++        }
++        IDWriteFactory7_Release(cache->factory);
++        free(cache);
++    }
++    return refs;
++}
++static BOOL valid_entry(glyph_cache *cache, IDWriteFontFace *face, cache_entry *entry, BOOL outline)
++{
++    cache_entry *e;
++    LIST_FOR_EACH_ENTRY(e, &cache->entries, cache_entry, entry)
++    if (e == entry)
++        return e->face == face && e->outline == outline;
++    return FALSE;
++}
++static HRESULT get_entry(glyph_cache *cache, IDWriteFontFace *face, float em, BOOL sideways,
++                         const DWRITE_MATRIX *transform, UINT32 mode, UINT32 grid, UINT32 aa, BOOL outline,
++                         cache_entry **out, UINT32 *raster, void **data)
++{
++    DWRITE_MATRIX m = transform ? *transform : identity;
++    cache_entry *entry;
++    unsigned int i;
++    if (!out || !data || (!outline && !raster))
++        return E_POINTER;
++    *out = NULL;
++    *data = NULL;
++    if (raster)
++        *raster = 0;
++    if (!face || !isfinite(em) || em <= 0.0f)
++        return E_INVALIDARG;
++    for (i = 0; i < 6; ++i)
++        if (!isfinite(((float *)&m)[i]))
++            return E_INVALIDARG;
++    m.dx = m.dy = 0.0f; /* Placement belongs to the caller. */
++    if (!outline && (mode == 0 || mode == 6 || mode > 7 || grid == 0 || grid > 2 || aa > 1))
++        return E_INVALIDARG;
++    LIST_FOR_EACH_ENTRY(entry, &cache->entries, cache_entry, entry)
++    if (entry->face == face && entry->em == em && entry->sideways == !!sideways && entry->mode == mode &&
++        entry->grid == grid && entry->aa == aa && entry->outline == outline &&
++        !memcmp(&entry->transform, &m, sizeof(m)))
++        goto found;
++    if (!(entry = calloc(1, sizeof(*entry))))
++        return E_OUTOFMEMORY;
++    entry->lpVtbl = &entry_vtbl;
++    entry->face = face;
++    IDWriteFontFace_AddRef(face);
++    entry->em = em;
++    entry->sideways = !!sideways;
++    entry->transform = m;
++    entry->mode = mode;
++    entry->grid = grid;
++    entry->aa = aa;
++    entry->outline = outline;
++    if (mode == 1)
++        entry->raster = 0;
++    else if (!aa)
++        entry->raster = mode >= 5 ? 2 : 1;
++    else
++        entry->raster = mode == 7 ? 5 : mode == 5 ? 4 : 3;
++    list_init(&entry->glyphs);
++    list_add_tail(&cache->entries, &entry->entry);
++found:
++    *out = entry;
++    *data = entry->item_data;
++    if (raster)
++        *raster = entry->raster;
++    TRACE("entry %p face %p em %f mode %u aa %u raster %u outline %d.\n", entry, face, em, mode, aa, entry->raster,
++          outline);
++    return S_OK;
++}
++static HRESULT WINAPI cache_bitmap(glyph_cache *cache, IDWriteFontFace *face, float em, BOOL sideways,
++                                   const DWRITE_MATRIX *transform, UINT32 mode, UINT32 grid, UINT32 aa,
++                                   cache_entry **out, UINT32 *raster, void **data)
++{
++    return get_entry(cache, face, em, sideways, transform, mode, grid, aa, FALSE, out, raster, data);
++}
++static HRESULT WINAPI cache_outline(glyph_cache *cache, IDWriteFontFace *face, BOOL sideways, cache_entry **out,
++                                    void **data)
++{
++    return get_entry(cache, face, 1.0f, sideways, NULL, 0, 0, 0, TRUE, out, NULL, data);
++}
++static void set_sample(BYTE *bits, UINT32 pitch, UINT32 raster, UINT32 x, UINT32 y)
++{
++    if (raster == 4)
++    {
++        UINT32 bit = (y & 3) * 4 + (x & 3);
++        bits[(SIZE_T)(y / 4) * pitch + (x / 4) * 2 + bit / 8] |= 1u << (bit & 7);
++    }
++    else
++        bits[(SIZE_T)y * pitch + x / 8] |= 1u << (x & 7);
++}
++static BOOL get_sample(const struct glyph_bitmap *bitmap, UINT32 raster, UINT32 x, UINT32 y)
++{
++    UINT32 bit;
++    if (raster == 4)
++    {
++        bit = (y & 3) * 4 + (x & 3);
++        return !!(bitmap->bits[(SIZE_T)(y / 4) * bitmap->pitch + (x / 4) * 2 + bit / 8] & (1u << (bit & 7)));
++    }
++    return !!(bitmap->bits[(SIZE_T)y * bitmap->pitch + x / 8] & (1u << (x & 7)));
++}
++static HRESULT get_bitmap(glyph_cache *cache, cache_entry *entry, UINT16 glyph, struct glyph_bitmap **out)
++{
++    struct glyph_bitmap *bitmap;
++    IDWriteGlyphRunAnalysis *analysis;
++    DWRITE_MATRIX m = entry->transform;
++    DWRITE_GLYPH_RUN run = {0};
++    RECT bounds;
++    BYTE *alpha;
++    float advance = 0.0f;
++    UINT32 width, height, x, y, sx = scale_x[entry->raster], sy = scale_y[entry->raster];
++    HRESULT hr;
++    *out = NULL;
++    if (glyph >= IDWriteFontFace_GetGlyphCount(entry->face))
++        glyph = 0;
++    LIST_FOR_EACH_ENTRY(bitmap, &entry->glyphs, struct glyph_bitmap, entry)
++    if (bitmap->glyph == glyph)
++    {
++        *out = bitmap;
++        return S_OK;
++    }
++    if (entry->sideways)
++    {
++        DWRITE_MATRIX old = m;
++        m.m11 = -old.m21;
++        m.m12 = -old.m22;
++        m.m21 = old.m11;
++        m.m22 = old.m12;
++    }
++    m.m11 *= sx;
++    m.m21 *= sx;
++    m.m12 *= sy;
++    m.m22 *= sy;
++    run.fontFace = entry->face;
++    run.fontEmSize = entry->em;
++    run.glyphCount = 1;
++    run.glyphIndices = &glyph;
++    run.glyphAdvances = &advance;
++    /* Binary oversamples in the private layout. FreeType coverage/hinting may
++     * differ from the Microsoft rasterizer; no byte-identical claim. */
++    hr = IDWriteFactory7_CreateGlyphRunAnalysis(cache->factory, &run, &m, DWRITE_RENDERING_MODE1_ALIASED,
++                                                DWRITE_MEASURING_MODE_NATURAL, entry->grid,
++                                                DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE, 0, 0, &analysis);
++    if (FAILED(hr))
++        return hr;
++    hr = IDWriteGlyphRunAnalysis_GetAlphaTextureBounds(analysis, DWRITE_TEXTURE_ALIASED_1x1, &bounds);
++    if (FAILED(hr))
++        goto done;
++    width = bounds.right - bounds.left;
++    height = bounds.bottom - bounds.top;
++    if (width > USHRT_MAX || height > USHRT_MAX || bounds.left < SHRT_MIN || bounds.left > SHRT_MAX ||
++        bounds.top < -SHRT_MAX || bounds.top > -SHRT_MIN || (UINT64)width * height > 64 * 1024 * 1024)
++    {
++        hr = E_OUTOFMEMORY;
++        goto done;
++    }
++    if (!(bitmap = calloc(1, sizeof(*bitmap))))
++    {
++        hr = E_OUTOFMEMORY;
++        goto done;
++    }
++    bitmap->glyph = glyph;
++    bitmap->info.width = width;
++    bitmap->info.height = height;
++    bitmap->info.left = bounds.left;
++    bitmap->info.top = -bounds.top;
++    bitmap->info.flags = entry->mode == 1 ? 3 : entry->mode <= 3 ? 2 : 0;
++    bitmap->rows = entry->raster == 4 ? (height + 3) / 4 : height;
++    bitmap->pitch = entry->raster == 4 ? (((width + 3) / 4 * 2 + 3) & ~3u) : ((width + 31) / 32 * 4);
++    if (width && height)
++    {
++        alpha = malloc((SIZE_T)width * height);
++        bitmap->bits = calloc(bitmap->rows, bitmap->pitch);
++        if (!alpha || !bitmap->bits)
++            hr = E_OUTOFMEMORY;
++        else
++        {
++            hr = IDWriteGlyphRunAnalysis_CreateAlphaTexture(analysis, DWRITE_TEXTURE_ALIASED_1x1, &bounds, alpha,
++                                                            width * height);
++            if (SUCCEEDED(hr))
++                for (y = 0; y < height; ++y)
++                    for (x = 0; x < width; ++x)
++                        if (alpha[(SIZE_T)y * width + x])
++                            set_sample(bitmap->bits, bitmap->pitch, entry->raster, x, y);
++        }
++        free(alpha);
++        if (FAILED(hr))
++        {
++            free(bitmap->bits);
++            free(bitmap);
++            goto done;
++        }
++    }
++    list_add_tail(&entry->glyphs, &bitmap->entry);
++    *out = bitmap;
++done:
++    IDWriteGlyphRunAnalysis_Release(analysis);
++    return hr;
++}
++static HRESULT WINAPI cache_info(glyph_cache *cache, IDWriteFontFace *face, cache_entry *entry, UINT32 count,
++                                 const UINT16 *glyphs, struct glyph_bitmap_info *info)
++{
++    struct glyph_bitmap *bitmap;
++    UINT32 i;
++    HRESULT hr;
++    if (!valid_entry(cache, face, entry, FALSE) || (count && (!glyphs || !info)))
++        return E_INVALIDARG;
++    for (i = 0; i < count; ++i)
++    {
++        if (FAILED(hr = get_bitmap(cache, entry, glyphs[i], &bitmap)))
++            return hr;
++        info[i] = bitmap->info;
++    }
++    return S_OK;
++}
++static HRESULT WINAPI cache_fill(glyph_cache *cache, IDWriteFontFace *face, cache_entry *entry, UINT16 glyph,
++                                 UINT32 options, INT32 x, INT32 y, UINT32 rows, UINT32 pitch, void *buffer)
++{
++    struct glyph_bitmap *bitmap;
++    UINT32 dx, dy;
++    INT64 tx, ty, width, height;
++    HRESULT hr;
++    if (!valid_entry(cache, face, entry, FALSE) || (rows && pitch && !buffer) || options & ~3u)
++        return E_INVALIDARG;
++    if (FAILED(hr = get_bitmap(cache, entry, glyph, &bitmap)))
++        return hr;
++    width = entry->raster == 4 ? (INT64)(pitch / 2) * 4 : (INT64)pitch * 8;
++    height = entry->raster == 4 ? (INT64)rows * 4 : rows;
++    /* OR overlapping coverage. Clip signed sample offsets before arithmetic. */
++    for (dy = 0; dy < bitmap->info.height; ++dy)
++    {
++        ty = (INT64)y + dy;
++        if (ty < 0 || ty >= height)
++            continue;
++        for (dx = 0; dx < bitmap->info.width; ++dx)
++        {
++            tx = (INT64)x + dx;
++            if (tx >= 0 && tx < width && get_sample(bitmap, entry->raster, dx, dy))
++                set_sample(buffer, pitch, entry->raster, tx, ty);
++        }
++    }
++    return S_OK;
++}
++static HRESULT WINAPI cache_get_outline(glyph_cache *cache, IDWriteFontFace *face, cache_entry *entry, float em,
++                                        UINT16 glyph, BOOL sideways, UINT32 options, ID2D1SimplifiedGeometrySink *sink)
++{
++    float advance = 0;
++    if (!valid_entry(cache, face, entry, TRUE) || !sink || !isfinite(em) || em <= 0 || options & ~1u)
++        return E_INVALIDARG;
++    if (glyph >= IDWriteFontFace_GetGlyphCount(face))
++        glyph = 0;
++    return IDWriteFontFace_GetGlyphRunOutline(face, em, &glyph, &advance, NULL, 1, sideways, FALSE, sink);
++}
++static HRESULT WINAPI cache_keep_outline(glyph_cache *cache, IDWriteFontFace *face, cache_entry *entry, UINT16 glyph)
++{
++    DWRITE_GLYPH_METRICS metrics;
++    if (!valid_entry(cache, face, entry, TRUE))
++        return E_INVALIDARG;
++    if (glyph >= IDWriteFontFace_GetGlyphCount(face))
++        glyph = 0;
++    /* Font face retains the source for cache lifetime; outline emits directly
++     * into the caller's sink, borrowing no transient command storage. */
++    return IDWriteFontFace_GetDesignGlyphMetrics(face, &glyph, 1, &metrics, entry->sideways);
++}
++static HRESULT WINAPI cache_uncompressed(glyph_cache *cache, IDWriteFontFace *face, cache_entry *entry, UINT16 glyph,
++                                         UINT32 options, UINT32 *rows, UINT32 *pitch, const void **data)
++{
++    struct glyph_bitmap *bitmap;
++    HRESULT hr;
++    if (!rows || !pitch || !data)
++        return E_POINTER;
++    *rows = *pitch = 0;
++    *data = NULL;
++    if (!valid_entry(cache, face, entry, FALSE) || options & ~3u)
++        return E_INVALIDARG;
++    if (FAILED(hr = get_bitmap(cache, entry, glyph, &bitmap)))
++        return hr;
++    *rows = bitmap->rows;
++    *pitch = bitmap->pitch;
++    *data = bitmap->bits;
++    return S_OK;
++}
++static void WINAPI cache_cleanup(glyph_cache *cache)
++{
++    cache_entry *entry;
++    LIST_FOR_EACH_ENTRY(entry, &cache->entries, cache_entry, entry) clear_glyphs(entry);
++}
++static const struct glyph_cache_vtbl cache_vtbl = {
++    cache_qi,   cache_addref,      cache_release,      cache_bitmap,       cache_outline, cache_info,
++    cache_fill, cache_get_outline, cache_keep_outline, cache_uncompressed, cache_cleanup};
++static HRESULT WINAPI private_qi(private_factory *factory, REFIID iid, void **out)
++{
++    if (!out)
++        return E_POINTER;
++    return IDWriteFactory7_QueryInterface(factory->public, iid, out);
++}
++static ULONG WINAPI private_addref(private_factory *factory)
++{
++    return IDWriteFactory7_AddRef(factory->public);
++}
++static ULONG WINAPI private_release(private_factory *factory)
++{
++    return IDWriteFactory7_Release(factory->public);
++}
++static HRESULT WINAPI private_cache(private_factory *factory, glyph_cache **out)
++{
++    glyph_cache *cache;
++    if (!out)
++        return E_POINTER;
++    *out = NULL;
++    if (!(cache = calloc(1, sizeof(*cache))))
++        return E_OUTOFMEMORY;
++    cache->lpVtbl = &cache_vtbl;
++    cache->refs = 1;
++    cache->factory = factory->public;
++    IDWriteFactory7_AddRef(cache->factory);
++    list_init(&cache->entries);
++    *out = cache;
++    return S_OK;
++}
++static void WINAPI private_blend(private_factory *factory, IDWriteRenderingParams *params, IDWriteFontFace *face,
++                                 DWRITE_RENDERING_MODE1 mode, DWRITE_TEXT_ANTIALIAS_MODE aa, BOOLEAN force_grayscale,
++                                 float red, float green, float blue, float *gamma, float *contrast, float *level)
++{
++    IDWriteRenderingParams1 *params1;
++    float luma = red * .3f + green * .59f + blue * .11f, enhancement;
++    if (!params || !gamma || !contrast || !level)
++        return;
++    *gamma = IDWriteRenderingParams_GetGamma(params);
++    enhancement = IDWriteRenderingParams_GetEnhancedContrast(params);
++    *level = force_grayscale || aa == DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE
++                 ? 0
++                 : IDWriteRenderingParams_GetClearTypeLevel(params);
++    if (aa == DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE &&
++        SUCCEEDED(IDWriteRenderingParams_QueryInterface(params, &IID_IDWriteRenderingParams1, (void **)&params1)))
++    {
++        enhancement = IDWriteRenderingParams1_GetGrayscaleEnhancedContrast(params1);
++        IDWriteRenderingParams1_Release(params1);
++    }
++    if (mode == DWRITE_RENDERING_MODE1_GDI_CLASSIC || mode == DWRITE_RENDERING_MODE1_GDI_NATURAL)
++    {
++        UINT value = 1400;
++        SystemParametersInfoW(SPI_GETFONTSMOOTHINGCONTRAST, 0, &value, 0);
++        *gamma = value / 1000.0f;
++        enhancement = 0;
++        *level = force_grayscale || aa == DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE ||
++                         IDWriteRenderingParams_GetPixelGeometry(params) == DWRITE_PIXEL_GEOMETRY_BGR
++                     ? 0
++                     : 1;
++    }
++    luma = luma >= .75f ? 0 : luma > .5f ? (.75f - luma) * 4 : 1;
++    *contrast = luma * enhancement;
++    TRACE("mode %u aa %u gamma %f contrast %f level %f.\n", mode, aa, *gamma, *contrast, *level);
++}
++static HRESULT WINAPI private_origins(private_factory *factory, const DWRITE_GLYPH_RUN *run, DWRITE_MEASURING_MODE mode,
++                                      D2D1_POINT_2F origin, float ppdip, const DWRITE_MATRIX *transform,
++                                      D2D1_POINT_2F *out)
++{
++    struct dwrite_fontface *face;
++    DWRITE_FONT_METRICS font_metrics;
++    DWRITE_GLYPH_METRICS metrics;
++    D2D1_POINT_2F position;
++    float advance, scale;
++    UINT32 i;
++    HRESULT hr;
++    if (!run || !run->fontFace || (run->glyphCount && (!run->glyphIndices || !out)) || !isfinite(run->fontEmSize) ||
++        run->fontEmSize <= 0 || !isfinite(ppdip) || ppdip <= 0 || (UINT32)mode > DWRITE_MEASURING_MODE_GDI_NATURAL)
++        return E_INVALIDARG;
++    if (transform)
++        for (i = 0; i < 6; ++i)
++            if (!isfinite(((const float *)transform)[i]))
++                return E_INVALIDARG;
++    face = unsafe_impl_from_IDWriteFontFace(run->fontFace);
++    IDWriteFontFace_GetMetrics(run->fontFace, &font_metrics);
++    scale = run->fontEmSize / font_metrics.designUnitsPerEm;
++    for (i = 0; i < run->glyphCount; ++i)
++    {
++        position = origin;
++        if (run->isSideways)
++        {
++            if (mode == DWRITE_MEASURING_MODE_NATURAL)
++                hr = IDWriteFontFace_GetDesignGlyphMetrics(run->fontFace, run->glyphIndices + i, 1, &metrics, TRUE);
++            else
++                hr = IDWriteFontFace_GetGdiCompatibleGlyphMetrics(run->fontFace, run->fontEmSize, ppdip, transform,
++                                                                  mode == DWRITE_MEASURING_MODE_GDI_NATURAL,
++                                                                  run->glyphIndices + i, 1, &metrics, TRUE);
++            if (FAILED(hr))
++                return hr;
++            advance = metrics.advanceHeight * scale;
++            position.x += metrics.verticalOriginY * scale;
++            position.y += metrics.advanceWidth * scale * .5f;
++        }
++        else if (!run->glyphAdvances || (run->bidiLevel & 1))
++            advance = fontface_get_scaled_design_advance(face, mode, run->fontEmSize, ppdip, transform,
++                                                         run->glyphIndices[i], FALSE);
++        else
++            advance = run->glyphAdvances[i];
++        if (run->bidiLevel & 1)
++            position.x -= advance;
++        if (run->glyphOffsets)
++        {
++            position.x += (run->bidiLevel & 1 ? -1 : 1) * run->glyphOffsets[i].advanceOffset;
++            position.y -= run->glyphOffsets[i].ascenderOffset;
++        }
++        origin.x += (run->bidiLevel & 1 ? -1 : 1) * (run->glyphAdvances ? run->glyphAdvances[i] : advance);
++        /* ppdip controls GDI metric rounding; output remains in DIPs. The
++         * private method applies the supplied transform to final origins. */
++        if (transform)
++        {
++            out[i].x = position.x * transform->m11 + position.y * transform->m21 + transform->dx;
++            out[i].y = position.x * transform->m12 + position.y * transform->m22 + transform->dy;
++        }
++        else
++            out[i] = position;
++    }
++    return S_OK;
++}
++static HRESULT WINAPI private_merge(private_factory *factory, const DWRITE_GLYPH_RUN *run, struct merge_range *ranges,
++                                    UINT32 *count)
++{
++    if (!count)
++        return E_POINTER;
++    *count = 0;
++    if (!run || !run->fontFace || (run->glyphCount > 1 && !ranges))
++        return E_INVALIDARG;
++    /* Conservatively union the entire run's coverage. This avoids seams for
++     * overlapping glyphs without relying on the optional legacy MERG table. */
++    if (run->glyphCount > 1)
++    {
++        ranges[0].start = 0;
++        ranges[0].end = run->glyphCount;
++        *count = 1;
++    }
++    return S_OK;
++}
++static void WINAPI private_override(private_factory *factory)
++{
++    FIXME("System rendering override is not implemented.\n");
++}
++static float WINAPI private_get_gamma(private_factory *factory)
++{
++    union {
++        LONG bits;
++        float value;
++    } r;
++    r.bits = InterlockedCompareExchange(&compatible_gamma, 0, 0);
++    return r.value;
++}
++static void WINAPI private_set_gamma(private_factory *factory, float value)
++{
++    union {
++        LONG bits;
++        float value;
++    } v;
++    v.value = value;
++    InterlockedExchange(&compatible_gamma, v.bits);
++}
++static HRESULT WINAPI private_font_file(private_factory *factory, IDWriteFontFile *file, UINT32 index,
++                                        const struct fixed_axis *axes, UINT32 count,
++                                        DWRITE_FONT_SIMULATIONS simulations, IDWriteFontFaceReference **out)
++{
++    if (!out)
++        return E_POINTER;
++    *out = NULL;
++    if (count)
++    {
++        FIXME("Private variable font reference not implemented.\n");
++        return E_NOTIMPL;
++    }
++    return IDWriteFactory7_CreateFontFaceReference_(factory->public, file, index, simulations, out);
++}
++static HRESULT WINAPI private_font_path(private_factory *factory, const WCHAR *path, const FILETIME *time, UINT32 index,
++                                        const struct fixed_axis *axes, UINT32 count,
++                                        DWRITE_FONT_SIMULATIONS simulations, IDWriteFontFaceReference **out)
++{
++    if (!out)
++        return E_POINTER;
++    *out = NULL;
++    if (count)
++    {
++        FIXME("Private variable font reference not implemented.\n");
++        return E_NOTIMPL;
++    }
++    return IDWriteFactory3_CreateFontFaceReference((IDWriteFactory3 *)factory->public, path, time, index, simulations,
++                                                   out);
++}
++static HRESULT WINAPI private_font_key(private_factory *factory, REFGUID key, const void *data, UINT32 size,
++                                       UINT32 index, DWRITE_FONT_SIMULATIONS simulations,
++                                       IDWriteFontFaceReference **out)
++{
++    if (!out)
++        return E_POINTER;
++    *out = NULL;
++    FIXME("Private keyed font reference not implemented.\n");
++    return E_NOTIMPL;
++}
++static HRESULT WINAPI private_bitmap_target(private_factory *factory, UINT32 *bits, UINT32 width, UINT32 height,
++                                            IDWriteBitmapRenderTarget1 **out)
++{
++    if (!out)
++        return E_POINTER;
++    *out = NULL;
++    FIXME("Caller-backed bitmap render target not implemented.\n");
++    return E_NOTIMPL;
++}
++const struct private_factory_vtbl private_factory_vtbl = {
++    private_qi,        private_addref,    private_release,  private_cache,        private_blend,
++    private_origins,   private_merge,     private_override, private_get_gamma,    private_set_gamma,
++    private_font_file, private_font_path, private_font_key, private_bitmap_target};

@@ -1,0 +1,48 @@
+--- a/dlls/wined3d/context_gl.c
++++ b/dlls/wined3d/context_gl.c
+@@ -1210,6 +1210,10 @@
+         return FALSE;
+ 
+     current = gl_info->gl_ops.wgl.p_wglGetPixelFormat(dc);
++    if (!current && context_gl->internal_format_set &&
++            GetEnvironmentVariableA("GHUB_D3D11_CONTEXT_TRACE", NULL, 0))
++        ERR("GHUB format diagnostic: dc %p, private %u, window %p, saved window %p, format %d, current %d, internal %u.\n",
++                dc, private, WindowFromDC(dc), context_gl->window, format, current, context_gl->internal_format_set);
+     if ((current == format) || (!current && context_gl->internal_format_set))
+         goto success;
+ 
+@@ -1262,6 +1266,7 @@
+ {
+     struct wined3d_device_gl *device_gl = wined3d_device_gl(context_gl->c.device);
+     BOOL backup = FALSE;
++    static LONG test_backup_used;
+ 
+     TRACE("context_gl %p.\n", context_gl);
+ 
+@@ -1269,6 +1274,16 @@
+     {
+         WARN("Failed to set pixel format %d on device context %p.\n",
+                 context_gl->pixel_format, context_gl->dc);
++        backup = TRUE;
++    }
++
++    /* Isolated recovery regression: exercise switching from an internally
++     * formatted application DC to a fresh backup DC once per process. */
++    if (!context_gl->dc_is_private && context_gl->internal_format_set &&
++            GetEnvironmentVariableA("GHUB_D3D11_TEST_BACKUP_DC", NULL, 0) &&
++            !InterlockedCompareExchange(&test_backup_used, 1, 0))
++    {
++        ERR("GHUB TEST: forcing application-DC to backup-DC recovery.\n");
+         backup = TRUE;
+     }
+ 
+@@ -1296,6 +1311,9 @@
+         TRACE("Using backup DC %p.\n", context_gl->dc);
+         context_gl->dc_is_private = TRUE;
+         context_gl->dc_has_format = FALSE;
++        /* The internal format belongs to the previous DC. A fresh backup
++         * can report format zero until wglSetPixelFormatWINE initializes it. */
++        context_gl->internal_format_set = 0;
+ 
+         if (!wined3d_context_gl_set_pixel_format(context_gl))
+         {

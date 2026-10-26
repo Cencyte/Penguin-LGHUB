@@ -1,0 +1,54 @@
+<!doctype html>
+<html data-theme="GHUB">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; connect-src 'none'">
+  <link rel="stylesheet" href="app.min.css">
+  <style>
+    body { margin:0; background:#111; }
+    .GhubHome { position:static!important; padding:0!important; }
+    .DeviceList { display:flex; gap:24px; padding:30px; }
+    .DeviceList.list { flex-direction:column; }
+  </style>
+</head>
+<body>
+<div class="GhubHome"><div id="cards" class="DeviceList"></div></div>
+<script>
+  const layout = new URLSearchParams(location.search).get('layout');
+  const list = document.getElementById('cards');
+  list.classList.add(layout);
+  for (let i = 0; i < 3; i++) {
+    // Match VB/tG/Wj's installed card hierarchy, with inert artwork and a
+    // footer button. No Redux sagas, agent connection, or peripheral writes.
+    list.insertAdjacentHTML('beforeend', `
+      <div class="animated-card-container" style="width:${layout === 'list' ? 900 : 280}px">
+        <div class="flip-card-inner"><div class="card-front">
+          <div id="card${i}" class="dls-Card DeviceCard" data-disabled="false" tabindex="0">
+            <header class="dls-CardHeader"><h3 class="HeaderText">Peripheral ${i}</h3><div>Battery: 100%</div></header>
+            <main class="dls-CardBody"><div class="device-image-wrapper DeviceThumbContainer">
+              <svg class="DeviceThumb" width="190" height="240"><rect width="180" height="230" fill="#608080"/></svg>
+              <div class="device-canvas-underlay show"><canvas width="100" height="150"></canvas></div>
+            </div></main>
+            <footer class="dls-CardFooter"><button>Memory</button></footer>
+          </div>
+        </div></div>
+      </div>`);
+  }
+  let serial = 0;
+  function cards() {
+    return [...document.querySelectorAll('.DeviceCard')].map(card => ({
+      hover:card.matches(':hover'), focus:card.matches(':focus'),
+      color:getComputedStyle(card).borderTopColor,
+      background:getComputedStyle(card).backgroundColor,
+      rect:card.getBoundingClientRect().toJSON()
+    }));
+  }
+  document.addEventListener('mousemove', event => {
+    const x = event.clientX, y = event.clientY;
+    requestAnimationFrame(() => console.log('HOVER_SAMPLE ' + JSON.stringify({
+      serial:++serial, x, y, cards:cards()
+    })));
+  });
+  requestAnimationFrame(() => console.log('HOVER_READY ' + JSON.stringify(cards())));
+</script>
+</body></html>

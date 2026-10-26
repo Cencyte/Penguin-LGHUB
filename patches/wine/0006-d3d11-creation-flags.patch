@@ -1,0 +1,43 @@
+--- a/dlls/d3d11/d3d11_private.h
++++ b/dlls/d3d11/d3d11_private.h
+@@ -578,6 +578,7 @@
+     LONG refcount;
+ 
+     BOOL d3d11_only;
++    UINT creation_flags;
+ 
+     struct d3d_device_context_state *state;
+     struct d3d11_device_context immediate_context;
+--- a/dlls/d3d11/d3d11_main.c
++++ b/dlls/d3d11/d3d11_main.c
+@@ -138,6 +138,7 @@
+         return E_FAIL;
+     }
+     d3d_device->d3d11_only = TRUE;
++    d3d_device->creation_flags = flags;
+ 
+     return S_OK;
+ }
+--- a/dlls/d3d11/device.c
++++ b/dlls/d3d11/device.c
+@@ -5072,9 +5072,9 @@
+ 
+ static UINT STDMETHODCALLTYPE d3d11_device_GetCreationFlags(ID3D11Device5 *iface)
+ {
+-    FIXME("iface %p stub!\n", iface);
+-
+-    return 0;
++    struct d3d_device *device = impl_from_ID3D11Device5(iface);
++    TRACE("iface %p, flags %#x.\n", iface, device->creation_flags);
++    return device->creation_flags;
+ }
+ 
+ static HRESULT STDMETHODCALLTYPE d3d11_device_GetDeviceRemovedReason(ID3D11Device5 *iface)
+@@ -8159,6 +8160,7 @@
+     /* COM aggregation always takes place */
+     device->outer_unk = outer_unknown;
+     device->d3d11_only = FALSE;
++    device->creation_flags = 0;
+     device->state = NULL;
+ 
+     d3d11_device_context_init(&device->immediate_context, device, D3D11_DEVICE_CONTEXT_IMMEDIATE);

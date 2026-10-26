@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-10-26T06:42:12.030046+00:00",
+  "application_version": "2026.6.974819",
+  "build_id": "869589",
+  "selection": "tested_setup",
+  "scope": "30 depots marked PRESENT in the working installation; not all 779 catalog entries or all devices",
+  "lock_sha256_canonical_json": "b6be401ebe43adedba1132d1e1a7a693ebde3a11d71a9d7934c734bb7156ee14",
+  "download_source": "Official HTTPS updates.ghub.logitechg.com; every archive size and SHA-256 matched the lock",
+  "download_bytes": 910350368,
+  "formats": {
+    "plain_depots": 27,
+    "encrypted_depots": 3,
+    "encrypted_members": 59,
+    "nested_resource_capsules": 6
+  },
+  "public_access": {
+    "fresh_download_verified": true,
+    "required_key_fingerprints_verified": 2,
+    "authentication_required": false,
+    "key_values_in_repository": false
+  },
+  "fresh_stage": {
+    "depot_count": 30,
+    "depot_files": 1115,
+    "application_files": 438,
+    "pending_capsules": 0,
+    "vendor_executables_started": false,
+    "live_runtime_modified": false
+  },
+  "working_installation_comparison": {
+    "depots": {
+      "exact": 1115,
+      "different": [],
+      "absent": []
+    },
+    "application": {
+      "exact": 434,
+      "different": [
+        "system_tray/MainWindow.xbf",
+        "system_tray/resources.pri"
+      ],
+      "absent": [
+        "sdk_legacy_led_x64.dll",
+        "sdk_legacy_led_x86.dll"
+      ]
+    }
+  },
+  "pending_installer_declaration_groups": {
+    "detection": 4,
+    "conditional_or_external_file": 17,
+    "product": 1,
+    "shortcuts": 1,
+    "installer": 1,
+    "updater": 1,
+    "uninstaller": 1,
+    "userRepair": 1,
+    "userUninstaller": 1,
+    "processControl": 1,
+    "will_connect_to_lus_ipc": 1,
+    "launchables": 1,
+    "missing_source_file": 2,
+    "registerLibrary": 2,
+    "extensions": 8
+  },
+  "missing_sources": [
+    "sdks/trueforce_sdk_x86.dll",
+    "sdks/trueforce_sdk_x64.dll"
+  ],
+  "tested_selection_closures": {
+    "core": 6,
+    "required": 12,
+    "tested_setup": 30
+  },
+  "depot_file_counts": {
+    "81b39626-9f66-4cc4-9c87-2137b1d1b078": 20,
+    "97b085d9-0fde-406b-8bcd-b244746387e7": 25,
+    "applet_assetto_corsa": 15,
+    "applet_csgo": 4,
+    "applet_discord": 2,
+    "applet_dota2": 4,
+    "applet_obs": 3,
+    "applet_overwolf": 2,
+    "applet_slobs": 2,
+    "audio_samples": 60,
+    "audio_test_samples": 2,
+    "core_runtime_win": 8,
+    "core_systray_win": 28,
+    "gl_resources": 44,
+    "gl": 3,
+    "core_assets": 303,
+    "core": 507,
+    "di_ffb": 2,
+    "driver_audio_apo": 2,
+    "driver_audio_devices": 2,
+    "driver_hid_virtual": 2,
+    "driver_logi_lamparray": 2,
+    "driver_usb": 2,
+    "fd06962e-6e72-4606-bacc-88d9425f31f3": 14,
+    "lua_scripting": 2,
+    "release_notes": 21,
+    "trueforce_sdk": 2,
+    "wheel_sdk": 2,
+    "yeti_original_nano_dfu": 23,
+    "yeti_original_nano": 7
+  },
+  "tests": {
+    "command": "python -m unittest discover -s tests/packaging -v",
+    "passed": 36,
+    "depot_specific": 12
+  },
+  "implementation_sha256": {
+    "tools/packaging/logitech_depots.py": "21385135a45569d6e159dbc82ad3fc10bfc92d040a40f8c6b04423acede5d97a",
+    "tools/packaging/logitech_capsule.py": "56343706d1fdb20e99e4c8327822e07a70f9dcdf16f1174a8e4f05ff45cc7303",
+    "tests/packaging/test_logitech_depots.py": "fa8a915e50c4900de02ebf12acf62b89f492f0b0533a222e572b40ffd9e9a408"
+  },
+  "not_yet_validated": [
+    "Installation into a fresh Wine prefix",
+    "Service, COM and WinRT registration from acquired files",
+    "Extension installers and conditional integrations",
+    "End-to-end operation on clean Manjaro or CachyOS",
+    "Other hardware depot selections"
+  ],
+  "publication_payload": "Only implementation, tests, URL/hash/path metadata and sanitized verification; no vendor binaries, keys, decompilation or populated prefixes"
+}

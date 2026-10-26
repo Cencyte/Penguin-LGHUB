@@ -1,0 +1,62 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: [PATCH] Native ninput initialization and verified coordinate-scale fast paths
+
+Configured natural-input dispatch and mixed-DPI legacy scaling remain unsupported.
+
+--- a/dlls/user32/misc.c
++++ b/dlls/user32/misc.c
+@@ -572,3 +572,34 @@
+     if (!imm_ime_wnd_proc) return DefWindowProcW(hwnd, msg, wParam, lParam);
+     return imm_ime_wnd_proc( hwnd, msg, wParam, lParam, FALSE );
+ }
++
++/* Native ninput queries whether a registry-selected natural input handler is
++ * available. Wine has no natural-input dispatch hook; report it unavailable. */
++BOOL WINAPI RegisterNaturalInputHandler(void)
++{
++    HKEY key;
++    LONG ret = RegOpenKeyExW(HKEY_LOCAL_MACHINE,
++        L"Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows", 0, KEY_QUERY_VALUE, &key);
++    if (ret == ERROR_SUCCESS)
++    {
++        ret = RegQueryValueExW(key, L"NaturalInputHandler", NULL, NULL, NULL, NULL);
++        RegCloseKey(key);
++        if (ret != ERROR_FILE_NOT_FOUND)
++            FIXME("Configured natural input handlers are not supported.\n");
++    }
++    return FALSE;
++}
++
++/* Native fast paths verified against user32.pdb
++ * 1622FA8BA268948EAB8F7DEE3DF9DF581, GetHimetricScaleFactorFromPixelLocation.
++ * The mixed-monitor legacy-awareness syscall is not implemented. The native
++ * caller handles FALSE without losing the pointer packet. */
++BOOL WINAPI GetHimetricScaleFactorFromPixelLocation(HANDLE device, ULONGLONG point, UINT *x, UINT *y)
++{
++    if (!device || !x || !y) { SetLastError(ERROR_INVALID_PARAMETER); return FALSE; }
++    if (GetSystemMetrics(SM_CMONITORS) > 1 &&
++        GetAwarenessFromDpiAwarenessContext(GetThreadDpiAwarenessContext()) != DPI_AWARENESS_PER_MONITOR_AWARE)
++    { SetLastError(ERROR_NOT_SUPPORTED); return FALSE; }
++    *x = *y = 1;
++    return TRUE;
++}
+--- a/dlls/user32/user32.spec
++++ b/dlls/user32/user32.spec
+@@ -29,7 +29,7 @@
+ 2515 stub @
+ 2516 stub -noname DelegateCapturePointers  # NtUserDelegateCapturePointers
+ 2517 stub -noname GetTouchValidationStatus  # NtUserGetTouchValidationStatus
+-2518 stub @
++2518 stdcall -noname RegisterNaturalInputHandler()
+ 2519 stub -noname EnableMouseInputForCursorSuppression  # NtUserEnableMouseInputForCursorSuppression
+ 2520 stub -noname IsMouseInputEnabled  # NtUserIsMouseInputEnabled
+ 2521 stub GetProcessUIContextInformation  # NtUserGetProcessUIContextInformation
+@@ -71,7 +71,7 @@
+ 2557 stub @
+ 2558 stub @
+ 2559 stub -noname GetOwnerTransformedMonitorRect  # NtUserGetOwnerTransformedMonitorRect
+-2560 stub @
++2560 stdcall -noname GetHimetricScaleFactorFromPixelLocation(ptr int64 ptr ptr)
+ 2561 stdcall -noname EnableMouseInPointerForThread() NtUserEnableMouseInPointerForThread
+ 
+ 2563 stub -noname ClearForeground  # NtUserClearForeground

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "sha256": "61772de356096af7cea986e2f9b3f42db69e6f410c4106609998c389fd755fc1",
+  "reviewed_untyped_widths": [
+    {
+      "address": "143dc9d10",
+      "hex": "47006c006f006200",
+      "reason": "finish-02 and finish-03 retain eight untyped bytes; round-02 and round-03 propose undefined8. Category-by-category ProgramDiff found only a code-unit-width difference, with identical bytes, symbols, references, and all other properties. Retain the untyped baseline and preserve every width observation."
+    }
+  ],
+  "evidence": {
+    "path": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-zfs-work/campaign-20261006-214743/convergence-eight-byte-audit-v1/report.json",
+    "sha256": "a309a69d377801aa0e7a092567d65dd9cee9926724bb4fc803eb6f02f0e22214",
+    "snapshots": {
+      "parallel-captures-v5/finish-02/program.gzf": "66b528145dcf6e05d97db87b06d6c2f54a4a81c310355a667086910afaadfb60",
+      "parallel-captures-v5/round-02/merge/program.gzf": "cfe2f3ac29ef685d53b6035f0194cf990d14dbc7b4e032b6cf0e44d9f49b7bbf",
+      "parallel-captures-v5/finish-03/program.gzf": "1e74277587339fdbe573804f9e9c3c31579f2e0c5b301c1a47c75dadf1790b0f",
+      "parallel-captures-v5/round-03/merge/program.gzf": "a177cd5900cd24327d24b74dc4d03b58fca4f43195319e7860ace85cca01d620"
+    }
+  }
+}

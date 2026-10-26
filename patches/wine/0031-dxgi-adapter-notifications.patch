@@ -1,0 +1,366 @@
+--- a/dlls/dxgi/Makefile.in
++++ b/dlls/dxgi/Makefile.in
+@@ -1,10 +1,11 @@
+ MODULE    = dxgi.dll
+ IMPORTLIB = dxgi
+-IMPORTS   = gdi32 dxguid uuid wined3d user32 win32u
++IMPORTS   = gdi32 dxguid uuid wined3d user32 win32u ntdll
+ EXTRAINCL = $(VKD3D_PE_CFLAGS)
+ 
+ SOURCES = \
+ 	adapter.c \
++	adapter_notifications.c \
+ 	device.c \
+ 	dxgi_main.c \
+ 	factory.c \
+--- a/dlls/dxgi/dxgi_private.h
++++ b/dlls/dxgi/dxgi_private.h
+@@ -117,7 +117,14 @@
+     struct wined3d *wined3d;
+     BOOL extended;
+     HWND device_window;
+-};
++    struct dxgi_adapter_notifications *adapter_notifications;
++};
++
++HRESULT dxgi_adapter_notifications_create(struct dxgi_adapter_notifications **out);
++void dxgi_adapter_notifications_destroy(struct dxgi_adapter_notifications *state);
++BOOL dxgi_adapter_notifications_is_current(struct dxgi_adapter_notifications *state);
++HRESULT dxgi_adapter_notifications_register(struct dxgi_adapter_notifications *state, HANDLE event, DWORD *cookie);
++HRESULT dxgi_adapter_notifications_unregister(struct dxgi_adapter_notifications *state, DWORD cookie);
+ 
+ HRESULT dxgi_factory_create(REFIID riid, void **factory, BOOL extended);
+ HWND dxgi_factory_get_device_window(struct dxgi_factory *factory);
+--- a/dlls/dxgi/factory.c
++++ b/dlls/dxgi/factory.c
+@@ -74,6 +74,7 @@
+ 
+     if (!refcount)
+     {
++        dxgi_adapter_notifications_destroy(factory->adapter_notifications);
+         if (factory->device_window)
+             DestroyWindow(factory->device_window);
+ 
+@@ -250,14 +251,9 @@
+ 
+ static BOOL STDMETHODCALLTYPE dxgi_factory_IsCurrent(IWineDXGIFactory *iface)
+ {
+-    static BOOL once = FALSE;
+-
+-    if (!once++)
+-        FIXME("iface %p stub!\n", iface);
+-    else
+-        WARN("iface %p stub!\n", iface);
+-
+-    return TRUE;
++    struct dxgi_factory *factory = impl_from_IWineDXGIFactory(iface);
++
++    return dxgi_adapter_notifications_is_current(factory->adapter_notifications);
+ }
+ 
+ static BOOL STDMETHODCALLTYPE dxgi_factory_IsWindowedStereoEnabled(IWineDXGIFactory *iface)
+@@ -487,17 +483,17 @@
+ static HRESULT STDMETHODCALLTYPE dxgi_factory_RegisterAdaptersChangedEvent(IWineDXGIFactory *iface,
+         HANDLE event, DWORD *cookie)
+ {
+-    FIXME("iface %p, event %p, cookie %p stub!\n", iface, event, cookie);
+-
+-    return E_NOTIMPL;
++    struct dxgi_factory *factory = impl_from_IWineDXGIFactory(iface);
++
++    return dxgi_adapter_notifications_register(factory->adapter_notifications, event, cookie);
+ }
+ 
+ static HRESULT STDMETHODCALLTYPE dxgi_factory_UnregisterAdaptersChangedEvent(IWineDXGIFactory *iface,
+         DWORD cookie)
+ {
+-    FIXME("iface %p, cookie %#lx stub!\n", iface, cookie);
+-
+-    return E_NOTIMPL;
++    struct dxgi_factory *factory = impl_from_IWineDXGIFactory(iface);
++
++    return dxgi_adapter_notifications_unregister(factory->adapter_notifications, cookie);
+ }
+ 
+ static const struct IWineDXGIFactoryVtbl dxgi_factory_vtbl =
+@@ -564,6 +560,8 @@
+ 
+ static HRESULT dxgi_factory_init(struct dxgi_factory *factory, BOOL extended)
+ {
++    HRESULT hr;
++
+     factory->IWineDXGIFactory_iface.lpVtbl = &dxgi_factory_vtbl;
+     factory->refcount = 1;
+     wined3d_private_store_init(&factory->private_store);
+@@ -575,6 +573,13 @@
+     {
+         wined3d_private_store_cleanup(&factory->private_store);
+         return DXGI_ERROR_UNSUPPORTED;
++    }
++
++    if (FAILED(hr = dxgi_adapter_notifications_create(&factory->adapter_notifications)))
++    {
++        wined3d_decref(factory->wined3d);
++        wined3d_private_store_cleanup(&factory->private_store);
++        return hr;
+     }
+ 
+     factory->extended = extended;
+--- a/dlls/dxgi/adapter_notifications.c
++++ b/dlls/dxgi/adapter_notifications.c
+@@ -0,0 +1,255 @@
++/*
++ * DXGI adapter-enumeration notifications.
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ */
++
++#include "dxgi_private.h"
++#include "winternl.h"
++#include "ddk/d3dkmthk.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(dxgi_adapters);
++
++struct adapter_registration
++{
++    struct adapter_registration *next;
++    HANDLE event;
++    DWORD cookie;
++};
++
++struct dxgi_adapter_notifications
++{
++    CRITICAL_SECTION lock;
++    TP_TIMER *timer;
++    struct adapter_registration *registrations;
++    LUID *adapters;
++    UINT count;
++    BOOL current;
++};
++
++static LONG next_cookie;
++
++static int compare_luid(const void *left, const void *right)
++{
++    const LUID *a = left, *b = right;
++
++    if (a->HighPart != b->HighPart) return a->HighPart < b->HighPart ? -1 : 1;
++    return a->LowPart < b->LowPart ? -1 : a->LowPart != b->LowPart;
++}
++
++static HRESULT get_adapter_snapshot(LUID **luids, UINT *count)
++{
++    D3DKMT_ENUMADAPTERS2 desc = {0};
++    D3DKMT_CLOSEADAPTER close_desc;
++    D3DKMT_ADAPTERINFO *adapters;
++    NTSTATUS status;
++    LUID *snapshot;
++    UINT i;
++
++    *luids = NULL;
++    *count = 0;
++    if ((status = D3DKMTEnumAdapters2(&desc)))
++        return HRESULT_FROM_WIN32(RtlNtStatusToDosError(status));
++    if (!desc.NumAdapters) return S_OK;
++    if (!(adapters = calloc(desc.NumAdapters, sizeof(*adapters)))) return E_OUTOFMEMORY;
++    if (!(snapshot = calloc(desc.NumAdapters, sizeof(*snapshot))))
++    {
++        free(adapters);
++        return E_OUTOFMEMORY;
++    }
++    desc.pAdapters = adapters;
++    status = D3DKMTEnumAdapters2(&desc);
++    if (!status)
++    {
++        for (i = 0; i < desc.NumAdapters; ++i)
++        {
++            snapshot[i] = adapters[i].AdapterLuid;
++            close_desc.hAdapter = adapters[i].hAdapter;
++            D3DKMTCloseAdapter(&close_desc);
++        }
++        qsort(snapshot, desc.NumAdapters, sizeof(*snapshot), compare_luid);
++        *luids = snapshot;
++        *count = desc.NumAdapters;
++    }
++    else free(snapshot);
++    free(adapters);
++    return status ? HRESULT_FROM_WIN32(RtlNtStatusToDosError(status)) : S_OK;
++}
++
++/* Caller holds lock. Failed enumeration must not look like adapter removal. */
++static HRESULT update_adapter_snapshot(struct dxgi_adapter_notifications *state)
++{
++    struct adapter_registration *registration;
++    LUID *adapters;
++    UINT count;
++    HRESULT hr;
++
++    if (FAILED(hr = get_adapter_snapshot(&adapters, &count)))
++    {
++        WARN("Adapter enumeration failed, hr %#lx.\n", hr);
++        return hr;
++    }
++    if (count != state->count || (count && memcmp(adapters, state->adapters, count * sizeof(*adapters))))
++    {
++        state->current = FALSE;
++        TRACE("Adapter set changed for %p, %u -> %u.\n", state, state->count, count);
++        for (registration = state->registrations; registration; registration = registration->next)
++            SetEvent(registration->event);
++        free(state->adapters);
++        state->adapters = adapters;
++        state->count = count;
++    }
++    else free(adapters);
++    return S_OK;
++}
++
++static void CALLBACK poll_adapters(TP_CALLBACK_INSTANCE *instance, void *context, TP_TIMER *timer)
++{
++    struct dxgi_adapter_notifications *state = context;
++
++    EnterCriticalSection(&state->lock);
++    if (state->registrations) update_adapter_snapshot(state);
++    LeaveCriticalSection(&state->lock);
++}
++
++HRESULT dxgi_adapter_notifications_create(struct dxgi_adapter_notifications **out)
++{
++    struct dxgi_adapter_notifications *state;
++    HRESULT hr;
++
++    *out = NULL;
++    if (!(state = calloc(1, sizeof(*state)))) return E_OUTOFMEMORY;
++    if (FAILED(hr = get_adapter_snapshot(&state->adapters, &state->count)))
++    {
++        free(state);
++        return hr;
++    }
++    InitializeCriticalSection(&state->lock);
++    state->current = TRUE;
++    *out = state;
++    return S_OK;
++}
++
++void dxgi_adapter_notifications_destroy(struct dxgi_adapter_notifications *state)
++{
++    struct adapter_registration *registration, *next;
++
++    if (state->timer)
++    {
++        SetThreadpoolTimer(state->timer, NULL, 0, 0);
++        /* Never drain a callback while holding the lock it needs. */
++        WaitForThreadpoolTimerCallbacks(state->timer, TRUE);
++        CloseThreadpoolTimer(state->timer);
++    }
++    for (registration = state->registrations; registration; registration = next)
++    {
++        next = registration->next;
++        CloseHandle(registration->event);
++        free(registration);
++    }
++    free(state->adapters);
++    DeleteCriticalSection(&state->lock);
++    free(state);
++}
++
++BOOL dxgi_adapter_notifications_is_current(struct dxgi_adapter_notifications *state)
++{
++    BOOL current;
++
++    EnterCriticalSection(&state->lock);
++    current = SUCCEEDED(update_adapter_snapshot(state)) && state->current;
++    LeaveCriticalSection(&state->lock);
++    return current;
++}
++
++HRESULT dxgi_adapter_notifications_register(struct dxgi_adapter_notifications *state, HANDLE event, DWORD *cookie)
++{
++    union { OBJECT_TYPE_INFORMATION info; BYTE buffer[512]; } type;
++    OBJECT_BASIC_INFORMATION basic;
++    struct adapter_registration *registration, *entry;
++    LARGE_INTEGER due;
++    HANDLE duplicate;
++    NTSTATUS status;
++    HRESULT hr;
++    DWORD value;
++
++    if (!cookie) return E_INVALIDARG;
++    if (!DuplicateHandle(GetCurrentProcess(), event, GetCurrentProcess(), &duplicate, 0, FALSE, DUPLICATE_SAME_ACCESS))
++        return HRESULT_FROM_WIN32(GetLastError());
++    if ((status = NtQueryObject(duplicate, ObjectTypeInformation, &type, sizeof(type), NULL)))
++        hr = HRESULT_FROM_WIN32(RtlNtStatusToDosError(status));
++    else if (type.info.TypeName.Length != 5 * sizeof(WCHAR) || wcsncmp(type.info.TypeName.Buffer, L"Event", 5))
++        hr = E_INVALIDARG;
++    else if ((status = NtQueryObject(duplicate, ObjectBasicInformation, &basic, sizeof(basic), NULL)))
++        hr = HRESULT_FROM_WIN32(RtlNtStatusToDosError(status));
++    else hr = basic.GrantedAccess & EVENT_MODIFY_STATE ? S_OK : E_ACCESSDENIED;
++    if (FAILED(hr))
++    {
++        CloseHandle(duplicate);
++        return hr;
++    }
++    if (!(registration = malloc(sizeof(*registration))))
++    {
++        CloseHandle(duplicate);
++        return E_OUTOFMEMORY;
++    }
++
++    EnterCriticalSection(&state->lock);
++    if (!state->timer && !(state->timer = CreateThreadpoolTimer(poll_adapters, state, NULL)))
++    {
++        hr = HRESULT_FROM_WIN32(GetLastError());
++        goto failed;
++    }
++    if (FAILED(hr = update_adapter_snapshot(state))) goto failed;
++    do
++    {
++        value = InterlockedIncrement(&next_cookie);
++        for (entry = state->registrations; entry && entry->cookie != value; entry = entry->next);
++    } while (!value || entry);
++    registration->cookie = value;
++    registration->event = duplicate;
++    registration->next = state->registrations;
++    state->registrations = registration;
++    /* Close the factory-creation/registration race for an already stale factory. */
++    if (!state->current) SetEvent(duplicate);
++    if (!registration->next)
++    {
++        /* Wine has no KMT adapter-notification primitive yet. Poll real KMT LUIDs
++         * only while subscribed; monitor modes and source counts are irrelevant. */
++        due.QuadPart = -10000000;
++        SetThreadpoolTimer(state->timer, (FILETIME *)&due, 1000, 0);
++    }
++    *cookie = value;
++    LeaveCriticalSection(&state->lock);
++    TRACE("Registered adapter event %p, cookie %#lx, state %p.\n", event, value, state);
++    return S_OK;
++
++failed:
++    LeaveCriticalSection(&state->lock);
++    CloseHandle(duplicate);
++    free(registration);
++    return hr;
++}
++
++HRESULT dxgi_adapter_notifications_unregister(struct dxgi_adapter_notifications *state, DWORD cookie)
++{
++    struct adapter_registration **cursor, *registration;
++
++    EnterCriticalSection(&state->lock);
++    for (cursor = &state->registrations; *cursor && (*cursor)->cookie != cookie; cursor = &(*cursor)->next);
++    if (!(registration = *cursor))
++    {
++        LeaveCriticalSection(&state->lock);
++        return DXGI_ERROR_INVALID_CALL;
++    }
++    *cursor = registration->next;
++    if (!state->registrations) SetThreadpoolTimer(state->timer, NULL, 0, 0);
++    CloseHandle(registration->event);
++    free(registration);
++    LeaveCriticalSection(&state->lock);
++    TRACE("Unregistered adapter cookie %#lx, state %p.\n", cookie, state);
++    return S_OK;
++}

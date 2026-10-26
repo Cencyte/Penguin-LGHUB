@@ -1,0 +1,52 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: Route cursor and activation messages to the visible composition host
+
+--- a/dlls/win32u/message.c
++++ b/dlls/win32u/message.c
+@@ -2567,6 +2567,7 @@
+     MOUSEHOOKSTRUCTEX hook;
+     BOOL eat_msg;
+     WPARAM wparam;
++    HWND presentation = 0;
+ 
+     /* find the window to dispatch this mouse message to */
+ 
+@@ -2577,7 +2578,13 @@
+         hittest = HTCLIENT;
+         msg->hwnd = info.hwndCapture;
+     }
+-    else if (composition_routed) hittest = HTCLIENT;
++    else if (composition_routed)
++    {
++        /* Input sinks may be message-only HWNDs on another thread. Cursor
++         * selection and activation still belong to the visible host. */
++        presentation = window_from_point(0, msg->pt, &hittest, FALSE);
++        hittest = HTCLIENT;
++    }
+     else
+     {
+         HWND orig = msg->hwnd;
+@@ -2727,11 +2734,11 @@
+ 
+         if (msg->hwnd != info.hwndActive)
+         {
+-            HWND hwndTop = NtUserGetAncestor( msg->hwnd, GA_ROOT );
++            HWND hwndTop = NtUserGetAncestor( presentation ? presentation : msg->hwnd, GA_ROOT );
+ 
+             if ((get_window_long( hwndTop, GWL_STYLE ) & (WS_POPUP|WS_CHILD)) != WS_CHILD)
+             {
+-                UINT ret = send_message( msg->hwnd, WM_MOUSEACTIVATE, (WPARAM)hwndTop,
++                UINT ret = send_message( presentation ? presentation : msg->hwnd, WM_MOUSEACTIVATE, (WPARAM)hwndTop,
+                                          MAKELONG( hittest, msg->message ) );
+                 switch(ret)
+                 {
+@@ -2759,7 +2766,8 @@
+ 
+     /* Windows sends the normal mouse message as the message parameter
+        in the WM_SETCURSOR message even if it's non-client mouse message */
+-    send_message( msg->hwnd, WM_SETCURSOR, (WPARAM)msg->hwnd, MAKELONG( hittest, msg->message ));
++    send_message( presentation ? presentation : msg->hwnd, WM_SETCURSOR,
++                  (WPARAM)(presentation ? presentation : msg->hwnd), MAKELONG( hittest, msg->message ));
+ 
+     msg->message = message;
+     return !eat_msg;

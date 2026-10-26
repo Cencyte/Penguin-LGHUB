@@ -1,0 +1,239 @@
+--- a/dlls/dxgi/device.c
++++ b/dlls/dxgi/device.c
+@@ -318,9 +318,18 @@
+
+ static HRESULT STDMETHODCALLTYPE dxgi_device_EnqueueSetEvent(IWineDXGIDevice *iface, HANDLE event)
+ {
+-    FIXME("iface %p, event %p stub!\n", iface, event);
+-
+-    return E_NOTIMPL;
++    struct dxgi_device *device = impl_from_IWineDXGIDevice(iface);
++    char enabled[2];
++    HRESULT hr;
++
++    TRACE("iface %p, event %p.\n", iface, event);
++    if (GetEnvironmentVariableA("GHUB_DXGI_ENQUEUE_EVENT", enabled, sizeof(enabled)) != 1 || enabled[0] != '1')
++        return E_NOTIMPL;
++
++    wined3d_mutex_lock();
++    hr = wined3d_device_enqueue_set_event(device->wined3d_device, event);
++    wined3d_mutex_unlock();
++    return hr;
+ }
+
+ static void STDMETHODCALLTYPE dxgi_device_Trim(IWineDXGIDevice *iface)
+--- a/dlls/wined3d/cs.c
++++ b/dlls/wined3d/cs.c
+@@ -2432,6 +2432,133 @@
+     wined3d_cs_emit_callback(cs, callback, object);
+ }
+
++/* Completion events are owned and retired on the CS thread. No worker holds
++ * the WineD3D mutex while waiting for GPU work or device destruction. */
++struct wined3d_completion_event
++{
++    struct list entry;
++    struct wined3d_cs *cs;
++    struct wined3d_fence *fence;
++    HANDLE event;
++};
++
++static void complete_event(struct wined3d_completion_event *completion)
++{
++    TRACE_(d3d_perf)("Signalling DXGI completion event %p.\n", completion->event);
++    if (!SetEvent(completion->event))
++        ERR("Failed to signal completion event, error %lu.\n", GetLastError());
++    CloseHandle(completion->event);
++    wined3d_fence_destroy(completion->fence);
++    free(completion);
++}
++
++static void poll_queries(struct wined3d_cs *cs);
++
++static void poll_completion_events(struct wined3d_cs *cs, bool wait)
++{
++    struct wined3d_completion_event *completion, *next;
++    enum wined3d_fence_result result;
++
++    LIST_FOR_EACH_ENTRY_SAFE(completion, next, &cs->completion_events, struct wined3d_completion_event, entry)
++    {
++        result = wait ? wined3d_fence_wait(completion->fence, cs->c.device)
++                : wined3d_fence_test(completion->fence, cs->c.device, 0);
++        if (result == WINED3D_FENCE_WAITING)
++            continue;
++        /* Like event queries, release waiters when the backend/context fails.
++         * This API signals on device removal as well as normal completion. */
++        if (result != WINED3D_FENCE_OK)
++            WARN("Completion fence returned %#x.\n", result);
++        /* Publish earlier query results before waking an application that
++         * may immediately inspect them with DONOTFLUSH. */
++        if (cs->thread)
++            poll_queries(cs);
++        list_remove(&completion->entry);
++        complete_event(completion);
++    }
++}
++
++static void finish_completion_events(void *object)
++{
++    poll_completion_events(object, true);
++}
++
++void wined3d_cs_finish_completions(struct wined3d_cs *cs)
++{
++    wined3d_cs_init_object(cs, finish_completion_events, cs);
++    wined3d_cs_finish(cs, WINED3D_CS_QUEUE_DEFAULT);
++}
++
++static void issue_completion_event(void *object)
++{
++    struct wined3d_completion_event *completion = object;
++    struct wined3d_cs *cs = completion->cs;
++    struct wined3d_context *context;
++
++    context = context_acquire(cs->c.device, NULL, 0);
++    if (!wined3d_context_gl(context)->valid)
++    {
++        WARN("GL context lost before completion fence.\n");
++        context_release(context);
++        complete_event(completion);
++        return;
++    }
++    wined3d_fence_issue(completion->fence, cs->c.device);
++    /* Waiting on the OS event must make progress without another D3D call. */
++    cs->c.device->adapter->adapter_ops->adapter_flush_context(context);
++    context_release(context);
++    list_add_tail(&cs->completion_events, &completion->entry);
++    /* Without a CS thread there is no independent poller. Complete here on
++     * the issuing GL thread rather than moving its context to a worker. */
++    if (!cs->thread)
++        poll_completion_events(cs, true);
++}
++
++HRESULT CDECL wined3d_device_enqueue_set_event(struct wined3d_device *device, HANDLE event)
++{
++    static const UNICODE_STRING event_type = RTL_CONSTANT_STRING(L"Event");
++    struct { OBJECT_TYPE_INFORMATION info; WCHAR name[64]; } type;
++    struct wined3d_completion_event *completion;
++    OBJECT_BASIC_INFORMATION basic;
++    HANDLE owned;
++    HRESULT hr;
++
++    /* Duplicate first so concurrent handle closure/reuse cannot change the
++     * object being validated. Never request rights the caller did not have. */
++    if (!DuplicateHandle(GetCurrentProcess(), event, GetCurrentProcess(), &owned, 0, FALSE, DUPLICATE_SAME_ACCESS))
++        return GetLastError() == ERROR_NOT_ENOUGH_MEMORY ? E_OUTOFMEMORY : E_INVALIDARG;
++    if (NtQueryObject(owned, ObjectBasicInformation, &basic, sizeof(basic), NULL)
++            || !(basic.GrantedAccess & EVENT_MODIFY_STATE)
++            || NtQueryObject(owned, ObjectTypeInformation, &type, sizeof(type), NULL)
++            || !RtlEqualUnicodeString(&type.info.TypeName, &event_type, FALSE))
++    {
++        CloseHandle(owned);
++        return E_INVALIDARG;
++    }
++    if (wined3d_get_renderer() != WINED3D_RENDERER_OPENGL || device->wined3d->flags & WINED3D_NO3D)
++    {
++        CloseHandle(owned);
++        return E_NOTIMPL;
++    }
++    if (!(completion = calloc(1, sizeof(*completion))))
++    {
++        CloseHandle(owned);
++        return E_OUTOFMEMORY;
++    }
++    if (FAILED(hr = wined3d_fence_create(device, &completion->fence)))
++    {
++        CloseHandle(owned);
++        free(completion);
++        return hr;
++    }
++    completion->event = owned;
++    completion->cs = device->cs;
++    TRACE_(d3d_perf)("Queueing DXGI completion event %p as %p.\n", event, owned);
++    wined3d_cs_init_object(device->cs, issue_completion_event, completion);
++    return S_OK;
++}
++
++
+ static void wined3d_cs_exec_query_issue(struct wined3d_cs *cs, const void *data)
+ {
+     const struct wined3d_cs_query_issue *op = data;
+@@ -3686,7 +3813,7 @@
+     static const LARGE_INTEGER query_timeout = {.QuadPart = WINED3D_CS_COMMAND_WAIT_WITH_QUERIES_TIMEOUT * -10};
+     const LARGE_INTEGER *timeout = NULL;
+
+-    if (!list_empty(&cs->query_poll_list))
++    if (!list_empty(&cs->query_poll_list) || !list_empty(&cs->completion_events))
+         timeout = &query_timeout;
+
+     InterlockedExchange(&cs->waiting_for_event, TRUE);
+@@ -3805,6 +3932,7 @@
+         {
+             wined3d_cs_command_lock(cs);
+             poll_queries(cs);
++            poll_completion_events(cs, false);
+             wined3d_cs_command_unlock(cs);
+             poll = 0;
+         }
+@@ -3882,6 +4010,7 @@
+
+     cs->c.ops = &wined3d_cs_st_ops;
+     cs->c.device = device;
++    list_init(&cs->completion_events);
+     cs->serialize_commands = TRACE_ON(d3d_sync) || wined3d_settings.cs_multithreaded & WINED3D_CSMT_SERIALIZE;
+
+     if (cs->serialize_commands)
+@@ -3963,6 +4092,7 @@
+
+ void wined3d_cs_destroy(struct wined3d_cs *cs)
+ {
++    wined3d_cs_finish_completions(cs);
+     if (cs->thread)
+     {
+         wined3d_cs_emit_stop(cs);
+--- a/dlls/wined3d/device.c
++++ b/dlls/wined3d/device.c
+@@ -1676,6 +1676,8 @@
+         return;
+     }
+
++    /* Retire completion fences while their GL contexts are still alive. */
++    wined3d_cs_finish_completions(device->cs);
+     wined3d_cs_finish(device->cs, WINED3D_CS_QUEUE_DEFAULT);
+
+     device->swapchain_count = 0;
+--- a/dlls/wined3d/wined3d.spec
++++ b/dlls/wined3d/wined3d.spec
+@@ -409,3 +409,4 @@
+ @ cdecl wined3d_resource_set_shared_flags(ptr long)
+ @ cdecl wined3d_shared_texture_get_desc(ptr ptr ptr)
+ @ cdecl wined3d_resource_open_shared_handle(ptr ptr)
++@ cdecl wined3d_device_enqueue_set_event(ptr ptr)
+--- a/dlls/wined3d/wined3d_private.h
++++ b/dlls/wined3d/wined3d_private.h
+@@ -3710,6 +3710,7 @@
+     size_t data_size, start, end;
+     void *data;
+     struct list query_poll_list;
++    struct list completion_events;
+     BOOL queries_flushed;
+
+     HANDLE event, present_event;
+@@ -3733,6 +3734,7 @@
+ struct wined3d_cs *wined3d_cs_create(struct wined3d_device *device,
+         const enum wined3d_feature_level *levels, unsigned int level_count);
+ void wined3d_cs_destroy(struct wined3d_cs *cs);
++void wined3d_cs_finish_completions(struct wined3d_cs *cs);
+ void wined3d_cs_destroy_object(struct wined3d_cs *cs,
+         void (*callback)(void *object), void *object);
+ void wined3d_cs_emit_add_dirty_texture_region(struct wined3d_cs *cs,
+--- a/include/wine/wined3d.h
++++ b/include/wine/wined3d.h
+@@ -2508,6 +2508,7 @@
+ void __cdecl wined3d_device_context_execute_command_list(struct wined3d_device_context *context,
+         struct wined3d_command_list *list, bool restore_state);
+ void __cdecl wined3d_device_context_flush(struct wined3d_device_context *context);
++HRESULT __cdecl wined3d_device_enqueue_set_event(struct wined3d_device *device, HANDLE event);
+ UINT64 __cdecl wined3d_device_get_conservative_flush_count(const struct wined3d_device *device);
+ void __cdecl wined3d_device_context_flush_mapped_buffer(struct wined3d_device_context *context,
+         struct wined3d_buffer *buffer);

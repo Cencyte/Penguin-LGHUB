@@ -1,0 +1,50 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: [PATCH] Backport upstream Wine DwmShowContact export (visual feedback remains a stub).
+
+--- a/dlls/dwmapi/dwmapi_main.c
++++ b/dlls/dwmapi/dwmapi_main.c
+@@ -376,3 +376,12 @@
+     FIXME("(%p) stub\n", params);
+     return E_NOTIMPL;
+ }
++
++/**********************************************************************
++ * DwmShowContact (DWMAPI.@)
++ */
++HRESULT WINAPI DwmShowContact(DWORD pointer_id, enum DWM_SHOWCONTACT showcontact)
++{
++    FIXME("pointer_id %#lx, showcontact %#x stub\n", pointer_id, showcontact);
++    return S_OK;
++}
+--- a/dlls/dwmapi/dwmapi.spec
++++ b/dlls/dwmapi/dwmapi.spec
+@@ -84,7 +84,7 @@
+ @ stdcall DwmSetIconicThumbnail(long long long)
+ @ stdcall DwmSetPresentParameters(ptr ptr)
+ @ stdcall DwmSetWindowAttribute(long long ptr long)
+-# @ stub DwmShowContact
++@ stdcall DwmShowContact(long long)
+ # @ stub DwmTetherContact
+ # @ stub DwmTransitionOwnedWindow
+ @ stdcall DwmUnregisterThumbnail(long)
+--- a/include/dwmapi.h
++++ b/include/dwmapi.h
+@@ -28,6 +28,18 @@
+ # define DWMAPI        STDAPI
+ # define DWMAPI_(type) STDAPI_(type)
+ #endif
++
++enum DWM_SHOWCONTACT
++{
++    DWMSC_NONE = 0x0,
++    DWMSC_DOWN = 0x1,
++    DWMSC_UP = 0x2,
++    DWMSC_DRAG = 0x4,
++    DWMSC_HOLD = 0x8,
++    DWMSC_PENBARREL = 0x10,
++    DWMSC_ALL = 0xffffffff
++};
++DWMAPI DwmShowContact(DWORD, enum DWM_SHOWCONTACT);
+
+ DECLARE_HANDLE(HTHUMBNAIL);
+ typedef HTHUMBNAIL *PHTHUMBNAIL;

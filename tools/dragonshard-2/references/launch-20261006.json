@@ -1,0 +1,1364 @@
+{
+  "date": "2026-10-06",
+  "campaign_dir": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743",
+  "campaign_service": "dragonshard2-campaign-20261006-215237",
+  "scope": {
+    "programs": 21,
+    "recognized_functions_planned": 561191,
+    "batch_sizes": [
+      7,
+      7,
+      6,
+      1
+    ],
+    "max_workers": 32
+  },
+  "staging": {
+    "method": "Ghidra read-only project view and DomainFile.copyTo, then independent reflink clones of closed compact batch projects",
+    "source_gui_preserved": true,
+    "source_saved_programs": 23,
+    "batch1_logical_bytes": 94033049,
+    "source_original_project": "/home/firesongz/Source2/Penguin-GHUB/ghidra_project/ghub2remapper.gpr"
+  },
+  "systemsage": {
+    "native_mcp_calls_passed": true,
+    "fresh_stdio_preflight_passed": true,
+    "tool_count": 52
+  },
+  "vm_shutdown": {
+    "win11": "shut off after virsh graceful shutdown",
+    "macos-tahoe": "shut off after System Events shutdown through existing SSH key; no forced power-off"
+  },
+  "ghidra": {
+    "project": "ghub2remapper",
+    "pid": 824009,
+    "display": ":0",
+    "native_mcp_metadata_passed": true,
+    "script_execution": "Disabled in GUI; not needed or changed for safe staging"
+  },
+  "transplant": {
+    "project": "/home/firesongz/Source2/Transplant",
+    "existing_live_method": "xpra-managed applications",
+    "existing_ordinary_app_alternative": "Alt+4 mirrors the source screen through xpra shadow without restarting the application",
+    "changes_made": false
+  },
+  "first_batches": {
+    "1": [
+      {
+        "name": "CoreMessagingXP.dll",
+        "sha256": "024a7b4031098dec4a243d770f5b820d5d382ced61687263bb8dab4908425427",
+        "recognized_internal_functions": 3707,
+        "outcomes": {
+          "ok": 3707
+        },
+        "shards": 5,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "lghub_system_tray.exe",
+        "sha256": "07e3872b0b9cee9cb98ad39b53bff3b731e7ef34dea0785970676ea95aa44fc6",
+        "recognized_internal_functions": 27429,
+        "outcomes": {
+          "ok": 27428,
+          "timeout": 1
+        },
+        "shards": 30,
+        "export_complete": true,
+        "all_functions_decompiled": false
+      },
+      {
+        "name": "InputHost.dll",
+        "sha256": "2409d64759a449eb433ddbe0682cf55d2539876d0c69cfb4bc68fa336f004674",
+        "recognized_internal_functions": 10440,
+        "outcomes": {
+          "ok": 10440
+        },
+        "shards": 12,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "CoreMessaging.dll",
+        "sha256": "775d93c0cf8256dc6046222828e12686e7e735926a6204e062da06b04d78985c",
+        "recognized_internal_functions": 5350,
+        "outcomes": {
+          "ok": 5350
+        },
+        "shards": 6,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "Microsoft.UI.Input.dll",
+        "sha256": "942cf3f4b487eb1b512d359057968cfc0829468160b064793a04b476251ae29c",
+        "recognized_internal_functions": 6252,
+        "outcomes": {
+          "ok": 6252
+        },
+        "shards": 7,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "Microsoft.Internal.FrameworkUdk.dll",
+        "sha256": "988f37ceb00e6c17cc7c98ef22cce5304702c09d9e59f0ca96f5869fd8859cd4",
+        "recognized_internal_functions": 4176,
+        "outcomes": {
+          "ok": 4176
+        },
+        "shards": 5,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "Microsoft.InputStateManager.dll",
+        "sha256": "d82fe3b83251ed171b4b4771c59b9a367eef012de00d93ee4390ec70a32c56e6",
+        "recognized_internal_functions": 1701,
+        "outcomes": {
+          "ok": 1701
+        },
+        "shards": 2,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      }
+    ],
+    "2": [
+      {
+        "name": "wuceffectsi.dll",
+        "sha256": "03c32482a297c8b43fa16a09577b29eed5c7a5cf467577ae5ba42e734209ae50",
+        "recognized_internal_functions": 1775,
+        "outcomes": {
+          "ok": 1775
+        },
+        "shards": 3,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "dcomp.dll",
+        "sha256": "74d91c2545c5f0ad8cd3ac46f7b878e8e18d11b5bbc3261272b3891c766e2a9a",
+        "recognized_internal_functions": 9904,
+        "outcomes": {
+          "ok": 9904
+        },
+        "shards": 12,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "dwmcorei.dll",
+        "sha256": "833b78602b12d8f1d81c327158021a8548accef185718eb41acf24407c647cdd",
+        "recognized_internal_functions": 7465,
+        "outcomes": {
+          "ok": 7464,
+          "timeout": 1
+        },
+        "shards": 9,
+        "export_complete": true,
+        "all_functions_decompiled": false
+      },
+      {
+        "name": "DWrite.dll",
+        "sha256": "c44185a344257b748b28e73dddb772e922d8c560b17a8e861969cc18fb9efd81",
+        "recognized_internal_functions": 6280,
+        "outcomes": {
+          "ok": 6280
+        },
+        "shards": 8,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "d2d1.dll",
+        "sha256": "d1425b33d6816a03769f2d635bfee7abb6392c267abbca4f5bd27593841a39fc",
+        "recognized_internal_functions": 12234,
+        "outcomes": {
+          "ok": 12234
+        },
+        "shards": 15,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "dcompi.dll",
+        "sha256": "d87b13197bc59e98d237738e9d038290fd121473b3461a66ab86aae39952ef5c",
+        "recognized_internal_functions": 8182,
+        "outcomes": {
+          "ok": 8182
+        },
+        "shards": 10,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "d3d11.dll",
+        "sha256": "da24465d41f1a691d60743cbcb89997fcdaa55651df173648d8e8e15e71b0a92",
+        "recognized_internal_functions": 7413,
+        "outcomes": {
+          "ok": 7413
+        },
+        "shards": 9,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      }
+    ],
+    "3": [
+      {
+        "name": "Microsoft.ui.xaml.dll",
+        "sha256": "004c034e8d2b9214317cdd2eaea5da7c94099f0f2b733031469b4ed7bd5c90d4",
+        "recognized_internal_functions": 60539,
+        "outcomes": {
+          "ok": 60535,
+          "failed": 3,
+          "timeout": 1
+        },
+        "shards": 32,
+        "export_complete": true,
+        "all_functions_decompiled": false
+      },
+      {
+        "name": "twinapi.appcore.dll",
+        "sha256": "2be58806f3546a91c3daf6f39cdf8f40ba7602b3a1f2e59fc2bb9487d268f37b",
+        "recognized_internal_functions": 12138,
+        "outcomes": {
+          "ok": 12135,
+          "timeout": 3
+        },
+        "shards": 8,
+        "export_complete": true,
+        "all_functions_decompiled": false
+      },
+      {
+        "name": "marshal.dll",
+        "sha256": "57c078371a1e0d72935ae28757f12514c8c94fa37976a76bff1aec815813d1a8",
+        "recognized_internal_functions": 2248,
+        "outcomes": {
+          "ok": 2248
+        },
+        "shards": 2,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "user32.dll",
+        "sha256": "6fcd82185566db70ca0a7bc5cf08fbe448d407928990fd58eec32c06b240b1bc",
+        "recognized_internal_functions": 2822,
+        "outcomes": {
+          "ok": 2822
+        },
+        "shards": 2,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "win32kbase.sys",
+        "sha256": "ae1e883d42407c1f610795b8ccdfc9c01547fef736182e22eb8a7664d0f413f0",
+        "recognized_internal_functions": 9250,
+        "outcomes": {
+          "ok": 9250
+        },
+        "shards": 7,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      },
+      {
+        "name": "win32kfull.sys",
+        "sha256": "dfe1b9f1448713adaca72913a580a14d1c4b7d1aa00971c79bb548ebdc30344e",
+        "recognized_internal_functions": 10054,
+        "outcomes": {
+          "ok": 10054
+        },
+        "shards": 7,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      }
+    ],
+    "4": [
+      {
+        "name": "lghub_agent_saved_wine.exe",
+        "sha256": "61772de356096af7cea986e2f9b3f42db69e6f410c4106609998c389fd755fc1",
+        "recognized_internal_functions": 351250,
+        "outcomes": {
+          "ok": 351232,
+          "timeout": 18
+        },
+        "shards": 32,
+        "export_complete": true,
+        "all_functions_decompiled": false
+      }
+    ]
+  },
+  "status_at_recording": "complete",
+  "validation": {
+    "unit_tests_passed": 17,
+    "real_staging_and_multi_dll_exports": "PASS",
+    "full_corpus_completion": "PASS: 21 programs exported, all four indexes verified, run-owned temporary clones reclaimed"
+  },
+  "notes": [
+    "The native FunctionManager count includes externals; exported internal functions have a separate denominator.",
+    "First service may be garbage-collected after success; campaign verifies durable coverage/database instead.",
+    "No new Wine behavior implemented in this export launch."
+  ],
+  "measured_result": {
+    "programs": 21,
+    "internal_functions": 560609,
+    "reported_functions_including_externals": 561191,
+    "excluded_external_functions": 582,
+    "outcomes": {
+      "ok": 560582,
+      "timeout": 24,
+      "failed": 3
+    },
+    "completed_shards": 223,
+    "batches": [
+      {
+        "batch": 1,
+        "programs": 7,
+        "functions": 59055,
+        "outcomes": {
+          "ok": 59054,
+          "timeout": 1
+        },
+        "index_check": "ok",
+        "clones_removed": true
+      },
+      {
+        "batch": 2,
+        "programs": 7,
+        "functions": 53253,
+        "outcomes": {
+          "ok": 53252,
+          "timeout": 1
+        },
+        "index_check": "ok",
+        "clones_removed": true
+      },
+      {
+        "batch": 3,
+        "programs": 6,
+        "functions": 97051,
+        "outcomes": {
+          "ok": 97044,
+          "failed": 3,
+          "timeout": 4
+        },
+        "index_check": "ok",
+        "clones_removed": true
+      },
+      {
+        "batch": 4,
+        "programs": 1,
+        "functions": 351250,
+        "outcomes": {
+          "ok": 351232,
+          "timeout": 18
+        },
+        "index_check": "ok",
+        "clones_removed": true
+      }
+    ],
+    "failed_decompilations": [
+      {
+        "binary": "lghub_system_tray.exe",
+        "address": "140482be0",
+        "name": "FUN_140482be0",
+        "status": "timeout",
+        "error": "Exception while decompiling 140482be0: process: timeout\n"
+      },
+      {
+        "binary": "dwmcorei.dll",
+        "address": "1800a7850",
+        "name": "FUN_1800a7850",
+        "status": "timeout",
+        "error": "Exception while decompiling 1800a7850: process: timeout\n"
+      },
+      {
+        "binary": "Microsoft.ui.xaml.dll",
+        "address": "18003c283",
+        "name": "FUN_18003c283",
+        "status": "failed",
+        "error": "\nLow-level Error: Cannot properly adjust input varnodes"
+      },
+      {
+        "binary": "Microsoft.ui.xaml.dll",
+        "address": "18072b3b4",
+        "name": "FUN_18072b3b4",
+        "status": "timeout",
+        "error": "Exception while decompiling 18072b3b4: process: timeout\n"
+      },
+      {
+        "binary": "Microsoft.ui.xaml.dll",
+        "address": "18030124e",
+        "name": "FUN_18030124e",
+        "status": "failed",
+        "error": "\nLow-level Error: Cannot properly adjust input varnodes"
+      },
+      {
+        "binary": "Microsoft.ui.xaml.dll",
+        "address": "1803013ae",
+        "name": "FUN_1803013ae",
+        "status": "failed",
+        "error": "\nLow-level Error: Cannot properly adjust input varnodes"
+      },
+      {
+        "binary": "twinapi.appcore.dll",
+        "address": "180041bc0",
+        "name": "FUN_180041bc0",
+        "status": "timeout",
+        "error": "Exception while decompiling 180041bc0: process: timeout\n"
+      },
+      {
+        "binary": "twinapi.appcore.dll",
+        "address": "1800775b8",
+        "name": "FUN_1800775b8",
+        "status": "timeout",
+        "error": "Exception while decompiling 1800775b8: process: timeout\n"
+      },
+      {
+        "binary": "twinapi.appcore.dll",
+        "address": "18018d97c",
+        "name": "FUN_18018d97c",
+        "status": "timeout",
+        "error": "Exception while decompiling 18018d97c: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "141184050",
+        "name": "FUN_141184050",
+        "status": "timeout",
+        "error": "Exception while decompiling 141184050: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "1418c1d50",
+        "name": "FUN_1418c1d50",
+        "status": "timeout",
+        "error": "Exception while decompiling 1418c1d50: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "140ee6b90",
+        "name": "FUN_140ee6b90",
+        "status": "timeout",
+        "error": "Exception while decompiling 140ee6b90: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "1410e35b0",
+        "name": "FUN_1410e35b0",
+        "status": "timeout",
+        "error": "Exception while decompiling 1410e35b0: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "142640200",
+        "name": "FUN_142640200",
+        "status": "timeout",
+        "error": "Exception while decompiling 142640200: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "141957d10",
+        "name": "FUN_141957d10",
+        "status": "timeout",
+        "error": "Exception while decompiling 141957d10: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "141204170",
+        "name": "FUN_141204170",
+        "status": "timeout",
+        "error": "Exception while decompiling 141204170: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "1412084c0",
+        "name": "FUN_1412084c0",
+        "status": "timeout",
+        "error": "Exception while decompiling 1412084c0: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "14169ee50",
+        "name": "FUN_14169ee50",
+        "status": "timeout",
+        "error": "Exception while decompiling 14169ee50: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "141736ce0",
+        "name": "FUN_141736ce0",
+        "status": "timeout",
+        "error": "Exception while decompiling 141736ce0: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "14121b700",
+        "name": "FUN_14121b700",
+        "status": "timeout",
+        "error": "Exception while decompiling 14121b700: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "141576e20",
+        "name": "FUN_141576e20",
+        "status": "timeout",
+        "error": "Exception while decompiling 141576e20: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "141586630",
+        "name": "FUN_141586630",
+        "status": "timeout",
+        "error": "Exception while decompiling 141586630: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "14120fe90",
+        "name": "FUN_14120fe90",
+        "status": "timeout",
+        "error": "Exception while decompiling 14120fe90: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "142970740",
+        "name": "FUN_142970740",
+        "status": "timeout",
+        "error": "Exception while decompiling 142970740: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "141b9abf0",
+        "name": "FUN_141b9abf0",
+        "status": "timeout",
+        "error": "Exception while decompiling 141b9abf0: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "1416b9440",
+        "name": "FUN_1416b9440",
+        "status": "timeout",
+        "error": "Exception while decompiling 1416b9440: process: timeout\n"
+      },
+      {
+        "binary": "lghub_agent_saved_wine.exe",
+        "address": "1411501d0",
+        "name": "FUN_1411501d0",
+        "status": "timeout",
+        "error": "Exception while decompiling 1411501d0: process: timeout\n"
+      }
+    ]
+  },
+  "depth_audit_correction": {
+    "initial_listing_quality": "INCOMPLETE: most functions have one-byte placeholder bodies; agent has zero instruction references",
+    "initial_corpus_role": "baseline C and export evidence; not sufficient call/reference corpus",
+    "deep_campaign": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/depth-v2",
+    "pilot": {
+      "sha256": "024a7b4031098dec4a243d770f5b820d5d382ced61687263bb8dab4908425427",
+      "program": "CoreMessagingXP.dll",
+      "project_path": "/CoreMessagingXP.dll",
+      "started": "2026-10-07T02:16:21.070932912Z",
+      "mode": "analyze",
+      "complete": true,
+      "analysis_options": {
+        "Scalar Operand References": "true",
+        "Variadic Function Signature Override": "false",
+        "Windows x86 PE RTTI Analyzer": "true",
+        "x86 Constant Reference Analyzer": "true",
+        "Data Reference.Relocation Table Guide": "true",
+        "ASCII Strings": "true",
+        "Shared Return Calls.Allow Conditional Jumps": "false",
+        "PDB Universal": "true",
+        "Create Address Tables.Allow Offcut References": "false",
+        "Reference.Unicode String References": "true",
+        "Decompiler Parameter ID.Analysis Decompiler Timeout (sec)": "60",
+        "Function ID.Create Analysis Bookmarks": "true",
+        "Create Address Tables": "true",
+        "PDB Universal.Import Source Line Info": "true",
+        "Disassemble Entry Points.Respect Execute Flag": "true",
+        "Aggressive Instruction Finder": "false",
+        "Reference.Address Table Minimum Size": "2",
+        "ASCII Strings.Minimum String Length": "LEN_5",
+        "PDB Universal.Search untrusted symbol servers": "false",
+        "Reference.Minimum String Length": "5",
+        "Function ID": "true",
+        "Non-Returning Functions - Known.Create Analysis Bookmarks": "true",
+        "Reference.Ascii String References": "true",
+        "Reference.Relocation Table Guide": "true",
+        "Variadic Function Signature Override.Create Analysis Bookmarks": "false",
+        "Function Start Search": "true",
+        "Stack.Max Threads": "2",
+        "x86 Constant Reference Analyzer.Min absolute reference": "4",
+        "Data Reference.Address Table Alignment": "1",
+        "Decompiler Parameter ID": "true",
+        "Non-Returning Functions - Discovered.Repair Flow Damage": "true",
+        "Apply Data Archives.Create Analysis Bookmarks": "true",
+        "Create Address Tables.Create Analysis Bookmarks": "true",
+        "WindowsPE x86 Propagate External Parameters": "false",
+        "Reference.References to Pointers": "true",
+        "Windows x86 Thread Environment Block (TEB) Analyzer": "true",
+        "Apply Data Archives.Archive Chooser": "[Auto-Detect]",
+        "Non-Returning Functions - Discovered": "true",
+        "Apply Data Archives.User Project Archive Path": "",
+        "Create Address Tables.Relocation Table Guide": "true",
+        "Reference.Address Table Alignment": "1",
+        "Data Reference.Align End of Strings": "false",
+        "Function ID.Always Apply FID Labels": "false",
+        "Apply Data Archives": "true",
+        "ASCII Strings.Create Strings Containing Existing Strings": "true",
+        "Data Reference.Create Address Tables": "true",
+        "ASCII Strings.Force Model Reload": "false",
+        "Function ID.Multiple Match Threshold": "30.0",
+        "x86 Constant Reference Analyzer.Function parameter/return Pointer analysis": "true",
+        "Data Reference.Ascii String References": "true",
+        "Data Reference.Respect Execute Flag": "true",
+        "PDB MSDIA.Search untrusted symbol servers": "false",
+        "Data Reference.Subroutine References": "true",
+        "Function ID.Instruction Count Threshold": "14.6",
+        "Shared Return Calls": "true",
+        "Data Reference": "true",
+        "Condense Filler Bytes": "false",
+        "Reference": "true",
+        "Subroutine References": "true",
+        "x86 Constant Reference Analyzer.Create Data from pointer": "false",
+        "ASCII Strings.Create Strings Containing References": "true",
+        "Disassemble Entry Points": "true",
+        "Aggressive Instruction Finder.Create Analysis Bookmarks": "true",
+        "Windows x86 PE Exception Handling": "true",
+        "Shared Return Calls.Assume Contiguous Functions Only": "true",
+        "Data Reference.Switch Table References": "false",
+        "Condense Filler Bytes.Filler Value": "Auto",
+        "Stack.Create Local Variables": "true",
+        "Call Convention ID.Analysis Decompiler Timeout (sec)": "60",
+        "Data Reference.Address Table Minimum Size": "2",
+        "Create Address Tables.Table Alignment": "4",
+        "Data Reference.Unicode String References": "true",
+        "Embedded Media.Create Analysis Bookmarks": "true",
+        "Windows x86 Thread Environment Block (TEB) Analyzer.Starting Address of the TEB": "",
+        "Decompiler Parameter ID.Prototype Evaluation": "__fastcall",
+        "ASCII Strings.String Start Alignment": "ALIGN_1",
+        "Decompiler Parameter ID.Analysis Clear Level": "ANALYSIS",
+        "Scalar Operand References.Relocation Table Guide": "true",
+        "Decompiler Switch Analysis.Analysis Decompiler Timeout (sec)": "60",
+        "ASCII Strings.Require Null Termination for String": "true",
+        "Decompiler Parameter ID.Commit Data Types": "true",
+        "x86 Constant Reference Analyzer.Trust values read from writable memory": "true",
+        "Create Address Tables.Minimum Table Size": "2",
+        "Data Reference.References to Pointers": "true",
+        "Windows x86 Thread Environment Block (TEB) Analyzer.Windows OS Version": "Windows 7",
+        "Non-Returning Functions - Discovered.Create Analysis Bookmarks": "true",
+        "Create Address Tables.Pointer Alignment": "1",
+        "External Entry References": "true",
+        "Reference.Respect Execute Flag": "true",
+        "x86 Constant Reference Analyzer.Require pointer param data type": "false",
+        "ASCII Strings.String end alignment": "4",
+        "PDB MSDIA": "false",
+        "x86 Constant Reference Analyzer.Stored Value Pointer analysis": "true",
+        "Non-Returning Functions - Known": "true",
+        "Stack": "true",
+        "Reference.Align End of Strings": "false",
+        "Non-Returning Functions - Discovered.Function Non-return Threshold": "3",
+        "Reference.Subroutine References": "true",
+        "Subroutine References.Create Thunks Early": "true",
+        "Call Convention ID": "true",
+        "WindowsResourceReference.Create Analysis Bookmarks": "true",
+        "ASCII Strings.Search Only in Accessible Memory Blocks": "true",
+        "Reference.Create Address Tables": "true",
+        "ASCII Strings.Model File": "StringModel.sng",
+        "x86 Constant Reference Analyzer.Speculative reference max": "256",
+        "Embedded Media": "true",
+        "Reference.Switch Table References": "false",
+        "Data Reference.Minimum String Length": "5",
+        "x86 Constant Reference Analyzer.Max Threads": "2",
+        "WindowsResourceReference": "true",
+        "Create Address Tables.Minimum Pointer Address": "4132",
+        "Decompiler Switch Analysis": "true",
+        "Decompiler Parameter ID.Commit Void Return Values": "false",
+        "Function Start Search.Search Data Blocks": "false",
+        "x86 Constant Reference Analyzer.Speculative reference min": "1024",
+        "Call-Fixup Installer": "true",
+        "Create Address Tables.Auto Label Table": "false",
+        "Create Address Tables.Maxmimum Pointer Distance": "16777215",
+        "Stack.Create Param Variables": "false",
+        "Demangler Microsoft": "true",
+        "Function Start Search.Bookmark Functions": "false",
+        "Condense Filler Bytes.Minimum number of sequential bytes": "1"
+      },
+      "before": {
+        "functions": 3707,
+        "one_byte_bodies": 3707,
+        "functions_without_entry_instruction": 3707,
+        "executable_initialized_bytes": 675840,
+        "instruction_count": 0,
+        "executable_instruction_bytes": 0,
+        "executable_function_body_bytes": 3707,
+        "instructions_outside_function_bodies_bytes": 0,
+        "undefined_executable_bytes": 675840,
+        "instruction_references": 0,
+        "direct_call_references": 0,
+        "unresolved_indirect_call_instructions": 0,
+        "symbols": 3989,
+        "bookmarks": 9
+      },
+      "disassembly_seed_count": 3707,
+      "disassembly_command_ok": true,
+      "body_fixups": 3705,
+      "body_fixups_refused": 2,
+      "phase": "auto_analysis",
+      "after": {
+        "functions": 4082,
+        "one_byte_bodies": 2,
+        "functions_without_entry_instruction": 0,
+        "executable_initialized_bytes": 675840,
+        "instruction_count": 170271,
+        "executable_instruction_bytes": 623837,
+        "executable_function_body_bytes": 623534,
+        "instructions_outside_function_bodies_bytes": 303,
+        "undefined_executable_bytes": 51979,
+        "instruction_references": 71075,
+        "direct_call_references": 17261,
+        "unresolved_indirect_call_instructions": 46,
+        "symbols": 28750,
+        "bookmarks": 900
+      },
+      "finished": "2026-10-07T02:16:59.262391215Z"
+    },
+    "deep_status_at_recording": "batch1_exporting",
+    "completed_analysis": [
+      {
+        "program": "CoreMessagingXP.dll",
+        "before": {
+          "functions": 3707,
+          "one_byte_bodies": 3707,
+          "functions_without_entry_instruction": 3707,
+          "executable_initialized_bytes": 675840,
+          "instruction_count": 0,
+          "executable_instruction_bytes": 0,
+          "executable_function_body_bytes": 3707,
+          "instructions_outside_function_bodies_bytes": 0,
+          "undefined_executable_bytes": 675840,
+          "instruction_references": 0,
+          "direct_call_references": 0,
+          "unresolved_indirect_call_instructions": 0,
+          "symbols": 3989,
+          "bookmarks": 9
+        },
+        "after": {
+          "functions": 4082,
+          "one_byte_bodies": 2,
+          "functions_without_entry_instruction": 0,
+          "executable_initialized_bytes": 675840,
+          "instruction_count": 170271,
+          "executable_instruction_bytes": 623837,
+          "executable_function_body_bytes": 623534,
+          "instructions_outside_function_bodies_bytes": 303,
+          "undefined_executable_bytes": 51979,
+          "instruction_references": 71075,
+          "direct_call_references": 17261,
+          "unresolved_indirect_call_instructions": 46,
+          "symbols": 28750,
+          "bookmarks": 900
+        }
+      },
+      {
+        "program": "InputHost.dll",
+        "before": {
+          "functions": 10440,
+          "one_byte_bodies": 10440,
+          "functions_without_entry_instruction": 10440,
+          "executable_initialized_bytes": 1396736,
+          "instruction_count": 0,
+          "executable_instruction_bytes": 0,
+          "executable_function_body_bytes": 10440,
+          "instructions_outside_function_bodies_bytes": 0,
+          "undefined_executable_bytes": 1396736,
+          "instruction_references": 0,
+          "direct_call_references": 0,
+          "unresolved_indirect_call_instructions": 0,
+          "symbols": 11086,
+          "bookmarks": 10
+        },
+        "after": {
+          "functions": 11075,
+          "one_byte_bodies": 0,
+          "functions_without_entry_instruction": 0,
+          "executable_initialized_bytes": 1396736,
+          "instruction_count": 337039,
+          "executable_instruction_bytes": 1255396,
+          "executable_function_body_bytes": 1254955,
+          "instructions_outside_function_bodies_bytes": 441,
+          "undefined_executable_bytes": 140946,
+          "instruction_references": 142227,
+          "direct_call_references": 36049,
+          "unresolved_indirect_call_instructions": 169,
+          "symbols": 67254,
+          "bookmarks": 2306
+        }
+      },
+      {
+        "program": "Microsoft.InputStateManager.dll",
+        "before": {
+          "functions": 1701,
+          "one_byte_bodies": 1701,
+          "functions_without_entry_instruction": 1701,
+          "executable_initialized_bytes": 299008,
+          "instruction_count": 0,
+          "executable_instruction_bytes": 0,
+          "executable_function_body_bytes": 1701,
+          "instructions_outside_function_bodies_bytes": 0,
+          "undefined_executable_bytes": 299008,
+          "instruction_references": 0,
+          "direct_call_references": 0,
+          "unresolved_indirect_call_instructions": 0,
+          "symbols": 1903,
+          "bookmarks": 9
+        },
+        "after": {
+          "functions": 2369,
+          "one_byte_bodies": 2,
+          "functions_without_entry_instruction": 0,
+          "executable_initialized_bytes": 299008,
+          "instruction_count": 69616,
+          "executable_instruction_bytes": 271720,
+          "executable_function_body_bytes": 271151,
+          "instructions_outside_function_bodies_bytes": 569,
+          "undefined_executable_bytes": 27192,
+          "instruction_references": 27885,
+          "direct_call_references": 6614,
+          "unresolved_indirect_call_instructions": 201,
+          "symbols": 15266,
+          "bookmarks": 203
+        }
+      },
+      {
+        "program": "CoreMessaging.dll",
+        "before": {
+          "functions": 5350,
+          "one_byte_bodies": 5349,
+          "functions_without_entry_instruction": 5349,
+          "executable_initialized_bytes": 856064,
+          "instruction_count": 15,
+          "executable_instruction_bytes": 65,
+          "executable_function_body_bytes": 5414,
+          "instructions_outside_function_bodies_bytes": 0,
+          "undefined_executable_bytes": 855999,
+          "instruction_references": 8,
+          "direct_call_references": 0,
+          "unresolved_indirect_call_instructions": 0,
+          "symbols": 5784,
+          "bookmarks": 9
+        },
+        "after": {
+          "functions": 5578,
+          "one_byte_bodies": 0,
+          "functions_without_entry_instruction": 0,
+          "executable_initialized_bytes": 856064,
+          "instruction_count": 214558,
+          "executable_instruction_bytes": 781915,
+          "executable_function_body_bytes": 781573,
+          "instructions_outside_function_bodies_bytes": 342,
+          "undefined_executable_bytes": 73833,
+          "instruction_references": 88612,
+          "direct_call_references": 23661,
+          "unresolved_indirect_call_instructions": 50,
+          "symbols": 36399,
+          "bookmarks": 945
+        }
+      },
+      {
+        "program": "Microsoft.Internal.FrameworkUdk.dll",
+        "before": {
+          "functions": 4176,
+          "one_byte_bodies": 4176,
+          "functions_without_entry_instruction": 4175,
+          "executable_initialized_bytes": 602112,
+          "instruction_count": 61,
+          "executable_instruction_bytes": 70,
+          "executable_function_body_bytes": 4176,
+          "instructions_outside_function_bodies_bytes": 69,
+          "undefined_executable_bytes": 602042,
+          "instruction_references": 2,
+          "direct_call_references": 0,
+          "unresolved_indirect_call_instructions": 59,
+          "symbols": 4607,
+          "bookmarks": 10
+        },
+        "after": {
+          "functions": 4470,
+          "one_byte_bodies": 2,
+          "functions_without_entry_instruction": 0,
+          "executable_initialized_bytes": 602112,
+          "instruction_count": 116899,
+          "executable_instruction_bytes": 526099,
+          "executable_function_body_bytes": 525866,
+          "instructions_outside_function_bodies_bytes": 233,
+          "undefined_executable_bytes": 75484,
+          "instruction_references": 77129,
+          "direct_call_references": 14139,
+          "unresolved_indirect_call_instructions": 78,
+          "symbols": 35087,
+          "bookmarks": 467
+        }
+      },
+      {
+        "program": "lghub_system_tray.exe",
+        "before": {
+          "functions": 27429,
+          "one_byte_bodies": 27224,
+          "functions_without_entry_instruction": 27217,
+          "executable_initialized_bytes": 7230976,
+          "instruction_count": 3827,
+          "executable_instruction_bytes": 17242,
+          "executable_function_body_bytes": 43624,
+          "instructions_outside_function_bodies_bytes": 835,
+          "undefined_executable_bytes": 7213734,
+          "instruction_references": 2589,
+          "direct_call_references": 488,
+          "unresolved_indirect_call_instructions": 23,
+          "symbols": 28684,
+          "bookmarks": 12
+        },
+        "after": {
+          "functions": 32588,
+          "one_byte_bodies": 0,
+          "functions_without_entry_instruction": 0,
+          "executable_initialized_bytes": 7230976,
+          "instruction_count": 1819246,
+          "executable_instruction_bytes": 6897087,
+          "executable_function_body_bytes": 6877214,
+          "instructions_outside_function_bodies_bytes": 19873,
+          "undefined_executable_bytes": 303981,
+          "instruction_references": 710539,
+          "direct_call_references": 140097,
+          "unresolved_indirect_call_instructions": 9976,
+          "symbols": 190086,
+          "bookmarks": 2686
+        }
+      },
+      {
+        "program": "Microsoft.UI.Input.dll",
+        "before": {
+          "functions": 6252,
+          "one_byte_bodies": 6252,
+          "functions_without_entry_instruction": 6252,
+          "executable_initialized_bytes": 860160,
+          "instruction_count": 0,
+          "executable_instruction_bytes": 0,
+          "executable_function_body_bytes": 6252,
+          "instructions_outside_function_bodies_bytes": 0,
+          "undefined_executable_bytes": 860160,
+          "instruction_references": 0,
+          "direct_call_references": 0,
+          "unresolved_indirect_call_instructions": 0,
+          "symbols": 6689,
+          "bookmarks": 10
+        },
+        "after": {
+          "functions": 7690,
+          "one_byte_bodies": 2,
+          "functions_without_entry_instruction": 0,
+          "executable_initialized_bytes": 860160,
+          "instruction_count": 203612,
+          "executable_instruction_bytes": 781853,
+          "executable_function_body_bytes": 780192,
+          "instructions_outside_function_bodies_bytes": 1661,
+          "undefined_executable_bytes": 77872,
+          "instruction_references": 88851,
+          "direct_call_references": 22944,
+          "unresolved_indirect_call_instructions": 495,
+          "symbols": 45968,
+          "bookmarks": 1107
+        }
+      }
+    ]
+  },
+  "compute_boost": {
+    "analysis_worker_ceiling": 8,
+    "export_worker_ceiling": 48,
+    "actual_concurrent_analyses_started": 7,
+    "agent_started_early": true,
+    "completed_export_batches_reused": [
+      1,
+      2
+    ],
+    "live_arc_limit_gib": 16,
+    "persistent_boot_arc_limit_gib": 32,
+    "observed_prior_campaign_memory_peak_bytes": 16654700544,
+    "dll_worker_budget_gib": 1.25,
+    "agent_worker_budget_gib": 1.5,
+    "watcher_script": "scripts/watch_campaign.py",
+    "watcher_display": ":10.0",
+    "watcher_konsole_pid": 210218,
+    "main_service": "dragonshard2-depth-boosted-20261006",
+    "ahead_service": "dragonshard2-agent-ahead-20261006",
+    "status_at_recording": "batch3_exporting",
+    "unit_tests_passed": 21,
+    "handoff_note": "Retained unstarted copies left during graceful shutdown; reused both verified indexes. No completed analysis/export discarded."
+  },
+  "deep_first20_validation": {
+    "scope_programs_indexed": 20,
+    "functions": 225377,
+    "successful_c": 225372,
+    "errors": 5,
+    "instruction_references": 4500958,
+    "no_instruction_thunks": [
+      {
+        "binary": "dcomp.dll",
+        "address": "18021f020",
+        "name": "Ordinal_1045",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "dcomp.dll",
+        "address": "18021f028",
+        "name": "Ordinal_1046",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "dcomp.dll",
+        "address": "18021f000",
+        "name": "Ordinal_1019",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "dcomp.dll",
+        "address": "18021f008",
+        "name": "Ordinal_1028",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "dcomp.dll",
+        "address": "18021f010",
+        "name": "Ordinal_1043",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "dcomp.dll",
+        "address": "18021f018",
+        "name": "Ordinal_1044",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "user32.dll",
+        "address": "1801c7000",
+        "name": "DefDlgProcA",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "user32.dll",
+        "address": "1801c7018",
+        "name": "DefWindowProcW",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "user32.dll",
+        "address": "1801c7008",
+        "name": "DefDlgProcW",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "user32.dll",
+        "address": "1801c7010",
+        "name": "DefWindowProcA",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kbase.sys",
+        "address": "140335000",
+        "name": "DxDdGetDxgkWin32kInterface",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kbase.sys",
+        "address": "140335008",
+        "name": "DxDdIsTearDownLddmSpriteDisabled",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410030",
+        "name": "RtlPcToFileHeader",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410068",
+        "name": "_local_unwind",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410000",
+        "name": "RtlCaptureContext",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410038",
+        "name": "RtlRestoreContext",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410070",
+        "name": "_setjmp",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410008",
+        "name": "RtlCopyMemory",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410040",
+        "name": "RtlUnwindEx",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410078",
+        "name": "_setjmpex",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410010",
+        "name": "RtlCopyMemoryNonTemporal",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410048",
+        "name": "RtlVirtualUnwind",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410080",
+        "name": "longjmp",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410018",
+        "name": "RtlFillMemory",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410050",
+        "name": "RtlZeroMemory",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410020",
+        "name": "RtlLookupFunctionEntry",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410058",
+        "name": "__C_specific_handler",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410028",
+        "name": "RtlMoveMemory",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      },
+      {
+        "binary": "win32kfull.sys",
+        "address": "140410060",
+        "name": "__chkstk",
+        "classification": "Ghidra synthetic thunk; not unresolved code body"
+      }
+    ],
+    "exception_evidence_catalog": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/depth-v2/exception-evidence/catalog.json",
+    "agent_state": "batch4_analyzing"
+  },
+  "deep_exception_evidence": [
+    {
+      "binary": "Microsoft.ui.xaml.dll",
+      "sha256": "004c034e8d2b9214317cdd2eaea5da7c94099f0f2b733031469b4ed7bd5c90d4",
+      "address": "18030124e",
+      "instructions": 86,
+      "standard_decompilation_recovered": false,
+      "normalized_output_available": false,
+      "evidence_file": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/depth-v2/exception-evidence/004c034e8d2b9214/evidence.json"
+    },
+    {
+      "binary": "Microsoft.ui.xaml.dll",
+      "sha256": "004c034e8d2b9214317cdd2eaea5da7c94099f0f2b733031469b4ed7bd5c90d4",
+      "address": "1803013ae",
+      "instructions": 113,
+      "standard_decompilation_recovered": false,
+      "normalized_output_available": false,
+      "evidence_file": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/depth-v2/exception-evidence/004c034e8d2b9214/evidence.json"
+    },
+    {
+      "binary": "Microsoft.ui.xaml.dll",
+      "sha256": "004c034e8d2b9214317cdd2eaea5da7c94099f0f2b733031469b4ed7bd5c90d4",
+      "address": "18003c283",
+      "instructions": 394,
+      "standard_decompilation_recovered": false,
+      "normalized_output_available": false,
+      "evidence_file": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/depth-v2/exception-evidence/004c034e8d2b9214/evidence.json"
+    },
+    {
+      "binary": "user32.dll",
+      "sha256": "6fcd82185566db70ca0a7bc5cf08fbe448d407928990fd58eec32c06b240b1bc",
+      "address": "1800a8bbd",
+      "instructions": 2,
+      "standard_decompilation_recovered": false,
+      "normalized_output_available": true,
+      "evidence_file": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/depth-v2/exception-evidence/6fcd82185566db70/evidence.json"
+    },
+    {
+      "binary": "user32.dll",
+      "sha256": "6fcd82185566db70ca0a7bc5cf08fbe448d407928990fd58eec32c06b240b1bc",
+      "address": "1800595e4",
+      "instructions": 187,
+      "standard_decompilation_recovered": false,
+      "normalized_output_available": true,
+      "evidence_file": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/depth-v2/exception-evidence/6fcd82185566db70/evidence.json"
+    }
+  ],
+  "global_dependency_queue": {
+    "directory": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/swarm-v5",
+    "service": "dragonshard2-workqueue-v5-20261007.service",
+    "legacy_controllers_stopped": [
+      "dragonshard2-depth-boosted-20261006.service",
+      "dragonshard2-workqueue-20261007.service",
+      "dragonshard2-workqueue-v4-20261007.service"
+    ],
+    "independent_analysis_preserved": "dragonshard2-agent-ahead-20261006.service",
+    "adopted_program_indexes": 20,
+    "completed_gap_audits": 20,
+    "indirect_functions_planned": 7485,
+    "indirect_shards_planned": 69,
+    "cpu_slots": 48,
+    "disk_cushion_gib": 0,
+    "host_memory_reserve_gib": 10,
+    "service_memory_high_gib": 54,
+    "service_memory_max_gib": 64,
+    "session_linger": true,
+    "continues_without_chat_prompts": true,
+    "survives_reboot": false,
+    "latest_observed_status": {
+      "state": "running",
+      "reason": "waiting_for_external_analysis",
+      "programs_total": 21,
+      "programs_indexed": 20,
+      "programs_gap_audited": 20,
+      "indirect_shards_complete": 69,
+      "indirect_shards_total": 69,
+      "jobs": {
+        "complete": 89
+      },
+      "ready_tasks": 0,
+      "active_tasks": 0,
+      "cpu_percent": 22.945965951147297,
+      "cpu_slots_limit": 48,
+      "disk_reserve_gib": 0.0,
+      "idle_reasons": {},
+      "external_dependencies": [
+        "lghub_agent_saved_wine.exe"
+      ]
+    },
+    "observed_at_unix": 1791343633.9150965,
+    "validation": {
+      "unit_tests_passed": 33,
+      "real_full_pipeline_fixture": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/dragonshard-2/fixture/swarm-validation-v4",
+      "real_indirect_ssa_fixture": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/dragonshard-2/fixture/indirect-validation-task.result.json",
+      "fixture_indirect_functions": 2,
+      "fixture_indirect_successes": 2,
+      "sqlite_size_cap_rejection_preserves_prior_index": true
+    },
+    "completion_semantics": "All scheduled analysis/export/index/gap/data-flow tasks complete; unresolved transfers, decompiler failures and semantic questions remain explicit, not claimed solved."
+  },
+  "partitioned_constant_propagation": {
+    "directory": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/parallel-analysis-v2",
+    "service": "dragonshard2-parallel-analysis-v2-20261007.service",
+    "workers": 42,
+    "checkpoint": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/parallel-seed-v1/checkpoint/program.gzf",
+    "checkpoint_functions": 351250,
+    "first_pass_functions_attempted": 351250,
+    "observed_host_cpu_percent_during_computation": 97.9,
+    "observed_java_processes": 42,
+    "observed_at_unix": 1791345371.5928829,
+    "latest_status": {
+      "state": "parallel_constant_propagation",
+      "binary": "lghub_agent_saved_wine.exe",
+      "requested_workers": 42,
+      "complete": false,
+      "scope": "Partitioned X86 constant propagation; not all Ghidra analyzers",
+      "round": "round-00",
+      "functions": 351250,
+      "shards": 42,
+      "completed_shards": 5,
+      "worker_heap": "640m",
+      "baseline": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-2/campaign-20261006-214743/parallel-seed-v1/checkpoint/program.gzf",
+      "baseline_sha256": "48143aeb9f318d1d77efbb0e53f661a829d10467410c1c730c7abb3590eea70d"
+    },
+    "worker_database_isolation": "Separate ProgramDB/DBHandle/transactions/locks per JVM; shared immutable backing only",
+    "output_packing": "Serialized because packed export creates a full temporary database; remaining workers keep computing",
+    "serial_fallback": "Frozen dragonshard2-agent-ahead-20261006.service; thawed on failure/exit including ExecStopPost",
+    "export_handoff": "dragonshard2-workqueue-v6-20261007.service adopts complete-analysis.json only after convergence and depth validation",
+    "validation": {
+      "nonzero_fixture_parallel_serial_program_diff_equal": true,
+      "fixture_changed_address_bytes": 128,
+      "remaining_analysis_reconciliation_rounds": 1,
+      "conflicting_worker_mutations_rejected": true,
+      "conflict_result": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/dragonshard-2/fixture/parallel-conflict-validation/merge/report.json",
+      "full_pipeline_fixture": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/dragonshard-2/fixture/parallel-analysis-v4/complete-analysis.json",
+      "unit_tests_passed": 36
+    },
+    "limitations": "Large-agent merge and convergence remain unvalidated until the running pipeline completes. This is not proof of exhaustive semantics or Wine compatibility."
+  },
+  "reboot_recovery_20261010": {
+    "campaign": "/mnt/Captures/DragonShard-2/Penguin-GHUB/campaign-20261006-214743",
+    "analysis_directory": "parallel-captures-v5",
+    "analysis_unit": "dragonshard2-parallel-captures-v5-20261010.service",
+    "queue_directory": "swarm-captures-v8",
+    "queue_unit": "dragonshard2-workqueue-captures-v8-20261010.service",
+    "disk_guard_unit": "dragonshard2-disk-guard-20261010.service",
+    "scratch_helper_unit": "dragonshard2-scratch-reserve-v5-20261010.service",
+    "checkpoint": "parallel-captures-v4/finish-01",
+    "checkpoint_sha256": "14c8cdfada4af4ddfe20583e5e6a761acfb79787e2493ea698b8f81401981ec1",
+    "checkpoint_functions": 374900,
+    "requested_and_admitted_workers": 42,
+    "live_arc_cap_gib": 16,
+    "root_reserve_gib": 20,
+    "captures_reserve_gib": 16,
+    "adopted_programs": 20,
+    "adopted_jobs": 89,
+    "observed_host_cpu_samples_percent": [
+      97.5,
+      75.3,
+      96.1
+    ],
+    "cpu_sample_context": "97.5 during ramp-up; 75.3 with NTFS allocation contention; 96.1 after scratch preallocation. Samples, not a sustained utilization guarantee.",
+    "repairs": [
+      "Warm immutable packed database views before concurrent opens to avoid Ghidra 30-second cache timeout",
+      "Resume complete remaining-analyzer checkpoint; publish directly when subsequent reconciliation has no changes",
+      "Follow the owned parallel producer after reboot instead of the obsolete serial fallback unit",
+      "Preallocate private scratch extents with KEEP_SIZE and disk reservations to reduce NTFS allocation contention",
+      "Finish checksummed relocation of closed fallback files to Captures"
+    ],
+    "validation": {
+      "unit_tests": 45,
+      "parallel_serial_programdiff_equal": true,
+      "saved_finish_checkpoint_resume_passed": true,
+      "contradictory_concrete_types_refused": true,
+      "skill_valid": true,
+      "systemsage_metric_calls_passed": true,
+      "ghidra_mcp_project_read_passed": true
+    },
+    "scope_note": "This is static corpus preparation, not a Wine compatibility completion percentage."
+  }
+}

@@ -1,0 +1,339 @@
+--- a/dlls/windows.ui/Makefile.in
++++ b/dlls/windows.ui/Makefile.in
+@@ -2 +2 @@
+-IMPORTS = combase advapi32 user32
++IMPORTS = combase advapi32 user32 ntdll
+@@ -8,0 +9 @@
++	inputsite.c \
+--- a/dlls/windows.ui/main.c
++++ b/dlls/windows.ui/main.c
+@@ -32,0 +33,2 @@
++extern HRESULT inputsite_get_factory(IActivationFactory **out);
++
+@@ -37,0 +40,2 @@
++
++    if (!wcscmp(buffer, L"Windows.UI.Internal.Input.InputSite")) return inputsite_get_factory(factory);
+--- /dev/null
++++ b/dlls/windows.ui/inputsite.c
+@@ -0,0 +1,321 @@
++/* Private composition input-site bridge.
++ *
++ * Copyright 2026 Cencyte D
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This implements GetForVisual for visuals with an existing input sink.
++ * The marker IInputSite has only the six IInspectable methods. It is
++ * deliberately not a substitute for input-object factories or DWM routing.
++ */
++#include "private.h"
++#include "winternl.h"
++#include "wine/debug.h"
++#include "wine/list.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(ui);
++
++static const WCHAR class_name[] = L"Windows.UI.Internal.Input.InputSite";
++static const GUID iid_statics = {0x8ca0442d,0xae80,0x47b0,{0xaf,0x23,0x81,0x3f,0xc1,0xda,0x9c,0xd0}};
++/* FrameworkUdk's RS5 contract and the current InputHost marker contract. */
++static const GUID iid_site_rs5 = {0xf77d91d0,0x46ca,0x4464,{0x99,0xc1,0x89,0x02,0xae,0xd1,0x76,0x80}};
++static const GUID iid_site = {0xcfb32fa7,0x5399,0x5f3d,{0x82,0xba,0x96,0x41,0xf1,0x06,0xff,0xcd}};
++/* FrameworkUdk's RS5 visual adapter: GetInputSinkHandle is slot 20. */
++static const GUID iid_visual_partner2 = {0x53456138,0x20b5,0x4f17,{0x8f,0x6c,0xf3,0x79,0xa1,0xac,0x98,0xd0}};
++/* The VB adapter exposes IVisualInternal instead, with the getter at slot 9. */
++static const GUID iid_visual_internal = {0x92179cc0,0xae1f,0x48bc,{0xa3,0x54,0x8f,0x7a,0x88,0x00,0xf2,0xfb}};
++
++typedef struct inputsite_statics inputsite_statics;
++typedef struct inputsite_statics_vtbl
++{
++    HRESULT (WINAPI *QueryInterface)(inputsite_statics *, REFIID, void **);
++    ULONG (WINAPI *AddRef)(inputsite_statics *);
++    ULONG (WINAPI *Release)(inputsite_statics *);
++    HRESULT (WINAPI *GetIids)(inputsite_statics *, ULONG *, IID **);
++    HRESULT (WINAPI *GetRuntimeClassName)(inputsite_statics *, HSTRING *);
++    HRESULT (WINAPI *GetTrustLevel)(inputsite_statics *, TrustLevel *);
++    HRESULT (WINAPI *GetForVisual)(inputsite_statics *, IInspectable *, IInspectable **);
++    HRESULT (WINAPI *GetForHwnd)(inputsite_statics *, UINT64, IInspectable **);
++    HRESULT (WINAPI *GetForCoreWindow)(inputsite_statics *, IInspectable *, IInspectable **);
++    HRESULT (WINAPI *GetForCoreComponentInputSource)(inputsite_statics *, IInspectable *, IInspectable **);
++    HRESULT (WINAPI *GetForCoreIndependentInputSource)(inputsite_statics *, IInspectable *, IInspectable **);
++    HRESULT (WINAPI *GetForCurrentProcess)(inputsite_statics *, IInspectable **);
++} inputsite_statics_vtbl;
++struct inputsite_statics { const inputsite_statics_vtbl *lpVtbl; };
++
++struct site
++{
++    IInspectable IInspectable_iface;
++    IClosable IClosable_iface;
++    struct list entry;
++    LONG ref;
++    LUID id;
++    HANDLE sink;
++};
++
++/* Weak cache, protected through the final decrement: a lookup cannot revive
++ * an object whose destructor is running. No cache-owned reference leaks. */
++static SRWLOCK sites_lock = SRWLOCK_INIT;
++static struct list sites = LIST_INIT(sites);
++static INIT_ONCE query_once = INIT_ONCE_STATIC_INIT;
++static NTSTATUS (WINAPI *query_sink_luid)(HANDLE, LUID *);
++
++static BOOL CALLBACK init_query(INIT_ONCE *once, void *param, void **context)
++{
++    HMODULE module = LoadLibraryW(L"win32u.dll");
++    if (module) query_sink_luid = (void *)GetProcAddress(module, "NtQueryCompositionInputSinkLuid");
++    /* The module stays loaded for the lifetime of this bridge. */
++    return TRUE;
++}
++
++static HRESULT copy_iids(const IID *values, ULONG count, ULONG *out_count, IID **out)
++{
++    if (!out_count || !out) return E_POINTER;
++    *out_count = 0;
++    *out = CoTaskMemAlloc(count * sizeof(**out));
++    if (!*out) return E_OUTOFMEMORY;
++    memcpy(*out, values, count * sizeof(**out));
++    *out_count = count;
++    return S_OK;
++}
++
++static HRESULT get_name(HSTRING *out)
++{
++    if (!out) return E_POINTER;
++    return WindowsCreateString(class_name, ARRAY_SIZE(class_name) - 1, out);
++}
++
++static HRESULT get_trust(TrustLevel *out)
++{
++    if (!out) return E_POINTER;
++    *out = BaseTrust;
++    return S_OK;
++}
++
++static struct site *impl_from_IInspectable(IInspectable *iface)
++{
++    return CONTAINING_RECORD(iface, struct site, IInspectable_iface);
++}
++
++static ULONG WINAPI site_AddRef(IInspectable *iface)
++{
++    return InterlockedIncrement(&impl_from_IInspectable(iface)->ref);
++}
++
++static ULONG WINAPI site_Release(IInspectable *iface)
++{
++    struct site *impl = impl_from_IInspectable(iface);
++    ULONG ref;
++    AcquireSRWLockExclusive(&sites_lock);
++    ref = InterlockedDecrement(&impl->ref);
++    if (!ref && impl->sink) list_remove(&impl->entry);
++    ReleaseSRWLockExclusive(&sites_lock);
++    if (!ref)
++    {
++        if (impl->sink) CloseHandle(impl->sink);
++        free(impl);
++    }
++    return ref;
++}
++
++static HRESULT WINAPI site_QueryInterface(IInspectable *iface, REFIID iid, void **out)
++{
++    struct site *impl = impl_from_IInspectable(iface);
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) ||
++        IsEqualGUID(iid, &iid_site) || IsEqualGUID(iid, &iid_site_rs5))
++        *out = &impl->IInspectable_iface;
++    else if (IsEqualGUID(iid, &IID_IClosable)) *out = &impl->IClosable_iface;
++    else
++    {
++        FIXME("InputSite interface %s not implemented.\n", debugstr_guid(iid));
++        return E_NOINTERFACE;
++    }
++    site_AddRef(iface);
++    return S_OK;
++}
++
++static HRESULT WINAPI site_GetIids(IInspectable *iface, ULONG *count, IID **out)
++{
++    IID ids[] = {iid_site_rs5, iid_site, IID_IClosable};
++    return copy_iids(ids, ARRAY_SIZE(ids), count, out);
++}
++static HRESULT WINAPI site_GetRuntimeClassName(IInspectable *iface, HSTRING *out) { return get_name(out); }
++static HRESULT WINAPI site_GetTrustLevel(IInspectable *iface, TrustLevel *out) { return get_trust(out); }
++static const IInspectableVtbl site_vtbl =
++{
++    site_QueryInterface, site_AddRef, site_Release, site_GetIids, site_GetRuntimeClassName, site_GetTrustLevel
++};
++
++DEFINE_IINSPECTABLE(closable, IClosable, struct site, IInspectable_iface)
++static HRESULT WINAPI closable_Close(IClosable *iface)
++{
++    struct site *impl = impl_from_IClosable(iface);
++    HANDLE sink;
++    AcquireSRWLockExclusive(&sites_lock);
++    if ((sink = impl->sink))
++    {
++        list_remove(&impl->entry);
++        impl->sink = NULL;
++    }
++    ReleaseSRWLockExclusive(&sites_lock);
++    if (sink) CloseHandle(sink);
++    return S_OK;
++}
++static const IClosableVtbl closable_vtbl =
++{
++    closable_QueryInterface, closable_AddRef, closable_Release, closable_GetIids,
++    closable_GetRuntimeClassName, closable_GetTrustLevel, closable_Close
++};
++
++static HRESULT WINAPI statics_GetForVisual(inputsite_statics *iface, IInspectable *visual, IInspectable **out)
++{
++    struct site *impl;
++    IUnknown *partner;
++    HANDLE original = NULL, sink;
++    LUID id;
++    HRESULT hr;
++    NTSTATUS status;
++    unsigned int slot = 9;
++    HRESULT (WINAPI *get_sink)(IUnknown *, INT64 *);
++
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (!visual) return E_INVALIDARG;
++    TRACE("InputSite GetForVisual %p.\n", visual);
++    hr = IInspectable_QueryInterface(visual, &iid_visual_internal, (void **)&partner);
++    if (hr == E_NOINTERFACE)
++    {
++        slot = 20;
++        hr = IInspectable_QueryInterface(visual, &iid_visual_partner2, (void **)&partner);
++    }
++    if (FAILED(hr)) { WARN("InputSite visual partner query failed %#lx.\n", hr); return hr; }
++    get_sink = ((void **)partner->lpVtbl)[slot];
++    hr = get_sink(partner, (INT64 *)&original);
++    IUnknown_Release(partner);
++    if (FAILED(hr)) { WARN("InputSite sink accessor failed %#lx.\n", hr); return hr; }
++    TRACE("InputSite visual %p sink %p.\n", visual, original);
++    /* Never borrow a caller handle in the cache: closure/reuse must not
++     * silently change the site's identity. Duplicate before validating. */
++    if (!DuplicateHandle(GetCurrentProcess(), original, GetCurrentProcess(), &sink, 0, FALSE, DUPLICATE_SAME_ACCESS))
++        return HRESULT_FROM_WIN32(GetLastError());
++    InitOnceExecuteOnce(&query_once, init_query, NULL, NULL);
++    if (!query_sink_luid)
++    {
++        CloseHandle(sink);
++        return E_NOTIMPL;
++    }
++    status = query_sink_luid(sink, &id);
++    if (status)
++    {
++        CloseHandle(sink);
++        return HRESULT_FROM_WIN32(RtlNtStatusToDosError(status));
++    }
++    AcquireSRWLockExclusive(&sites_lock);
++    LIST_FOR_EACH_ENTRY(impl, &sites, struct site, entry)
++        if (impl->id.LowPart == id.LowPart && impl->id.HighPart == id.HighPart)
++        {
++            site_AddRef(&impl->IInspectable_iface);
++            *out = &impl->IInspectable_iface;
++            ReleaseSRWLockExclusive(&sites_lock);
++            CloseHandle(sink);
++            TRACE("InputSite reused %p for sink LUID %08lx:%08lx.\n", *out, id.HighPart, id.LowPart);
++            return S_OK;
++        }
++    if ((impl = calloc(1, sizeof(*impl))))
++    {
++        impl->IInspectable_iface.lpVtbl = &site_vtbl;
++        impl->IClosable_iface.lpVtbl = &closable_vtbl;
++        impl->ref = 1;
++        impl->id = id;
++        impl->sink = sink;
++        list_add_tail(&sites, &impl->entry);
++        *out = &impl->IInspectable_iface;
++    }
++    ReleaseSRWLockExclusive(&sites_lock);
++    if (!impl) { CloseHandle(sink); return E_OUTOFMEMORY; }
++    TRACE("InputSite created %p for sink LUID %08lx:%08lx.\n", *out, id.HighPart, id.LowPart);
++    return S_OK;
++}
++
++static HRESULT WINAPI statics_GetForHwnd(inputsite_statics *iface, UINT64 hwnd, IInspectable **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    return E_NOTIMPL;
++}
++static HRESULT WINAPI statics_GetForSource(inputsite_statics *iface, IInspectable *source, IInspectable **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    return E_NOTIMPL;
++}
++static HRESULT WINAPI statics_GetForProcess(inputsite_statics *iface, IInspectable **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    return E_NOTIMPL;
++}
++
++static IActivationFactory factory;
++static inputsite_statics statics;
++static LONG factory_ref = 1;
++static HRESULT WINAPI factory_QueryInterface(IActivationFactory *iface, REFIID iid, void **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) ||
++        IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IActivationFactory)) *out = &factory;
++    else if (IsEqualGUID(iid, &iid_statics)) *out = &statics;
++    else return E_NOINTERFACE;
++    InterlockedIncrement(&factory_ref);
++    return S_OK;
++}
++static ULONG WINAPI factory_AddRef(IActivationFactory *iface) { return InterlockedIncrement(&factory_ref); }
++static ULONG WINAPI factory_Release(IActivationFactory *iface) { return InterlockedDecrement(&factory_ref); }
++static HRESULT WINAPI factory_GetIids(IActivationFactory *iface, ULONG *count, IID **out)
++{
++    return copy_iids(&iid_statics, 1, count, out);
++}
++static HRESULT WINAPI factory_GetRuntimeClassName(IActivationFactory *iface, HSTRING *out) { return get_name(out); }
++static HRESULT WINAPI factory_GetTrustLevel(IActivationFactory *iface, TrustLevel *out) { return get_trust(out); }
++static HRESULT WINAPI factory_ActivateInstance(IActivationFactory *iface, IInspectable **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    return E_NOTIMPL;
++}
++static const IActivationFactoryVtbl factory_vtbl =
++{
++    factory_QueryInterface, factory_AddRef, factory_Release, factory_GetIids,
++    factory_GetRuntimeClassName, factory_GetTrustLevel, factory_ActivateInstance
++};
++static IActivationFactory factory = {&factory_vtbl};
++static HRESULT WINAPI statics_QueryInterface(inputsite_statics *iface, REFIID iid, void **out)
++{ return factory_QueryInterface(&factory, iid, out); }
++static ULONG WINAPI statics_AddRef(inputsite_statics *iface) { return factory_AddRef(&factory); }
++static ULONG WINAPI statics_Release(inputsite_statics *iface) { return factory_Release(&factory); }
++static HRESULT WINAPI statics_GetIids(inputsite_statics *iface, ULONG *count, IID **out)
++{ return factory_GetIids(&factory, count, out); }
++static HRESULT WINAPI statics_GetRuntimeClassName(inputsite_statics *iface, HSTRING *out) { return get_name(out); }
++static HRESULT WINAPI statics_GetTrustLevel(inputsite_statics *iface, TrustLevel *out) { return get_trust(out); }
++static const inputsite_statics_vtbl statics_vtbl =
++{
++    statics_QueryInterface, statics_AddRef, statics_Release, statics_GetIids,
++    statics_GetRuntimeClassName, statics_GetTrustLevel, statics_GetForVisual, statics_GetForHwnd,
++    statics_GetForSource, statics_GetForSource, statics_GetForSource, statics_GetForProcess
++};
++static inputsite_statics statics = {&statics_vtbl};
++
++HRESULT inputsite_get_factory(IActivationFactory **out)
++{
++    WCHAR enabled[2];
++    *out = NULL;
++    if (GetEnvironmentVariableW(L"WINE_GHUB_INPUT_SITE", enabled, ARRAY_SIZE(enabled)) != 1 || enabled[0] != '1')
++        return CLASS_E_CLASSNOTAVAILABLE;
++    return factory_QueryInterface(&factory, &IID_IActivationFactory, (void **)out);
++}

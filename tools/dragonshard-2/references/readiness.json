@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-03",
+  "systemsage": {
+    "enabled_in_codex": true,
+    "command": "/home/firesongz/bin/mcp-wrapper-systemsage",
+    "environment": "/home/firesongz/Source2/AI/MCP/SystemSage/.venv",
+    "pinned_versions": {
+      "SystemSage": "0.1",
+      "mcp": "1.29.0",
+      "psutil": "7.2.2"
+    },
+    "stdio_metrics_verified": true,
+    "tools": 52,
+    "repair": "Local preserved compatible environment; import banners redirected to stderr; no JSON key-order filtering or dependency fetching at startup.",
+    "active_codex_catalog": "Still stale; fresh real MCP stdio clients work now."
+  },
+  "arc": {
+    "live_bytes": 34359738368,
+    "persistent_file": "/etc/modprobe.d/zfs.conf",
+    "persistent_bytes": 34359738368,
+    "changed_this_task": false
+  },
+  "full_corpus_preflight": {
+    "time": "2026-10-03T23:18:40-0400",
+    "workers": 40,
+    "blockers": [
+      "Insufficient MemAvailable for configured workers plus reserve",
+      "Insufficient disk for worst-case clone divergence, exports/index and reserve",
+      "Source project is open/locked; save and close it before cloning"
+    ],
+    "systemsage": {
+      "tool_count": 52,
+      "metrics": {
+        "get_memory_usage": [
+          "Memory usage: 89.3% used (114868 MB of 128656 MB)"
+        ],
+        "get_cpu_usage": [
+          "Current CPU usage: 25.8%"
+        ],
+        "get_disk_usage": [
+          "Disk usage: 97.7% used (1801 GB of 1843 GB)"
+        ]
+      }
+    },
+    "available_gib": 13.61,
+    "swap_used_gib": 88.34,
+    "memory_required_gib": 68.0,
+    "cpu_threads": 48,
+    "pressure": "some avg10=0.00 avg60=0.00 avg300=0.59 total=1233850527\nfull avg10=0.00 avg60=0.00 avg300=0.59 total=1220663725",
+    "thermals_c": {
+      "hwmon6/iwlwifi_1/temp1_input": 34.0,
+      "hwmon4/k10temp/Tccd1": 75.5,
+      "hwmon4/k10temp/Tccd5": 70.25,
+      "hwmon4/k10temp/Tctl": 85.125,
+      "hwmon4/k10temp/Tccd3": 73.75,
+      "hwmon4/k10temp/Tccd7": 67.75,
+      "hwmon2/nvme/Composite": 49.85,
+      "hwmon0/nvme/Composite": 44.85,
+      "hwmon3/nct6798/AUXTIN3": -20.0,
+      "hwmon3/nct6798/TSI0_TEMP": 87.375,
+      "hwmon3/nct6798/AUXTIN0": 22.0,
+      "hwmon3/nct6798/PCH_CHIP_TEMP": 0.0,
+      "hwmon3/nct6798/AUXTIN4": 50.0,
+      "hwmon3/nct6798/TSI1_TEMP": 70.25,
+      "hwmon3/nct6798/AUXTIN1": 83.0,
+      "hwmon3/nct6798/PCH_CPU_TEMP": 0.0,
+      "hwmon3/nct6798/PECI Agent 0 Calibration": 67.0,
+      "hwmon3/nct6798/SYSTIN": 29.0,
+      "hwmon3/nct6798/AUXTIN2": 8.0,
+      "hwmon3/nct6798/PCH_MCH_TEMP": 0.0,
+      "hwmon3/nct6798/PCH_CHIP_CPU_MAX_TEMP": 0.0,
+      "hwmon3/nct6798/CPUTIN": 55.0,
+      "hwmon1/nvme/Composite": 32.85,
+      "hwmon1/nvme/Sensor 1": 32.85
+    },
+    "arc_max_gib": 32.0,
+    "source_logical_gib": 3.68,
+    "disk_free_gib": 41.99,
+    "disk_required_gib": 177.0,
+    "source_locks": [
+      "/home/firesongz/Source2/Penguin-GHUB/ghidra_project/ghub2remapper.lock",
+      "/home/firesongz/Source2/Penguin-GHUB/ghidra_project/ghub2remapper.lock~"
+    ],
+    "ready": false
+  },
+  "validation": {
+    "skill_validator": "PASS",
+    "coverage_unit_tests": 8,
+    "real_ghidra_version": "12.1.2",
+    "fixture_root_program": [
+      {
+        "name": "evidence",
+        "sha256": "4e1dc1af9fe27166f59a4cd5b8c9a05cec074cfd7969f51ff5139fb5d691e972",
+        "recognized_internal_functions": 18,
+        "outcomes": {
+          "ok": 18
+        },
+        "shards": 2,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      }
+    ],
+    "fixture_nested_program": [
+      {
+        "name": "evidence",
+        "sha256": "4e1dc1af9fe27166f59a4cd5b8c9a05cec074cfd7969f51ff5139fb5d691e972",
+        "recognized_internal_functions": 18,
+        "outcomes": {
+          "ok": 18
+        },
+        "shards": 2,
+        "export_complete": true,
+        "all_functions_decompiled": true
+      }
+    ],
+    "real_fts_string_and_call_relationship": "PASS",
+    "systemsage_failure_gate": {
+      "pass": true,
+      "exit": 1,
+      "run_directory_created": false,
+      "blockers": [
+        "SystemSage MCP verification failed: Command '['/home/firesongz/Source2/AI/MCP/SystemSage/.venv/bin/python', '/home/firesongz/Source2/Penguin-GHUB/tools/dragonshard-2/scripts/sage_probe.py', '--command', '/nonexistent/dragonshard-test-sage']' returned non-zero exit status 1."
+      ]
+    }
+  },
+  "production_corpus_exported": false,
+  "global_agent_estimate_preference_added": true,
+  "raw_evidence_directory": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/dragonshard-2"
+}

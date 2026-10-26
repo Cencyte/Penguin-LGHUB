@@ -1,0 +1,9 @@
+LIBRARY dcomp
+EXPORTS
+    DCompositionCreateDevice @1020
+    DCompositionCreateDevice2 @1021
+    DCompositionCreateDevice3 @1022
+    DllCanUnloadNow @1024
+    DCompositionCreateTargetForHandle @1038 NONAME
+    DCompositionCreateSharedVisualHandle @1040 NONAME
+    DCompositionWaitForCompositorClock @1104

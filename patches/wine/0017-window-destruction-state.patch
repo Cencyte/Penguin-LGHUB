@@ -1,0 +1,168 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: Expose IsWindowInDestroy with shared window lifecycle state
+
+Apply after patches0013-0016 and regenerate requests. Mount matched User32,
+Win32u, ntdll and wineserver; shared window data and request protocol change.
+Native reference: user32 IsWindowInDestroy reads WND+0x14 bit0x80.
+win32kfull xxxDestroyWindow sets flag0x480 after CBT/WM_PARENTNOTIFY and
+before hiding; recursive WM_DESTROY alone does not set it for children.
+Recursive teardown marks each child before WM_NCDESTROY. Query the
+shared state so cross-thread and cross-process readers see the same value.
+No native Windows differential execution was performed.
+
+--- a/dlls/user32/user32.spec
++++ b/dlls/user32/user32.spec
+@@ -804,7 +804,7 @@
+ @ stdcall IsWindow(long)
+ @ stdcall IsWindowArranged(long)
+ @ stdcall IsWindowEnabled(long)
+-# @ stub IsWindowInDestroy
++@ stdcall IsWindowInDestroy(long)
+ @ stdcall IsWindowRedirectedForPrint(long)
+ @ stdcall IsWindowUnicode(long)
+ @ stdcall IsWindowVisible(long)
+--- a/dlls/user32/win.c
++++ b/dlls/user32/win.c
+@@ -1204,6 +1204,11 @@
+ /*******************************************************************
+  *		IsWindow (USER32.@)
+  */
++BOOL WINAPI IsWindowInDestroy( HWND hwnd )
++{
++    return NtUserCallHwnd( hwnd, NtUserCallHwnd_IsWindowInDestroy );
++}
++
+ BOOL WINAPI IsWindow( HWND hwnd )
+ {
+     return NtUserIsWindow( hwnd );
+--- a/dlls/win32u/window.c
++++ b/dlls/win32u/window.c
+@@ -1077,6 +1077,32 @@
+     }
+ 
+     return ctx;
++}
++
++static BOOL is_window_in_destroy(HWND hwnd)
++{
++    struct object_lock lock = OBJECT_LOCK_INIT;
++    const window_shm_t *shared = NULL;
++    NTSTATUS status;
++    BOOL ret = FALSE;
++    while ((status = get_shared_window(hwnd, &lock, &shared)) == STATUS_PENDING)
++        ret = shared->in_destroy;
++    if (status)
++    {
++        RtlSetLastWin32Error(ERROR_INVALID_WINDOW_HANDLE);
++        return FALSE;
++    }
++    return ret;
++}
++
++static void mark_window_destroying(HWND hwnd)
++{
++    SERVER_START_REQ(mark_window_destroying)
++    {
++        req->handle = wine_server_user_handle(hwnd);
++        wine_server_call(req);
++    }
++    SERVER_END_REQ;
+ }
+ 
+ /* see GetDpiForWindow */
+@@ -5250,6 +5276,7 @@
+ 
+     TRACE( "%p\n", hwnd );
+ 
++    mark_window_destroying(hwnd);
+     unregister_imm_window( hwnd );
+ 
+     /* free child windows */
+@@ -5258,6 +5285,7 @@
+         int i;
+         for (i = 0; children[i]; i++)
+         {
++            mark_window_destroying(children[i]);
+             if (is_current_thread_window( children[i] ))
+                 destroy_window( children[i] );
+             else
+@@ -5351,6 +5379,10 @@
+     }
+ 
+     if (!is_window( hwnd )) return TRUE;
++
++    /* Native marks the explicit target after CBT/parent notifications.
++     * Recursively notified children are marked later in destroy_window(). */
++    mark_window_destroying(hwnd);
+ 
+     /* Hide the window */
+     if (get_window_long( hwnd, GWL_STYLE ) & WS_VISIBLE)
+@@ -6068,6 +6100,9 @@
+ 
+     case NtUserCallHwnd_GetWindowTextLength:
+         return get_server_window_text( hwnd, NULL, 0 );
++
++    case NtUserCallHwnd_IsWindowInDestroy:
++        return is_window_in_destroy(hwnd);
+ 
+     case NtUserCallHwnd_IsWindow:
+         return is_window( hwnd );
+--- a/include/ntuser.h
++++ b/include/ntuser.h
+@@ -1328,6 +1328,7 @@
+     NtUserGetFullWindowHandle,
+     NtUserIsCurrentProcessWindow,
+     NtUserIsCurrentThreadWindow,
++    NtUserCallHwnd_IsWindowInDestroy,
+ };
+ 
+ static inline void NtUserActivateOtherWindow( HWND hwnd )
+--- a/server/window.c
++++ b/server/window.c
+@@ -686,6 +686,7 @@
+     {
+         shared->class       = class_locator;
+         shared->dpi_context = NTUSER_DPI_PER_MONITOR_AWARE;
++        shared->in_destroy = 0;
+     }
+     SHARED_WRITE_END;
+ 
+@@ -3254,3 +3255,19 @@
+     }
+     else set_win32_error( ERROR_INVALID_WINDOW_HANDLE );
+ }
++
++DECL_HANDLER(mark_window_destroying)
++{
++    struct window *win = get_window(req->handle);
++    if (!win) return;
++    if (!win->thread || win->thread->process != current->process || is_desktop_window(win))
++    {
++        set_error(STATUS_ACCESS_DENIED);
++        return;
++    }
++    SHARED_WRITE_BEGIN(win->shared, window_shm_t)
++    {
++        shared->in_destroy = 1;
++    }
++    SHARED_WRITE_END;
++}
+--- a/server/protocol.def
++++ b/server/protocol.def
+@@ -1065,6 +1065,7 @@
+ {
+     struct obj_locator   class;            /* object locator for the window class shared object */
+     unsigned int         dpi_context;      /* DPI awareness context */
++    int                  in_destroy;       /* set after destroy notifications, before hiding */
+ } window_shm_t;
+ 
+ typedef volatile union
+@@ -4526,3 +4527,8 @@
+     int x;
+     int y;
+ @END
++
++/* Publish actual window destruction state to queries from every process. */
++@REQ(mark_window_destroying)
++    user_handle_t handle;
++@END

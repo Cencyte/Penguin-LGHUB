@@ -1,0 +1,85 @@
+--- a/dlls/win32u/child_composition.h
++++ b/dlls/win32u/child_composition.h
+@@ -391,6 +391,25 @@
+ {
+     child_composite_set_clip, child_composite_flush, child_composite_destroy
+ };
++/* Ordinary windows may be painted directly by another process (Chromium's
++ * GPU process, for example). Do not retain and later flush an unrelated GDI
++ * bitmap over those pixels. Promote only trees containing our retained data. */
++static BOOL needs_child_composition(HWND hwnd, UINT depth)
++{
++    HWND *children;
++    UINT i;
++    BOOL needed;
++    WND *win = get_win_ptr(hwnd);
++    if (!win || win == WND_DESKTOP || win == WND_OTHER_PROCESS) return FALSE;
++    needed = win->composition_owner || is_child_composite_surface(win->surface) ||
++             (win->surface && win->surface->funcs == &child_composite_funcs);
++    release_win_ptr(win);
++    if (needed || depth > 64) return TRUE;
++    if (!(children = list_window_children(hwnd))) return FALSE;
++    for (i = 0; children[i] && !needed; i++) needed = needs_child_composition(children[i], depth + 1);
++    free(children);
++    return needed;
++}
+ static void wrap_child_composite_surface(HWND hwnd, struct window_surface **surface)
+ {
+     struct child_composite_surface *composite;
+@@ -399,7 +418,8 @@
+     struct window_surface *target = *surface;
+     const void *bits;
+     if (!target || target == &dummy_surface || !child_composition_enabled() ||
+-        NtUserGetAncestor(hwnd, GA_ROOT) != hwnd || target->funcs == &child_composite_funcs) return;
++        NtUserGetAncestor(hwnd, GA_ROOT) != hwnd || target->funcs == &child_composite_funcs ||
++        !needs_child_composition(hwnd, 0)) return;
+     window_surface_lock(target);
+     bits = window_surface_get_color(target, info);
+     window_surface_unlock(target);
+@@ -407,6 +427,12 @@
+     if (info->bmiHeader.biBitCount != 32 || info->bmiHeader.biHeight >= 0) return;
+     composite = (void *)window_surface_create(sizeof(*composite), &child_composite_funcs, hwnd, &target->rect, info, 0);
+     if (!composite) return;
++    /* Promotion must preserve the base GDI image already drawn before the
++     * first composition target was attached. Keep it separate from output. */
++    window_surface_lock(target);
++    bits = window_surface_get_color(target, info);
++    memcpy(window_surface_get_color(&composite->header, info), bits, info->bmiHeader.biSizeImage);
++    window_surface_unlock(target);
+     composite->target = target; /* consume caller's reference */
+     *surface = &composite->header;
+ }
+@@ -415,8 +441,20 @@
+     HWND root = NtUserGetAncestor(hwnd, GA_ROOT);
+     struct window_surface *surface = NULL;
+     WND *win;
+-    if (!root || !(win = get_win_ptr(root))) return;
+-    if (win == WND_DESKTOP || win == WND_OTHER_PROCESS) return;
++    if (!root || !child_composition_enabled() || !needs_child_composition(root, 0)) return;
++    if (!(win = get_win_ptr(root)) || win == WND_DESKTOP || win == WND_OTHER_PROCESS) return;
++    if (win->surface && win->surface != &dummy_surface &&
++        win->surface->funcs != &child_composite_funcs && !(win->flags & WIN_COMPOSITION_PROMOTING))
++    {
++        /* Recreate through the normal window path so cached DCs also switch
++         * to the retained surface. SetWindowPos can reenter this function. */
++        win->flags |= WIN_COMPOSITION_PROMOTING;
++        release_win_ptr(win);
++        NtUserSetWindowPos(root, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
++                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
++        if (!(win = get_win_ptr(root)) || win == WND_DESKTOP || win == WND_OTHER_PROCESS) return;
++        win->flags &= ~WIN_COMPOSITION_PROMOTING;
++    }
+     if (win->surface && win->surface->funcs == &child_composite_funcs)
+     {
+         surface = win->surface;
+--- a/dlls/win32u/ntuser_private.h
++++ b/dlls/win32u/ntuser_private.h
+@@ -89,6 +89,8 @@
+ #define WIN_CHILDREN_MOVED        0x0040 /* children may have moved, ignore stored positions */
+ #define WIN_HAS_IME_WIN           0x0080 /* the window has been registered with imm32 */
+ 
++#define WIN_COMPOSITION_PROMOTING 0x0100 /* retained-surface promotion in progress */
++
+ #define WND_OTHER_PROCESS ((WND *)1)  /* returned by get_win_ptr on unknown window handles */
+ #define WND_DESKTOP       ((WND *)2)  /* returned by get_win_ptr on the desktop window */
+ 

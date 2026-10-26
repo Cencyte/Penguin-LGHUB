@@ -1,0 +1,60 @@
+--- a/dlls/winex11.drv/mouse.c
++++ b/dlls/winex11.drv/mouse.c
+@@ -1463,6 +1463,16 @@
+ 
+     TRACE( "hwnd %p/%lx, pos %s, dir %d, button %d\n", hwnd, win, wine_dbgstr_point(&pos), dir, button );
+ 
++    /* A nested size/move loop may have already consumed the button release
++     * before an application repeats its mouse-initiated system command.
++     * Sending button 0 would start a new WM grab with no release to end it.
++     * Explicit keyboard size/move commands must still reach the WM. */
++    if (!button && dir != _NET_WM_MOVERESIZE_MOVE_KEYBOARD && dir != _NET_WM_MOVERESIZE_SIZE_KEYBOARD)
++    {
++        TRACE( "ignoring mouse size/move after button release\n" );
++        return;
++    }
++
+     xev.xclient.type = ClientMessage;
+     xev.xclient.window = win;
+     xev.xclient.message_type = x11drv_atom(_NET_WM_MOVERESIZE);
+--- a/dlls/winex11.drv/window.c
++++ b/dlls/winex11.drv/window.c
+@@ -57,17 +57,6 @@
+ WINE_DEFAULT_DEBUG_CHANNEL(x11drv);
+ WINE_DECLARE_DEBUG_CHANNEL(systray);
+ 
+-#define _NET_WM_MOVERESIZE_SIZE_TOPLEFT      0
+-#define _NET_WM_MOVERESIZE_SIZE_TOP          1
+-#define _NET_WM_MOVERESIZE_SIZE_TOPRIGHT     2
+-#define _NET_WM_MOVERESIZE_SIZE_RIGHT        3
+-#define _NET_WM_MOVERESIZE_SIZE_BOTTOMRIGHT  4
+-#define _NET_WM_MOVERESIZE_SIZE_BOTTOM       5
+-#define _NET_WM_MOVERESIZE_SIZE_BOTTOMLEFT   6
+-#define _NET_WM_MOVERESIZE_SIZE_LEFT         7
+-#define _NET_WM_MOVERESIZE_MOVE              8
+-#define _NET_WM_MOVERESIZE_SIZE_KEYBOARD     9
+-#define _NET_WM_MOVERESIZE_MOVE_KEYBOARD    10
+ 
+ #define _NET_WM_STATE_REMOVE  0
+ #define _NET_WM_STATE_ADD     1
+--- a/dlls/winex11.drv/x11drv.h
++++ b/dlls/winex11.drv/x11drv.h
+@@ -751,6 +751,18 @@
+ extern void X11DRV_ActivateWindow( HWND hwnd, HWND previous );
+ extern void reapply_cursor_clipping(void);
+ extern void ungrab_clipping_window(void);
++#define _NET_WM_MOVERESIZE_SIZE_TOPLEFT      0
++#define _NET_WM_MOVERESIZE_SIZE_TOP          1
++#define _NET_WM_MOVERESIZE_SIZE_TOPRIGHT     2
++#define _NET_WM_MOVERESIZE_SIZE_RIGHT        3
++#define _NET_WM_MOVERESIZE_SIZE_BOTTOMRIGHT  4
++#define _NET_WM_MOVERESIZE_SIZE_BOTTOM       5
++#define _NET_WM_MOVERESIZE_SIZE_BOTTOMLEFT   6
++#define _NET_WM_MOVERESIZE_SIZE_LEFT         7
++#define _NET_WM_MOVERESIZE_MOVE              8
++#define _NET_WM_MOVERESIZE_SIZE_KEYBOARD     9
++#define _NET_WM_MOVERESIZE_MOVE_KEYBOARD    10
++
+ extern void move_resize_window( HWND hwnd, int dir, POINT pos );
+ extern void X11DRV_InitKeyboard( Display *display );
+ extern BOOL X11DRV_ProcessEvents( DWORD mask );

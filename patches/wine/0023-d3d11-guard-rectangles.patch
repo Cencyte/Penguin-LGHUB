@@ -1,0 +1,530 @@
+--- a/dlls/d3d11/d3d11_private.h
++++ b/dlls/d3d11/d3d11_private.h
+@@ -138,6 +138,7 @@
+     ID3D11Texture2D ID3D11Texture2D_iface;
+     ID3D10Texture2D ID3D10Texture2D_iface;
+     LONG refcount;
++    BOOL guard_registered;
+
+     IUnknown *dxgi_resource;
+     struct wined3d_texture *wined3d_texture;
+@@ -570,6 +571,7 @@
+ {
+     IUnknown IUnknown_inner;
+     IUnknown partner_probe;
++    unsigned int partner_guard_count, partner_guard_resources;
+     IUnknown d2d_private_info;
+     ID3D11Device5 ID3D11Device5_iface;
+     ID3D10Device1 ID3D10Device1_iface;
+--- a/dlls/d3d11/device.c
++++ b/dlls/d3d11/device.c
+@@ -5532,9 +5532,10 @@
+     d3d11_device_CreateFence,
+ };
+
+-/* Diagnostic private partner interface: preserve real device identity/lifetime,
++/* Private partner interface: preserve real device identity/lifetime,
+  * report zero optional partner capabilities, and fail explicitly on any actual
+- * operation not implemented. Enabled only by GHUB_D3D11_PARTNER_PROBE. */
++ * operation not implemented. Guarded 2D rendering is supported by WineD3D.
++ * Enabled only by GHUB_D3D11_PARTNER_PROBE. */
+ static const GUID partner_iid = {0x26c5dc23,0xe49c,0x4b0a,{0x8f,0x79,0xe7,0xb1,0xac,0x80,0x4d,0x32}};
+ static struct d3d_device *partner_device(IUnknown *iface)
+ {
+@@ -5558,23 +5559,114 @@
+     ERR("GHUB partner probe: unsupported %s\n", name);
+     return E_NOTIMPL;
+ }
+-static void partner_unsupported_void(const char *name)
+-{
+-    partner_unsupported(name);
+-    RaiseException(0xc0000002, EXCEPTION_NONCONTINUABLE, 0, NULL);
+-}
+-static HRESULT WINAPI partner_begin(IUnknown *iface) { return partner_unsupported("BeginGuardRectangleSupport"); }
+-static void WINAPI partner_end(IUnknown *iface) { partner_unsupported_void("EndGuardRectangleSupport"); }
++static HRESULT WINAPI partner_begin(IUnknown *iface)
++{
++    struct d3d_device *device = partner_device(iface);
++    HRESULT hr = S_OK;
++    wined3d_mutex_lock();
++    if (device->partner_guard_count == UINT_MAX)
++        hr = E_OUTOFMEMORY;
++    else
++        ++device->partner_guard_count;
++    TRACE("guard support count %u.\n", device->partner_guard_count);
++    wined3d_mutex_unlock();
++    return hr;
++}
++static void WINAPI partner_end(IUnknown *iface)
++{
++    struct d3d_device *device = partner_device(iface);
++    wined3d_mutex_lock();
++    if (device->partner_guard_count)
++        --device->partner_guard_count;
++    else
++        WARN("Unbalanced EndGuardRectangleSupport.\n");
++    wined3d_mutex_unlock();
++}
++static HRESULT partner_texture_resource(IUnknown *iface, ID3D11Texture2D *texture, struct wined3d_resource **out)
++{
++    struct d3d_texture2d *object;
++    struct d3d_device *device = partner_device(iface);
++    if (!texture)
++        return E_INVALIDARG;
++    object = unsafe_impl_from_ID3D11Texture2D(texture);
++    if (object->device != &device->ID3D11Device5_iface || object->desc.Usage != D3D11_USAGE_DEFAULT ||
++        object->desc.CPUAccessFlags)
++        return E_INVALIDARG;
++    *out = wined3d_texture_get_resource(object->wined3d_texture);
++    return S_OK;
++}
+ static HRESULT WINAPI partner_texture(IUnknown *iface, const D3D11_TEXTURE2D_DESC *desc,
+-        const D3D11_SUBRESOURCE_DATA *data, ID3D11Texture2D **out)
+-{
+-    if (!out) return E_POINTER;
+-    *out = NULL;
+-    return partner_unsupported("CreateGuardableTexture2D");
+-}
+-static void WINAPI partner_guard(IUnknown *iface, ID3D11Texture2D *texture, RECT rect) { partner_unsupported_void("SetGuardRect"); }
+-static void WINAPI partner_empty(IUnknown *iface, ID3D11Texture2D *texture) { partner_unsupported_void("SetEmptyGuardRect"); }
+-static void WINAPI partner_unguarded(IUnknown *iface, ID3D11Texture2D *texture) { partner_unsupported_void("SetUnguarded"); }
++                                      const D3D11_SUBRESOURCE_DATA *data, ID3D11Texture2D **out)
++{
++    struct d3d_device *device = partner_device(iface);
++    struct d3d_texture2d *object;
++    HRESULT hr;
++    if (out)
++        *out = NULL;
++    if (!desc || desc->Usage != D3D11_USAGE_DEFAULT || desc->CPUAccessFlags || (desc->BindFlags & 0x600))
++        return E_INVALIDARG;
++    /* Larger resource shapes require additional guard semantics. */
++    if (desc->MipLevels != 1 || desc->ArraySize != 1 || desc->SampleDesc.Count != 1 ||
++        desc->BindFlags & ~(D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE) ||
++        desc->MiscFlags & (D3D11_RESOURCE_MISC_GENERATE_MIPS | D3D11_RESOURCE_MISC_GDI_COMPATIBLE))
++        return E_NOTIMPL;
++    wined3d_mutex_lock();
++    if (!device->partner_guard_count && !device->partner_guard_resources)
++        hr = E_INVALIDARG;
++    else if (SUCCEEDED(hr = d3d_texture2d_create(device, desc, NULL, data, &object)))
++    {
++        hr = wined3d_resource_set_guard_rect(wined3d_texture_get_resource(object->wined3d_texture), 0, NULL);
++        if (FAILED(hr) || !out)
++        {
++            ID3D11Texture2D_Release(&object->ID3D11Texture2D_iface);
++            if (SUCCEEDED(hr))
++                hr = S_FALSE;
++        }
++        else
++            *out = &object->ID3D11Texture2D_iface;
++    }
++    wined3d_mutex_unlock();
++    return hr;
++}
++/* Native guard operations retain one implicit support scope per texture. */
++static void partner_register_guard(IUnknown *iface, ID3D11Texture2D *texture)
++{
++    struct d3d_texture2d *object = unsafe_impl_from_ID3D11Texture2D(texture);
++    struct d3d_device *device = partner_device(iface);
++    wined3d_mutex_lock();
++    if (!object->guard_registered)
++    {
++        object->guard_registered = TRUE;
++        ++device->partner_guard_resources;
++    }
++    wined3d_mutex_unlock();
++}
++static void partner_set_guard(IUnknown *iface, ID3D11Texture2D *texture, unsigned int mode, const RECT *rect)
++{
++    struct wined3d_resource *resource;
++    HRESULT hr = partner_texture_resource(iface, texture, &resource);
++    if (SUCCEEDED(hr))
++        hr = wined3d_resource_set_guard_rect(resource, mode, rect);
++    if (SUCCEEDED(hr))
++        partner_register_guard(iface, texture);
++    if (FAILED(hr))
++    {
++        ERR("Cannot guard texture %p, hr %#lx.\n", texture, hr);
++        RaiseException(0xc0000002, EXCEPTION_NONCONTINUABLE, 0, NULL);
++    }
++}
++static void WINAPI partner_guard(IUnknown *iface, ID3D11Texture2D *texture, RECT rect)
++{
++    partner_set_guard(iface, texture, 1, &rect);
++}
++static void WINAPI partner_empty(IUnknown *iface, ID3D11Texture2D *texture)
++{
++    partner_set_guard(iface, texture, 2, NULL);
++}
++static void WINAPI partner_unguarded(IUnknown *iface, ID3D11Texture2D *texture)
++{
++    partner_set_guard(iface, texture, 0, NULL);
++}
+ static HRESULT WINAPI partner_offer(IUnknown *iface, UINT count, IDXGIResource *const *resources, UINT priority, UINT flags)
+ { return partner_unsupported("OfferResourcesInternal"); }
+ static HRESULT WINAPI partner_reclaim(IUnknown *iface, UINT count, IDXGIResource *const *resources, UINT *results)
+@@ -5594,7 +5686,20 @@
+ static HRESULT WINAPI partner_present(IUnknown *iface, HANDLE handle, IUnknown *const *buffers, UINT count)
+ { return partner_unsupported("PresentCompositionBuffers"); }
+ static void WINAPI partner_get_guard(IUnknown *iface, ID3D11Texture2D *texture, BOOL *guarded, RECT *rect)
+-{ partner_unsupported_void("GetGuardRect"); }
++{
++    struct wined3d_resource *resource;
++    unsigned int mode;
++    if (guarded)
++        *guarded = FALSE;
++    if (rect)
++        SetRectEmpty(rect);
++    if (FAILED(partner_texture_resource(iface, texture, &resource)))
++        return;
++    partner_register_guard(iface, texture);
++    mode = wined3d_resource_get_guard_rect(resource, rect);
++    if (guarded)
++        *guarded = mode == 1;
++}
+ static HRESULT WINAPI partner_channel(IUnknown *iface, IUnknown **out)
+ {
+     if (out) *out = NULL;
+--- a/dlls/d3d11/texture.c
++++ b/dlls/d3d11/texture.c
+@@ -682,6 +682,12 @@
+     *desc = texture->desc;
+
+     wined3d_mutex_lock();
++    if (texture->guard_registered)
++    {
++        desc->BindFlags &= ~(D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS);
++        desc->MiscFlags &= ~(D3D11_RESOURCE_MISC_SHARED | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX);
++        desc->MiscFlags |= D3D11_RESOURCE_MISC_GUARDED;
++    }
+     wined3d_resource_get_desc(wined3d_texture_get_resource(texture->wined3d_texture), &wined3d_desc);
+     wined3d_mutex_unlock();
+
+@@ -752,6 +758,13 @@
+ {
+     struct d3d_texture2d *texture = parent;
+
++    if (texture->guard_registered)
++    {
++        struct d3d_device *device = impl_from_ID3D11Device5(texture->device);
++        wined3d_mutex_lock();
++        --device->partner_guard_resources;
++        wined3d_mutex_unlock();
++    }
+     if (texture->dxgi_resource) IUnknown_Release(texture->dxgi_resource);
+     free(texture);
+ }
+--- a/dlls/wined3d/cs.c
++++ b/dlls/wined3d/cs.c
+@@ -849,12 +849,40 @@
+     wined3d_device_context_submit(&cs->c, WINED3D_CS_QUEUE_DEFAULT);
+ }
+
++/* Restrict producer commands before they are queued. Caller-visible rasterizer
++ * state is never changed; the CS temporarily receives the guarded variant. */
++static BOOL guard_clip_rect(struct wined3d_resource *resource, RECT *rect)
++{
++    RECT guard;
++    unsigned int mode = wined3d_resource_get_guard_rect(resource, &guard);
++    if (!mode)
++        return TRUE;
++    if (!IntersectRect(rect, rect, &guard))
++        return FALSE;
++    return !IsRectEmpty(rect);
++}
++static BOOL guard_clip_box(struct wined3d_resource *resource, struct wined3d_box *box)
++{
++    RECT rect = {box->left, box->top, box->right, box->bottom};
++    if (!guard_clip_rect(resource, &rect))
++        return FALSE;
++    box->left = rect.left;
++    box->top = rect.top;
++    box->right = rect.right;
++    box->bottom = rect.bottom;
++    return TRUE;
++}
+ void wined3d_device_context_emit_clear_rendertarget_view(struct wined3d_device_context *context,
+         struct wined3d_rendertarget_view *view, const RECT *rect, unsigned int flags,
+         const struct wined3d_color *color, float depth, unsigned int stencil)
+ {
+     struct wined3d_cs_clear *op;
++    RECT clipped = *rect;
+     size_t size;
++
++    if (!guard_clip_rect(view->resource, &clipped))
++        return;
++    rect = &clipped;
+
+     size = FIELD_OFFSET(struct wined3d_cs_clear, rects[1]);
+     op = wined3d_device_context_require_space(context, size, WINED3D_CS_QUEUE_DEFAULT);
+@@ -1171,6 +1199,84 @@
+             state->unordered_access_view[WINED3D_PIPELINE_GRAPHICS]);
+ }
+
++static BOOL guard_begin_draw(struct wined3d_device_context *context, BOOL *changed)
++{
++    const struct wined3d_state *state = context->state;
++    struct wined3d_device *device = context->device;
++    struct wined3d_rendertarget_view *view = NULL;
++    struct wined3d_rasterizer_state_desc desc = {0};
++    struct wined3d_rasterizer_state *rasterizer;
++    struct wine_rb_entry *entry;
++    RECT rects[WINED3D_MAX_VIEWPORTS], guard;
++    unsigned int i, rt_count = 0, count, mode;
++
++    *changed = FALSE;
++    for (i = 0; i < ARRAY_SIZE(state->fb.render_targets); ++i)
++        if (state->fb.render_targets[i])
++        {
++            ++rt_count;
++            if (wined3d_resource_get_guard_rect(state->fb.render_targets[i]->resource, NULL))
++                view = state->fb.render_targets[i];
++        }
++    if (!view)
++        return TRUE;
++    if (rt_count != 1)
++    {
++        WARN("Guarded rendering does not support multiple render targets.\n");
++        return FALSE;
++    }
++    mode = wined3d_resource_get_guard_rect(view->resource, &guard);
++    if (mode == 2 || IsRectEmpty(&guard))
++        return FALSE;
++    if (state->rasterizer_state)
++        desc = state->rasterizer_state->desc;
++    else
++    {
++        desc.fill_mode = WINED3D_FILL_SOLID;
++        desc.cull_mode = WINED3D_CULL_BACK;
++        desc.depth_clip = TRUE;
++    }
++    count = max(state->viewport_count, 1);
++    for (i = 0; i < count; ++i)
++    {
++        SetRect(&rects[i], 0, 0, view->width, view->height);
++        if (desc.scissor)
++        {
++            if (i < state->scissor_rect_count)
++                IntersectRect(&rects[i], &rects[i], &state->scissor_rects[i]);
++            else
++                SetRectEmpty(&rects[i]);
++        }
++        IntersectRect(&rects[i], &rects[i], &guard);
++    }
++    desc.scissor = TRUE;
++    /* Device-owned state cache keeps recorded command-list pointers alive. */
++    wined3d_mutex_lock();
++    if ((entry = wine_rb_get(&device->rasterizer_states, &desc)))
++        rasterizer = WINE_RB_ENTRY_VALUE(entry, struct wined3d_rasterizer_state, entry);
++    else
++    {
++        if (FAILED(wined3d_rasterizer_state_create(device, &desc, NULL, &wined3d_null_parent_ops, &rasterizer)))
++        {
++            wined3d_mutex_unlock();
++            return FALSE;
++        }
++        wine_rb_put(&device->rasterizer_states, &desc, &rasterizer->entry);
++    }
++    wined3d_mutex_unlock();
++    wined3d_device_context_emit_set_rasterizer_state(context, rasterizer);
++    wined3d_device_context_emit_set_scissor_rects(context, count, rects);
++    *changed = TRUE;
++    return TRUE;
++}
++static void guard_end_draw(struct wined3d_device_context *context, BOOL changed)
++{
++    if (!changed)
++        return;
++    wined3d_device_context_emit_set_rasterizer_state(context, context->state->rasterizer_state);
++    wined3d_device_context_emit_set_scissor_rects(context, context->state->scissor_rect_count,
++            context->state->scissor_rects);
++}
+ void wined3d_device_context_emit_draw(struct wined3d_device_context *context,
+         enum wined3d_primitive_type primitive_type, unsigned int patch_vertex_count, int base_vertex_idx,
+         unsigned int start_idx, unsigned int index_count, unsigned int start_instance, unsigned int instance_count,
+@@ -1178,6 +1284,10 @@
+ {
+     const struct wined3d_d3d_info *d3d_info = &context->device->adapter->d3d_info;
+     struct wined3d_cs_draw *op;
++    BOOL guarded;
++
++    if (!guard_begin_draw(context, &guarded))
++        return;
+
+     op = wined3d_device_context_require_space(context, sizeof(*op), WINED3D_CS_QUEUE_DEFAULT);
+     op->opcode = WINED3D_CS_OP_DRAW;
+@@ -1194,6 +1304,7 @@
+     reference_graphics_pipeline_resources(context, indexed, d3d_info);
+
+     wined3d_device_context_submit(context, WINED3D_CS_QUEUE_DEFAULT);
++    guard_end_draw(context, guarded);
+ }
+
+ void CDECL wined3d_device_context_draw_indirect(struct wined3d_device_context *context,
+@@ -1202,10 +1313,17 @@
+     const struct wined3d_d3d_info *d3d_info = &context->device->adapter->d3d_info;
+     const struct wined3d_state *state = context->state;
+     struct wined3d_cs_draw *op;
++    BOOL guarded;
+
+     wined3d_device_context_lock(context);
+
+     if (indexed && !state->index_buffer)
++    {
++        wined3d_device_context_unlock(context);
++        return;
++    }
++
++    if (!guard_begin_draw(context, &guarded))
+     {
+         wined3d_device_context_unlock(context);
+         return;
+@@ -1224,6 +1342,7 @@
+     wined3d_device_context_reference_resource(context, &buffer->resource);
+
+     wined3d_device_context_submit(context, WINED3D_CS_QUEUE_DEFAULT);
++    guard_end_draw(context, guarded);
+     wined3d_device_context_unlock(context);
+ }
+
+@@ -2713,6 +2832,36 @@
+         unsigned int flags, const struct wined3d_blt_fx *fx, enum wined3d_texture_filter_type filter)
+ {
+     struct wined3d_cs_blt_sub_resource *op;
++    struct wined3d_box src_clipped, dst_clipped, before;
++
++    if (wined3d_resource_get_guard_rect(dst_resource, NULL) ||
++            (src_resource && wined3d_resource_get_guard_rect(src_resource, NULL)))
++    {
++        if (!src_resource || src_box->right - src_box->left != dst_box->right - dst_box->left ||
++                src_box->bottom - src_box->top != dst_box->bottom - dst_box->top ||
++                (flags & WINED3D_BLT_FX))
++        {
++            WARN("Scaled/effect blits of guarded resources are not implemented.\n");
++            return;
++        }
++        src_clipped = *src_box;
++        dst_clipped = *dst_box;
++        if (!guard_clip_box(src_resource, &src_clipped))
++            return;
++        dst_clipped.left += src_clipped.left - src_box->left;
++        dst_clipped.top += src_clipped.top - src_box->top;
++        dst_clipped.right -= src_box->right - src_clipped.right;
++        dst_clipped.bottom -= src_box->bottom - src_clipped.bottom;
++        before = dst_clipped;
++        if (!guard_clip_box(dst_resource, &dst_clipped))
++            return;
++        src_clipped.left += dst_clipped.left - before.left;
++        src_clipped.top += dst_clipped.top - before.top;
++        src_clipped.right -= before.right - dst_clipped.right;
++        src_clipped.bottom -= before.bottom - dst_clipped.bottom;
++        src_box = &src_clipped;
++        dst_box = &dst_clipped;
++    }
+
+     /* If we are replacing the whole resource, the CS thread might discard and
+      * rename the buffer object, in which case ours is no longer valid. */
+@@ -2777,7 +2926,14 @@
+     struct wined3d_cs_update_sub_resource *op;
+     struct wined3d_map_desc map_desc;
+     struct wined3d_box dummy_box;
++    struct wined3d_box clipped = *box;
+     struct upload_bo bo;
++
++    if (!guard_clip_box(resource, &clipped))
++        return;
++    data = (const BYTE *)data + (SIZE_T)(clipped.top - box->top) * row_pitch +
++            (SIZE_T)(clipped.left - box->left) * resource->format->byte_count;
++    box = &clipped;
+
+     /* If we are replacing the whole resource, the CS thread might discard and
+      * rename the buffer object, in which case ours is no longer valid. */
+--- a/dlls/wined3d/resource.c
++++ b/dlls/wined3d/resource.c
+@@ -167,6 +167,7 @@
+             return WINED3DERR_INVALIDCALL;
+     }
+
++    resource->guard_mode = 0;
+     resource->ref = 1;
+     resource->device = device;
+     resource->type = type;
+@@ -712,3 +713,47 @@
+     }
+
+ }
++
++/* Guard rectangles are a DirectComposition update-region contract, not a
++ * content-protection feature. Only non-planar single-subresource 2D render
++ * textures are supported; reject other shapes rather than silently unguard. */
++HRESULT CDECL wined3d_resource_set_guard_rect(struct wined3d_resource *resource, unsigned int mode, const RECT *rect)
++{
++    struct wined3d_texture *texture;
++    if (mode > 2 || (mode == 1 && !rect))
++        return E_INVALIDARG;
++    if (resource->type != WINED3D_RTYPE_TEXTURE_2D)
++        return E_NOTIMPL;
++    texture = texture_from_resource(resource);
++    if (texture->level_count != 1 || texture->layer_count != 1 ||
++        resource->multisample_type != WINED3D_MULTISAMPLE_NONE ||
++        resource->bind_flags & ~(WINED3D_BIND_RENDER_TARGET | WINED3D_BIND_SHADER_RESOURCE) ||
++        resource->format->block_width != 1 || resource->format->block_height != 1 ||
++        resource->format->attrs & WINED3D_FORMAT_ATTR_PLANAR || !resource->format->byte_count)
++        return E_NOTIMPL;
++    wined3d_mutex_lock();
++    resource->guard_mode = mode;
++    if (mode == 1)
++        resource->guard_rect = *rect;
++    else if (mode == 2)
++        SetRectEmpty(&resource->guard_rect);
++    else
++        SetRect(&resource->guard_rect, 0, 0, -16, -4); /* Native unguarded sentinel. */
++    wined3d_mutex_unlock();
++    return S_OK;
++}
++unsigned int CDECL wined3d_resource_get_guard_rect(struct wined3d_resource *resource, RECT *rect)
++{
++    unsigned int mode;
++    wined3d_mutex_lock();
++    mode = resource->guard_mode;
++    if (rect)
++    {
++        if (mode)
++            *rect = resource->guard_rect;
++        else
++            SetRect(rect, 0, 0, -16, -4);
++    }
++    wined3d_mutex_unlock();
++    return mode;
++}
+--- a/dlls/wined3d/wined3d.spec
++++ b/dlls/wined3d/wined3d.spec
+@@ -403,3 +403,5 @@
+
+ # Append to preserve existing auto-assigned export ordinals.
+ @ cdecl -ret64 wined3d_device_get_conservative_flush_count(ptr)
++@ cdecl wined3d_resource_set_guard_rect(ptr long ptr)
++@ cdecl wined3d_resource_get_guard_rect(ptr ptr)
+--- a/dlls/wined3d/wined3d_private.h
++++ b/dlls/wined3d/wined3d_private.h
+@@ -3302,6 +3302,10 @@
+
+     LONG srv_bind_count_device;
+     LONG rtv_bind_count_device;
++
++    /* Producer-side guard state. Commands snapshot it before queueing. */
++    unsigned int guard_mode; /* 0: unguarded, 1: rectangle, 2: empty. */
++    RECT guard_rect;
+ };
+
+ static inline ULONG wined3d_resource_incref(struct wined3d_resource *resource)
+--- a/include/wine/wined3d.h
++++ b/include/wine/wined3d.h
+@@ -2739,6 +2739,8 @@
+ void __cdecl wined3d_resource_get_desc(const struct wined3d_resource *resource,
+         struct wined3d_resource_desc *desc);
+ void * __cdecl wined3d_resource_get_parent(const struct wined3d_resource *resource);
++HRESULT __cdecl wined3d_resource_set_guard_rect(struct wined3d_resource *resource, unsigned int mode, const RECT *rect);
++unsigned int __cdecl wined3d_resource_get_guard_rect(struct wined3d_resource *resource, RECT *rect);
+ unsigned int __cdecl wined3d_resource_get_priority(const struct wined3d_resource *resource);
+ unsigned int __cdecl wined3d_resource_get_sub_resource_count(struct wined3d_resource *resource);
+ HRESULT __cdecl wined3d_resource_get_sub_resource_desc(struct wined3d_resource *resource,

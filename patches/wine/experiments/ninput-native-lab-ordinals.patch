@@ -1,0 +1,61 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: [EXPERIMENT] Native ninput probes for verified absent-handler/single-monitor cases
+
+Not a production implementation. Exits 77 outside the explicitly isolated lab
+or if a NaturalInputHandler is configured or multiple monitors are present.
+
+--- a/dlls/user32/misc.c
++++ b/dlls/user32/misc.c
+@@ -558,3 +558,32 @@
+     if (!imm_ime_wnd_proc) return DefWindowProcW(hwnd, msg, wParam, lParam);
+     return imm_ime_wnd_proc( hwnd, msg, wParam, lParam, FALSE );
+ }
++
++/* PRIVATE LAB ONLY: exercise the verified absent-handler branch. A configured
++ * NaturalInputHandler must not silently be treated as absent. */
++BOOL WINAPI GhubProbeNaturalInputHandlerAvailable(void)
++{
++    HKEY key;
++    LONG ret;
++    if (!GetEnvironmentVariableW(L"GHUB_TRAY_PRIVATE_LAB", NULL, 0)) ExitProcess(77);
++    ret = RegOpenKeyExW(HKEY_LOCAL_MACHINE,
++        L"Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows", 0, KEY_QUERY_VALUE, &key);
++    if (ret == ERROR_SUCCESS)
++    {
++        ret = RegQueryValueExW(key, L"NaturalInputHandler", NULL, NULL, NULL, NULL);
++        RegCloseKey(key);
++    }
++    if (ret != ERROR_FILE_NOT_FOUND) ExitProcess(77);
++    TRACE("NaturalInputHandler is absent; ordinal 2518 returns FALSE.\n");
++    return FALSE;
++}
++
++/* Private single-monitor diagnostic matching the native fast path. */
++BOOL WINAPI GhubProbeHimetricScale(HANDLE device, ULONGLONG point, UINT *x, UINT *y)
++{
++    if (!GetEnvironmentVariableW(L"GHUB_TRAY_PRIVATE_LAB", NULL, 0) ||
++        GetSystemMetrics(SM_CMONITORS) != 1) ExitProcess(77);
++    if (!device || !x || !y) { SetLastError(ERROR_INVALID_PARAMETER); return FALSE; }
++    *x = *y = 1;
++    return TRUE;
++}
+--- a/dlls/user32/user32.spec
++++ b/dlls/user32/user32.spec
+@@ -29,7 +29,7 @@
+ 2515 stub @
+ 2516 stub -noname DelegateCapturePointers  # NtUserDelegateCapturePointers
+ 2517 stub -noname GetTouchValidationStatus  # NtUserGetTouchValidationStatus
+-2518 stub @
++2518 stdcall -noname GhubProbeNaturalInputHandlerAvailable()
+ 2519 stub -noname EnableMouseInputForCursorSuppression  # NtUserEnableMouseInputForCursorSuppression
+ 2520 stub -noname IsMouseInputEnabled  # NtUserIsMouseInputEnabled
+ 2521 stub GetProcessUIContextInformation  # NtUserGetProcessUIContextInformation
+@@ -71,7 +71,7 @@
+ 2557 stub @
+ 2558 stub @
+ 2559 stub -noname GetOwnerTransformedMonitorRect  # NtUserGetOwnerTransformedMonitorRect
+-2560 stub @
++2560 stdcall -noname GhubProbeHimetricScale(ptr int64 ptr ptr)
+ 2561 stdcall -noname EnableMouseInPointerForThread() NtUserEnableMouseInPointerForThread
+ 
+ 2563 stub -noname ClearForeground  # NtUserClearForeground

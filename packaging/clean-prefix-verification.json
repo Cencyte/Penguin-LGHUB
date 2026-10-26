@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-10-26T07:21:11.060241+00:00",
+  "application_version": "2026.6.974819",
+  "build_id": "869589",
+  "depot_lock_sha256": "b6be401ebe43adedba1132d1e1a7a693ebde3a11d71a9d7934c734bb7156ee14",
+  "scope": "Fresh prefix assembly and isolated backend startup on the pinned development host; not a portable public installer",
+  "inputs": {
+    "depot_selection": "tested_setup",
+    "depot_count": 30,
+    "depot_files": 1115,
+    "application_layout_files": 438,
+    "windows_dlls": "Both hash-pinned DLLs from verified Microsoft media reconstruction",
+    "compatibility_artifacts": "32 allowlisted pinned files from the lab artifact layout; no complete donor prefix"
+  },
+  "clean_prefix": {
+    "generated_utc": "2026-10-26T07:14:48Z",
+    "donor_prefix_cloned": false,
+    "personal_state_copied": false,
+    "live_desktop_used": false,
+    "vendor_applications_started": false,
+    "service_start": "demand; stopped",
+    "installer_dispositions": {
+      "deferred": 35,
+      "configured": 2,
+      "replaced": 1,
+      "frozen": 2,
+      "partial": 1,
+      "unresolved": 2
+    }
+  },
+  "integrity": {
+    "managed_files_verified": 1599,
+    "depot_files": 1115,
+    "activation_factories_verified_at_install": 8,
+    "public_installer_ready": false
+  },
+  "activation_factories": {
+    "Windows.Foundation.Metadata.ApiInformation": "00000000",
+    "Windows.ApplicationModel.Core.CoreApplication": "00000000",
+    "Windows.System.DispatcherQueue": "00000000",
+    "Windows.System.Threading.ThreadPoolTimer": "00000000",
+    "Windows.Storage.Streams.InMemoryRandomAccessStream": "00000000",
+    "Windows.Storage.Streams.DataWriter": "00000000",
+    "Windows.UI.Internal.Input.InputSite": "00000000",
+    "Windows.UI.Internal.Input.ActivationConfigurationInputObject": "00000000"
+  },
+  "registry_checks": {
+    "passed": 4,
+    "total": 4,
+    "scope": [
+      "lghubapp command",
+      "tray Windows version override",
+      "agent sensor DLL override",
+      "software-manager loader exclusion"
+    ]
+  },
+  "service": {
+    "passed": true,
+    "name": "LGHUBUpdaterService",
+    "start": "demand",
+    "state": "stopped",
+    "command_verified": true
+  },
+  "resource_transforms": {
+    "frontend/color-preview.asar": "04afa23969d90e3f315f9183a5babf84bfcc9559ff2fc8ae190d8a2d8466cd15",
+    "prefix/drive_c/Program Files/LGHUB/system_tray/MainWindow.xbf": "7fa2ee6bfa7ecd19b1720e13379837241fe497c8c41fae217b4dec4ec31de0a4",
+    "prefix/drive_c/Program Files/LGHUB/system_tray/resources.pri": "4075ce48d17515ac9b0e202f8cee5a458e99b779ff5adbca70eba019d212ada2"
+  },
+  "agent_probe": {
+    "isolated_network": true,
+    "physical_devices_exposed": false,
+    "live_desktop_used": false,
+    "agent_ready": true,
+    "routes_succeeded": [
+      "/devices/list",
+      "/input/gshift",
+      "/profile/active",
+      "/profiles",
+      "/profiles/auto_switching"
+    ],
+    "scope": "Backend API with no physical devices",
+    "session_runtime_sockets_masked": true
+  },
+  "agent_api_results": {
+    "/devices/list": "SUCCESS",
+    "/input/gshift": "SUCCESS",
+    "/profile/active": "SUCCESS",
+    "/profiles": "SUCCESS",
+    "/profiles/auto_switching": "SUCCESS"
+  },
+  "tests": {
+    "command": "python -m unittest discover -s tests/packaging -q",
+    "passed": 45,
+    "clean_prefix_specific": 9
+  },
+  "implementation_sha256": {
+    "tools/packaging/prepare_clean_prefix.py": "1c9e523bc7f1912a9285ffd052d1e9810056cf4b9db62b34e352dbdab2049589",
+    "tools/packaging/clean_prefix_probe.cpp": "e154d30614e85b29517c0b4819fb908a48183d581aa23789eaa9c09beaf65aea",
+    "tools/packaging/probe_clean_agent.py": "c072345146a7f6373c03c97ab104d81df5d61088a895b9cbd4f5acfc869e097d",
+    "tests/packaging/test_clean_prefix.py": "caed7af3c465f067611553e075a4f3e0bb8b586ba021c34f50864d035d25038b"
+  },
+  "limitations": [
+    "Uses host Wine 10.20 and private artifact overlays; complete standalone runner not packaged",
+    "No physical devices exposed: API responses do not validate mappings, lighting, G-Shift or profile switching on hardware",
+    "Xvfb uses GLX disabled; UI/tray painting, input and GPU performance are not qualified",
+    "Windows fonts are not copied; acquisition or alternatives and visual qualification remain pending",
+    "Updater service is configured but its runtime behavior and final startup policy are not qualified",
+    "35 installer declaration groups deferred, 2 unresolved and 1 partial; no extension falsely marked installed",
+    "No new Desktop launcher, independent Manjaro or CachyOS reproduction, or public-installer readiness",
+    "Technical verification does not resolve third-party licensing or publication-history review"
+  ],
+  "publication_payload": "Implementation, tests and sanitized evidence only; no vendor binaries, downloaded keys, private settings or populated prefix"
+}

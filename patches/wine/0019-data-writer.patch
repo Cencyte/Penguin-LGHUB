@@ -1,0 +1,1469 @@
+Implement DataWriter in the private Wine 10.20 Windows.Storage build.
+Requires 0018-memory-stream.patch. No global module or package replacement.
+
+Provides IDataWriterFactory, buffer-only activation, primitive and string
+serialization, independent byte buffering, detach/close, and StoreAsync
+adapted to the output stream's actual completion. Preserves short-write tails
+and propagates errors/cancellation. Flush forwards to the associated stream.
+Includes ABI tests with controlled delayed/error/short-write streams and a
+full-size BMP byte round-trip through the memory stream.
+
+diff --git a/dlls/windows.storage/Makefile.in b/dlls/windows.storage/Makefile.in
+--- a/dlls/windows.storage/Makefile.in
++++ b/dlls/windows.storage/Makefile.in
+@@ -6,4 +6,5 @@
+ 	async_private.idl \
+ 	classes.idl \
+ 	main.c \
+-	streams.c
++	streams.c \
++	writer.c
+diff --git a/dlls/windows.storage/main.c b/dlls/windows.storage/main.c
+--- a/dlls/windows.storage/main.c
++++ b/dlls/windows.storage/main.c
+@@ -41,6 +41,9 @@
+     if (!wcscmp( buffer, RuntimeClass_Windows_Storage_Streams_InMemoryRandomAccessStream ))
+         IActivationFactory_QueryInterface( memory_stream_activation_factory, &IID_IActivationFactory, (void **)factory );
+ 
++    if (!wcscmp( buffer, RuntimeClass_Windows_Storage_Streams_DataWriter ))
++        IActivationFactory_QueryInterface( data_writer_factory, &IID_IActivationFactory, (void **)factory );
++
+     if (*factory) return S_OK;
+     return CLASS_E_CLASSNOTAVAILABLE;
+ }
+diff --git a/dlls/windows.storage/private.h b/dlls/windows.storage/private.h
+--- a/dlls/windows.storage/private.h
++++ b/dlls/windows.storage/private.h
+@@ -51,6 +51,7 @@
+ 
+ extern IActivationFactory *random_access_stream_reference_factory;
+ extern IActivationFactory *memory_stream_activation_factory;
++extern IActivationFactory *data_writer_factory;
+ 
+ #define DEFINE_IINSPECTABLE_( pfx, iface_type, impl_type, impl_from, iface_mem, expr )             \
+     static inline impl_type *impl_from( iface_type *iface )                                        \
+diff --git a/dlls/windows.storage/classes.idl b/dlls/windows.storage/classes.idl
+--- a/dlls/windows.storage/classes.idl
++++ b/dlls/windows.storage/classes.idl
+@@ -32,4 +32,5 @@
+ namespace Windows.Storage.Streams {
+     runtimeclass RandomAccessStreamReference;
+     runtimeclass InMemoryRandomAccessStream;
++    runtimeclass DataWriter;
+ }
+diff --git a/dlls/windows.storage/writer.c b/dlls/windows.storage/writer.c
+--- /dev/null
++++ b/dlls/windows.storage/writer.c
+@@ -0,0 +1,853 @@
++/* WinRT DataWriter for the private G HUB Wine build.
++ * Copyright 2026 Cencyte D
++ *
++ * This library is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU Lesser General Public License as published by
++ * the Free Software Foundation; either version 2.1 of the License, or
++ * (at your option) any later version.
++ * This library is distributed WITHOUT ANY WARRANTY; without even the implied
++ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU Lesser General Public License for more details.
++ */
++#include <limits.h>
++#include "private.h"
++#include "roapi.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(storage);
++
++#define WRITER_BUSY HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION)
++#define ASYNC_CLOSED 4
++
++struct data_writer
++{
++    IDataWriter IDataWriter_iface;
++    IClosable IClosable_iface;
++    LONG ref;
++    SRWLOCK lock;
++    BYTE *data;
++    UINT32 length, capacity;
++    IOutputStream *stream;
++    ByteOrder order;
++    UnicodeEncoding encoding;
++    BOOL closed, storing;
++};
++
++static struct data_writer *writer_from_iface( IDataWriter *iface )
++{
++    return CONTAINING_RECORD( iface, struct data_writer, IDataWriter_iface );
++}
++
++static HRESULT copy_iids( const IID *const *ids, ULONG count, ULONG *iid_count, IID **iids )
++{
++    ULONG i;
++    if (!iid_count || !iids) return E_POINTER;
++    *iid_count = 0;
++    if (!(*iids = CoTaskMemAlloc( count * sizeof(IID) ))) return E_OUTOFMEMORY;
++    for (i = 0; i < count; ++i) (*iids)[i] = *ids[i];
++    *iid_count = count;
++    return S_OK;
++}
++
++static HRESULT WINAPI writer_QueryInterface( IDataWriter *iface, REFIID iid, void **out )
++{
++    struct data_writer *impl = writer_from_iface( iface );
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) ||
++        IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IDataWriter)) *out = iface;
++    else if (IsEqualGUID(iid, &IID_IClosable)) *out = &impl->IClosable_iface;
++    else return E_NOINTERFACE;
++    IDataWriter_AddRef( iface );
++    return S_OK;
++}
++
++static ULONG WINAPI writer_AddRef( IDataWriter *iface )
++{
++    return InterlockedIncrement( &writer_from_iface(iface)->ref );
++}
++
++static ULONG WINAPI writer_Release( IDataWriter *iface )
++{
++    struct data_writer *impl = writer_from_iface( iface );
++    ULONG ref = InterlockedDecrement( &impl->ref );
++    if (!ref)
++    {
++        if (impl->stream) IOutputStream_Release( impl->stream );
++        free( impl->data );
++        free( impl );
++    }
++    return ref;
++}
++
++static HRESULT WINAPI writer_GetIids( IDataWriter *iface, ULONG *count, IID **iids )
++{
++    static const IID *const ids[] = { &IID_IDataWriter, &IID_IClosable };
++    return copy_iids( ids, ARRAY_SIZE(ids), count, iids );
++}
++
++static HRESULT WINAPI writer_GetRuntimeClassName( IDataWriter *iface, HSTRING *name )
++{
++    static const WCHAR value[] = L"Windows.Storage.Streams.DataWriter";
++    return WindowsCreateString( value, ARRAY_SIZE(value) - 1, name );
++}
++
++static HRESULT WINAPI writer_GetTrustLevel( IDataWriter *iface, TrustLevel *trust )
++{
++    if (!trust) return E_POINTER;
++    *trust = BaseTrust;
++    return S_OK;
++}
++
++/* Callers hold the writer lock. A pending store owns an immutable buffer. */
++static HRESULT writer_ready( struct data_writer *impl )
++{
++    return impl->closed ? RO_E_CLOSED : impl->storing ? WRITER_BUSY : S_OK;
++}
++
++static HRESULT writer_append( struct data_writer *impl, const BYTE *data, UINT32 length )
++{
++    UINT32 capacity;
++    BYTE *resized;
++    HRESULT hr = writer_ready( impl );
++    if (FAILED(hr)) return hr;
++    if (length && !data) return E_POINTER;
++    if (length > UINT_MAX - impl->length) return E_OUTOFMEMORY;
++    if (impl->length + length > impl->capacity)
++    {
++        capacity = max( impl->length + length, 256 );
++        if (impl->capacity <= UINT_MAX / 2) capacity = max( capacity, impl->capacity * 2 );
++        if (!(resized = realloc( impl->data, capacity ))) return E_OUTOFMEMORY;
++        impl->data = resized;
++        impl->capacity = capacity;
++    }
++    if (length) memcpy( impl->data + impl->length, data, length );
++    impl->length += length;
++    return S_OK;
++}
++
++static HRESULT WINAPI writer_get_UnstoredBufferLength( IDataWriter *iface, UINT32 *value )
++{
++    struct data_writer *impl = writer_from_iface( iface );
++    HRESULT hr;
++    if (!value) return E_POINTER;
++    AcquireSRWLockShared( &impl->lock );
++    *value = impl->closed ? 0 : impl->length;
++    hr = impl->closed ? RO_E_CLOSED : S_OK;
++    ReleaseSRWLockShared( &impl->lock );
++    return hr;
++}
++
++#define WRITER_PROPERTY(name, type, member, valid) \
++static HRESULT WINAPI writer_get_##name( IDataWriter *iface, type *value ) \
++{ \
++    struct data_writer *impl = writer_from_iface(iface); \
++    HRESULT hr; \
++    if (!value) return E_POINTER; \
++    AcquireSRWLockShared(&impl->lock); \
++    *value = impl->member; \
++    hr = impl->closed ? RO_E_CLOSED : S_OK; \
++    ReleaseSRWLockShared(&impl->lock); \
++    return hr; \
++} \
++static HRESULT WINAPI writer_put_##name( IDataWriter *iface, type value ) \
++{ \
++    struct data_writer *impl = writer_from_iface(iface); \
++    HRESULT hr; \
++    AcquireSRWLockExclusive(&impl->lock); \
++    hr = writer_ready(impl); \
++    if (SUCCEEDED(hr) && !(valid)) hr = E_INVALIDARG; \
++    if (SUCCEEDED(hr)) impl->member = value; \
++    ReleaseSRWLockExclusive(&impl->lock); \
++    return hr; \
++}
++WRITER_PROPERTY(ByteOrder, ByteOrder, order, value == ByteOrder_LittleEndian || value == ByteOrder_BigEndian)
++WRITER_PROPERTY(UnicodeEncoding, UnicodeEncoding, encoding,
++                value == UnicodeEncoding_Utf8 || value == UnicodeEncoding_Utf16LE || value == UnicodeEncoding_Utf16BE)
++
++static HRESULT WINAPI writer_WriteBytes( IDataWriter *iface, UINT32 count, BYTE *value )
++{
++    struct data_writer *impl = writer_from_iface( iface );
++    HRESULT hr;
++    if (!TryAcquireSRWLockExclusive( &impl->lock )) return WRITER_BUSY;
++    hr = writer_append( impl, value, count );
++    ReleaseSRWLockExclusive( &impl->lock );
++    TRACE( "writer %p, count %u, hr %#lx.\n", iface, count, hr );
++    return hr;
++}
++
++static HRESULT WINAPI writer_WriteByte( IDataWriter *iface, BYTE value )
++{
++    return writer_WriteBytes( iface, 1, &value );
++}
++
++static HRESULT WINAPI writer_WriteBoolean( IDataWriter *iface, BOOLEAN value )
++{
++    return writer_WriteByte( iface, !!value );
++}
++
++static HRESULT writer_number( IDataWriter *iface, UINT64 value, unsigned int size )
++{
++    struct data_writer *impl = writer_from_iface( iface );
++    BYTE bytes[8];
++    unsigned int i;
++    HRESULT hr;
++    if (!TryAcquireSRWLockExclusive( &impl->lock )) return WRITER_BUSY;
++    for (i = 0; i < size; ++i)
++        bytes[impl->order == ByteOrder_LittleEndian ? i : size - i - 1] = value >> (8 * i);
++    hr = writer_append( impl, bytes, size );
++    ReleaseSRWLockExclusive( &impl->lock );
++    return hr;
++}
++#define WRITER_NUMBER(name, type) \
++static HRESULT WINAPI writer_Write##name( IDataWriter *iface, type value ) \
++{ return writer_number( iface, (UINT64)value, sizeof(value) ); }
++WRITER_NUMBER(Int16, INT16)
++WRITER_NUMBER(Int32, INT32)
++WRITER_NUMBER(Int64, INT64)
++WRITER_NUMBER(UInt16, UINT16)
++WRITER_NUMBER(UInt32, UINT32)
++WRITER_NUMBER(UInt64, UINT64)
++
++static HRESULT WINAPI writer_WriteSingle( IDataWriter *iface, FLOAT value )
++{
++    UINT32 bits;
++    memcpy( &bits, &value, sizeof(bits) );
++    return writer_number( iface, bits, sizeof(bits) );
++}
++static HRESULT WINAPI writer_WriteDouble( IDataWriter *iface, DOUBLE value )
++{
++    UINT64 bits;
++    memcpy( &bits, &value, sizeof(bits) );
++    return writer_number( iface, bits, sizeof(bits) );
++}
++static HRESULT WINAPI writer_WriteDateTime( IDataWriter *iface, DateTime value )
++{
++    return writer_WriteInt64( iface, value.UniversalTime );
++}
++static HRESULT WINAPI writer_WriteTimeSpan( IDataWriter *iface, TimeSpan value )
++{
++    return writer_WriteInt64( iface, value.Duration );
++}
++static HRESULT WINAPI writer_WriteGuid( IDataWriter *iface, GUID value )
++{
++    struct data_writer *impl = writer_from_iface( iface );
++    BYTE bytes[16];
++    unsigned int i;
++    HRESULT hr;
++    if (!TryAcquireSRWLockExclusive( &impl->lock )) return WRITER_BUSY;
++    for (i = 0; i < 4; ++i) bytes[impl->order == ByteOrder_LittleEndian ? i : 3 - i] = value.Data1 >> (8 * i);
++    for (i = 0; i < 2; ++i)
++    {
++        bytes[4 + (impl->order == ByteOrder_LittleEndian ? i : 1 - i)] = value.Data2 >> (8 * i);
++        bytes[6 + (impl->order == ByteOrder_LittleEndian ? i : 1 - i)] = value.Data3 >> (8 * i);
++    }
++    memcpy( bytes + 8, value.Data4, 8 );
++    hr = writer_append( impl, bytes, sizeof(bytes) );
++    ReleaseSRWLockExclusive( &impl->lock );
++    return hr;
++}
++
++static HRESULT WINAPI writer_WriteBufferRange( IDataWriter *iface, IBuffer *buffer, UINT32 start, UINT32 count )
++{
++    IBufferByteAccess *access;
++    UINT32 length, capacity;
++    BYTE *data;
++    HRESULT hr;
++    if (!buffer) return E_POINTER;
++    if (FAILED(hr = IBuffer_get_Length( buffer, &length ))) return hr;
++    if (FAILED(hr = IBuffer_get_Capacity( buffer, &capacity ))) return hr;
++    if (length > capacity || start > length || count > length - start) return E_INVALIDARG;
++    if (!count) return writer_WriteBytes( iface, 0, NULL );
++    if (FAILED(hr = IBuffer_QueryInterface( buffer, &IID_IBufferByteAccess, (void **)&access ))) return hr;
++    hr = IBufferByteAccess_Buffer( access, &data );
++    if (SUCCEEDED(hr)) hr = data ? writer_WriteBytes( iface, count, data + start ) : E_POINTER;
++    IBufferByteAccess_Release( access );
++    return hr;
++}
++static HRESULT WINAPI writer_WriteBuffer( IDataWriter *iface, IBuffer *buffer )
++{
++    UINT32 length;
++    HRESULT hr;
++    if (!buffer) return E_POINTER;
++    if (FAILED(hr = IBuffer_get_Length( buffer, &length ))) return hr;
++    return writer_WriteBufferRange( iface, buffer, 0, length );
++}
++
++static HRESULT writer_string( IDataWriter *iface, HSTRING value, UINT32 *count, BOOL append )
++{
++    struct data_writer *impl = writer_from_iface( iface );
++    const WCHAR *text;
++    UINT32 length, bytes = 0, i;
++    BYTE *encoded = NULL;
++    int converted;
++    HRESULT hr;
++    if (!count) return E_POINTER;
++    *count = 0;
++    text = WindowsGetStringRawBuffer( value, &length );
++    if (!TryAcquireSRWLockExclusive( &impl->lock )) return WRITER_BUSY;
++    if (FAILED(hr = writer_ready( impl ))) goto done;
++    if (impl->encoding == UnicodeEncoding_Utf8)
++    {
++        if (length > INT_MAX) { hr = E_OUTOFMEMORY; goto done; }
++        converted = length ? WideCharToMultiByte( CP_UTF8, 0, text, length, NULL, 0, NULL, NULL ) : 0;
++        if (length && !converted) { hr = HRESULT_FROM_WIN32(GetLastError()); goto done; }
++        bytes = converted;
++        if (append && bytes)
++        {
++            if (!(encoded = malloc(bytes))) { hr = E_OUTOFMEMORY; goto done; }
++            if (!WideCharToMultiByte( CP_UTF8, 0, text, length, (char *)encoded, bytes, NULL, NULL ))
++            { hr = HRESULT_FROM_WIN32(GetLastError()); goto done; }
++        }
++    }
++    else
++    {
++        if (length > UINT_MAX / 2) { hr = E_OUTOFMEMORY; goto done; }
++        bytes = length * 2;
++        if (append && bytes)
++        {
++            if (!(encoded = malloc(bytes))) { hr = E_OUTOFMEMORY; goto done; }
++            for (i = 0; i < length; ++i)
++            {
++                encoded[2*i + (impl->encoding == UnicodeEncoding_Utf16LE ? 0 : 1)] = text[i];
++                encoded[2*i + (impl->encoding == UnicodeEncoding_Utf16LE ? 1 : 0)] = text[i] >> 8;
++            }
++        }
++    }
++    if (append) hr = writer_append( impl, encoded, bytes );
++    if (SUCCEEDED(hr)) *count = bytes;
++done:
++    ReleaseSRWLockExclusive( &impl->lock );
++    free( encoded );
++    return hr;
++}
++static HRESULT WINAPI writer_WriteString( IDataWriter *iface, HSTRING value, UINT32 *count )
++{
++    return writer_string( iface, value, count, TRUE );
++}
++static HRESULT WINAPI writer_MeasureString( IDataWriter *iface, HSTRING value, UINT32 *count )
++{
++    return writer_string( iface, value, count, FALSE );
++}
++
++static HRESULT writer_buffer( const BYTE *data, UINT32 length, IBuffer **out )
++{
++    static const WCHAR class[] = L"Windows.Storage.Streams.Buffer";
++    IBufferFactory *factory;
++    IBufferByteAccess *access;
++    HSTRING name;
++    BYTE *target;
++    HRESULT hr;
++    *out = NULL;
++    if (FAILED(hr = WindowsCreateString( class, ARRAY_SIZE(class) - 1, &name ))) return hr;
++    hr = RoGetActivationFactory( name, &IID_IBufferFactory, (void **)&factory );
++    WindowsDeleteString( name );
++    if (FAILED(hr)) return hr;
++    hr = IBufferFactory_Create( factory, length, out );
++    IBufferFactory_Release( factory );
++    if (FAILED(hr)) return hr;
++    if (SUCCEEDED(hr = IBuffer_QueryInterface( *out, &IID_IBufferByteAccess, (void **)&access )))
++    {
++        hr = IBufferByteAccess_Buffer( access, &target );
++        if (SUCCEEDED(hr) && length)
++        {
++            if (!target) hr = E_POINTER;
++            else memcpy( target, data, length );
++        }
++        IBufferByteAccess_Release( access );
++    }
++    if (SUCCEEDED(hr)) hr = IBuffer_put_Length( *out, length );
++    if (FAILED(hr)) { IBuffer_Release(*out); *out = NULL; }
++    return hr;
++}
++
++/* Adapter from the output stream's real write operation to DataWriterStoreOperation.
++ * The child's completion breaks the temporary child/delegate reference cycle.
++ * No waiting or message pumping happens on the calling thread. */
++struct writer_store
++{
++    IAsyncOperation_UINT32 IAsyncOperation_UINT32_iface;
++    IAsyncInfo IAsyncInfo_iface;
++    IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 handler_iface;
++    LONG ref;
++    SRWLOCK lock;
++    struct data_writer *writer;
++    IBuffer *buffer;
++    IAsyncOperationWithProgress_UINT32_UINT32 *child;
++    IAsyncInfo *child_info;
++    IAsyncOperationCompletedHandler_UINT32 *completed;
++    AsyncStatus status;
++    HRESULT error;
++    UINT32 count, id;
++    BOOL assigned;
++};
++
++static struct writer_store *store_from_iface( IAsyncOperation_UINT32 *iface )
++{
++    return CONTAINING_RECORD( iface, struct writer_store, IAsyncOperation_UINT32_iface );
++}
++static HRESULT WINAPI store_QueryInterface( IAsyncOperation_UINT32 *iface, REFIID iid, void **out )
++{
++    struct writer_store *impl = store_from_iface( iface );
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) ||
++        IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IAsyncOperation_UINT32)) *out = iface;
++    else if (IsEqualGUID(iid, &IID_IAsyncInfo)) *out = &impl->IAsyncInfo_iface;
++    else return E_NOINTERFACE;
++    IAsyncOperation_UINT32_AddRef( iface );
++    return S_OK;
++}
++static ULONG WINAPI store_AddRef( IAsyncOperation_UINT32 *iface )
++{
++    return InterlockedIncrement( &store_from_iface(iface)->ref );
++}
++static ULONG WINAPI store_Release( IAsyncOperation_UINT32 *iface )
++{
++    struct writer_store *impl = store_from_iface( iface );
++    ULONG ref = InterlockedDecrement( &impl->ref );
++    if (!ref)
++    {
++        if (impl->completed) IAsyncOperationCompletedHandler_UINT32_Release( impl->completed );
++        if (impl->child_info) IAsyncInfo_Release( impl->child_info );
++        if (impl->child) IAsyncOperationWithProgress_UINT32_UINT32_Release( impl->child );
++        if (impl->buffer) IBuffer_Release( impl->buffer );
++        IDataWriter_Release( &impl->writer->IDataWriter_iface );
++        free( impl );
++    }
++    return ref;
++}
++static HRESULT WINAPI store_GetIids( IAsyncOperation_UINT32 *iface, ULONG *count, IID **iids )
++{
++    static const IID *const ids[] = { &IID_IAsyncOperation_UINT32, &IID_IAsyncInfo };
++    return copy_iids( ids, ARRAY_SIZE(ids), count, iids );
++}
++static HRESULT WINAPI store_GetRuntimeClassName( IAsyncOperation_UINT32 *iface, HSTRING *name )
++{
++    static const WCHAR value[] = L"Windows.Storage.Streams.DataWriterStoreOperation";
++    return WindowsCreateString( value, ARRAY_SIZE(value) - 1, name );
++}
++static HRESULT WINAPI store_GetTrustLevel( IAsyncOperation_UINT32 *iface, TrustLevel *trust )
++{
++    if (!trust) return E_POINTER;
++    *trust = BaseTrust;
++    return S_OK;
++}
++static HRESULT WINAPI store_put_Completed( IAsyncOperation_UINT32 *iface, IAsyncOperationCompletedHandler_UINT32 *handler )
++{
++    struct writer_store *impl = store_from_iface( iface );
++    AsyncStatus status;
++    HRESULT hr = S_OK;
++    BOOL invoke = FALSE;
++    if (handler) IAsyncOperationCompletedHandler_UINT32_AddRef( handler );
++    AcquireSRWLockExclusive( &impl->lock );
++    status = impl->status;
++    if (status == ASYNC_CLOSED) hr = E_ILLEGAL_METHOD_CALL;
++    else if (impl->assigned) hr = E_ILLEGAL_DELEGATE_ASSIGNMENT;
++    else
++    {
++        impl->assigned = TRUE;
++        if (status == Started) { impl->completed = handler; handler = NULL; }
++        else invoke = TRUE;
++    }
++    ReleaseSRWLockExclusive( &impl->lock );
++    if (handler)
++    {
++        if (invoke)
++        {
++            IAsyncOperation_UINT32_AddRef( iface );
++            IAsyncOperationCompletedHandler_UINT32_Invoke( handler, iface, status );
++            IAsyncOperation_UINT32_Release( iface );
++        }
++        IAsyncOperationCompletedHandler_UINT32_Release( handler );
++    }
++    return hr;
++}
++static HRESULT WINAPI store_get_Completed( IAsyncOperation_UINT32 *iface, IAsyncOperationCompletedHandler_UINT32 **handler )
++{
++    struct writer_store *impl = store_from_iface( iface );
++    HRESULT hr;
++    if (!handler) return E_POINTER;
++    AcquireSRWLockShared( &impl->lock );
++    *handler = impl->completed;
++    if (*handler) IAsyncOperationCompletedHandler_UINT32_AddRef( *handler );
++    hr = impl->status == ASYNC_CLOSED ? E_ILLEGAL_METHOD_CALL : S_OK;
++    ReleaseSRWLockShared( &impl->lock );
++    return hr;
++}
++static HRESULT WINAPI store_GetResults( IAsyncOperation_UINT32 *iface, UINT32 *count )
++{
++    struct writer_store *impl = store_from_iface( iface );
++    HRESULT hr;
++    if (!count) return E_POINTER;
++    AcquireSRWLockShared( &impl->lock );
++    *count = impl->status == Completed ? impl->count : 0;
++    hr = impl->status == Started || impl->status == ASYNC_CLOSED ? E_ILLEGAL_METHOD_CALL : impl->error;
++    ReleaseSRWLockShared( &impl->lock );
++    return hr;
++}
++static const IAsyncOperation_UINT32Vtbl store_vtbl =
++{
++    store_QueryInterface, store_AddRef, store_Release, store_GetIids, store_GetRuntimeClassName,
++    store_GetTrustLevel, store_put_Completed, store_get_Completed, store_GetResults,
++};
++DEFINE_IINSPECTABLE( store_info, IAsyncInfo, struct writer_store, IAsyncOperation_UINT32_iface )
++static HRESULT WINAPI store_info_get_Id( IAsyncInfo *iface, UINT32 *id )
++{
++    struct writer_store *impl = impl_from_IAsyncInfo(iface);
++    HRESULT hr;
++    if (!id) return E_POINTER;
++    AcquireSRWLockShared(&impl->lock);
++    *id = impl->id;
++    hr = impl->status == ASYNC_CLOSED ? E_ILLEGAL_METHOD_CALL : S_OK;
++    ReleaseSRWLockShared(&impl->lock);
++    return hr;
++}
++static HRESULT WINAPI store_info_get_Status( IAsyncInfo *iface, AsyncStatus *status )
++{
++    struct writer_store *impl = impl_from_IAsyncInfo(iface);
++    if (!status) return E_POINTER;
++    AcquireSRWLockShared(&impl->lock);
++    *status = impl->status;
++    ReleaseSRWLockShared(&impl->lock);
++    return *status == ASYNC_CLOSED ? E_ILLEGAL_METHOD_CALL : S_OK;
++}
++static HRESULT WINAPI store_info_get_ErrorCode( IAsyncInfo *iface, HRESULT *error )
++{
++    struct writer_store *impl = impl_from_IAsyncInfo(iface);
++    HRESULT hr;
++    if (!error) return E_POINTER;
++    AcquireSRWLockShared(&impl->lock);
++    hr = impl->status == ASYNC_CLOSED ? E_ILLEGAL_METHOD_CALL : S_OK;
++    *error = FAILED(hr) ? hr : impl->error;
++    ReleaseSRWLockShared(&impl->lock);
++    return hr;
++}
++static HRESULT WINAPI store_info_Cancel( IAsyncInfo *iface )
++{
++    struct writer_store *impl = impl_from_IAsyncInfo(iface);
++    IAsyncInfo *child = NULL;
++    HRESULT hr = S_OK;
++    AcquireSRWLockShared(&impl->lock);
++    if (impl->status == ASYNC_CLOSED) hr = E_ILLEGAL_METHOD_CALL;
++    else if ((child = impl->child_info)) IAsyncInfo_AddRef(child);
++    ReleaseSRWLockShared(&impl->lock);
++    if (child) { hr = IAsyncInfo_Cancel(child); IAsyncInfo_Release(child); }
++    return hr;
++}
++static HRESULT WINAPI store_info_Close( IAsyncInfo *iface )
++{
++    struct writer_store *impl = impl_from_IAsyncInfo(iface);
++    HRESULT hr = S_OK;
++    AcquireSRWLockExclusive(&impl->lock);
++    if (impl->status == Started) hr = E_ILLEGAL_STATE_CHANGE;
++    else impl->status = ASYNC_CLOSED;
++    ReleaseSRWLockExclusive(&impl->lock);
++    return hr;
++}
++static const IAsyncInfoVtbl store_info_vtbl =
++{
++    store_info_QueryInterface, store_info_AddRef, store_info_Release, store_info_GetIids,
++    store_info_GetRuntimeClassName, store_info_GetTrustLevel, store_info_get_Id,
++    store_info_get_Status, store_info_get_ErrorCode, store_info_Cancel, store_info_Close,
++};
++
++static void store_finish( struct writer_store *impl, AsyncStatus status, HRESULT hr, UINT32 count )
++{
++    IAsyncOperationCompletedHandler_UINT32 *handler;
++    IAsyncOperationWithProgress_UINT32_UINT32 *child;
++    IAsyncInfo *child_info;
++    IBuffer *buffer;
++    struct data_writer *writer = impl->writer;
++
++    /* This helper is called once, either by completion or by creation failure. */
++    AcquireSRWLockExclusive(&writer->lock);
++    if (SUCCEEDED(hr) && count > writer->length) { hr = E_UNEXPECTED; status = Error; count = 0; }
++    if (SUCCEEDED(hr) && count)
++    {
++        writer->length -= count;
++        memmove(writer->data, writer->data + count, writer->length);
++    }
++    writer->storing = FALSE;
++    ReleaseSRWLockExclusive(&writer->lock);
++
++    AcquireSRWLockExclusive(&impl->lock);
++    impl->status = status;
++    impl->error = hr;
++    impl->count = SUCCEEDED(hr) ? count : 0;
++    handler = impl->completed; impl->completed = NULL;
++    child = impl->child; impl->child = NULL;
++    child_info = impl->child_info; impl->child_info = NULL;
++    buffer = impl->buffer; impl->buffer = NULL;
++    ReleaseSRWLockExclusive(&impl->lock);
++    TRACE("store %p, status %u, count %u, hr %#lx.\n", impl, status, count, hr);
++    if (handler)
++    {
++        IAsyncOperationCompletedHandler_UINT32_Invoke(handler, &impl->IAsyncOperation_UINT32_iface, status);
++        IAsyncOperationCompletedHandler_UINT32_Release(handler);
++    }
++    if (child_info) IAsyncInfo_Release(child_info);
++    if (child) IAsyncOperationWithProgress_UINT32_UINT32_Release(child);
++    if (buffer) IBuffer_Release(buffer);
++}
++static struct writer_store *store_from_handler( IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 *iface )
++{
++    return CONTAINING_RECORD(iface, struct writer_store, handler_iface);
++}
++static HRESULT WINAPI store_handler_QueryInterface( IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 *iface,
++                                                   REFIID iid, void **out )
++{
++    if (!out) return E_POINTER;
++    if (IsEqualGUID(iid, &IID_IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32))
++    {
++        *out = iface;
++        IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32_AddRef(iface);
++        return S_OK;
++    }
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IAgileObject))
++    {
++        *out = iface;
++        IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32_AddRef(iface);
++        return S_OK;
++    }
++    return E_NOINTERFACE;
++}
++static ULONG WINAPI store_handler_AddRef( IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 *iface )
++{
++    return store_AddRef(&store_from_handler(iface)->IAsyncOperation_UINT32_iface);
++}
++static ULONG WINAPI store_handler_Release( IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 *iface )
++{
++    return store_Release(&store_from_handler(iface)->IAsyncOperation_UINT32_iface);
++}
++static HRESULT WINAPI store_handler_Invoke( IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 *iface,
++                                           IAsyncOperationWithProgress_UINT32_UINT32 *child, AsyncStatus status )
++{
++    struct writer_store *impl = store_from_handler(iface);
++    UINT32 count = 0;
++    HRESULT hr;
++    store_AddRef(&impl->IAsyncOperation_UINT32_iface);
++    hr = status == Canceled ? E_ABORT : IAsyncOperationWithProgress_UINT32_UINT32_GetResults(child, &count);
++    if (FAILED(hr) && status != Canceled) status = Error;
++    store_finish(impl, status, hr, count);
++    store_Release(&impl->IAsyncOperation_UINT32_iface);
++    return S_OK;
++}
++static const IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32Vtbl store_handler_vtbl =
++{
++    store_handler_QueryInterface, store_handler_AddRef, store_handler_Release, store_handler_Invoke,
++};
++
++static HRESULT WINAPI writer_StoreAsync( IDataWriter *iface, IAsyncOperation_UINT32 **operation )
++{
++    static LONG next_id;
++    struct data_writer *writer = writer_from_iface(iface);
++    struct writer_store *impl;
++    IAsyncOperationWithProgress_UINT32_UINT32 *child = NULL;
++    IOutputStream *stream;
++    HRESULT hr;
++    if (!operation) return E_POINTER;
++    *operation = NULL;
++    if (!TryAcquireSRWLockExclusive(&writer->lock)) return WRITER_BUSY;
++    hr = writer_ready(writer);
++    if (SUCCEEDED(hr) && !writer->stream) hr = E_ILLEGAL_METHOD_CALL;
++    if (FAILED(hr)) { ReleaseSRWLockExclusive(&writer->lock); return hr; }
++    if (!(impl = calloc(1, sizeof(*impl)))) { ReleaseSRWLockExclusive(&writer->lock); return E_OUTOFMEMORY; }
++    impl->IAsyncOperation_UINT32_iface.lpVtbl = &store_vtbl;
++    impl->IAsyncInfo_iface.lpVtbl = &store_info_vtbl;
++    impl->handler_iface.lpVtbl = &store_handler_vtbl;
++    impl->ref = 1;
++    impl->id = InterlockedIncrement(&next_id);
++    impl->writer = writer;
++    IDataWriter_AddRef(iface);
++    writer->storing = TRUE;
++    stream = writer->stream;
++    IOutputStream_AddRef(stream);
++    ReleaseSRWLockExclusive(&writer->lock);
++
++    hr = writer_buffer(writer->data, writer->length, &impl->buffer);
++    if (SUCCEEDED(hr)) hr = IOutputStream_WriteAsync(stream, impl->buffer, &child);
++    IOutputStream_Release(stream);
++    if (SUCCEEDED(hr) && !child) hr = E_UNEXPECTED;
++    if (SUCCEEDED(hr))
++    {
++        impl->child = child;
++        IAsyncOperationWithProgress_UINT32_UINT32_AddRef(child);
++        hr = IAsyncOperationWithProgress_UINT32_UINT32_QueryInterface(child, &IID_IAsyncInfo, (void **)&impl->child_info);
++        if (SUCCEEDED(hr)) hr = IAsyncOperationWithProgress_UINT32_UINT32_put_Completed(child, &impl->handler_iface);
++    }
++    if (child) IAsyncOperationWithProgress_UINT32_UINT32_Release(child);
++    if (FAILED(hr))
++    {
++        store_finish(impl, Error, hr, 0);
++        store_Release(&impl->IAsyncOperation_UINT32_iface);
++        return hr;
++    }
++    *operation = &impl->IAsyncOperation_UINT32_iface;
++    return S_OK;
++}
++
++static HRESULT WINAPI writer_FlushAsync( IDataWriter *iface, IAsyncOperation_boolean **operation )
++{
++    struct data_writer *impl = writer_from_iface(iface);
++    IOutputStream *stream = NULL;
++    HRESULT hr;
++    if (!operation) return E_POINTER;
++    *operation = NULL;
++    AcquireSRWLockShared(&impl->lock);
++    hr = writer_ready(impl);
++    if (SUCCEEDED(hr) && !(stream = impl->stream)) hr = E_ILLEGAL_METHOD_CALL;
++    if (stream) IOutputStream_AddRef(stream);
++    ReleaseSRWLockShared(&impl->lock);
++    if (FAILED(hr)) return hr;
++    hr = IOutputStream_FlushAsync(stream, operation);
++    IOutputStream_Release(stream);
++    return hr;
++}
++static HRESULT WINAPI writer_DetachBuffer( IDataWriter *iface, IBuffer **buffer )
++{
++    struct data_writer *impl = writer_from_iface(iface);
++    HRESULT hr;
++    if (!buffer) return E_POINTER;
++    *buffer = NULL;
++    if (!TryAcquireSRWLockExclusive(&impl->lock)) return WRITER_BUSY;
++    hr = writer_ready(impl);
++    if (SUCCEEDED(hr)) impl->storing = TRUE;
++    ReleaseSRWLockExclusive(&impl->lock);
++    if (FAILED(hr)) return hr;
++    hr = writer_buffer(impl->data, impl->length, buffer);
++    AcquireSRWLockExclusive(&impl->lock);
++    if (SUCCEEDED(hr)) impl->length = 0;
++    impl->storing = FALSE;
++    ReleaseSRWLockExclusive(&impl->lock);
++    return hr;
++}
++static HRESULT WINAPI writer_DetachStream( IDataWriter *iface, IOutputStream **stream )
++{
++    struct data_writer *impl = writer_from_iface(iface);
++    HRESULT hr;
++    if (!stream) return E_POINTER;
++    *stream = NULL;
++    if (!TryAcquireSRWLockExclusive(&impl->lock)) return WRITER_BUSY;
++    hr = writer_ready(impl);
++    if (SUCCEEDED(hr)) { *stream = impl->stream; impl->stream = NULL; }
++    ReleaseSRWLockExclusive(&impl->lock);
++    return hr;
++}
++static const IDataWriterVtbl writer_vtbl =
++{
++    writer_QueryInterface, writer_AddRef, writer_Release, writer_GetIids, writer_GetRuntimeClassName,
++    writer_GetTrustLevel, writer_get_UnstoredBufferLength, writer_get_UnicodeEncoding, writer_put_UnicodeEncoding,
++    writer_get_ByteOrder, writer_put_ByteOrder, writer_WriteByte, writer_WriteBytes, writer_WriteBuffer,
++    writer_WriteBufferRange, writer_WriteBoolean, writer_WriteGuid, writer_WriteInt16, writer_WriteInt32,
++    writer_WriteInt64, writer_WriteUInt16, writer_WriteUInt32, writer_WriteUInt64, writer_WriteSingle,
++    writer_WriteDouble, writer_WriteDateTime, writer_WriteTimeSpan, writer_WriteString, writer_MeasureString,
++    writer_StoreAsync, writer_FlushAsync, writer_DetachBuffer, writer_DetachStream,
++};
++DEFINE_IINSPECTABLE( writer_closable, IClosable, struct data_writer, IDataWriter_iface )
++static HRESULT WINAPI writer_closable_Close( IClosable *iface )
++{
++    struct data_writer *impl = impl_from_IClosable(iface);
++    IOutputStream *stream;
++    IClosable *closable;
++    HRESULT hr = S_OK;
++    AcquireSRWLockExclusive(&impl->lock);
++    impl->closed = TRUE;
++    stream = impl->stream; impl->stream = NULL;
++    ReleaseSRWLockExclusive(&impl->lock);
++    if (stream)
++    {
++        if (SUCCEEDED(IOutputStream_QueryInterface(stream, &IID_IClosable, (void **)&closable)))
++        {
++            hr = IClosable_Close(closable);
++            IClosable_Release(closable);
++        }
++        IOutputStream_Release(stream);
++    }
++    return hr;
++}
++static const IClosableVtbl writer_closable_vtbl =
++{
++    writer_closable_QueryInterface, writer_closable_AddRef, writer_closable_Release, writer_closable_GetIids,
++    writer_closable_GetRuntimeClassName, writer_closable_GetTrustLevel, writer_closable_Close,
++};
++static HRESULT writer_create( IOutputStream *stream, IDataWriter **out )
++{
++    struct data_writer *impl;
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (!(impl = calloc(1, sizeof(*impl)))) return E_OUTOFMEMORY;
++    impl->IDataWriter_iface.lpVtbl = &writer_vtbl;
++    impl->IClosable_iface.lpVtbl = &writer_closable_vtbl;
++    impl->ref = 1;
++    impl->order = ByteOrder_BigEndian;
++    impl->encoding = UnicodeEncoding_Utf8;
++    if ((impl->stream = stream)) IOutputStream_AddRef(stream);
++    *out = &impl->IDataWriter_iface;
++    TRACE("created DataWriter %p, stream %p.\n", *out, stream);
++    return S_OK;
++}
++
++struct writer_factory
++{
++    IActivationFactory IActivationFactory_iface;
++    IDataWriterFactory IDataWriterFactory_iface;
++    LONG ref;
++};
++static struct writer_factory writer_factory;
++static HRESULT WINAPI factory_QueryInterface( IActivationFactory *iface, REFIID iid, void **out )
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) ||
++        IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IActivationFactory)) *out = iface;
++    else if (IsEqualGUID(iid, &IID_IDataWriterFactory)) *out = &writer_factory.IDataWriterFactory_iface;
++    else return E_NOINTERFACE;
++    IActivationFactory_AddRef(iface);
++    return S_OK;
++}
++static ULONG WINAPI factory_AddRef( IActivationFactory *iface )
++{
++    return InterlockedIncrement(&writer_factory.ref);
++}
++static ULONG WINAPI factory_Release( IActivationFactory *iface )
++{
++    return InterlockedDecrement(&writer_factory.ref);
++}
++static HRESULT WINAPI factory_GetIids( IActivationFactory *iface, ULONG *count, IID **iids )
++{
++    static const IID *const ids[] = { &IID_IActivationFactory, &IID_IDataWriterFactory };
++    return copy_iids(ids, ARRAY_SIZE(ids), count, iids);
++}
++static HRESULT WINAPI factory_GetRuntimeClassName( IActivationFactory *iface, HSTRING *name )
++{
++    return writer_GetRuntimeClassName(NULL, name);
++}
++static HRESULT WINAPI factory_GetTrustLevel( IActivationFactory *iface, TrustLevel *trust )
++{
++    return writer_GetTrustLevel(NULL, trust);
++}
++static HRESULT WINAPI factory_ActivateInstance( IActivationFactory *iface, IInspectable **instance )
++{
++    return writer_create(NULL, (IDataWriter **)instance);
++}
++static const IActivationFactoryVtbl factory_vtbl =
++{
++    factory_QueryInterface, factory_AddRef, factory_Release, factory_GetIids,
++    factory_GetRuntimeClassName, factory_GetTrustLevel, factory_ActivateInstance,
++};
++DEFINE_IINSPECTABLE( writer_factory, IDataWriterFactory, struct writer_factory, IActivationFactory_iface )
++static HRESULT WINAPI writer_factory_CreateDataWriter( IDataWriterFactory *iface, IOutputStream *stream, IDataWriter **writer )
++{
++    if (!writer) return E_POINTER;
++    *writer = NULL;
++    if (!stream) return E_POINTER;
++    return writer_create(stream, writer);
++}
++static const IDataWriterFactoryVtbl writer_factory_vtbl =
++{
++    writer_factory_QueryInterface, writer_factory_AddRef, writer_factory_Release, writer_factory_GetIids,
++    writer_factory_GetRuntimeClassName, writer_factory_GetTrustLevel, writer_factory_CreateDataWriter,
++};
++static struct writer_factory writer_factory = { {&factory_vtbl}, {&writer_factory_vtbl}, 1 };
++IActivationFactory *data_writer_factory = &writer_factory.IActivationFactory_iface;
+diff --git a/dlls/windows.storage/tests/Makefile.in b/dlls/windows.storage/tests/Makefile.in
+--- a/dlls/windows.storage/tests/Makefile.in
++++ b/dlls/windows.storage/tests/Makefile.in
+@@ -2,4 +2,5 @@
+ IMPORTS = combase
+ 
+ SOURCES = \
+-	storage.c
++	storage.c \
++	writer.c
+diff --git a/dlls/windows.storage/tests/writer.c b/dlls/windows.storage/tests/writer.c
+--- /dev/null
++++ b/dlls/windows.storage/tests/writer.c
+@@ -0,0 +1,545 @@
++/* DataWriter ABI and controlled-stream regression tests.
++ * Copyright 2026 Cencyte D
++ * Licensed under the GNU LGPL, version 2.1 or later.
++ */
++#include <stdarg.h>
++#define COBJMACROS
++#include "windef.h"
++#include "winbase.h"
++#include "winstring.h"
++#include "roapi.h"
++#define WIDL_using_Windows_Foundation
++#include "windows.foundation.h"
++#define WIDL_using_Windows_Storage_Streams
++#include "windows.storage.streams.h"
++#include "robuffer.h"
++#include "wine/test.h"
++
++#define HR(expr) do { HRESULT hr_ = (expr); ok(hr_ == S_OK, #expr ": %#lx\n", hr_); } while (0)
++#define BUSY HRESULT_FROM_WIN32(ERROR_INVALID_OPERATION)
++
++static HRESULT factory( const WCHAR *class, REFIID iid, void **out )
++{
++    HSTRING name;
++    HRESULT hr;
++    HR(WindowsCreateString(class, wcslen(class), &name));
++    hr = RoGetActivationFactory(name, iid, out);
++    WindowsDeleteString(name);
++    ok(hr == S_OK, "activation %s: %#lx\n", wine_dbgstr_w(class), hr);
++    return hr;
++}
++static IDataWriter *create_writer( IOutputStream *stream )
++{
++    IDataWriterFactory *f;
++    IActivationFactory *activation;
++    IDataWriter *writer = NULL;
++    IInspectable *instance;
++    if (stream)
++    {
++        if (FAILED(factory(L"Windows.Storage.Streams.DataWriter", &IID_IDataWriterFactory, (void **)&f))) return NULL;
++        HR(IDataWriterFactory_CreateDataWriter(f, stream, &writer));
++        IDataWriterFactory_Release(f);
++    }
++    else
++    {
++        if (FAILED(factory(L"Windows.Storage.Streams.DataWriter", &IID_IActivationFactory, (void **)&activation))) return NULL;
++        HR(IActivationFactory_ActivateInstance(activation, &instance));
++        HR(IInspectable_QueryInterface(instance, &IID_IDataWriter, (void **)&writer));
++        IInspectable_Release(instance);
++        IActivationFactory_Release(activation);
++    }
++    return writer;
++}
++static BYTE *buffer_data( IBuffer *buffer )
++{
++    IBufferByteAccess *access;
++    BYTE *data = NULL;
++    HR(IBuffer_QueryInterface(buffer, &IID_IBufferByteAccess, (void **)&access));
++    HR(IBufferByteAccess_Buffer(access, &data));
++    IBufferByteAccess_Release(access);
++    return data;
++}
++static void buffer_matches( IBuffer *buffer, const BYTE *expected, UINT32 size )
++{
++    UINT32 length;
++    HR(IBuffer_get_Length(buffer, &length));
++    ok(length == size, "buffer length %u expected %u\n", length, size);
++    if (length == size && size) ok(!memcmp(buffer_data(buffer), expected, size), "buffer data mismatch\n");
++}
++static void close_writer( IDataWriter *writer )
++{
++    IClosable *closable;
++    HR(IDataWriter_QueryInterface(writer, &IID_IClosable, (void **)&closable));
++    HR(IClosable_Close(closable));
++    IClosable_Release(closable);
++}
++
++struct completion
++{
++    IAsyncOperationCompletedHandler_UINT32 iface;
++    LONG refs, calls;
++    AsyncStatus status;
++    IDataWriter *reenter;
++    HRESULT result_hr;
++    UINT32 result;
++    HANDLE event;
++};
++static struct completion *completion_impl(IAsyncOperationCompletedHandler_UINT32 *iface)
++{ return CONTAINING_RECORD(iface, struct completion, iface); }
++static HRESULT WINAPI completion_qi(IAsyncOperationCompletedHandler_UINT32 *iface, REFIID iid, void **out)
++{
++    *out = NULL;
++    if (!IsEqualGUID(iid, &IID_IUnknown) && !IsEqualGUID(iid, &IID_IAgileObject) &&
++        !IsEqualGUID(iid, &IID_IAsyncOperationCompletedHandler_UINT32)) return E_NOINTERFACE;
++    *out = iface; IAsyncOperationCompletedHandler_UINT32_AddRef(iface); return S_OK;
++}
++static ULONG WINAPI completion_addref(IAsyncOperationCompletedHandler_UINT32 *iface)
++{ return InterlockedIncrement(&completion_impl(iface)->refs); }
++static ULONG WINAPI completion_release(IAsyncOperationCompletedHandler_UINT32 *iface)
++{ return InterlockedDecrement(&completion_impl(iface)->refs); }
++static HRESULT WINAPI completion_invoke(IAsyncOperationCompletedHandler_UINT32 *iface, IAsyncOperation_UINT32 *op, AsyncStatus status)
++{
++    struct completion *impl = completion_impl(iface);
++    InterlockedIncrement(&impl->calls);
++    impl->status = status;
++    impl->result_hr = IAsyncOperation_UINT32_GetResults(op, &impl->result);
++    if (impl->reenter) HR(IDataWriter_WriteByte(impl->reenter, 0x7e));
++    if (impl->event) SetEvent(impl->event);
++    return S_OK;
++}
++static const IAsyncOperationCompletedHandler_UINT32Vtbl completion_vtbl =
++{ completion_qi, completion_addref, completion_release, completion_invoke };
++
++/* A real pending operation controlled by the test, independent of the writer's adapter. */
++struct mock_op
++{
++    IAsyncOperationWithProgress_UINT32_UINT32 iface;
++    IAsyncInfo info;
++    LONG refs;
++    AsyncStatus status;
++    HRESULT error;
++    UINT32 count;
++    unsigned int canceled;
++    BOOL assigned;
++    IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 *handler;
++    IBuffer *buffer;
++};
++static struct mock_op *mock_from_op(IAsyncOperationWithProgress_UINT32_UINT32 *iface)
++{ return CONTAINING_RECORD(iface, struct mock_op, iface); }
++static struct mock_op *mock_from_info(IAsyncInfo *iface)
++{ return CONTAINING_RECORD(iface, struct mock_op, info); }
++static HRESULT WINAPI mock_qi(IAsyncOperationWithProgress_UINT32_UINT32 *iface, REFIID iid, void **out)
++{
++    struct mock_op *impl = mock_from_op(iface);
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) ||
++        IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IAsyncOperationWithProgress_UINT32_UINT32)) *out = iface;
++    else if (IsEqualGUID(iid, &IID_IAsyncInfo)) *out = &impl->info;
++    else return E_NOINTERFACE;
++    IAsyncOperationWithProgress_UINT32_UINT32_AddRef(iface); return S_OK;
++}
++static ULONG WINAPI mock_addref(IAsyncOperationWithProgress_UINT32_UINT32 *iface)
++{ return InterlockedIncrement(&mock_from_op(iface)->refs); }
++static ULONG WINAPI mock_release(IAsyncOperationWithProgress_UINT32_UINT32 *iface)
++{
++    struct mock_op *impl = mock_from_op(iface);
++    ULONG ref = InterlockedDecrement(&impl->refs);
++    if (!ref)
++    {
++        if (impl->handler) IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32_Release(impl->handler);
++        if (impl->buffer) IBuffer_Release(impl->buffer);
++        free(impl);
++    }
++    return ref;
++}
++static HRESULT WINAPI mock_iids(IAsyncOperationWithProgress_UINT32_UINT32 *iface, ULONG *count, IID **iids) { return E_NOTIMPL; }
++static HRESULT WINAPI mock_name(IAsyncOperationWithProgress_UINT32_UINT32 *iface, HSTRING *name) { return E_NOTIMPL; }
++static HRESULT WINAPI mock_trust(IAsyncOperationWithProgress_UINT32_UINT32 *iface, TrustLevel *trust) { return E_NOTIMPL; }
++static HRESULT WINAPI mock_put_progress(IAsyncOperationWithProgress_UINT32_UINT32 *iface, IAsyncOperationProgressHandler_UINT32_UINT32 *handler) { return E_NOTIMPL; }
++static HRESULT WINAPI mock_get_progress(IAsyncOperationWithProgress_UINT32_UINT32 *iface, IAsyncOperationProgressHandler_UINT32_UINT32 **handler) { return E_NOTIMPL; }
++static HRESULT WINAPI mock_put_completed(IAsyncOperationWithProgress_UINT32_UINT32 *iface, IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 *handler)
++{
++    struct mock_op *impl = mock_from_op(iface);
++    if (impl->assigned) return E_ILLEGAL_DELEGATE_ASSIGNMENT;
++    impl->assigned = TRUE;
++    impl->handler = handler;
++    if (handler) IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32_AddRef(handler);
++    return S_OK;
++}
++static HRESULT WINAPI mock_get_completed(IAsyncOperationWithProgress_UINT32_UINT32 *iface, IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 **handler)
++{
++    *handler = mock_from_op(iface)->handler;
++    if (*handler) IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32_AddRef(*handler);
++    return S_OK;
++}
++static HRESULT WINAPI mock_results(IAsyncOperationWithProgress_UINT32_UINT32 *iface, UINT32 *count)
++{
++    struct mock_op *impl = mock_from_op(iface);
++    *count = impl->status == Completed ? impl->count : 0;
++    return impl->status == Started ? E_ILLEGAL_METHOD_CALL : impl->error;
++}
++static const IAsyncOperationWithProgress_UINT32_UINT32Vtbl mock_op_vtbl =
++{ mock_qi, mock_addref, mock_release, mock_iids, mock_name, mock_trust, mock_put_progress,
++  mock_get_progress, mock_put_completed, mock_get_completed, mock_results };
++static void mock_finish(struct mock_op *impl, AsyncStatus status, HRESULT error, UINT32 count)
++{
++    IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32 *handler = impl->handler;
++    impl->handler = NULL;
++    impl->status = status; impl->error = error; impl->count = count;
++    if (handler)
++    {
++        IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32_Invoke(handler, &impl->iface, status);
++        IAsyncOperationWithProgressCompletedHandler_UINT32_UINT32_Release(handler);
++    }
++}
++static HRESULT WINAPI mock_info_qi(IAsyncInfo *iface, REFIID iid, void **out) { return mock_qi(&mock_from_info(iface)->iface, iid, out); }
++static ULONG WINAPI mock_info_addref(IAsyncInfo *iface) { return mock_addref(&mock_from_info(iface)->iface); }
++static ULONG WINAPI mock_info_release(IAsyncInfo *iface) { return mock_release(&mock_from_info(iface)->iface); }
++static HRESULT WINAPI mock_info_iids(IAsyncInfo *iface, ULONG *count, IID **iids) { return E_NOTIMPL; }
++static HRESULT WINAPI mock_info_name(IAsyncInfo *iface, HSTRING *name) { return E_NOTIMPL; }
++static HRESULT WINAPI mock_info_trust(IAsyncInfo *iface, TrustLevel *trust) { return E_NOTIMPL; }
++static HRESULT WINAPI mock_info_id(IAsyncInfo *iface, UINT32 *id) { *id = 45; return S_OK; }
++static HRESULT WINAPI mock_info_status(IAsyncInfo *iface, AsyncStatus *status) { *status = mock_from_info(iface)->status; return S_OK; }
++static HRESULT WINAPI mock_info_error(IAsyncInfo *iface, HRESULT *error) { *error = mock_from_info(iface)->error; return S_OK; }
++static HRESULT WINAPI mock_info_cancel(IAsyncInfo *iface)
++{
++    struct mock_op *impl = mock_from_info(iface);
++    ++impl->canceled;
++    mock_finish(impl, Canceled, E_ABORT, 0);
++    return S_OK;
++}
++static HRESULT WINAPI mock_info_close(IAsyncInfo *iface) { return S_OK; }
++static const IAsyncInfoVtbl mock_info_vtbl = { mock_info_qi, mock_info_addref, mock_info_release,
++    mock_info_iids, mock_info_name, mock_info_trust, mock_info_id, mock_info_status, mock_info_error, mock_info_cancel, mock_info_close };
++
++struct mock_stream
++{
++    IOutputStream iface;
++    IClosable closable;
++    LONG refs;
++    struct mock_op *last;
++    HRESULT write_hr;
++    unsigned int flushes, closes;
++    IDataWriter *reenter;
++};
++static struct mock_stream *mock_stream_impl(IOutputStream *iface) { return CONTAINING_RECORD(iface, struct mock_stream, iface); }
++static HRESULT WINAPI stream_qi(IOutputStream *iface, REFIID iid, void **out)
++{
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable) ||
++        IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IOutputStream)) *out = iface;
++    else if (IsEqualGUID(iid, &IID_IClosable)) *out = &mock_stream_impl(iface)->closable;
++    else return E_NOINTERFACE;
++    IOutputStream_AddRef(iface); return S_OK;
++}
++static ULONG WINAPI stream_addref(IOutputStream *iface) { return InterlockedIncrement(&mock_stream_impl(iface)->refs); }
++static ULONG WINAPI stream_release(IOutputStream *iface) { return InterlockedDecrement(&mock_stream_impl(iface)->refs); }
++static HRESULT WINAPI stream_iids(IOutputStream *iface, ULONG *count, IID **iids) { return E_NOTIMPL; }
++static HRESULT WINAPI stream_name(IOutputStream *iface, HSTRING *name) { return E_NOTIMPL; }
++static HRESULT WINAPI stream_trust(IOutputStream *iface, TrustLevel *trust) { return E_NOTIMPL; }
++static HRESULT WINAPI stream_write(IOutputStream *iface, IBuffer *buffer, IAsyncOperationWithProgress_UINT32_UINT32 **out)
++{
++    struct mock_stream *impl = mock_stream_impl(iface);
++    HRESULT hr;
++    *out = NULL;
++    if (impl->reenter)
++    {
++        hr = IDataWriter_WriteByte(impl->reenter, 0xf0);
++        ok(hr == BUSY, "write reentrancy not rejected: %#lx\n", hr);
++    }
++    if (FAILED(impl->write_hr)) return impl->write_hr;
++    if (impl->last) mock_release(&impl->last->iface);
++    impl->last = calloc(1, sizeof(*impl->last));
++    impl->last->iface.lpVtbl = &mock_op_vtbl;
++    impl->last->info.lpVtbl = &mock_info_vtbl;
++    impl->last->refs = 1;
++    impl->last->buffer = buffer; IBuffer_AddRef(buffer);
++    *out = &impl->last->iface; mock_addref(*out);
++    return S_OK;
++}
++static HRESULT WINAPI stream_flush(IOutputStream *iface, IAsyncOperation_boolean **out)
++{
++    ++mock_stream_impl(iface)->flushes;
++    *out = NULL;
++    return E_ACCESSDENIED;
++}
++static const IOutputStreamVtbl mock_stream_vtbl = { stream_qi, stream_addref, stream_release,
++    stream_iids, stream_name, stream_trust, stream_write, stream_flush };
++static struct mock_stream *mock_closable_impl(IClosable *iface) { return CONTAINING_RECORD(iface, struct mock_stream, closable); }
++static HRESULT WINAPI close_qi(IClosable *iface, REFIID iid, void **out) { return stream_qi(&mock_closable_impl(iface)->iface, iid, out); }
++static ULONG WINAPI close_addref(IClosable *iface) { return stream_addref(&mock_closable_impl(iface)->iface); }
++static ULONG WINAPI close_release(IClosable *iface) { return stream_release(&mock_closable_impl(iface)->iface); }
++static HRESULT WINAPI close_iids(IClosable *iface, ULONG *count, IID **iids) { return E_NOTIMPL; }
++static HRESULT WINAPI close_name(IClosable *iface, HSTRING *name) { return E_NOTIMPL; }
++static HRESULT WINAPI close_trust(IClosable *iface, TrustLevel *trust) { return E_NOTIMPL; }
++static HRESULT WINAPI close_close(IClosable *iface) { ++mock_closable_impl(iface)->closes; return S_OK; }
++static const IClosableVtbl mock_closable_vtbl = { close_qi, close_addref, close_release, close_iids, close_name, close_trust, close_close };
++
++static DWORD WINAPI finish_worker(void *arg)
++{
++    struct mock_op *op = arg;
++    mock_finish(op, Completed, S_OK, 6);
++    mock_release(&op->iface);
++    return 0;
++}
++
++static void test_pending_writer(void)
++{
++    struct mock_stream stream = { {&mock_stream_vtbl}, {&mock_closable_vtbl}, 1 };
++    struct completion handler = { {&completion_vtbl}, 1 };
++    IDataWriter *writer = create_writer(&stream.iface);
++    IAsyncOperation_UINT32 *op, *other;
++    IAsyncOperation_boolean *flush;
++    IAsyncInfo *info;
++    IOutputStream *detached;
++    IBuffer *buffer;
++    IUnknown *a, *b;
++    UINT32 count;
++    AsyncStatus status;
++    HRESULT hr;
++    BYTE bytes[] = {1, 2, 3, 4, 5, 6};
++    if (!writer) return;
++    stream.reenter = writer;
++    HR(IDataWriter_WriteBytes(writer, sizeof(bytes), bytes));
++    HR(IDataWriter_StoreAsync(writer, &op));
++    buffer_matches(stream.last->buffer, bytes, sizeof(bytes));
++    HR(IAsyncOperation_UINT32_QueryInterface(op, &IID_IAsyncInfo, (void **)&info));
++    HR(IAsyncInfo_get_Status(info, &status));
++    ok(status == Started, "premature status %u\n", status);
++    hr = IAsyncOperation_UINT32_GetResults(op, &count);
++    ok(hr == E_ILLEGAL_METHOD_CALL, "premature result %#lx\n", hr);
++    hr = IAsyncInfo_Close(info); ok(hr == E_ILLEGAL_STATE_CHANGE, "premature close %#lx\n", hr);
++    HR(IAsyncInfo_QueryInterface(info, &IID_IUnknown, (void **)&a));
++    HR(IAsyncOperation_UINT32_QueryInterface(op, &IID_IUnknown, (void **)&b));
++    ok(a == b, "async identity mismatch\n"); IUnknown_Release(a); IUnknown_Release(b);
++    HR(IAsyncOperation_UINT32_put_Completed(op, &handler.iface));
++    hr = IAsyncOperation_UINT32_put_Completed(op, &handler.iface);
++    ok(hr == E_ILLEGAL_DELEGATE_ASSIGNMENT, "second completion assignment %#lx\n", hr);
++    hr = IDataWriter_WriteByte(writer, 9); ok(hr == BUSY, "write while storing %#lx\n", hr);
++    other = (void *)0xdeadbeef;
++    hr = IDataWriter_StoreAsync(writer, &other); ok(hr == BUSY && !other, "overlap store %#lx/%p\n", hr, other);
++    hr = IDataWriter_DetachStream(writer, &detached); ok(hr == BUSY && !detached, "detach while storing %#lx\n", hr);
++    hr = IDataWriter_DetachBuffer(writer, &buffer); ok(hr == BUSY && !buffer, "detach buffer while storing %#lx\n", hr);
++    hr = IDataWriter_FlushAsync(writer, &flush); ok(hr == BUSY && !flush, "flush while storing %#lx\n", hr);
++    HR(IDataWriter_get_UnstoredBufferLength(writer, &count)); ok(count == 6, "pending bytes %u\n", count);
++    handler.reenter = writer;
++    mock_finish(stream.last, Completed, S_OK, 2);
++    ok(handler.calls == 1 && handler.status == Completed && handler.result_hr == S_OK && handler.result == 2,
++       "completion calls/status/result %ld/%u/%#lx/%u\n", handler.calls, handler.status, handler.result_hr, handler.result);
++    HR(IDataWriter_get_UnstoredBufferLength(writer, &count)); ok(count == 5, "short write lost tail: %u\n", count);
++    HR(IDataWriter_DetachBuffer(writer, &buffer));
++    { BYTE expected[] = {3,4,5,6,0x7e}; buffer_matches(buffer, expected, sizeof(expected)); }
++    IBuffer_Release(buffer);
++    ok(stream.last->refs == 1, "child adapter cycle retained: %ld\n", stream.last->refs);
++    HR(IAsyncInfo_Close(info));
++    hr = IAsyncOperation_UINT32_GetResults(op, &count); ok(hr == E_ILLEGAL_METHOD_CALL, "closed result %#lx\n", hr);
++    IAsyncInfo_Release(info); IAsyncOperation_UINT32_Release(op);
++    ok(handler.refs == 1, "completion handler leaked: %ld\n", handler.refs);
++
++    HR(IDataWriter_WriteBytes(writer, sizeof(bytes), bytes));
++    HR(IDataWriter_StoreAsync(writer, &op));
++    HR(IAsyncOperation_UINT32_QueryInterface(op, &IID_IAsyncInfo, (void **)&info));
++    HR(IAsyncInfo_Cancel(info));
++    ok(stream.last->canceled == 1, "child cancel not called\n");
++    HR(IAsyncInfo_get_Status(info, &status)); ok(status == Canceled, "cancel status %u\n", status);
++    hr = IAsyncOperation_UINT32_GetResults(op, &count); ok(hr == E_ABORT && !count, "canceled result %#lx/%u\n", hr, count);
++    HR(IDataWriter_get_UnstoredBufferLength(writer, &count)); ok(count == 6, "cancel lost pending bytes\n");
++    IAsyncInfo_Release(info); IAsyncOperation_UINT32_Release(op);
++    HR(IDataWriter_StoreAsync(writer, &op));
++    mock_finish(stream.last, Error, E_ACCESSDENIED, 0);
++    hr = IAsyncOperation_UINT32_GetResults(op, &count); ok(hr == E_ACCESSDENIED, "error propagation %#lx\n", hr);
++    IAsyncOperation_UINT32_Release(op);
++    HR(IDataWriter_get_UnstoredBufferLength(writer, &count)); ok(count == 6, "error lost pending bytes\n");
++    /* Complete on another thread after caller drops its operation reference. */
++    {
++        struct completion threaded = { {&completion_vtbl}, 1 };
++        HANDLE thread;
++        DWORD wait;
++        HR(IDataWriter_StoreAsync(writer, &op));
++        threaded.event = CreateEventW(NULL, FALSE, FALSE, NULL);
++        HR(IAsyncOperation_UINT32_put_Completed(op, &threaded.iface));
++        IAsyncOperation_UINT32_Release(op);
++        mock_addref(&stream.last->iface);
++        thread = CreateThread(NULL, 0, finish_worker, stream.last, 0, NULL);
++        ok(!!thread, "create completion thread\n");
++        if (thread)
++        {
++            wait = WaitForSingleObject(thread, 5000);
++            ok(wait == WAIT_OBJECT_0, "completion thread wait %lu\n", wait);
++            if (wait != WAIT_OBJECT_0) WaitForSingleObject(thread, INFINITE);
++            CloseHandle(thread);
++        }
++        else finish_worker(stream.last);
++        ok(threaded.calls == 1 && threaded.status == Completed && threaded.result == 6 && threaded.refs == 1,
++           "cross-thread completion %ld/%u/%u/%ld\n", threaded.calls, threaded.status, threaded.result, threaded.refs);
++        CloseHandle(threaded.event);
++        HR(IDataWriter_get_UnstoredBufferLength(writer, &count)); ok(!count, "threaded store retained bytes\n");
++        ok(stream.last->refs == 1, "threaded child retained %ld\n", stream.last->refs);
++    }
++    HR(IDataWriter_WriteBytes(writer, sizeof(bytes), bytes));
++    HR(IDataWriter_StoreAsync(writer, &op));
++    mock_finish(stream.last, Completed, S_OK, 7);
++    hr = IAsyncOperation_UINT32_GetResults(op, &count);
++    ok(hr == E_UNEXPECTED, "invalid child byte count accepted %#lx\n", hr);
++    IAsyncOperation_UINT32_Release(op);
++    HR(IDataWriter_get_UnstoredBufferLength(writer, &count)); ok(count == 6, "invalid result lost bytes\n");
++    stream.write_hr = E_OUTOFMEMORY;
++    op = (void *)0xdeadbeef;
++    hr = IDataWriter_StoreAsync(writer, &op); ok(hr == E_OUTOFMEMORY && !op, "creation failure %#lx/%p\n", hr, op);
++    HR(IDataWriter_WriteByte(writer, 7));
++    hr = IDataWriter_FlushAsync(writer, &flush); ok(hr == E_ACCESSDENIED && !flush && stream.flushes == 1, "flush forwarding %#lx\n", hr);
++    HR(IDataWriter_DetachStream(writer, &detached)); ok(detached == &stream.iface, "detach identity\n");
++    IOutputStream_Release(detached);
++    close_writer(writer); ok(!stream.closes, "detached stream closed\n");
++    hr = IDataWriter_WriteByte(writer, 1); ok(hr == RO_E_CLOSED, "write after close %#lx\n", hr);
++    ok(!IDataWriter_Release(writer), "writer retained\n");
++    ok(stream.refs == 1, "stream retained %ld\n", stream.refs);
++    mock_release(&stream.last->iface); stream.last = NULL;
++    writer = create_writer(&stream.iface);
++    close_writer(writer); close_writer(writer); ok(stream.closes == 1, "close count %u\n", stream.closes);
++    IDataWriter_Release(writer);
++    ok(stream.refs == 1, "closed stream retained\n");
++    stream.write_hr = S_OK;
++    writer = create_writer(&stream.iface);
++    stream.reenter = NULL;
++    HR(IDataWriter_WriteBytes(writer, sizeof(bytes), bytes));
++    HR(IDataWriter_StoreAsync(writer, &op));
++    close_writer(writer);
++    IDataWriter_Release(writer);
++    mock_finish(stream.last, Error, RO_E_CLOSED, 0);
++    hr = IAsyncOperation_UINT32_GetResults(op, &count);
++    ok(hr == RO_E_CLOSED, "pending close result %#lx\n", hr);
++    IAsyncOperation_UINT32_Release(op);
++    ok(stream.refs == 1 && stream.last->refs == 1, "pending close retained references\n");
++    mock_release(&stream.last->iface);
++
++}
++
++static void test_serialization(void)
++{
++    IDataWriter *writer = create_writer(NULL);
++    IBuffer *buffer;
++    ByteOrder order;
++    UnicodeEncoding encoding;
++    UINT32 count;
++    HSTRING text;
++    HRESULT hr;
++    GUID guid = {0x11223344,0x5566,0x7788,{0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff,0x00}};
++    DateTime time = {0x0102030405060708};
++    TimeSpan span = {-2};
++    static const WCHAR string[] = {'A', 0, 0xe9, 0xd83d, 0xde00};
++    static const BYTE utf8[] = {0x41,0,0xc3,0xa9,0xf0,0x9f,0x98,0x80};
++    static const BYTE utf16be[] = {0,0x41,0,0,0,0xe9,0xd8,0x3d,0xde,0};
++    static const BYTE expected[] = {
++        1,0xff,0x12,0x34,0xff,0xfe,0xff,0xff,0xff,0xfd,
++        0x12,0x34,0x56,0x78,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
++        0x3f,0x80,0,0,0x3f,0xf0,0,0,0,0,0,0,
++        0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff,0,
++        1,2,3,4,5,6,7,8,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xfe };
++    if (!writer) return;
++    HR(IDataWriter_get_ByteOrder(writer, &order)); ok(order == ByteOrder_BigEndian, "default order %u\n", order);
++    HR(IDataWriter_get_UnicodeEncoding(writer, &encoding)); ok(encoding == UnicodeEncoding_Utf8, "default encoding %u\n", encoding);
++    hr = IDataWriter_put_ByteOrder(writer, 99); ok(hr == E_INVALIDARG, "invalid order %#lx\n", hr);
++    hr = IDataWriter_put_UnicodeEncoding(writer, 99); ok(hr == E_INVALIDARG, "invalid encoding %#lx\n", hr);
++    HR(IDataWriter_WriteBoolean(writer, TRUE)); HR(IDataWriter_WriteByte(writer, 0xff));
++    HR(IDataWriter_WriteUInt16(writer, 0x1234)); HR(IDataWriter_WriteInt16(writer, -2)); HR(IDataWriter_WriteInt32(writer, -3));
++    HR(IDataWriter_WriteUInt32(writer, 0x12345678)); HR(IDataWriter_WriteUInt64(writer, 0x0102030405060708));
++    HR(IDataWriter_WriteSingle(writer, 1.0f)); HR(IDataWriter_WriteDouble(writer, 1.0)); HR(IDataWriter_WriteGuid(writer, guid));
++    HR(IDataWriter_WriteDateTime(writer, time)); HR(IDataWriter_WriteTimeSpan(writer, span));
++    HR(IDataWriter_DetachBuffer(writer, &buffer)); buffer_matches(buffer, expected, sizeof(expected)); IBuffer_Release(buffer);
++    HR(IDataWriter_put_ByteOrder(writer, ByteOrder_LittleEndian));
++    HR(IDataWriter_WriteUInt32(writer, 0x12345678));
++    HR(IDataWriter_DetachBuffer(writer, &buffer));
++    { BYTE bytes[] = {0x78,0x56,0x34,0x12}; buffer_matches(buffer, bytes, sizeof(bytes)); }
++    HR(IDataWriter_WriteBufferRange(writer, buffer, 1, 2));
++    hr = IDataWriter_WriteBufferRange(writer, buffer, ~0u, 2); ok(hr == E_INVALIDARG, "range overflow %#lx\n", hr);
++    HR(IDataWriter_WriteBuffer(writer, buffer)); IBuffer_Release(buffer);
++    HR(IDataWriter_DetachBuffer(writer, &buffer));
++    { BYTE bytes[] = {0x56,0x34,0x78,0x56,0x34,0x12}; buffer_matches(buffer, bytes, sizeof(bytes)); }
++    IBuffer_Release(buffer);
++    HR(WindowsCreateString(string, ARRAY_SIZE(string), &text));
++    HR(IDataWriter_MeasureString(writer, text, &count)); ok(count == sizeof(utf8), "UTF8 measure %u\n", count);
++    HR(IDataWriter_WriteString(writer, text, &count)); ok(count == sizeof(utf8), "UTF8 count %u\n", count);
++    HR(IDataWriter_DetachBuffer(writer, &buffer)); buffer_matches(buffer, utf8, sizeof(utf8)); IBuffer_Release(buffer);
++    HR(IDataWriter_put_UnicodeEncoding(writer, UnicodeEncoding_Utf16BE));
++    HR(IDataWriter_WriteString(writer, text, &count)); ok(count == sizeof(utf16be), "UTF16 byte count %u\n", count);
++    HR(IDataWriter_DetachBuffer(writer, &buffer)); buffer_matches(buffer, utf16be, sizeof(utf16be)); IBuffer_Release(buffer);
++    HR(IDataWriter_put_UnicodeEncoding(writer, UnicodeEncoding_Utf16LE));
++    HR(IDataWriter_WriteString(writer, text, &count));
++    HR(IDataWriter_DetachBuffer(writer, &buffer)); buffer_matches(buffer, (const BYTE *)string, sizeof(string)); IBuffer_Release(buffer);
++    WindowsDeleteString(text);
++    HR(IDataWriter_WriteBytes(writer, 0, NULL));
++    hr = IDataWriter_WriteBytes(writer, 1, NULL); ok(hr == E_POINTER, "null bytes %#lx\n", hr);
++    ok(!IDataWriter_Release(writer), "buffer-only writer retained\n");
++}
++
++static void test_bmp_stream(void)
++{
++    IActivationFactory *f;
++    IInspectable *instance;
++    IRandomAccessStream *stream;
++    IOutputStream *output, *detached;
++    IInputStream *input;
++    IDataWriter *writer;
++    IAsyncOperation_UINT32 *op;
++    IAsyncOperation_boolean *flush;
++    IAsyncOperationWithProgress_IBuffer_UINT32 *read;
++    IBufferFactory *bf;
++    IBuffer *buffer, *result;
++    struct completion handler = { {&completion_vtbl}, 1 };
++    BYTE header[14] = {'B','M'}, dib[40] = {40}, *pixels, *data;
++    const UINT32 pixel_count = 1024 * 768 * 3;
++    UINT32 count, i, length;
++    BOOLEAN flushed = FALSE;
++    UINT64 size;
++    if (FAILED(factory(L"Windows.Storage.Streams.InMemoryRandomAccessStream", &IID_IActivationFactory, (void **)&f))) return;
++    HR(IActivationFactory_ActivateInstance(f, &instance)); IActivationFactory_Release(f);
++    HR(IInspectable_QueryInterface(instance, &IID_IRandomAccessStream, (void **)&stream)); IInspectable_Release(instance);
++    HR(IRandomAccessStream_QueryInterface(stream, &IID_IOutputStream, (void **)&output));
++    HR(IRandomAccessStream_QueryInterface(stream, &IID_IInputStream, (void **)&input));
++    writer = create_writer(output);
++    if (!writer) return;
++    pixels = malloc(pixel_count);
++    for (i = 0; i < pixel_count; ++i) pixels[i] = (i * 13 + 7) & 255;
++    HR(IDataWriter_WriteBytes(writer, sizeof(header), header));
++    HR(IDataWriter_WriteBytes(writer, sizeof(dib), dib));
++    HR(IDataWriter_WriteBytes(writer, pixel_count, pixels));
++    HR(IRandomAccessStream_get_Size(stream, &size)); ok(!size, "buffering wrote early\n");
++    HR(IDataWriter_get_UnstoredBufferLength(writer, &count)); ok(count == pixel_count + 54, "buffer size %u\n", count);
++    HR(IDataWriter_StoreAsync(writer, &op));
++    handler.event = CreateEventW(NULL, FALSE, FALSE, NULL);
++    HR(IAsyncOperation_UINT32_put_Completed(op, &handler.iface));
++    ok(WaitForSingleObject(handler.event, 3000) == WAIT_OBJECT_0, "store completion missing\n");
++    CloseHandle(handler.event);
++    HR(IAsyncOperation_UINT32_GetResults(op, &count)); ok(count == pixel_count + 54, "stored bytes %u\n", count);
++    IAsyncOperation_UINT32_Release(op);
++    HR(IDataWriter_get_UnstoredBufferLength(writer, &count)); ok(!count, "store retained bytes %u\n", count);
++    HR(IDataWriter_FlushAsync(writer, &flush));
++    HR(IAsyncOperation_boolean_GetResults(flush, &flushed)); ok(flushed == TRUE, "flush result %u\n", flushed);
++    IAsyncOperation_boolean_Release(flush);
++    HR(IRandomAccessStream_Seek(stream, 0));
++    if (FAILED(factory(L"Windows.Storage.Streams.Buffer", &IID_IBufferFactory, (void **)&bf))) return;
++    HR(IBufferFactory_Create(bf, pixel_count + 54, &buffer)); IBufferFactory_Release(bf);
++    HR(IInputStream_ReadAsync(input, buffer, pixel_count + 54, InputStreamOptions_None, &read));
++    HR(IAsyncOperationWithProgress_IBuffer_UINT32_GetResults(read, &result));
++    HR(IBuffer_get_Length(result, &length)); ok(length == pixel_count + 54, "read bytes %u\n", length);
++    data = buffer_data(result);
++    ok(!memcmp(data, header, 14) && !memcmp(data + 14, dib, 40) && !memcmp(data + 54, pixels, pixel_count), "BMP payload corrupted\n");
++    IBuffer_Release(result); IAsyncOperationWithProgress_IBuffer_UINT32_Release(read); IBuffer_Release(buffer);
++    HR(IDataWriter_DetachStream(writer, &detached)); IOutputStream_Release(detached);
++    close_writer(writer); IDataWriter_Release(writer);
++    HR(IRandomAccessStream_Seek(stream, 0));
++    IInputStream_Release(input); IOutputStream_Release(output);
++    ok(!IRandomAccessStream_Release(stream), "stream retained by writer operations\n");
++    ok(handler.refs == 1 && handler.calls == 1, "completion lifecycle %ld/%ld\n", handler.refs, handler.calls);
++    free(pixels);
++}
++
++START_TEST(writer)
++{
++    HR(RoInitialize(RO_INIT_MULTITHREADED));
++    test_serialization();
++    test_pending_writer();
++    test_bmp_stream();
++    RoUninitialize();
++}

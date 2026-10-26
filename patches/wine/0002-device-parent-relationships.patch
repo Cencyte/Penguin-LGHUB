@@ -1,0 +1,106 @@
+--- a/dlls/ntoskrnl.exe/pnp.c
++++ b/dlls/ntoskrnl.exe/pnp.c
+@@ -379,12 +379,12 @@
+     create_dyn_data_key( device );
+ }
+ 
+-static void enumerate_new_device( DEVICE_OBJECT *device, HDEVINFO set )
++static void enumerate_new_device( DEVICE_OBJECT *device, DEVICE_OBJECT *parent, HDEVINFO set )
+ {
+     static const WCHAR infpathW[] = {'I','n','f','P','a','t','h',0};
+ 
+     SP_DEVINFO_DATA sp_device = {sizeof(sp_device)};
+-    WCHAR device_instance_id[MAX_DEVICE_ID_LEN];
++    WCHAR device_instance_id[MAX_DEVICE_ID_LEN], parent_instance_id[MAX_DEVICE_ID_LEN];
+     DEVICE_CAPABILITIES caps;
+     BOOL need_driver = TRUE;
+     NTSTATUS status;
+@@ -402,6 +402,14 @@
+     }
+ 
+     TRACE("Creating new device %s.\n", debugstr_w(device_instance_id));
++
++    /* Publish the actual bus relationship before starting the child driver. */
++    if (!get_device_instance_id( parent, parent_instance_id ))
++    {
++        if (!SetupDiSetDevicePropertyW( set, &sp_device, &DEVPKEY_Device_Parent, DEVPROP_TYPE_STRING,
++                    (BYTE *)parent_instance_id, (lstrlenW( parent_instance_id ) + 1) * sizeof(WCHAR), 0 ))
++            WARN("Failed to set parent device property.\n");
++    }
+ 
+     /* Check if the device already has a driver registered; if not, find one
+      * and install it. */
+@@ -535,7 +543,7 @@
+         if (!wine_parent->children || !device_in_list( wine_parent->children, child ))
+         {
+             TRACE("Adding new device %p.\n", child);
+-            enumerate_new_device( child, set );
++            enumerate_new_device( child, &wine_parent->device_obj, set );
+         }
+     }
+ 
+--- a/dlls/setupapi/stubs.c
++++ b/dlls/setupapi/stubs.c
+@@ -131,17 +131,6 @@
+ }
+ 
+ /***********************************************************************
+- *              CM_Get_Parent (SETUPAPI.@)
+- */
+-DWORD WINAPI CM_Get_Parent(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags)
+-{
+-    FIXME("%p 0x%08lx 0x%08lx stub\n", pdnDevInst, dnDevInst, ulFlags);
+-    if(pdnDevInst)
+-        *pdnDevInst = 0;
+-    return CR_NO_SUCH_DEVNODE;
+-}
+-
+-/***********************************************************************
+  *		SetupInitializeFileLogW(SETUPAPI.@)
+  */
+ HSPFILELOG WINAPI SetupInitializeFileLogW(LPCWSTR LogFileName, DWORD Flags)
+--- a/dlls/setupapi/devinst.c
++++ b/dlls/setupapi/devinst.c
+@@ -4586,6 +4586,42 @@
+ }
+ 
+ /***********************************************************************
++ *              CM_Get_Parent (SETUPAPI.@)
++ */
++CONFIGRET WINAPI CM_Get_Parent(DEVINST *parent, DEVINST child, ULONG flags)
++{
++    SP_DEVINFO_DATA info = {sizeof(info)};
++    WCHAR parent_id[MAX_DEVICE_ID_LEN];
++    DEVPROPTYPE type;
++    DWORD size;
++    HDEVINFO set;
++    CONFIGRET ret = CR_NO_SUCH_DEVNODE;
++
++    TRACE("%p, %lu, %#lx\n", parent, child, flags);
++
++    if (!parent) return CR_INVALID_POINTER;
++    *parent = 0;
++    if (flags) return CR_INVALID_FLAG;
++    if (child >= devinst_table_size || !devinst_table[child]) return CR_NO_SUCH_DEVNODE;
++
++    if ((set = SetupDiCreateDeviceInfoList(NULL, NULL)) == INVALID_HANDLE_VALUE)
++        return CR_FAILURE;
++    if (SetupDiOpenDeviceInfoW(set, devinst_table[child], NULL, 0, &info)
++            && SetupDiGetDevicePropertyW(set, &info, &DEVPKEY_Device_Parent, &type,
++                (BYTE *)parent_id, sizeof(parent_id), &size, 0)
++            && type == DEVPROP_TYPE_STRING && size >= sizeof(WCHAR)
++            && size <= sizeof(parent_id) && !(size % sizeof(WCHAR))
++            && !parent_id[size / sizeof(WCHAR) - 1] && parent_id[0]
++            && SetupDiOpenDeviceInfoW(set, parent_id, NULL, 0, &info))
++    {
++        *parent = info.DevInst;
++        ret = CR_SUCCESS;
++    }
++    SetupDiDestroyDeviceInfoList(set);
++    return ret;
++}
++
++/***********************************************************************
+  *      CM_Locate_DevNodeA (SETUPAPI.@)
+  */
+ CONFIGRET WINAPI CM_Locate_DevNodeA(DEVINST *devinst, DEVINSTID_A device_id, ULONG flags)

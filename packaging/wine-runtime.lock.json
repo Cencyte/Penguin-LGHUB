@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "wine_version": "10.20",
+  "package_version": "10.20-2",
+  "architecture": "x86_64",
+  "archive": {
+    "url": "https://archive.archlinux.org/packages/w/wine/wine-10.20-2-x86_64.pkg.tar.zst",
+    "local_name": "wine-10.20-2-x86_64.pkg.tar.zst",
+    "size": 58985180,
+    "sha256": "4fae9232a0d4c6ab600c2650f875118ed7009d09cb5be64fbac4d3660e92cae0"
+  },
+  "signature": {
+    "url": "https://archive.archlinux.org/packages/w/wine/wine-10.20-2-x86_64.pkg.tar.zst.sig",
+    "local_name": "wine-10.20-2-x86_64.pkg.tar.zst.sig",
+    "size": 119,
+    "sha256": "a5124aaa97f9d3d2d63c47dbd1d0c216b0c6e0021dd06a360db66c58f9247749"
+  },
+  "verified_signer": "D2E95FEC015CF1F911AAAB0C3D4C5008BB5C8D29",
+  "upstream_source": "https://gitlab.winehq.org/wine/wine/-/tree/wine-10.20",
+  "distribution_recipe": "https://gitlab.archlinux.org/archlinux/packaging/packages/wine/-/tree/10.20-2",
+  "patches": {
+    "builds/wine-build/dlls/setupapi/x86_64-windows/setupapi.dll": {
+      "target": "usr/lib/wine/x86_64-windows/setupapi.dll",
+      "sha256": "85f349da52435ff78e3e3eb91cd98d1e04399c3b357c5537d7c01a437aee0f34"
+    },
+    "builds/wine-build/dlls/ntoskrnl.exe/x86_64-windows/ntoskrnl.exe": {
+      "target": "usr/lib/wine/x86_64-windows/ntoskrnl.exe",
+      "sha256": "ffbfd21f106ef78fcb6d23963277d765b0afd7f4ae8e49f23225025621130ef3"
+    },
+    "builds/wine-build/dlls/kernelbase/x86_64-windows/kernelbase.dll": {
+      "target": "usr/lib/wine/x86_64-windows/kernelbase.dll",
+      "sha256": "c6090400c8902cfbdc00b13407eabcba2a013cffb67497302b7b06d89167fd16"
+    },
+    "builds/wine-routing-build/dlls/ntdll/x86_64-windows/ntdll.dll": {
+      "target": "usr/lib/wine/x86_64-windows/ntdll.dll",
+      "sha256": "7c3edf6a11b4077de6c80fb3ae109ddd9c0d16efaa55cd38723328e8bff45d28"
+    },
+    "builds/wine-routing-build/dlls/win32u/x86_64-windows/win32u.dll": {
+      "target": "usr/lib/wine/x86_64-windows/win32u.dll",
+      "sha256": "d84d6614432cd201f4a3c4b5a6269666189b5fb5f4ed08897ea123c210ed532e"
+    },
+    "builds/wine-routing-build/dlls/user32/x86_64-windows/user32.dll": {
+      "target": "usr/lib/wine/x86_64-windows/user32.dll",
+      "sha256": "be1255ea3cdc435a3dbcc6df1e9330ded1a6c72b1782c78ee021a37b7028eb59"
+    },
+    "builds/wine-routing-build/dlls/ntdll/ntdll.so": {
+      "target": "usr/lib/wine/x86_64-unix/ntdll.so",
+      "sha256": "5a2bd9441bd750cbf6608ea1126c63e83a9ef6add85b9f65c097665646188e16"
+    },
+    "builds/wine-routing-build/dlls/win32u/win32u.so": {
+      "target": "usr/lib/wine/x86_64-unix/win32u.so",
+      "sha256": "33a3c8758866ff30d87ba12c4ce101eb9def2da6e0476fb4e5c6713e99625831"
+    },
+    "builds/wine-routing-build/server/wineserver": {
+      "target": "usr/bin/wineserver",
+      "sha256": "93193d62b7c0f37c5ae46cb786a848c90a32bd34ab8e1ac2dfd6078ae705ff1f"
+    },
+    "builds/wine-routing-build/dlls/threadpoolwinrt/x86_64-windows/threadpoolwinrt.dll": {
+      "target": "usr/lib/wine/x86_64-windows/threadpoolwinrt.dll",
+      "sha256": "c7301bd7fd1621a6b78d863b9615caca93a8605871c3efe037aedb39b5f9f343"
+    },
+    "builds/wine-d3d-context-build/dlls/d3d11/x86_64-windows/d3d11.dll": {
+      "target": "usr/lib/wine/x86_64-windows/d3d11.dll",
+      "sha256": "06bdb80e8440a65c6c9f5459d2f7b5ae8c4bf2935a8f0ffbbace381da1feed8b"
+    },
+    "builds/wine-d3d-context-build/dlls/dxgi/x86_64-windows/dxgi.dll": {
+      "target": "usr/lib/wine/x86_64-windows/dxgi.dll",
+      "sha256": "f19625459bd4ec62c2a1061d8130d4f96c8b70518f6760c438438f43a7f4d170"
+    },
+    "builds/wine-d3d-context-build/dlls/wined3d/x86_64-windows/wined3d.dll": {
+      "target": "usr/lib/wine/x86_64-windows/wined3d.dll",
+      "sha256": "c74482a9f31743aacb5bef311a8b7ae43471adda75fb24bc64078f67ce3acf5b"
+    },
+    "builds/wine-storage-build/dlls/dwrite/x86_64-windows/dwrite.dll": {
+      "target": "usr/lib/wine/x86_64-windows/dwrite.dll",
+      "sha256": "add7b661e2cd4b001a038360a10eedddaec65f51c98d964bf611acac531b67e1"
+    },
+    "builds/wine-storage-build/dlls/windows.storage/x86_64-windows/windows.storage.dll": {
+      "target": "usr/lib/wine/x86_64-windows/windows.storage.dll",
+      "sha256": "f0efcb61aedb350daa59f1462894863fb43218c44abb0ec516ce343339a7b2c4"
+    },
+    "builds/wine-ui-build/dlls/windows.ui/x86_64-windows/windows.ui.dll": {
+      "target": "usr/lib/wine/x86_64-windows/windows.ui.dll",
+      "sha256": "4146f55781dcb915ef91f5650032d27015a5f9a3c7aea63a29f6143045912051"
+    },
+    "builds/wine-build/dlls/shcore/x86_64-windows/shcore.dll": {
+      "target": "usr/lib/wine/x86_64-windows/shcore.dll",
+      "sha256": "3571ec8f6378e312808ef0ab6e1ed1a4720257b8307fd986aad55f338b419dfa"
+    },
+    "builds/wine-routing-build/dlls/winex11.drv/x86_64-windows/winex11.drv": {
+      "target": "usr/lib/wine/x86_64-windows/winex11.drv",
+      "sha256": "25b63b5fac0628f81a480fce744420c2e2d9ceb64b5ef7faed33b278d4ef93b4"
+    },
+    "builds/wine-routing-build/dlls/winex11.drv/winex11.so": {
+      "target": "usr/lib/wine/x86_64-unix/winex11.so",
+      "sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f"
+    },
+    "builds/wine-routing-build/dlls/dwmapi/x86_64-windows/dwmapi.dll": {
+      "target": "usr/lib/wine/x86_64-windows/dwmapi.dll",
+      "sha256": "30de0b0ca09250d0ef5fdfd4be0bc38a72937d31a50f8f2138529845333595e5"
+    }
+  },
+  "markers": {
+    "builds/wine-routing-build/ghub-composition-protocol": {
+      "target": "provenance/protocols/ghub-composition-protocol",
+      "sha256": "4bd31db6b060e847aad3ea639ae6794125fa093f8694b1a736d3c2ff627fb956"
+    },
+    "builds/wine-routing-build/ghub-delegation-protocol": {
+      "target": "provenance/protocols/ghub-delegation-protocol",
+      "sha256": "30dcfd56558736d4300e36b628097f2a1a81c0601369482479058c35d29d01c4"
+    },
+    "builds/wine-routing-build/ghub-threadpool-timer-protocol": {
+      "target": "provenance/protocols/ghub-threadpool-timer-protocol",
+      "sha256": "8c9ef867b85d03fe57a331c88a7e63b2db110643f39984ba07bc418eebdd385c"
+    },
+    "builds/wine-routing-build/ghub-native-input-protocol": {
+      "target": "provenance/protocols/ghub-native-input-protocol",
+      "sha256": "dbe462ed514af064c21fe7c4f82cb276569e669e91d88549cd680f1f64e06f59"
+    },
+    "builds/wine-routing-build/ghub-host-keyboard-protocol": {
+      "target": "provenance/protocols/ghub-host-keyboard-protocol",
+      "sha256": "ce0b0b287191a2ceec2d8805c7513d423171af22902b9fa546cdcc6664dfe4fe"
+    }
+  },
+  "supplements": {
+    "prefix/drive_c/Program Files/LGHUB/api_information_proxy.dll": {
+      "target": "compatibility/api_information_proxy.dll",
+      "sha256": "be567f889e6d49cc2d9ee8808049d1af98fa73017b026dad6873a656bc1101a7",
+      "application_path": "api_information_proxy.dll"
+    },
+    "prefix/drive_c/Program Files/LGHUB/core_application_experiment.dll": {
+      "target": "compatibility/core_application_experiment.dll",
+      "sha256": "a2a972efabee00537bfc84fbb0c373edec2be97e7a7c4d1630f67f5b1fb9df61",
+      "application_path": "core_application_experiment.dll"
+    },
+    "prefix/drive_c/Program Files/LGHUB/mfsensorgroup.dll": {
+      "target": "compatibility/mfsensorgroup.dll",
+      "sha256": "ab2af986870abf32669e63ea4c5fa51d32dd7937b32536754892f910876c6379",
+      "application_path": "mfsensorgroup.dll"
+    },
+    "prefix/drive_c/Program Files/LGHUB/system_tray/ghub_dispatcher_queue.dll": {
+      "target": "compatibility/system_tray/ghub_dispatcher_queue.dll",
+      "sha256": "540e14758263b108b9f71d2021671704ed13b0d397cb59040b39451acb5a1eb2",
+      "application_path": "system_tray/ghub_dispatcher_queue.dll"
+    },
+    "prefix/drive_c/Program Files/LGHUB/system_tray/CoreMessaging.dll": {
+      "target": "compatibility/system_tray/CoreMessaging.dll",
+      "sha256": "3815fb3998cda3d55835f886b8a936265ddcd9a50ff72178fecaa2744a02e836",
+      "application_path": "system_tray/CoreMessaging.dll"
+    },
+    "prefix/drive_c/Program Files/LGHUB/system_tray/dcomp.dll": {
+      "target": "compatibility/system_tray/dcomp.dll",
+      "sha256": "7a8d509b4ffc51c69575466d198c7246abb7fd2765eca612e69d63f6c9dc676a",
+      "application_path": "system_tray/dcomp.dll"
+    },
+    "prefix/drive_c/Program Files/LGHUB/system_tray/ghub_wine_coremessaging.dll": {
+      "target": "compatibility/system_tray/ghub_wine_coremessaging.dll",
+      "sha256": "16e70ea96875b8471d01b3ed8e5dd83b7196d4a64b6629497ae1a08715877237",
+      "application_path": "system_tray/ghub_wine_coremessaging.dll"
+    }
+  }
+}

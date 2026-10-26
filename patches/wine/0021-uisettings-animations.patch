@@ -1,0 +1,30 @@
+Backport Wine commit 3e86631f7cfa06227968494cf6e6e7f2d2c0bb0a.
+Author: Zhiyi Zhang <zzhang@codeweavers.com>
+Subject: windows.ui: Implement uisettings_get_AnimationsEnabled().
+
+Implementation-only backport to Wine 10.20; the upstream test context is
+newer than this source. tools/wine/uisettings_test.c exercises both states
+and changes on existing and fresh settings objects in a copied prefix.
+
+diff --git a/dlls/windows.ui/uisettings.c b/dlls/windows.ui/uisettings.c
+index ce95666723b6..c816ed83d20a 100644
+--- a/dlls/windows.ui/uisettings.c
++++ b/dlls/windows.ui/uisettings.c
+@@ -163,8 +163,15 @@ static HRESULT WINAPI uisettings_get_MessageDuration( IUISettings *iface, UINT32
+
+ static HRESULT WINAPI uisettings_get_AnimationsEnabled( IUISettings *iface, boolean *value )
+ {
+-    FIXME( "iface %p, value %p stub!\n", iface, value );
+-    return E_NOTIMPL;
++    BOOL enabled, ret;
++
++    TRACE( "iface %p, value %p.\n", iface, value );
++
++    ret = SystemParametersInfoW( SPI_GETCLIENTAREAANIMATION, 0, &enabled, 0 );
++    if (!ret) return E_FAIL;
++
++    *value = !!enabled;
++    return S_OK;
+ }
+
+ static HRESULT WINAPI uisettings_get_CaretBrowsingEnabled( IUISettings *iface, boolean *value )

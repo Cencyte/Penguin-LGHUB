@@ -1,0 +1,530 @@
+--- /dev/null
++++ b/dlls/win32u/child_composition.h
+@@ -0,0 +1,315 @@
++/* Retained composition for layered children, opt-in G HUB lab path.
++ * Copyright 2026 Cencyte D
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ *
++ * Composite into a separate output bitmap, never the retained GDI bitmap.
++ * This prevents repeated paints from blending an old composition again.
++ */
++struct child_frame
++{
++    struct child_frame *next;
++    RECT window, surface;
++    RECT *clips;
++    UINT count, width, height;
++    BYTE *pixels;
++};
++struct child_composite_surface
++{
++    struct window_surface header;
++    struct window_surface *target;
++    struct child_frame *frames;
++    RECT screen;
++    unsigned int generation;
++};
++static const struct window_surface_funcs child_composite_funcs;
++
++BOOL child_composition_enabled(void)
++{
++    const char *value = getenv("WINE_GHUB_CHILD_COMPOSITION");
++    return value && !strcmp(value,"1");
++}
++static const struct window_surface_funcs child_buffer_funcs =
++{
++    offscreen_window_surface_set_clip, offscreen_window_surface_flush, offscreen_window_surface_destroy
++};
++BOOL is_child_composite_surface(struct window_surface *surface)
++{
++    return surface && surface->funcs == &child_buffer_funcs;
++}
++static void create_child_buffer(HWND hwnd, const RECT *rect, struct window_surface **out)
++{
++    BITMAPINFO info = {0};
++    struct window_surface *previous = *out;
++    if (is_child_composite_surface(previous) && EqualRect(&previous->rect, rect)) return;
++    info.bmiHeader.biSize = sizeof(info.bmiHeader);
++    info.bmiHeader.biWidth = rect->right - rect->left;
++    info.bmiHeader.biHeight = rect->top - rect->bottom;
++    info.bmiHeader.biPlanes = 1;
++    info.bmiHeader.biBitCount = 32;
++    info.bmiHeader.biSizeImage = get_dib_image_size(&info);
++    *out = window_surface_create(sizeof(**out), &child_buffer_funcs, hwnd, rect, &info, 0);
++    if (previous) window_surface_release(previous);
++}
++static void free_child_frames(struct child_frame *frame)
++{
++    while (frame)
++    {
++        struct child_frame *next = frame->next;
++        free(frame->pixels); free(frame->clips); free(frame); frame = next;
++    }
++}
++static BOOL child_frame_region(HWND hwnd, UINT flags, struct child_frame *frame)
++{
++    NTSTATUS status;
++    size_t size = 256;
++    do
++    {
++        RECT *clips = malloc(size);
++        if (!clips) return FALSE;
++        SERVER_START_REQ(get_visible_region)
++        {
++            req->window = wine_server_user_handle(hwnd);
++            req->flags = flags;
++            wine_server_set_reply(req, clips, size);
++            if (!(status = wine_server_call(req)))
++            {
++                frame->clips = clips;
++                frame->count = wine_server_reply_size(reply) / sizeof(RECT);
++                frame->window = wine_server_get_rect(reply->win_rect);
++            }
++            else size = reply->total_size;
++        }
++        SERVER_END_REQ;
++        if (status) free(clips);
++    } while (status == STATUS_BUFFER_OVERFLOW);
++    return !status;
++}
++/* A below-child composition target stays below every ordinary child even if
++ * that child is later inserted below our transparent helper HWND. The parent's
++ * client DC clip excludes all opaque children regardless of insertion order. */
++static BOOL below_child_buffer(HWND hwnd)
++{
++    return NtUserGetProp(hwnd, u"GHUB.DComp.BelowChildBuffer.v1") == (HANDLE)1;
++}
++static BOOL snapshot_child_region(HWND hwnd, struct child_frame *frame)
++{
++    struct child_frame parent = {0};
++    RECT *clips;
++    size_t count = 0, i, j;
++    if (!child_frame_region(hwnd, DCX_WINDOW | DCX_CLIPSIBLINGS | DCX_CLIPCHILDREN, frame)) return FALSE;
++    if (!below_child_buffer(hwnd) || !frame->count) return TRUE;
++    if (!child_frame_region(NtUserGetAncestor(hwnd, GA_PARENT), DCX_CLIPCHILDREN, &parent)) return FALSE;
++    if (parent.count && frame->count > SIZE_MAX / parent.count / sizeof(RECT))
++    {
++        free(parent.clips);
++        return FALSE;
++    }
++    clips = malloc(max(1, (size_t)parent.count * frame->count) * sizeof(RECT));
++    if (!clips) { free(parent.clips); return FALSE; }
++    for (i = 0; i < frame->count; i++)
++        for (j = 0; j < parent.count; j++)
++            if (intersect_rect(&clips[count], &frame->clips[i], &parent.clips[j])) count++;
++    free(parent.clips);
++    free(frame->clips);
++    frame->clips = clips;
++    frame->count = count;
++    return TRUE;
++}
++/* Capture child buffers before taking the parent's surface lock. Never nest
++ * surface locks with the user lock or another child's surface lock. */
++static BOOL snapshot_child_frames(HWND parent, struct child_frame ***tail, UINT depth)
++{
++    HWND *children = list_window_children(parent);
++    UINT count = 0, index, pass;
++    BOOL ret = TRUE;
++    if (!children) return TRUE;
++    while (children[count]) count++;
++    if (depth > 64) { free(children); return FALSE; }
++    for (pass = 0; pass < 2 && ret; pass++)
++    for (index = count; index-- && ret;)
++    {
++        struct window_surface *surface = NULL;
++        struct child_frame *frame = NULL;
++        HWND hwnd = children[index];
++        WND *win;
++        if (below_child_buffer(hwnd) != (pass == 0)) continue;
++        win = get_win_ptr(hwnd);
++        if (!win || win == WND_DESKTOP || win == WND_OTHER_PROCESS) continue;
++        if (is_child_composite_surface(win->surface))
++        {
++            surface = win->surface;
++            window_surface_add_ref(surface);
++        }
++        release_win_ptr(win);
++        if (surface)
++        {
++            char buffer[FIELD_OFFSET(BITMAPINFO, bmiColors[256])];
++            BITMAPINFO *info = (BITMAPINFO *)buffer;
++            const void *bits;
++            if (!(frame = calloc(1, sizeof(*frame))) || !snapshot_child_region(hwnd, frame)) ret = FALSE;
++            else if (frame->count)
++            {
++                window_surface_lock(surface);
++                bits = window_surface_get_color(surface, info);
++                if (!bits || info->bmiHeader.biBitCount != 32 || info->bmiHeader.biHeight >= 0 ||
++                    surface->alpha_mask != 0xff000000 || surface->color_key != CLR_INVALID) ret = FALSE;
++                else
++                {
++                    frame->width = info->bmiHeader.biWidth;
++                    frame->height = -info->bmiHeader.biHeight;
++                    frame->surface = surface->rect;
++                    if (!(frame->pixels = malloc(info->bmiHeader.biSizeImage))) ret = FALSE;
++                    else memcpy(frame->pixels, bits, info->bmiHeader.biSizeImage);
++                }
++                window_surface_unlock(surface);
++            }
++            window_surface_release(surface);
++            if (ret && frame->count)
++            {
++                **tail = frame; *tail = &frame->next; frame = NULL;
++            }
++            free_child_frames(frame);
++        }
++        if (ret) ret = snapshot_child_frames(hwnd, tail, depth + 1);
++    }
++    free(children);
++    return ret;
++}
++static struct child_frame *prepare_child_frames(struct window_surface *surface, RECT *screen, BOOL *ok)
++{
++    struct child_frame *head = NULL, **tail = &head;
++    struct window_rects rects;
++    *ok = get_window_rects(surface->hwnd, COORDS_SCREEN, &rects, get_dpi_for_window(surface->hwnd));
++    if (*ok)
++    {
++        *screen = rects.visible;
++        *ok = snapshot_child_frames(surface->hwnd, &tail, 0);
++    }
++    return head;
++}
++static void child_composite_set_clip(struct window_surface *surface, const RECT *rects, UINT count)
++{
++    struct child_composite_surface *composite = (void *)surface;
++    window_surface_set_clip(composite->target, surface->clip_region);
++}
++static BOOL child_composite_flush(struct window_surface *surface, const RECT *rect, const RECT *dirty,
++                                 const BITMAPINFO *info, const void *bits, BOOL shape_changed,
++                                 const BITMAPINFO *shape_info, const void *shape_bits)
++{
++    struct child_composite_surface *composite = (void *)surface;
++    struct window_surface *target = composite->target;
++    char buffer[FIELD_OFFSET(BITMAPINFO, bmiColors[256])];
++    BITMAPINFO *target_info = (BITMAPINFO *)buffer;
++    struct child_frame *frame;
++    BYTE *dest;
++    UINT width = info->bmiHeader.biWidth, height = -info->bmiHeader.biHeight;
++    RECT bounds = {0, 0, width, height};
++    int origin_x = composite->screen.left + surface->rect.left;
++    int origin_y = composite->screen.top + surface->rect.top;
++    BOOL ret = FALSE;
++    window_surface_lock(target);
++    dest = window_surface_get_color(target, target_info);
++    if (!dest || target_info->bmiHeader.biBitCount != 32 ||
++        target_info->bmiHeader.biWidth != width || -target_info->bmiHeader.biHeight != height) goto done;
++    memcpy(dest, bits, info->bmiHeader.biSizeImage);
++    for (frame = composite->frames; frame; frame = frame->next)
++    {
++        UINT i;
++        for (i = 0; i < frame->count; i++)
++        {
++            RECT clip = frame->clips[i], src_bounds;
++            int x, y;
++            SetRect(&src_bounds, frame->window.left + frame->surface.left,
++                    frame->window.top + frame->surface.top,
++                    frame->window.left + frame->surface.left + frame->width,
++                    frame->window.top + frame->surface.top + frame->height);
++            intersect_rect(&clip, &clip, &src_bounds);
++            OffsetRect(&clip, -origin_x, -origin_y);
++            intersect_rect(&clip, &clip, &bounds);
++            for (y = clip.top; y < clip.bottom; y++)
++            {
++                const BYTE *src = frame->pixels + ((y + origin_y - src_bounds.top) * frame->width +
++                                                  clip.left + origin_x - src_bounds.left) * 4;
++                BYTE *dst = dest + (y * width + clip.left) * 4;
++                for (x = clip.left; x < clip.right; x++, src += 4, dst += 4)
++                {
++                    UINT inverse = 255 - src[3], c;
++                    for (c = 0; c < 4; c++) dst[c] = min(255, src[c] + (dst[c] * inverse + 127) / 255);
++                }
++            }
++        }
++    }
++    target->bounds = bounds;
++    ret = TRUE;
++done:
++    window_surface_unlock(target);
++    if (ret)
++    {
++        window_surface_set_layered(target, surface->color_key, surface->alpha_bits, surface->alpha_mask);
++        window_surface_set_shape(target, surface->shape_region);
++        window_surface_flush(target);
++    }
++    return ret;
++}
++static void child_composite_destroy(struct window_surface *surface)
++{
++    struct child_composite_surface *composite = (void *)surface;
++    window_surface_release(composite->target);
++}
++static const struct window_surface_funcs child_composite_funcs =
++{
++    child_composite_set_clip, child_composite_flush, child_composite_destroy
++};
++static void wrap_child_composite_surface(HWND hwnd, struct window_surface **surface)
++{
++    struct child_composite_surface *composite;
++    char buffer[FIELD_OFFSET(BITMAPINFO, bmiColors[256])];
++    BITMAPINFO *info = (BITMAPINFO *)buffer;
++    struct window_surface *target = *surface;
++    const void *bits;
++    if (!target || target == &dummy_surface || !child_composition_enabled() ||
++        NtUserGetAncestor(hwnd, GA_ROOT) != hwnd || target->funcs == &child_composite_funcs) return;
++    window_surface_lock(target);
++    bits = window_surface_get_color(target, info);
++    window_surface_unlock(target);
++    if (!bits) return;
++    if (info->bmiHeader.biBitCount != 32 || info->bmiHeader.biHeight >= 0) return;
++    composite = (void *)window_surface_create(sizeof(*composite), &child_composite_funcs, hwnd, &target->rect, info, 0);
++    if (!composite) return;
++    composite->target = target; /* consume caller's reference */
++    *surface = &composite->header;
++}
++void dirty_child_composite_parent(HWND hwnd)
++{
++    HWND root = NtUserGetAncestor(hwnd, GA_ROOT);
++    struct window_surface *surface = NULL;
++    WND *win;
++    if (!root || !(win = get_win_ptr(root))) return;
++    if (win == WND_DESKTOP || win == WND_OTHER_PROCESS) return;
++    if (win->surface && win->surface->funcs == &child_composite_funcs)
++    {
++        surface = win->surface;
++        window_surface_add_ref(surface);
++    }
++    release_win_ptr(win);
++    if (!surface) return;
++    window_surface_lock(surface);
++    ((struct child_composite_surface *)surface)->generation++;
++    surface->bounds = surface->rect;
++    OffsetRect(&surface->bounds, -surface->rect.left, -surface->rect.top);
++    window_surface_unlock(surface);
++    window_surface_release(surface);
++}
+--- a/dlls/win32u/dce.c
++++ b/dlls/win32u/dce.c
+@@ -141,6 +141,8 @@
+     if (previous) window_surface_release( previous );
+ }
+
++#include "child_composition.h"
++
+ struct scaled_surface
+ {
+     struct window_surface header;
+@@ -278,6 +280,12 @@
+     RECT monitor_rect;
+
+
++    if (child_composition_enabled() && create_layered && NtUserGetAncestor(hwnd, GA_ROOT) != hwnd)
++    {
++        create_child_buffer(hwnd, surface_rect, window_surface);
++        return;
++    }
++
+     monitor_rect = get_surface_rect( map_dpi_rect( *surface_rect, dpi, monitor_dpi ) );
+     if ((driver_surface = get_driver_window_surface( *window_surface, monitor_dpi )))
+     {
+@@ -297,10 +305,18 @@
+         return;
+     }
+
++    if (*window_surface && (*window_surface)->funcs == &child_composite_funcs &&
++        ((struct child_composite_surface *)*window_surface)->target == driver_surface)
++    {
++        window_surface_release(driver_surface);
++        return;
++    }
++
+     if (!driver_surface || dpi == monitor_dpi)
+     {
+         if (*window_surface) window_surface_release( *window_surface );
+         *window_surface = driver_surface;
++        wrap_child_composite_surface(hwnd, window_surface);
+         return;
+     }
+
+@@ -321,6 +337,8 @@
+ struct window_surface *get_driver_window_surface( struct window_surface *surface, UINT monitor_dpi )
+ {
+     if (!surface || surface == &dummy_surface) return surface;
++    if (surface->funcs == &child_composite_funcs)
++        surface = ((struct child_composite_surface *)surface)->target;
+     if (surface->funcs != &scaled_surface_funcs) return surface;
+     if (get_scaled_surface( surface )->dpi_to != monitor_dpi) return &dummy_surface;
+     return get_scaled_surface( surface )->target_surface;
+@@ -616,8 +634,29 @@
+     BITMAPINFO *shape_info = (BITMAPINFO *)shape_buf;
+     RECT dirty = surface->rect, bounds;
+     void *color_bits;
+-
++    struct child_frame *frames = NULL;
++    RECT screen;
++    unsigned int generation = 0;
++    BOOL frames_ok = TRUE, child_dirty = FALSE;
++
++    if (surface->funcs == &child_composite_funcs)
++    {
++        struct child_composite_surface *composite = (void *)surface;
++        window_surface_lock(surface);
++        generation = composite->generation;
++        frames_ok = !IsRectEmpty(&surface->bounds);
++        window_surface_unlock(surface);
++        if (!frames_ok) return;
++        frames = prepare_child_frames(surface, &screen, &frames_ok);
++    }
++    if (!frames_ok) { free_child_frames(frames); return; }
+     window_surface_lock( surface );
++    if (surface->funcs == &child_composite_funcs)
++    {
++        struct child_composite_surface *composite = (void *)surface;
++        composite->frames = frames;
++        composite->screen = screen;
++    }
+
+     /* align bounds / dirty rect to help with 1bpp shape bitmap updates */
+     bounds.left = surface->bounds.left & ~7;
+@@ -631,6 +670,7 @@
+     {
+         BOOL shape_changed = update_surface_shape( surface, &surface->rect, &dirty, color_info, color_bits );
+         void *shape_bits = window_surface_get_shape( surface, shape_info );
++        child_dirty = is_child_composite_surface(surface);
+
+         TRACE( "Flushing hwnd %p, surface %p %s, bounds %s, dirty %s\n", surface->hwnd, surface,
+                wine_dbgstr_rect( &surface->rect ), wine_dbgstr_rect( &surface->bounds ), wine_dbgstr_rect( &dirty ) );
+@@ -640,7 +680,19 @@
+             reset_bounds( &surface->bounds );
+     }
+
++    if (surface->funcs == &child_composite_funcs)
++    {
++        struct child_composite_surface *composite = (void *)surface;
++        composite->frames = NULL;
++        if (generation != composite->generation)
++        {
++            surface->bounds = surface->rect;
++            OffsetRect(&surface->bounds, -surface->rect.left, -surface->rect.top);
++        }
++    }
+     window_surface_unlock( surface );
++    free_child_frames(frames);
++    if (child_dirty) dirty_child_composite_parent(surface->hwnd);
+ }
+
+ W32KAPI void window_surface_set_layered( struct window_surface *surface, COLORREF color_key, UINT alpha_bits, UINT alpha_mask )
+--- a/dlls/win32u/window.c
++++ b/dlls/win32u/window.c
+@@ -657,6 +657,8 @@
+
+     if (was_visible) NtUserShowWindow( hwnd, SW_SHOW );
+
++    dirty_child_composite_parent(old_toplevel);
++    dirty_child_composite_parent(new_toplevel);
+     set_thread_dpi_awareness_context( context );
+     return old_parent;
+ }
+@@ -2220,7 +2222,7 @@
+             extra_rects[0] = extra_rects[1] = new_rects->visible;
+             if (new_surface)
+             {
+-                extra_rects[1] = is_layered ? dummy_surface.rect : new_surface->rect;
++                extra_rects[1] = is_layered && !is_child_composite_surface(new_surface) ? dummy_surface.rect : new_surface->rect;
+                 OffsetRect( &extra_rects[1], new_rects->visible.left, new_rects->visible.top );
+             }
+             if (valid_rects) extra_rects[2] = valid_rects[0];
+@@ -2348,6 +2350,7 @@
+         user_driver->pWindowPosChanged( hwnd, insert_after, owner_hint, swp_flags, &monitor_rects,
+                                         get_driver_window_surface( new_surface, raw_dpi ) );
+         update_window_client_surfaces( toplevel );
++        dirty_child_composite_parent(hwnd);
+     }
+
+     return ret;
+@@ -2553,12 +2556,34 @@
+     SIZE offset;
+     BOOL ret = FALSE;
+
++    /* The opt-in CPU child path currently supports premultiplied per-pixel
++     * alpha only. Do not silently accept unsupported global alpha/color keys. */
++    if (child_composition_enabled() && NtUserGetAncestor(hwnd, GA_ROOT) != hwnd &&
++        ((flags & ~ULW_EX_NORESIZE) != ULW_ALPHA || !blend || source_alpha != 255 ||
++         blend->AlphaFormat != AC_SRC_ALPHA))
++    {
++        RtlSetLastWin32Error(ERROR_NOT_SUPPORTED);
++        return FALSE;
++    }
++
+     if (flags & ~(ULW_COLORKEY | ULW_ALPHA | ULW_OPAQUE | ULW_EX_NORESIZE) ||
+         !(get_window_long( hwnd, GWL_EXSTYLE ) & WS_EX_LAYERED) ||
+         NtUserGetLayeredWindowAttributes( hwnd, NULL, NULL, NULL ))
+     {
+         RtlSetLastWin32Error( ERROR_INVALID_PARAMETER );
+         return FALSE;
++    }
++
++    if (child_composition_enabled() && NtUserGetAncestor(hwnd, GA_ROOT) != hwnd)
++    {
++        UINT raw_dpi;
++        get_win_monitor_dpi(hwnd, &raw_dpi);
++        if (get_dpi_for_window(hwnd) != raw_dpi ||
++            (get_window_long(NtUserGetAncestor(hwnd, GA_ROOT), GWL_EXSTYLE) & WS_EX_LAYERED))
++        {
++            RtlSetLastWin32Error(ERROR_NOT_SUPPORTED);
++            return FALSE;
++        }
+     }
+
+     get_window_rects( hwnd, COORDS_PARENT, &new_rects, get_thread_dpi() );
+@@ -5252,7 +5277,11 @@
+
+     send_message( hwnd, WM_NCDESTROY, 0, 0 );
+
+-    if (toplevel && toplevel != hwnd) update_window_state( toplevel );
++    if (toplevel && toplevel != hwnd)
++    {
++        update_window_state( toplevel );
++        dirty_child_composite_parent(toplevel);
++    }
+
+     /* FIXME: do we need to fake QS_MOUSEMOVE wakebit? */
+
+@@ -5941,7 +5970,11 @@
+     set_thread_dpi_awareness_context( context );
+
+     toplevel = NtUserGetAncestor( hwnd, GA_ROOT );
+-    if (toplevel && toplevel != hwnd) update_window_state( toplevel );
++    if (toplevel && toplevel != hwnd)
++    {
++        update_window_state( toplevel );
++        dirty_child_composite_parent(toplevel);
++    }
+
+     return hwnd;
+
+--- a/dlls/win32u/win32u_private.h
++++ b/dlls/win32u/win32u_private.h
+@@ -44,6 +44,9 @@
+
+ /* dce.c */
+ extern struct window_surface dummy_surface;
++extern void dirty_child_composite_parent(HWND hwnd);
++extern BOOL child_composition_enabled(void);
++extern BOOL is_child_composite_surface(struct window_surface *surface);
+ extern void create_window_surface( HWND hwnd, BOOL create_layered, const RECT *surface_rect, UINT monitor_dpi,
+                                    struct window_surface **window_surface );
+ extern struct window_surface *get_driver_window_surface( struct window_surface *surface, UINT monitor_dpi );

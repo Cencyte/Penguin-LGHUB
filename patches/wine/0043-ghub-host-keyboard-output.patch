@@ -1,0 +1,177 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: [PATCH] Opt in the G HUB agent to host X11 keyboard output.
+
+--- a/include/wine/gdi_driver.h
++++ b/include/wine/gdi_driver.h
+@@ -357,6 +357,9 @@
+ #define WINE_SWP_FULLSCREEN 0x80000000
+ #define WINE_SWP_RESIZABLE  0x40000000
+
++/* Private, opt-in G HUB keyboard output. Does not change the driver ABI. */
++#define WINE_GHUB_HOST_KEYBOARD_ESCAPE 0x47484b49
++
+ struct vulkan_driver_funcs;
+ struct opengl_driver_funcs;
+
+--- a/dlls/win32u/input.c
++++ b/dlls/win32u/input.c
+@@ -651,10 +651,31 @@
+ /***********************************************************************
+  *           NtUserSendInput  (win32u.@)
+  */
++static BOOL ghub_host_keyboard_enabled(void)
++{
++    const char *enabled = getenv( "WINE_GHUB_HOST_KEYBOARD" );
++    const UNICODE_STRING *image = &NtCurrentTeb()->Peb->ProcessParameters->ImagePathName;
++    static const char name[] = "lghub_agent.exe";
++    unsigned int i, start = 0, length = image->Length / sizeof(WCHAR);
++
++    if (!enabled || strcmp( enabled, "1" )) return FALSE;
++    for (i = 0; i < length; ++i)
++        if (image->Buffer[i] == '\\' || image->Buffer[i] == '/') start = i + 1;
++    if (length - start != sizeof(name) - 1) return FALSE;
++    for (i = 0; i < sizeof(name) - 1; ++i)
++    {
++        WCHAR ch = image->Buffer[start+i];
++        if (ch >= 'A' && ch <= 'Z') ch += 'a' - 'A';
++        if (ch != (unsigned char)name[i]) return FALSE;
++    }
++    return TRUE;
++}
++
+ UINT WINAPI NtUserSendInput( UINT count, INPUT *inputs, int size )
+ {
+     UINT i;
+     NTSTATUS status = STATUS_SUCCESS;
++    BOOL host_keyboard = ghub_host_keyboard_enabled();
+
+     if (size != sizeof(INPUT))
+     {
+@@ -677,6 +698,21 @@
+     for (i = 0; i < count; i++)
+     {
+         INPUT input = inputs[i];
++        if (host_keyboard && input.type == INPUT_KEYBOARD && !(input.ki.dwFlags & KEYEVENTF_UNICODE))
++        {
++            HDC dc = NtUserGetDC( 0 );
++            INT ret = dc ? NtGdiExtEscape( dc, NULL, 0, WINE_GHUB_HOST_KEYBOARD_ESCAPE,
++                                          sizeof(input.ki), (const char *)&input.ki, 0, NULL ) : 0;
++            if (dc) NtUserReleaseDC( 0, dc );
++            if (ret != 1)
++            {
++                RtlSetLastWin32Error( ERROR_NOT_SUPPORTED );
++                break;
++            }
++            /* X11 delivers this to the focused native OR Wine window. Do not
++             * also enqueue it in wineserver, which would duplicate the key. */
++            continue;
++        }
+         switch (input.type)
+         {
+         case INPUT_MOUSE:
+--- a/dlls/winex11.drv/init.c
++++ b/dlls/winex11.drv/init.c
+@@ -495,6 +495,10 @@
+
+     switch(escape)
+     {
++    case WINE_GHUB_HOST_KEYBOARD_ESCAPE:
++        if (in_data && in_count == sizeof(KEYBDINPUT))
++            return X11DRV_GhubHostKeyboard( in_data );
++        return 0;
+     case QUERYESCSUPPORT:
+         if (in_data && in_count >= sizeof(DWORD))
+         {
+--- a/dlls/winex11.drv/keyboard.c
++++ b/dlls/winex11.drv/keyboard.c
+@@ -39,6 +39,7 @@
+ #include <ctype.h>
+ #include <stdarg.h>
+ #include <string.h>
++#include <dlfcn.h>
+
+ #include "x11drv.h"
+
+@@ -67,6 +68,71 @@
+ static int NumLockMask, ScrollLockMask, AltGrMask; /* mask in the XKeyEvent state */
+
+ static pthread_mutex_t kbd_mutex = PTHREAD_MUTEX_INITIALIZER;
++
++/* Keep hardware layout translation in the X11 driver. G HUB's software key
++ * assignments otherwise terminate in wineserver and never reach native apps. */
++INT X11DRV_GhubHostKeyboard( const KEYBDINPUT *input )
++{
++    static void *library;
++    static int (*fake_key)( Display *, unsigned int, Bool, unsigned long );
++    static Bool (*query)( Display *, int *, int *, int *, int * );
++    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
++    Display *display = thread_init_display();
++    unsigned int scan = input->wScan & 0xff, vk = input->wVk;
++    int keycode = 0, candidate, ret = 0, a, b, c, d;
++    BOOL extended = !!(input->dwFlags & KEYEVENTF_EXTENDEDKEY);
++    KeySym function_key = input->wVk >= VK_F1 && input->wVk <= VK_F24
++                        ? XK_F1 + input->wVk - VK_F1 : NoSymbol;
++
++    if (input->dwFlags & KEYEVENTF_UNICODE) return 0;
++    if (input->dwFlags & KEYEVENTF_SCANCODE)
++        scan |= extended ? 0x100 : 0;
++    else switch (vk)
++    {
++        case VK_SHIFT: vk = input->wScan == 0x36 ? VK_RSHIFT : VK_LSHIFT; break;
++        case VK_CONTROL: vk = extended ? VK_RCONTROL : VK_LCONTROL; break;
++        case VK_MENU: vk = extended ? VK_RMENU : VK_LMENU; break;
++    }
++
++    pthread_mutex_lock( &kbd_mutex );
++    for (candidate = min_keycode; candidate <= max_keycode; ++candidate)
++    {
++        if (input->dwFlags & KEYEVENTF_SCANCODE)
++        {
++            if (keyc2scan[candidate] != scan) continue;
++        }
++        else
++        {
++            if (!vk || (keyc2vkey[candidate] & 0xff) != vk) continue;
++            /* Wine assigns spare virtual keys to unmapped XF86 keys. Do not
++             * turn an absent F13-F24 into an unrelated desktop command. */
++            if (function_key && XkbKeycodeToKeysym( display, candidate, 0, 0 ) != function_key) continue;
++            if ((vk == VK_RETURN || (vk >= VK_PRIOR && vk <= VK_DOWN) ||
++                 vk == VK_INSERT || vk == VK_DELETE) &&
++                !!(keyc2scan[candidate] & 0x100) != extended) continue;
++        }
++        keycode = candidate;
++        break;
++    }
++    pthread_mutex_unlock( &kbd_mutex );
++    if (!keycode) return 0;
++
++    pthread_mutex_lock( &mutex );
++    if (!library && (library = dlopen( "libXtst.so.6", RTLD_NOW | RTLD_LOCAL )))
++    {
++        fake_key = dlsym( library, "XTestFakeKeyEvent" );
++        query = dlsym( library, "XTestQueryExtension" );
++    }
++    if (fake_key && query && query( display, &a, &b, &c, &d ))
++    {
++        ret = !!fake_key( display, keycode, !(input->dwFlags & KEYEVENTF_KEYUP), CurrentTime );
++        XFlush( display );
++        TRACE( "G HUB host key vk=%x scan=%x flags=%x keycode=%u sent=%d\n",
++               input->wVk, input->wScan, input->dwFlags, keycode, ret );
++    }
++    pthread_mutex_unlock( &mutex );
++    return ret;
++}
+
+ static char KEYBOARD_MapDeadKeysym(KeySym keysym);
+
+--- a/dlls/winex11.drv/x11drv.h
++++ b/dlls/winex11.drv/x11drv.h
+@@ -340,6 +340,8 @@
+ /* GDI escapes */
+
+ #define X11DRV_ESCAPE 6789
++
++extern INT X11DRV_GhubHostKeyboard( const KEYBDINPUT *input );
+ enum x11drv_escape_codes
+ {
+     X11DRV_SET_DRAWABLE,     /* set current drawable for a DC */

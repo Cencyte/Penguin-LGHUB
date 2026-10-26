@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "name": "d2d1.dll",
+      "size": 6592096,
+      "sha256": "d1425b33d6816a03769f2d635bfee7abb6392c267abbca4f5bd27593841a39fc",
+      "machine": "0x8664",
+      "version": "10.0.26100.8737",
+      "exact_baseline_match": true
+    },
+    {
+      "name": "ninput.dll",
+      "size": 512000,
+      "sha256": "0da856260c5bf440038bd7df9e0b002c55be5e540294635b87f44da0fecab90c",
+      "machine": "0x8664",
+      "version": "10.0.26100.8737",
+      "exact_baseline_match": true
+    }
+  ],
+  "exact_matches": 2,
+  "required_dlls": 2,
+  "runtime_modified": false,
+  "license_clearance": "unresolved; hashes establish identity, not permission",
+  "method": "official ESD + reverse delta + official cumulative-update forward delta",
+  "generated_utc": "2026-10-26T04:26:35Z",
+  "wine_version": "wine-10.20",
+  "media": {
+    "package": {
+      "url": "https://catalog.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/0c7a093a-ecf2-4386-afa5-75bcd763ae00/public/windows11.0-kb5095093-x64_871fd990cedd9d3da6c90ca8b1dd0cc62b42c330.msu",
+      "sha256": "f4d7044b461ecefed165f52b8ee307074b0af27ba84663dcc4607fc0ada72274",
+      "size": 5153252541,
+      "local_name": "windows11.0-kb5095093-x64.msu",
+      "hash_basis": "SHA-256 published in Microsoft Update Catalog download metadata"
+    },
+    "base_media": {
+      "url": "https://catalog.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/009d9a0d-8e1a-45ce-9540-21377534803e/26100.4349.250607-1500.ge_release_svc_refresh_CLIENTCONSUMER_RET_x64FRE_en-us.esd",
+      "size": 4680320173,
+      "sha1": "8ceab2838f8e90180ac7490e8752157fb05588cb",
+      "publisher_hash_algorithm": "SHA1",
+      "catalog_url": "https://download.microsoft.com/download/8e0c23e7-ddc2-45c4-b7e1-85a808b408ee/Products-Win11-24H2-6B.cab",
+      "catalog_sha256": "ba2cf7e6024ebd4aed58b387b4ddf41cb18b87d32fa8b044884701ee2568c9ae",
+      "local_name": "26100.4349.250607-1500.ge_release_svc_refresh_CLIENTCONSUMER_RET_x64FRE_en-us.esd",
+      "catalog_original_url": "http://dl.delivery.mp.microsoft.com/filestreamingservice/files/009d9a0d-8e1a-45ce-9540-21377534803e/26100.4349.250607-1500.ge_release_svc_refresh_CLIENTCONSUMER_RET_x64FRE_en-us.esd",
+      "https_transport_note": "Same file ID/path served by Microsoft TLS-valid catalog CDN; verify catalog SHA1 and pinned SHA256 before use",
+      "sha256": "ca2d2e563b9700f7ba0569c9dc05321b81e1495c52da06861c3dc88ef9ce6eab",
+      "sha256_basis": "Locally computed after checking Microsoft catalog SHA1",
+      "image_index": 9,
+      "image_name": "Windows 11 Pro"
+    }
+  },
+  "recipe_lock_sha256": "a427e2350a75ae3112def6da0ac861b721da4219194449b70993536de984a41b",
+  "helper_source_sha256": {
+    "apply_windows_delta.c": "003f60834bcc6d06e4a31dc7f80dc1b0b4c69b13766add070f9bec5d589a2bfc",
+    "xpress_acquisition_bridge.h": "3fe5c1e7ea4e1e31688618c904cce25a5295f1cbc4181e2fc655fe24c76b65a4"
+  },
+  "windows_vm_booted": false,
+  "symbol_server_used_for_reconstruction": false,
+  "existing_runtime_or_prefix_used": false
+}

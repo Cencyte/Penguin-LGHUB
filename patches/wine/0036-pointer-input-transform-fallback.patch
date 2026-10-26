@@ -1,0 +1,42 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: [PATCH] user32: Report absent pointer input transforms without trapping.
+
+The ordinary-mouse InputStateManager path handles FALSE with ScreenToClient.
+No input-transform history is implemented; the no-transform path and argument
+validation avoid fabricating an identity transform for a translated window.
+
+--- a/dlls/user32/misc.c
++++ b/dlls/user32/misc.c
+@@ -532,6 +532,21 @@
+     return FALSE;
+ }
+
++/**********************************************************************
++ * GetPointerInputTransform [USER32.@]
++ */
++BOOL WINAPI GetPointerInputTransform(UINT32 id, UINT32 count, INPUT_TRANSFORM *transforms)
++{
++    TRACE("(%u %u %p)\n", id, count, transforms);
++
++    /* Wine does not attach input transforms to pointer messages. Report the
++     * documented absence of a transform so callers use ScreenToClient, rather
++     * than returning an identity matrix for a window with a nonzero origin.
++     * Do not write the output array on failure. */
++    SetLastError(!id || !count || !transforms ? ERROR_INVALID_PARAMETER : ERROR_NO_DATA);
++    return FALSE;
++}
++
+ LRESULT WINAPI ImeWndProcA( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
+ {
+     if (!imm_ime_wnd_proc) return DefWindowProcA(hwnd, msg, wParam, lParam);
+--- a/dlls/user32/user32.spec
++++ b/dlls/user32/user32.spec
+@@ -641,7 +641,7 @@
+ # @ stub GetPointerFrameTouchInfoHistory
+ @ stdcall GetPointerInfo(long ptr)
+ # @ stub GetPointerInfoHistory
+-# @ stub GetPointerInputTransform
++@ stdcall GetPointerInputTransform(long long ptr)
+ @ stdcall GetPointerPenInfo(long ptr)
+ # @ stub GetPointerPenInfoHistory
+ @ stdcall GetPointerTouchInfo(long ptr)

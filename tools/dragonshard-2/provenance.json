@@ -1,0 +1,8 @@
+{
+  "original_skill": "/home/firesongz/.claude/skills/dragonshard-headless-army",
+  "original_files": {
+    "SKILL.md": "c3f84ddc4c54020b1de4b461770da3b7309a5d705221d2aa588ae244c25ded5f",
+    "scripts/CloShard.java": "b6a6ca6bcf2948d7f2c103425ccf46b4abf6b8409351200b263e8193ff16a6a8"
+  },
+  "purpose": "Modified duplicate preserving original instructions, tone and independent-JVM/reflink/sharding mechanism. CLO-specific script removed from this duplicate at user request; generic evidence exporter, index and mandatory SystemSage preflight added. Original files remain unchanged."
+}

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "purpose": "Private acquisition experiment; not a redistribution permission",
+  "dockur_version": "6.06",
+  "dockur_source_commit": "013ea27498e0e820a46b3861a0fa047d5b19d846",
+  "image": "dockurr/windows@sha256:59f8bed19cfd49cf1701debe34f9df6311e61a4e2ae68aa9f41206e2184e31cc",
+  "architecture": "amd64",
+  "evaluation_page": "https://www.microsoft.com/en-us/evalcenter/download-windows-11-enterprise",
+  "observed_evaluation_url": "https://software-static.download.prss.microsoft.com/dbazure/26300.9457.260913-1737.26h2_ge_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso",
+  "observed_on": "2026-10-26",
+  "evaluation_notice": "Register with Microsoft before downloading. No perpetual production rights or extraction permission are established by an evaluation.",
+  "baseline_windows_file_version": "10.0.26100.8737",
+  "baseline_sha256": {
+    "d2d1.dll": "d1425b33d6816a03769f2d635bfee7abb6392c267abbca4f5bd27593841a39fc",
+    "ninput.dll": "0da856260c5bf440038bd7df9e0b002c55be5e540294635b87f44da0fecab90c"
+  },
+  "fonts": ["arial.ttf", "arialbd.ttf", "ariali.ttf", "arialbi.ttf", "segoeui.ttf", "segoeuib.ttf", "times.ttf", "timesbd.ttf", "cour.ttf", "courbd.ttf"]
+}

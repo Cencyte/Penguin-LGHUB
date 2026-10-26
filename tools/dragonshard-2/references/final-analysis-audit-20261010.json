@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "audit_date": "2026-10-10",
+  "campaign": "campaign-20261006-214743",
+  "decision": "Scheduled bulk analysis/export obligations are complete. Prioritize targeted runtime-contract analysis of the recorded tray crash; another blanket export has no demonstrated benefit.",
+  "active_catalog": "/mnt/Captures/DragonShard-2/Penguin-GHUB/campaign-20261006-214743/research-catalog-final.json",
+  "scope": {
+    "selected_binaries": 21,
+    "binary_hashes_verified": 21,
+    "scheduled_jobs_complete": 428,
+    "scheduled_jobs_total": 428,
+    "programs_indexed": 21,
+    "programs_gap_audited": 21,
+    "indirect_shards_complete": 237,
+    "indirect_shards_total": 237,
+    "active_or_ready_jobs": 0
+  },
+  "export_coverage": {
+    "attempted": 600281,
+    "ok": 600270,
+    "failed": 9,
+    "timeout": 2,
+    "identified_functions": 600281,
+    "exported_and_indexed_percent": 100.0,
+    "ordinary_c_success_percent": 99.99817,
+    "supplemental_recoveries_verified": 11,
+    "interpretation": "100% of currently identified internal functions have export records. Successful C is not proof of semantic correctness; unrecognized code is not in this denominator. Original failed/timeout rows remain unchanged."
+  },
+  "agent_final_evidence": {
+    "binary_sha256": "61772de356096af7cea986e2f9b3f42db69e6f410c4106609998c389fd755fc1",
+    "snapshot_id": "1e74277587339fdbe573804f9e9c3c31579f2e0c5b301c1a47c75dadf1790b0f",
+    "functions": 374904,
+    "ordinary_c_success": 374898,
+    "static_sources_indexed": 169,
+    "static_sources_total": 169,
+    "static_evidence_records": 903240,
+    "class_members": 244222,
+    "sqlite_integrity": "ok",
+    "source_identity_table": "source_identity",
+    "prior_snapshot": "6117ab3016e627cef92e340c31096ff8f1fa0a719a284fc9892387b6f81e64ff",
+    "old_unresolved_sites": 92380,
+    "current_unresolved_sites": 92377,
+    "removed_sites": [
+      "14111151c",
+      "141bab5dd",
+      "141bbcf6d"
+    ],
+    "stale_fid_fingerprints_excluded": [
+      "141111510",
+      "141bab5d0",
+      "141bbcf60"
+    ],
+    "fid_limit": "These three old fingerprints are excluded, not recalculated; all were unmatched.",
+    "fixed_point_validation": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-zfs-work/campaign-20261006-214743/saved-final-fixed-point-validation-v1/report.json",
+    "fixed_point_limit": "One reviewed 8-byte undefined-width cycle retained at 143dc9d10..143dc9d17; zero unaccepted difference ranges."
+  },
+  "exception_validation": {
+    "report": "/mnt/Captures/DragonShard-2/Penguin-GHUB/campaign-20261006-214743/final-agent-static-evidence-v1/final-exception-reconciliation.json",
+    "current_exceptions": 11,
+    "ordinary_retries": 2,
+    "reviewed_switch_recoveries": 4,
+    "fragment_entries_covered_by_recovered_parents": 5,
+    "recovered_parents": 2,
+    "checks": [
+      "Same binary identity",
+      "All original instruction address/byte pairs retained by recovery",
+      "Every recovered instruction byte matched current PE bytes",
+      "Completed supplemental C or recovered parent C present"
+    ],
+    "limit": "This verifies provenance and instruction coverage, not behavioral equivalence of generated C."
+  },
+  "symbol_retrieval": {
+    "programs_checked": 21,
+    "matching_pdbs": 19,
+    "public_symbols": 414541,
+    "anonymous_function_entries_named": 163660,
+    "database": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-zfs-work/campaign-20261006-214743/symbol-overlay-zfs-v1/symbols-recovered-2.sqlite",
+    "change": "Search verified PDB names alongside original C, joined by exact binary SHA-256 and function entry address. Unnamed FUN_ functions can now be retrieved using their class/method names."
+  },
+  "remaining_static_uncertainty": {
+    "indirect_functions_attempted": 33488,
+    "indirect_functions_failed": 5,
+    "requested_indirect_sites": 105595,
+    "sites_without_matching_high_pcode": 427,
+    "traced_transfers": 105147,
+    "unresolved_computed_transfer_sites": 116290,
+    "unowned_computed_transfer_sites": 10695,
+    "nonpadding_undefined_executable_bytes": 995317,
+    "padding_pattern_executable_bytes": 5767064,
+    "analysis_bookmarks": 31,
+    "executable_section_bookmarks": 5,
+    "fid_candidate_functions": 3188,
+    "fid_unmatched_functions": 544340,
+    "fid_unhashable_functions": 52753,
+    "interpretation": [
+      "Unresolved computed transfers include virtual/runtime dispatch, not 116290 proven missing implementations.",
+      "Undefined executable ranges may contain data, alignment or unrecognized code; these bytes are not an asserted function count.",
+      "Recovered C does not recreate failed high-pcode tracing automatically.",
+      "Function export completion does not measure understanding of every contract, hardware behavior, or Wine compatibility."
+    ]
+  },
+  "next_investigation": {
+    "component": "dwmcorei.dll / tools/wine/dcomp_experiment.cpp",
+    "confirmed": "Recorded tray exception dereferences null overlay context at dwmcorei+0x82872 with rcx=0.",
+    "hypothesis": "SetBitmapInterpolationMode(LINEAR) returning E_NOTIMPL causes EnsureUnderlyingWindowTarget to exit before overlay contexts are created; later BeginOverlayCollection calls through a null context.",
+    "confidence": "High confidence in crash identity and static initialization ordering; causal runtime path not yet traced.",
+    "next_steps": [
+      "Trace EnsureUnderlyingWindowTarget HRESULT and overlay fields through the recorded failure using a private headless tray harness.",
+      "Implement and test the required interpolation/border/back-face contracts with actual rendering behavior; do not replace errors with success-only stubs.",
+      "Retest tray responsiveness and rendering, then determine whether CoreMessagingXP waiting and the separate shared-texture GL-context failure remain."
+    ]
+  },
+  "wine_progress": {
+    "implementation_changed_by_this_audit": false,
+    "full_tray_validated": false,
+    "historical_tray_windows_tested": 11,
+    "historical_tray_windows_unresponsive": 11,
+    "overall_completion_percent": null,
+    "reason": "Bulk research coverage is measured above; the total required runtime/device contracts remain incompletely enumerated, so function counts cannot produce a Wine implementation percentage."
+  },
+  "evidence": {
+    "details": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-zfs-work/campaign-20261006-214743/final-quality-audit-details.json",
+    "binary_identities": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/dragonshard-zfs-work/campaign-20261006-214743/final-quality-binary-identities.json",
+    "final_static_status": "/mnt/Captures/DragonShard-2/Penguin-GHUB/campaign-20261006-214743/final-agent-static-evidence-v1/status.json",
+    "final_static_index_status": "/mnt/Captures/DragonShard-2/Penguin-GHUB/campaign-20261006-214743/final-agent-static-index-v1/status.json",
+    "tray_handoff": "tools/wine/installation_probe_results.json#runtime.activation_configuration.post_dragonshard_audit"
+  },
+  "retrieval_validation": {
+    "unit_tests_passed": 12,
+    "command": "python3 -m unittest discover -s tools/dragonshard-2/tests -p test_corpus.py -v",
+    "live_catalog_query": "BeginOverlayCollection OR ProcessWakeCompletion OR DrainOffThreadCompletions",
+    "live_verified_symbol_hits": 5,
+    "crash_and_caller_found": true,
+    "json_and_database_paths_valid": true
+  }
+}

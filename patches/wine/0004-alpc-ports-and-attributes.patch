@@ -1,0 +1,698 @@
+From: Zhiyi Zhang <zzhang@codeweavers.com>
+Subject: Backport real ALPC port objects and message attribute helpers to Wine 10.20
+
+Source: wine-11.17 dlls/ntdll/alpc.c, dlls/ntdll/unix/alpc.c, include/winternl.h
+Port object implementation: ecb4de70ab4776173e92c644144331aed12830a9
+Helpers: eb5fe5378fa501d39e2a557b68756b5fb73a08fe, a4cc93099631de3610ce41d7d12622cb32368777,
+2396da526d4e789801410af7341f6bd581f7e40e
+https://github.com/wine-mirror/wine
+Local adaptations: Wine 10.20 allocator name, append server requests, guard malformed
+object attributes in server; support waiting on a newly created empty port queue. Connection and message APIs remain honest NOT_IMPLEMENTED
+stubs from upstream; this is not a complete ALPC implementation. 64-bit experiment only.
+Regenerate tools/make_requests and tools/make_specfiles before building.
+
+diff --git a/dlls/ntdll/Makefile.in b/dlls/ntdll/Makefile.in
+--- a/dlls/ntdll/Makefile.in
++++ b/dlls/ntdll/Makefile.in
+@@ -12,6 +12,8 @@
+ x86_64_EXTRADLLFLAGS = -Wl,--image-base,0x170000000
+ 
+ SOURCES = \
++	alpc.c \
++	unix/alpc.c \
+ 	actctx.c \
+ 	atom.c \
+ 	crypt.c \
+diff --git a/dlls/ntdll/alpc.c b/dlls/ntdll/alpc.c
+--- /dev/null
++++ b/dlls/ntdll/alpc.c
+@@ -0,0 +1,98 @@
++/*
++ * Advanced Local Procedure Call
++ *
++ * Copyright 2026 Zhiyi Zhang for CodeWeavers
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++
++#include <stdarg.h>
++#include <windef.h>
++#include <winternl.h>
++#include <ntstatus.h>
++#include "wine/debug.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(alpc);
++
++SIZE_T WINAPI AlpcGetHeaderSize(ULONG attribute_flags)
++{
++    static const struct
++    {
++        ULONG attribute;
++        SIZE_T size;
++    } attribute_sizes[] =
++    {
++        /* Attribute with a higher bit is stored before that with a lower bit */
++        {ALPC_MESSAGE_SECURITY_ATTRIBUTE, sizeof(ALPC_SECURITY_ATTR)},
++        {ALPC_MESSAGE_VIEW_ATTRIBUTE, sizeof(ALPC_VIEW_ATTR)},
++        {ALPC_MESSAGE_CONTEXT_ATTRIBUTE, sizeof(ALPC_CONTEXT_ATTR)},
++        {ALPC_MESSAGE_HANDLE_ATTRIBUTE, sizeof(ALPC_HANDLE_ATTR)},
++        {ALPC_MESSAGE_TOKEN_ATTRIBUTE, sizeof(ALPC_TOKEN_ATTR)},
++        {ALPC_MESSAGE_DIRECT_ATTRIBUTE, sizeof(ALPC_DIRECT_ATTR)},
++        {ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE, sizeof(ALPC_WORK_ON_BEHALF_ATTR)},
++    };
++    unsigned int i;
++    SIZE_T size;
++
++    TRACE("%#lx.\n", attribute_flags);
++
++    size = sizeof(ALPC_MESSAGE_ATTRIBUTES);
++    for (i = 0; i < ARRAY_SIZE(attribute_sizes); i++)
++    {
++        if (attribute_flags & attribute_sizes[i].attribute)
++            size += attribute_sizes[i].size;
++    }
++
++    return size;
++}
++
++void * WINAPI AlpcGetMessageAttribute(ALPC_MESSAGE_ATTRIBUTES *attributes, ULONG attribute_flag)
++{
++    TRACE("%p, %lx.\n", attributes, attribute_flag);
++
++    /* If no flag is specified */
++    if (!attribute_flag)
++        return NULL;
++
++    /* If more than one flag is specified */
++    if (attribute_flag & (attribute_flag - 1))
++        return NULL;
++
++    /* If the specified flag is not in allocated attributes */
++    if ((attribute_flag & attributes->AllocatedAttributes & ALPC_MESSAGE_ATTRIBUTE_ALL) != attribute_flag)
++        return NULL;
++
++    return (unsigned char *)attributes + AlpcGetHeaderSize(attributes->AllocatedAttributes & ~(attribute_flag | (attribute_flag - 1)));
++}
++
++NTSTATUS WINAPI AlpcInitializeMessageAttribute(ULONG attribute_flags, ALPC_MESSAGE_ATTRIBUTES *buffer,
++                                               SIZE_T buffer_size, SIZE_T *required_buffer_size)
++{
++    TRACE("%#lx, %p, %Ix, %p.\n", attribute_flags, buffer, buffer_size, required_buffer_size);
++
++    *required_buffer_size = AlpcGetHeaderSize(attribute_flags);
++
++    if (buffer_size < *required_buffer_size)
++        return STATUS_BUFFER_TOO_SMALL;
++
++    if (buffer)
++    {
++        buffer->AllocatedAttributes = attribute_flags;
++        buffer->ValidAttributes = 0;
++    }
++
++    return STATUS_SUCCESS;
++
++}
+diff --git a/dlls/ntdll/ntdll.spec b/dlls/ntdll/ntdll.spec
+--- a/dlls/ntdll/ntdll.spec
++++ b/dlls/ntdll/ntdll.spec
+@@ -1,3 +1,12 @@
++@ stdcall AlpcGetHeaderSize(long)
++@ stdcall AlpcInitializeMessageAttribute(long ptr long ptr)
++@ stdcall AlpcGetMessageAttribute(ptr long)
++@ stdcall -syscall NtAlpcAcceptConnectPort(ptr ptr long ptr ptr ptr ptr ptr long)
++@ stdcall -syscall NtAlpcConnectPort(ptr ptr ptr ptr long ptr ptr ptr ptr ptr ptr)
++@ stdcall -syscall NtAlpcCreatePort(ptr ptr ptr)
++@ stdcall -syscall NtAlpcDisconnectPort(ptr long)
++@ stdcall -syscall NtAlpcImpersonateClientOfPort(ptr ptr ptr)
++@ stdcall -syscall NtAlpcSendWaitReceivePort(ptr long ptr ptr ptr ptr ptr ptr)
+ #note that the Zw... functions are alternate names for the
+ #Nt... functions.  (see www.sysinternals.com for details)
+ #if you change a Nt.. function DON'T FORGET to change the
+diff --git a/dlls/ntdll/unix/alpc.c b/dlls/ntdll/unix/alpc.c
+--- /dev/null
++++ b/dlls/ntdll/unix/alpc.c
+@@ -0,0 +1,135 @@
++/*
++ * Advanced Local Procedure Call
++ *
++ * Copyright 2026 Zhiyi Zhang for CodeWeavers
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++
++#if 0
++#pragma makedep unix
++#endif
++
++#include "ntstatus.h"
++#include "wine/debug.h"
++#include "wine/server.h"
++#include "unix_private.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(alpc);
++
++NTSTATUS WINAPI NtAlpcAcceptConnectPort( HANDLE *communication_port, HANDLE connection_port,
++                                         DWORD flags, OBJECT_ATTRIBUTES *obj_attr,
++                                         ALPC_PORT_ATTRIBUTES *port_attr, void *port_context,
++                                         ALPC_PORT_MESSAGE *send_msg,
++                                         ALPC_MESSAGE_ATTRIBUTES *send_msg_attr, BOOLEAN accept )
++{
++    FIXME( "%p, %p, %#x, %p, %p, %p, %p, %p, %d stub!\n", communication_port, connection_port,
++           (unsigned int)flags, obj_attr, port_attr, port_context, send_msg, send_msg_attr, accept );
++    return STATUS_NOT_IMPLEMENTED;
++}
++
++NTSTATUS WINAPI NtAlpcConnectPort( HANDLE *port_handle, UNICODE_STRING *port_name,
++                                   OBJECT_ATTRIBUTES *obj_attr, ALPC_PORT_ATTRIBUTES *port_attr,
++                                   DWORD flags, PSID required_server_sid,
++                                   ALPC_PORT_MESSAGE *connect_msg, SIZE_T *connect_msg_size,
++                                   ALPC_MESSAGE_ATTRIBUTES *send_msg_attr,
++                                   ALPC_MESSAGE_ATTRIBUTES *recv_msg_attr, LARGE_INTEGER *timeout )
++{
++    FIXME( "%p, %s, %p, %p, %#x, %p, %p, %p, %p, %p, %p stub!\n", port_handle,
++           debugstr_us( port_name ), obj_attr, port_attr, (unsigned int)flags, required_server_sid,
++           connect_msg, connect_msg_size, send_msg_attr, recv_msg_attr, timeout );
++    return STATUS_NOT_IMPLEMENTED;
++}
++
++NTSTATUS WINAPI NtAlpcCreatePort( HANDLE *port_handle, OBJECT_ATTRIBUTES *attr, ALPC_PORT_ATTRIBUTES *port_attr )
++{
++    struct object_attributes *objattr = NULL;
++    unsigned int status;
++    data_size_t len = 0;
++
++    TRACE( "%p, %p, %p.\n", port_handle, attr, port_attr );
++
++    if (!port_handle) return STATUS_ACCESS_VIOLATION;
++
++    *port_handle = NULL;
++
++    if (port_attr)
++        TRACE( "port attributes: flags %#x qos (length %#x impersonation_level %d tracking_mode %d "
++               "effective only %d) max_msg_length %#lx memory_bandwidth %#lx max_pool_usage %#lx "
++               "max_section_size %#lx max_view_size %#lx max_total_section_size %#lx.\n",
++               port_attr->Flags, port_attr->SecurityQos.Length, port_attr->SecurityQos.ImpersonationLevel,
++               port_attr->SecurityQos.ContextTrackingMode, port_attr->SecurityQos.EffectiveOnly,
++               port_attr->MaxMessageLength, port_attr->MemoryBandwidth, port_attr->MaxPoolUsage,
++               port_attr->MaxSectionSize, port_attr->MaxViewSize, port_attr->MaxTotalSectionSize );
++
++    if (port_attr && port_attr->Flags & 0x100000) return STATUS_INVALID_PARAMETER;
++
++    if (attr)
++    {
++        if (attr->ObjectName) TRACE( "name %s.\n", debugstr_us( attr->ObjectName ) );
++        if ((status = alloc_object_attributes( attr, &objattr, &len ))) return status;
++    }
++
++    SERVER_START_REQ( alpc_create_port )
++    {
++        if (port_attr)
++        {
++            req->flags = port_attr->Flags;
++            req->max_msg_len = port_attr->MaxMessageLength;
++        }
++        else
++        {
++            req->flags = 0;
++            req->max_msg_len = 65535;
++        }
++        wine_server_add_data( req, objattr, len );
++        if (!(status = wine_server_call( req )))
++        {
++            *port_handle = wine_server_ptr_handle( reply->handle );
++            TRACE( "created %p.\n", *port_handle );
++        }
++        else
++        {
++            WARN( "status %#x.\n", status );
++        }
++    }
++    SERVER_END_REQ;
++    free( objattr );
++    return status;
++}
++
++NTSTATUS WINAPI NtAlpcDisconnectPort( HANDLE port_handle, ULONG flags )
++{
++    FIXME( "%p, %#x stub!\n", port_handle, (unsigned int)flags );
++    return STATUS_NOT_IMPLEMENTED;
++}
++
++NTSTATUS WINAPI NtAlpcSendWaitReceivePort( HANDLE port_handle, ULONG flags,
++                                           ALPC_PORT_MESSAGE *send_msg,
++                                           ALPC_MESSAGE_ATTRIBUTES *send_msg_attr,
++                                           ALPC_PORT_MESSAGE *recv_msg, SIZE_T *recv_buffer_size,
++                                           ALPC_MESSAGE_ATTRIBUTES *recv_msg_attr,
++                                           LARGE_INTEGER *timeout )
++{
++    FIXME( "%p, %#x, %p, %p, %p, %p, %p, %p stub!\n", port_handle, (unsigned int)flags, send_msg,
++           send_msg_attr, recv_msg, recv_buffer_size, recv_msg_attr, timeout );
++    return STATUS_NOT_IMPLEMENTED;
++}
++
++NTSTATUS WINAPI NtAlpcImpersonateClientOfPort( HANDLE port_handle, ALPC_PORT_MESSAGE *msg, void *reserved )
++{
++    FIXME( "%p, %p, %p stub!\n", port_handle, msg, reserved );
++    return STATUS_NOT_IMPLEMENTED;
++}
+diff --git a/include/winnt.h b/include/winnt.h
+--- a/include/winnt.h
++++ b/include/winnt.h
+@@ -5360,6 +5360,9 @@
+ #define EVENT_MODIFY_STATE         0x0002
+ #define EVENT_ALL_ACCESS           (STANDARD_RIGHTS_REQUIRED|SYNCHRONIZE|0x3)
+ 
++#define ALPC_PORT_QUERY_STATE 0x0001
++#define ALPC_PORT_ALL_ACCESS (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | ALPC_PORT_QUERY_STATE)
++
+ #define SEMAPHORE_QUERY_STATE      0x0001
+ #define SEMAPHORE_MODIFY_STATE     0x0002
+ #define SEMAPHORE_ALL_ACCESS       (STANDARD_RIGHTS_REQUIRED|SYNCHRONIZE|0x3)
+diff --git a/include/winternl.h b/include/winternl.h
+--- a/include/winternl.h
++++ b/include/winternl.h
+@@ -4560,6 +4560,168 @@
+ NTSYSAPI NTSTATUS  WINAPI LdrUnloadDll(HMODULE);
+ NTSYSAPI NTSTATUS  WINAPI LdrUnlockLoaderLock(ULONG,ULONG_PTR);
+ NTSYSAPI NTSTATUS  WINAPI LdrUnregisterDllNotification(void*);
++/* ALPC */
++/* Connection flags */
++#define ALPC_SYNC_CONNECTION                    0x00020000 /* Synchronous connection request message, note that this doesn't affect normal messages */
++
++/* Port attribute flags */
++#define ALPC_PORTFLG_ALLOWIMPERSONATION         0x00010000 /* Allow server to impersonate the client */
++#define ALPC_PORTFLG_NON_BLOCKING_RECEIVE       0x00040000 /* Return immediately when there is no data to receive */
++#define ALPC_PORTFLG_ALLOW_DUP_OBJECT           0x00080000 /* Allow duplicating objects */
++
++/* Message flags */
++#define ALPC_MSGFLG_NONE                        0x00000000
++#define ALPC_MSGFLG_REPLY_MESSAGE               0x00010000 /* Message is a reply */
++#define ALPC_MSGFLG_SYNC_REQUEST                0x00020000 /* Synchronously send and receive message */
++
++/* Message attribute flags */
++#define ALPC_MESSAGE_SECURITY_ATTRIBUTE         0x80000000
++#define ALPC_MESSAGE_VIEW_ATTRIBUTE             0x40000000
++#define ALPC_MESSAGE_CONTEXT_ATTRIBUTE          0x20000000
++#define ALPC_MESSAGE_HANDLE_ATTRIBUTE           0x10000000
++#define ALPC_MESSAGE_TOKEN_ATTRIBUTE            0x08000000
++#define ALPC_MESSAGE_DIRECT_ATTRIBUTE           0x04000000
++#define ALPC_MESSAGE_WORK_ON_BEHALF_ATTRIBUTE   0x02000000
++#define ALPC_MESSAGE_ATTRIBUTE_ALL              0xfe000000
++
++/* Message types */
++typedef enum _ALPC_MESSAGE_TYPE
++{
++    ALPC_MESSAGE_TYPE_REQUEST = 1,
++    ALPC_MESSAGE_TYPE_REPLY,
++    ALPC_MESSAGE_TYPE_DATAGRAM,
++    ALPC_MESSAGE_TYPE_LOST_REPLY,
++    ALPC_MESSAGE_TYPE_PORT_CLOSED,
++    ALPC_MESSAGE_TYPE_CLIENT_DIED,
++    ALPC_MESSAGE_TYPE_EXCEPTION,
++    ALPC_MESSAGE_TYPE_DEBUG_EVENT,
++    ALPC_MESSAGE_TYPE_ERROR_EVENT,
++    ALPC_MESSAGE_TYPE_CONNECTION_REQUEST,
++    ALPC_MESSAGE_TYPE_CONNECTION_REPLY,
++    ALPC_MESSAGE_TYPE_CANCELED,
++    ALPC_MESSAGE_TYPE_UNREGISTER_PROCESS
++} ALPC_MESSAGE_TYPE;
++
++typedef struct _ALPC_PORT_MESSAGE
++{
++    union
++    {
++        struct
++        {
++            USHORT DataLength;
++            USHORT TotalLength;
++        } DUMMYSTRUCTNAME1;
++        ULONG Length;
++    } DUMMYUNIONNAME1;
++    union
++    {
++        struct
++        {
++            USHORT Type;
++            USHORT DataInfoOffset;
++        } DUMMYSTRUCTNAME2;
++        ULONG ZeroInit;
++    } DUMMYUNIONNAME2;
++    union
++    {
++        CLIENT_ID ClientId;
++        double DoNotUseThisField;
++    } DUMMYUNIONNAME3;
++    ULONG MessageId;
++    union
++    {
++        SIZE_T ClientViewSize;
++        ULONG CallbackId;
++    } DUMMYUNIONNAME4;
++} ALPC_PORT_MESSAGE, *PALPC_PORT_MESSAGE, ALPC_PORT_MESSAGE_HEADER, *PALPC_PORT_MESSAGE_HEADER;
++
++typedef struct _ALPC_MESSAGE_ATTRIBUTES
++{
++    ULONG AllocatedAttributes;
++    ULONG ValidAttributes;
++} ALPC_MESSAGE_ATTRIBUTES, *PALPC_MESSAGE_ATTRIBUTES;
++
++typedef struct _ALPC_SECURITY_ATTR
++{
++    ULONG Flags;
++    SECURITY_QUALITY_OF_SERVICE *QoS;
++    HANDLE ContextHandle;
++} ALPC_SECURITY_ATTR, *PALPC_SECURITY_ATTR;
++
++typedef struct _ALPC_VIEW_ATTR
++{
++    ULONG Flags;
++    HANDLE SectionHandle;
++    void *ViewBase;
++    SIZE_T ViewSize;
++} ALPC_VIEW_ATTR, *PALPC_VIEW_ATTR;
++
++typedef struct _ALPC_CONTEXT_ATTR
++{
++    void *PortContext;
++    void *MessageContext;
++    ULONG Sequence;
++    ULONG MessageId;
++    ULONG CallbackId;
++} ALPC_CONTEXT_ATTR, * PALPC_CONTEXT_ATTR;
++
++typedef struct _ALPC_HANDLE_ATTR
++{
++    ULONG Flags;
++    HANDLE Handle;
++    ULONG ObjectType;
++    ACCESS_MASK DesiredAccess;
++} ALPC_HANDLE_ATTR, *PALPC_HANDLE_ATTR;
++
++typedef struct _ALPC_TOKEN_ATTR
++{
++    ULONGLONG TokenId;
++    ULONGLONG AuthenticationId;
++    ULONGLONG ModifiedId;
++} ALPC_TOKEN_ATTR, *PALPC_TOKEN_ATTR;
++
++typedef struct _ALPC_DIRECT_ATTR
++{
++    HANDLE Event;
++} ALPC_DIRECT_ATTR, *PALPC_DIRECT_ATTR;
++
++typedef struct _ALPC_WORK_ON_BEHALF_ATTR
++{
++    ULONGLONG Ticket;
++} ALPC_WORK_ON_BEHALF_ATTR, *PALPC_WORK_ON_BEHALF_ATTR;
++
++typedef struct _ALPC_BASIC_INFORMATION
++{
++    ULONG Flags;
++    ULONG SequenceNo;
++    PVOID PortContext;
++} ALPC_BASIC_INFORMATION, *PALPC_BASIC_INFORMATION;
++
++typedef struct _ALPC_PORT_ATTRIBUTES
++{
++    ULONG Flags;
++    SECURITY_QUALITY_OF_SERVICE SecurityQos;
++    SIZE_T MaxMessageLength;
++    SIZE_T MemoryBandwidth;
++    SIZE_T MaxPoolUsage;
++    SIZE_T MaxSectionSize;
++    SIZE_T MaxViewSize;
++    SIZE_T MaxTotalSectionSize;
++    ULONG DupObjectTypes;
++#ifdef _WIN64
++    ULONG Reserved;
++#endif
++} ALPC_PORT_ATTRIBUTES, *PALPC_PORT_ATTRIBUTES;
++
++NTSYSAPI SIZE_T    WINAPI AlpcGetHeaderSize(ULONG);
++NTSYSAPI void *    WINAPI AlpcGetMessageAttribute(ALPC_MESSAGE_ATTRIBUTES *,ULONG);
++NTSYSAPI NTSTATUS  WINAPI AlpcInitializeMessageAttribute(ULONG,ALPC_MESSAGE_ATTRIBUTES *,SIZE_T,SIZE_T *);
++NTSYSAPI NTSTATUS  WINAPI NtAlpcAcceptConnectPort(HANDLE*,HANDLE,DWORD,OBJECT_ATTRIBUTES*,ALPC_PORT_ATTRIBUTES*,void*,ALPC_PORT_MESSAGE*,ALPC_MESSAGE_ATTRIBUTES*,BOOLEAN);
++NTSYSAPI NTSTATUS  WINAPI NtAlpcConnectPort(HANDLE*,UNICODE_STRING*,OBJECT_ATTRIBUTES*,ALPC_PORT_ATTRIBUTES*,DWORD,PSID,ALPC_PORT_MESSAGE*,SIZE_T*, ALPC_MESSAGE_ATTRIBUTES*,ALPC_MESSAGE_ATTRIBUTES*,LARGE_INTEGER*);
++NTSYSAPI NTSTATUS  WINAPI NtAlpcCreatePort(HANDLE*,OBJECT_ATTRIBUTES*,ALPC_PORT_ATTRIBUTES*);
++NTSYSAPI NTSTATUS  WINAPI NtAlpcDisconnectPort(HANDLE,ULONG);
++NTSYSAPI NTSTATUS  WINAPI NtAlpcImpersonateClientOfPort(HANDLE,ALPC_PORT_MESSAGE*,void*);
++NTSYSAPI NTSTATUS  WINAPI NtAlpcSendWaitReceivePort(HANDLE,DWORD,ALPC_PORT_MESSAGE*,ALPC_MESSAGE_ATTRIBUTES*,ALPC_PORT_MESSAGE*, SIZE_T*,ALPC_MESSAGE_ATTRIBUTES*,LARGE_INTEGER*);
+ NTSYSAPI NTSTATUS  WINAPI NtAcceptConnectPort(PHANDLE,ULONG,PLPC_MESSAGE,BOOLEAN,PLPC_SECTION_WRITE,PLPC_SECTION_READ);
+ NTSYSAPI NTSTATUS  WINAPI NtAccessCheck(PSECURITY_DESCRIPTOR,HANDLE,ACCESS_MASK,PGENERIC_MAPPING,PPRIVILEGE_SET,PULONG,PULONG,NTSTATUS*);
+ NTSYSAPI NTSTATUS  WINAPI NtAccessCheckAndAuditAlarm(UNICODE_STRING*,HANDLE,UNICODE_STRING*,UNICODE_STRING*,PSECURITY_DESCRIPTOR,ACCESS_MASK,GENERIC_MAPPING*,BOOLEAN,ACCESS_MASK*,NTSTATUS*,BOOLEAN*);
+diff --git a/server/Makefile.in b/server/Makefile.in
+--- a/server/Makefile.in
++++ b/server/Makefile.in
+@@ -1,6 +1,7 @@
+ PROGRAMS = wineserver
+ 
+ SOURCES = \
++	alpc.c \
+ 	async.c \
+ 	atom.c \
+ 	change.c \
+diff --git a/server/alpc.c b/server/alpc.c
+--- /dev/null
++++ b/server/alpc.c
+@@ -0,0 +1,178 @@
++/*
++ * Server-side advanced local procedure call management
++ *
++ * Copyright 2026 Zhiyi Zhang for CodeWeavers
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ *
++ */
++
++#include "config.h"
++
++#include <assert.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <stdarg.h>
++#include <sys/types.h>
++
++#include "windef.h"
++#include "winternl.h"
++#include "ntstatus.h"
++
++#include "handle.h"
++#include "thread.h"
++#include "security.h"
++#include "request.h"
++
++static const WCHAR alpc_port_name[] = {'A','L','P','C',' ','P','o','r','t'};
++
++struct type_descr alpc_port_type =
++{
++    { alpc_port_name, sizeof(alpc_port_name) }, /* name */
++    ALPC_PORT_ALL_ACCESS,                       /* valid_access */
++    {                                           /* mapping */
++         STANDARD_RIGHTS_READ | ALPC_PORT_QUERY_STATE,
++         DELETE | ALPC_PORT_QUERY_STATE,
++         0,
++         ALPC_PORT_ALL_ACCESS
++    },
++};
++
++enum alpc_port_enum_type
++{
++    CONNECTION_PORT,
++    COMMUNICATION_PORT
++};
++
++enum alpc_port_status
++{
++    UNINITIALIZED,
++    CONNECTED,
++    REFUSED,
++    DISCONNECTED
++};
++
++struct alpc_port
++{
++    struct object            obj;                   /* object header */
++    enum alpc_port_enum_type type;                  /* communication port or connection port */
++    enum alpc_port_status    status;                /* port status */
++    struct thread           *thread;                /* thread owning the port */
++    unsigned int             flags;                 /* flags in port attributes */
++    struct list              message_queue;         /* messages pending receipt */
++    mem_size_t               max_msg_len;           /* max message length in port attributes */
++};
++
++static void alpc_port_dump( struct object *obj, int verbose );
++static void alpc_port_destroy( struct object *obj );
++static int alpc_port_signaled( struct object *obj, struct wait_queue_entry *entry );
++
++static const struct object_ops alpc_port_ops =
++{
++    sizeof(struct alpc_port),      /* size */
++    &alpc_port_type,               /* type */
++    alpc_port_dump,                /* dump */
++    add_queue,                     /* add_queue */
++    remove_queue,                  /* remove_queue */
++    alpc_port_signaled,             /* signaled */
++    no_satisfied,                  /* satisfied */
++    no_signal,                     /* signal */
++    no_get_fd,                     /* get_fd */
++    default_get_sync,              /* get_sync */
++    default_map_access,            /* map_access */
++    default_get_sd,                /* get_sd */
++    default_set_sd,                /* set_sd */
++    default_get_full_name,         /* get_full_name */
++    no_lookup_name,                /* lookup_name */
++    directory_link_name,           /* link_name */
++    default_unlink_name,           /* unlink_name */
++    no_open_file,                  /* open_file */
++    no_kernel_obj_list,            /* get_kernel_obj_list */
++    no_close_handle,               /* close_handle */
++    alpc_port_destroy              /* destroy */
++};
++
++static void alpc_port_dump( struct object *obj, int verbose )
++{
++    struct alpc_port *port = (struct alpc_port *)obj;
++    assert( obj->ops == &alpc_port_ops );
++    fprintf( stderr, "ALPC Port type=%d status=%d\n", port->type, port->status );
++}
++
++/* A new connection port has no pending messages. Connection/message delivery
++ * remains unimplemented; those APIs must return NOT_IMPLEMENTED until enqueue,
++ * dequeue, notification and cancellation semantics are implemented together. */
++static int alpc_port_signaled( struct object *obj, struct wait_queue_entry *entry )
++{
++    struct alpc_port *port = (struct alpc_port *)obj;
++    return !list_empty( &port->message_queue );
++}
++
++static void alpc_port_destroy( struct object *obj )
++{
++    struct alpc_port *port = (struct alpc_port *)obj;
++    assert( obj->ops == &alpc_port_ops );
++    release_object( port->thread );
++}
++
++static struct alpc_port *alpc_create_port( struct object *root, const struct unicode_str *name,
++                                           unsigned int attr, const struct security_descriptor *sd,
++                                           enum alpc_port_enum_type type, unsigned int flags,
++                                           mem_size_t max_msg_len )
++{
++    struct alpc_port *port;
++
++    port = create_named_object( root, &alpc_port_ops, name, attr, sd );
++    if (port)
++    {
++        if (get_error() != STATUS_OBJECT_NAME_EXISTS)
++        {
++            list_init( &port->message_queue );
++            port->type = type;
++            port->status = UNINITIALIZED;
++            port->thread = (struct thread *)grab_object( current );
++            port->flags = flags;
++            port->max_msg_len = max_msg_len;
++        }
++        else
++        {
++            release_object( port );
++            return NULL;
++        }
++    }
++
++    return port;
++}
++
++/* Create an ALPC port */
++DECL_HANDLER(alpc_create_port)
++{
++    struct alpc_port *alpc_port;
++    const struct security_descriptor *sd;
++    struct unicode_str name;
++    struct object *root;
++    const struct object_attributes *objattr = get_req_object_attributes( &sd, &name, &root );
++
++    if (!objattr) return;
++
++    if ((alpc_port = alpc_create_port( root, &name, objattr->attributes, sd, CONNECTION_PORT,
++                                       req->flags, req->max_msg_len )))
++    {
++        reply->handle = alloc_handle( current->process, alpc_port, ALPC_PORT_ALL_ACCESS, objattr->attributes );
++        release_object( alpc_port );
++    }
++
++    if (root) release_object( root );
++}
+diff --git a/server/directory.c b/server/directory.c
+--- a/server/directory.c
++++ b/server/directory.c
+@@ -165,6 +165,7 @@
+     &key_type,
+     &apc_reserve_type,
+     &completion_reserve_type,
++    &alpc_port_type,
+     &completion_packet_type,
+ };
+ 
+diff --git a/server/object.h b/server/object.h
+--- a/server/object.h
++++ b/server/object.h
+@@ -372,6 +372,7 @@
+ extern struct type_descr key_type;
+ extern struct type_descr apc_reserve_type;
+ extern struct type_descr completion_reserve_type;
++extern struct type_descr alpc_port_type;
+ extern struct type_descr completion_packet_type;
+ 
+ #define KEYEDEVENT_WAIT       0x0001
+diff --git a/server/protocol.def b/server/protocol.def
+--- a/server/protocol.def
++++ b/server/protocol.def
+@@ -4299,3 +4299,12 @@
+     obj_handle_t  packet;         /* wait completion packet handle */
+     int           remove_signaled;/* whether to remove signaled packet */
+ @END
++
++/* Create a new ALPC object (appended to preserve existing client request IDs). */
++@REQ(alpc_create_port)
++    unsigned int flags;
++    mem_size_t max_msg_len;
++    VARARG(obj_attr,object_attributes);
++@REPLY
++    obj_handle_t handle;
++@END

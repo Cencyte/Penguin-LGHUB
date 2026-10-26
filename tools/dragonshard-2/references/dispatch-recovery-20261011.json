@@ -1,0 +1,47 @@
+{
+  "complete": true,
+  "original_unmatched_sites": 427,
+  "disposition": {
+    "processor_traps": 316,
+    "recovered_high_transfer": 103,
+    "instruction_level_resolution": 8
+  },
+  "failed_functions": 5,
+  "failed_function_sites": 21,
+  "failed_sites_with_recovered_slices": 21,
+  "verified_instruction_contexts": 78,
+  "classification": {
+    "named_import": 6,
+    "object_dispatch_slot": 95750,
+    "processor_trap": 12959,
+    "runtime_call_result": 851,
+    "runtime_dataflow": 447,
+    "runtime_register_or_argument": 2311,
+    "runtime_storage": 3907,
+    "static_candidate": 59
+  },
+  "orphan_sites_with_recovered_slices": 4,
+  "nontrap_sites_without_high_slices": 74,
+  "total_gap_sites": 116290,
+  "runtime_targets_proven": 0,
+  "limit": "All sites have categorized evidence, not all runtime destinations. Import names and bounded static targets differ from receiver/callback identities. High-pcode omissions remain explicit.",
+  "sqlite_integrity": "ok",
+  "new_unwind_recoveries": {
+    "independent_function": "1429b3300",
+    "chained_fragment": "142373d63",
+    "parent": "142373c60",
+    "all_four_sites_recovered": true,
+    "ordinary_c_characters": [
+      1398,
+      13020
+    ],
+    "not_merged_into_primary_corpus": true
+  },
+  "date": "2026-10-11",
+  "database": "/mnt/Captures/DragonShard-2/Penguin-GHUB/campaign-20261006-214743/dispatch-supplement-v3/dispatch.sqlite",
+  "manuscript": "docs/dragonshard/MANUSCRIPT.md",
+  "archive": "/mnt/Captures/DragonShard-2/Penguin-GHUB/campaign-20261006-214743/dispatch-recovery-v1/worker-archive/manifest.json",
+  "previous_dispatch_slots": 63596,
+  "unit_tests_passed": 98,
+  "primary_function_export_unchanged": true
+}

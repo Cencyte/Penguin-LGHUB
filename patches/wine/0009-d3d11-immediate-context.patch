@@ -1,0 +1,30 @@
+--- a/dlls/d3d11/device.c
++++ b/dlls/d3d11/device.c
+@@ -5249,7 +5249,12 @@
+ static void STDMETHODCALLTYPE d3d11_device_GetImmediateContext2(ID3D11Device5 *iface,
+         ID3D11DeviceContext2 **context)
+ {
+-    FIXME("iface %p, context %p stub!\n", iface, context);
++    struct d3d_device *device = impl_from_ID3D11Device5(iface);
++
++    TRACE("iface %p, context %p.\n", iface, context);
++
++    *context = (ID3D11DeviceContext2 *)&device->immediate_context.ID3D11DeviceContext4_iface;
++    ID3D11DeviceContext2_AddRef(*context);
+ }
+ 
+ static HRESULT STDMETHODCALLTYPE d3d11_device_CreateDeferredContext2(ID3D11Device5 *iface,
+@@ -5356,7 +5361,12 @@
+ static void STDMETHODCALLTYPE d3d11_device_GetImmediateContext3(ID3D11Device5 *iface,
+         ID3D11DeviceContext3 **context)
+ {
+-    FIXME("iface %p, context %p stub!\n", iface, context);
++    struct d3d_device *device = impl_from_ID3D11Device5(iface);
++
++    TRACE("iface %p, context %p.\n", iface, context);
++
++    *context = (ID3D11DeviceContext3 *)&device->immediate_context.ID3D11DeviceContext4_iface;
++    ID3D11DeviceContext3_AddRef(*context);
+ }
+ 
+ static HRESULT STDMETHODCALLTYPE d3d11_device_CreateDeferredContext3(ID3D11Device5 *iface,

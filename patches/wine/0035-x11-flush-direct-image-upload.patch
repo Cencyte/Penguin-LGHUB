@@ -1,0 +1,35 @@
+--- a/dlls/winex11.drv/bitblt.c
++++ b/dlls/winex11.drv/bitblt.c
+@@ -1295,6 +1295,16 @@
+         if (restore_region) restore_clipping_region( physdev );
+         add_device_bounds( physdev, &dst->visrect );
+         image->data = NULL;
++
++        /* A foreign window can be painted by a worker without a message loop
++         * (Chromium's software compositor, for example). Submit its completed
++         * upload now; waiting for that thread's next X event can leave the last
++         * damage rectangle buffered indefinitely. Pixmaps remain batched. */
++        {
++            DWORD is_memdc;
++            if (NtGdiGetDCDword( dev->hdc, NtGdiIsMemDC, &is_memdc ) && !is_memdc)
++                XFlush( gdi_display );
++        }
+     }
+
+     XDestroyImage( image );
+--- a/dlls/winex11.drv/xrender.c
++++ b/dlls/winex11.drv/xrender.c
+@@ -1852,6 +1852,13 @@
+                                 physdev->pict_format, physdev, 0, src, dst, use_repeat );
+
+         add_device_bounds( physdev->x11dev, &dst->visrect );
++        /* Match the direct X11 upload path: a drawing worker need not pump X
++         * events after this presentation. Keep only offscreen pixmaps batched. */
++        {
++            DWORD is_memdc;
++            if (NtGdiGetDCDword( dev->hdc, NtGdiIsMemDC, &is_memdc ) && !is_memdc)
++                XFlush( gdi_display );
++        }
+
+         pXRenderFreePicture( gdi_display, src_pict );
+         XFreePixmap( gdi_display, src_pixmap );

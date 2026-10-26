@@ -1,0 +1,480 @@
+--- a/include/windows.system.threading.idl
++++ b/include/windows.system.threading.idl
+@@ -31,6 +31,7 @@
+     typedef enum WorkItemOptions WorkItemOptions;
+ 
+     runtimeclass ThreadPool;
++    runtimeclass ThreadPoolTimer;
+ 
+     [
+         contract(Windows.Foundation.UniversalApiContract, 1.0)
+@@ -93,4 +94,57 @@
+     runtimeclass ThreadPool
+     {
+     }
++
++    [contract(Windows.Foundation.UniversalApiContract, 1.0),
++     uuid(faaea667-fbeb-49cb-adb2-71184c556e43)]
++    delegate HRESULT TimerElapsedHandler([in] Windows.System.Threading.ThreadPoolTimer *timer);
++
++    [contract(Windows.Foundation.UniversalApiContract, 1.0),
++     uuid(34ed19fa-8384-4eb9-8209-fb5094eeec35)]
++    delegate HRESULT TimerDestroyedHandler([in] Windows.System.Threading.ThreadPoolTimer *timer);
++
++    [contract(Windows.Foundation.UniversalApiContract, 1.0),
++     exclusiveto(Windows.System.Threading.ThreadPoolTimer),
++     uuid(594ebe78-55ea-4a88-a50d-3402ae1f9cf2)]
++    interface IThreadPoolTimer : IInspectable
++    {
++        [propget] HRESULT Period([out, retval] Windows.Foundation.TimeSpan *value);
++        [propget] HRESULT Delay([out, retval] Windows.Foundation.TimeSpan *value);
++        HRESULT Cancel();
++    }
++
++    [contract(Windows.Foundation.UniversalApiContract, 1.0),
++     exclusiveto(Windows.System.Threading.ThreadPoolTimer),
++     uuid(1a8a9d02-e482-461b-b8c7-8efad1cce590)]
++    interface IThreadPoolTimerStatics : IInspectable
++    {
++        [overload("CreatePeriodicTimer")] HRESULT CreatePeriodicTimer(
++            [in] Windows.System.Threading.TimerElapsedHandler *handler,
++            [in] Windows.Foundation.TimeSpan period,
++            [out, retval] Windows.System.Threading.ThreadPoolTimer **timer);
++        [overload("CreateTimer")] HRESULT CreateTimer(
++            [in] Windows.System.Threading.TimerElapsedHandler *handler,
++            [in] Windows.Foundation.TimeSpan delay,
++            [out, retval] Windows.System.Threading.ThreadPoolTimer **timer);
++        [overload("CreatePeriodicTimer")] HRESULT CreatePeriodicTimerWithCompletion(
++            [in] Windows.System.Threading.TimerElapsedHandler *handler,
++            [in] Windows.Foundation.TimeSpan period,
++            [in] Windows.System.Threading.TimerDestroyedHandler *destroyed,
++            [out, retval] Windows.System.Threading.ThreadPoolTimer **timer);
++        [overload("CreateTimer")] HRESULT CreateTimerWithCompletion(
++            [in] Windows.System.Threading.TimerElapsedHandler *handler,
++            [in] Windows.Foundation.TimeSpan delay,
++            [in] Windows.System.Threading.TimerDestroyedHandler *destroyed,
++            [out, retval] Windows.System.Threading.ThreadPoolTimer **timer);
++    }
++
++    [contract(Windows.Foundation.UniversalApiContract, 1.0),
++     marshaling_behavior(agile),
++     static(Windows.System.Threading.IThreadPoolTimerStatics, Windows.Foundation.UniversalApiContract, 1.0),
++     threading(both)]
++    runtimeclass ThreadPoolTimer
++    {
++        [default] interface Windows.System.Threading.IThreadPoolTimer;
++    }
++
+ }
+--- a/dlls/threadpoolwinrt/Makefile.in
++++ b/dlls/threadpoolwinrt/Makefile.in
+@@ -3,4 +3,5 @@
+ 
+ SOURCES = \
+ 	classes.idl \
+-	main.c
++	main.c \
++	timer.c
+--- a/dlls/threadpoolwinrt/classes.idl
++++ b/dlls/threadpoolwinrt/classes.idl
+@@ -23,4 +23,5 @@
+ 
+ namespace Windows.System.Threading {
+     runtimeclass ThreadPool;
++    runtimeclass ThreadPoolTimer;
+ }
+--- a/dlls/threadpoolwinrt/main.c
++++ b/dlls/threadpoolwinrt/main.c
+@@ -37,6 +37,8 @@
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(threadpool);
+ 
++extern IActivationFactory *threadpool_timer_factory;
++
+ struct threadpool_factory
+ {
+     IActivationFactory IActivationFactory_iface;
+@@ -630,6 +632,12 @@
+         IUnknown_AddRef(*factory);
+     }
+ 
++    if (!wcscmp(name, RuntimeClass_Windows_System_Threading_ThreadPoolTimer))
++    {
++        *factory = threadpool_timer_factory;
++        IActivationFactory_AddRef(*factory);
++    }
++
+     if (*factory) return S_OK;
+     return CLASS_E_CLASSNOTAVAILABLE;
+ }
+--- a/dlls/threadpoolwinrt/timer.c
++++ b/dlls/threadpoolwinrt/timer.c
+@@ -0,0 +1,368 @@
++/*
++ * Windows.System.Threading.ThreadPoolTimer
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * Lesser General Public License for more details.
++ */
++#define COBJMACROS
++#include <stdarg.h>
++#include "windef.h"
++#include "winbase.h"
++#include "winstring.h"
++#include "objbase.h"
++#include "activation.h"
++#define WIDL_using_Windows_Foundation
++#define WIDL_using_Windows_System_Threading
++#include "windows.system.threading.h"
++#include "wine/debug.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(threadpool);
++
++struct timer
++{
++    IThreadPoolTimer IThreadPoolTimer_iface;
++    LONG refcount;
++    CRITICAL_SECTION lock;
++    TP_TIMER *native;
++    TP_WORK *cleanup;
++    ITimerElapsedHandler *elapsed;
++    ITimerDestroyedHandler *destroyed;
++    TimeSpan period, delay;
++    DWORD period_ms;
++    BOOL stopped;
++};
++
++static struct timer *impl_from_IThreadPoolTimer(IThreadPoolTimer *iface)
++{
++    return CONTAINING_RECORD(iface, struct timer, IThreadPoolTimer_iface);
++}
++
++static HRESULT timer_get_iids(REFIID iid, ULONG *count, IID **iids)
++{
++    if (!count || !iids) return E_POINTER;
++    *count = 0;
++    if (!(*iids = CoTaskMemAlloc(sizeof(**iids)))) return E_OUTOFMEMORY;
++    **iids = *iid;
++    *count = 1;
++    return S_OK;
++}
++
++static HRESULT timer_class_name(HSTRING *name)
++{
++    const WCHAR *value = RuntimeClass_Windows_System_Threading_ThreadPoolTimer;
++    if (!name) return E_POINTER;
++    return WindowsCreateString(value, wcslen(value), name);
++}
++
++static HRESULT STDMETHODCALLTYPE timer_QueryInterface(IThreadPoolTimer *iface, REFIID iid, void **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable)
++            || IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IThreadPoolTimer))
++    {
++        IThreadPoolTimer_AddRef(iface);
++        *out = iface;
++        return S_OK;
++    }
++    return E_NOINTERFACE;
++}
++
++static ULONG STDMETHODCALLTYPE timer_AddRef(IThreadPoolTimer *iface)
++{
++    return InterlockedIncrement(&impl_from_IThreadPoolTimer(iface)->refcount);
++}
++
++static ULONG STDMETHODCALLTYPE timer_Release(IThreadPoolTimer *iface)
++{
++    struct timer *timer = impl_from_IThreadPoolTimer(iface);
++    ULONG refcount = InterlockedDecrement(&timer->refcount);
++    if (!refcount)
++    {
++        /* The scheduled operation owns a reference until cleanup has drained
++         * callbacks and released the delegates, independently of caller refs. */
++        DeleteCriticalSection(&timer->lock);
++        free(timer);
++    }
++    return refcount;
++}
++
++static HRESULT STDMETHODCALLTYPE timer_GetIids(IThreadPoolTimer *iface, ULONG *count, IID **iids)
++{
++    return timer_get_iids(&IID_IThreadPoolTimer, count, iids);
++}
++
++static HRESULT STDMETHODCALLTYPE timer_GetRuntimeClassName(IThreadPoolTimer *iface, HSTRING *name)
++{
++    return timer_class_name(name);
++}
++
++static HRESULT STDMETHODCALLTYPE timer_GetTrustLevel(IThreadPoolTimer *iface, TrustLevel *level)
++{
++    if (!level) return E_POINTER;
++    *level = BaseTrust;
++    return S_OK;
++}
++
++static HRESULT STDMETHODCALLTYPE timer_get_Period(IThreadPoolTimer *iface, TimeSpan *period)
++{
++    if (!period) return E_POINTER;
++    *period = impl_from_IThreadPoolTimer(iface)->period;
++    return S_OK;
++}
++
++static HRESULT STDMETHODCALLTYPE timer_get_Delay(IThreadPoolTimer *iface, TimeSpan *delay)
++{
++    if (!delay) return E_POINTER;
++    *delay = impl_from_IThreadPoolTimer(iface)->delay;
++    return S_OK;
++}
++
++static HRESULT STDMETHODCALLTYPE timer_Cancel(IThreadPoolTimer *iface)
++{
++    struct timer *timer = impl_from_IThreadPoolTimer(iface);
++    EnterCriticalSection(&timer->lock);
++    if (!timer->stopped)
++    {
++        timer->stopped = TRUE;
++        SetThreadpoolTimer(timer->native, NULL, 0, 0);
++        /* Never wait on the cancelling thread: it may be the elapsed handler. */
++        SubmitThreadpoolWork(timer->cleanup);
++        TRACE("timer %p stopped.\n", timer);
++    }
++    LeaveCriticalSection(&timer->lock);
++    return S_OK;
++}
++
++static const IThreadPoolTimerVtbl timer_vtbl =
++{
++    timer_QueryInterface, timer_AddRef, timer_Release,
++    timer_GetIids, timer_GetRuntimeClassName, timer_GetTrustLevel,
++    timer_get_Period, timer_get_Delay, timer_Cancel,
++};
++
++static void CALLBACK timer_cleanup(TP_CALLBACK_INSTANCE *instance, void *context, TP_WORK *work)
++{
++    struct timer *timer = context;
++    HRESULT hr, init_hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
++
++    /* Queued callbacks can be discarded; running delegates must finish before
++     * the completion delegate or any release of their captured state. */
++    WaitForThreadpoolTimerCallbacks(timer->native, TRUE);
++    CloseThreadpoolTimer(timer->native);
++    CloseThreadpoolWork(work);
++    if (timer->destroyed)
++    {
++        hr = ITimerDestroyedHandler_Invoke(timer->destroyed, &timer->IThreadPoolTimer_iface);
++        TRACE("timer %p completion returned %#lx.\n", timer, hr);
++        ITimerDestroyedHandler_Release(timer->destroyed);
++    }
++    ITimerElapsedHandler_Release(timer->elapsed);
++    if (SUCCEEDED(init_hr)) CoUninitialize();
++    IThreadPoolTimer_Release(&timer->IThreadPoolTimer_iface);
++}
++
++static void CALLBACK timer_callback(TP_CALLBACK_INSTANCE *instance, void *context, TP_TIMER *native)
++{
++    struct timer *timer = context;
++    BOOL invoke;
++    HRESULT hr, init_hr;
++
++    EnterCriticalSection(&timer->lock);
++    invoke = !timer->stopped;
++    LeaveCriticalSection(&timer->lock);
++    if (!invoke) return;
++
++    /* Cleanup holds the timer/delegates alive and waits for this callback.
++     * No internal lock is held across application code. */
++    init_hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
++    hr = ITimerElapsedHandler_Invoke(timer->elapsed, &timer->IThreadPoolTimer_iface);
++    TRACE("timer %p elapsed returned %#lx.\n", timer, hr);
++    if (!timer->period_ms) IThreadPoolTimer_Cancel(&timer->IThreadPoolTimer_iface);
++    if (SUCCEEDED(init_hr)) CoUninitialize();
++}
++
++static HRESULT timer_create(ITimerElapsedHandler *handler, TimeSpan duration, BOOL periodic,
++        ITimerDestroyedHandler *destroyed, IThreadPoolTimer **out)
++{
++    struct timer *timer;
++    LARGE_INTEGER due;
++    ULONGLONG milliseconds;
++    DWORD error;
++
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (!handler || duration.Duration < 0) return E_INVALIDARG;
++    milliseconds = periodic ? duration.Duration / 10000 : 0;
++    /* TP_TIMER's repeat interval is DWORD milliseconds; do not silently wrap. */
++    if (milliseconds > MAXDWORD) return E_INVALIDARG;
++    if (!(timer = calloc(1, sizeof(*timer)))) return E_OUTOFMEMORY;
++    timer->IThreadPoolTimer_iface.lpVtbl = &timer_vtbl;
++    timer->refcount = 2; /* caller + scheduled operation */
++    timer->period_ms = milliseconds;
++    if (periodic) timer->period = duration;
++    else timer->delay = duration;
++    InitializeCriticalSection(&timer->lock);
++    timer->native = CreateThreadpoolTimer(timer_callback, timer, NULL);
++    if (!timer->native) goto failed;
++    timer->cleanup = CreateThreadpoolWork(timer_cleanup, timer, NULL);
++    if (!timer->cleanup) goto failed;
++    ITimerElapsedHandler_AddRef((timer->elapsed = handler));
++    if (destroyed) ITimerDestroyedHandler_AddRef((timer->destroyed = destroyed));
++    due.QuadPart = -duration.Duration; /* zero is an immediate expiration */
++    *out = &timer->IThreadPoolTimer_iface;
++    TRACE("timer %p created: periodic %u, ticks %s, repeat_ms %lu, completion %p.\n",
++            timer, periodic, wine_dbgstr_longlong(duration.Duration), timer->period_ms, destroyed);
++    SetThreadpoolTimer(timer->native, (FILETIME *)&due, timer->period_ms, 0);
++    return S_OK;
++
++failed:
++    error = GetLastError();
++    if (timer->native) CloseThreadpoolTimer(timer->native);
++    DeleteCriticalSection(&timer->lock);
++    free(timer);
++    return HRESULT_FROM_WIN32(error);
++}
++
++struct timer_factory
++{
++    IActivationFactory IActivationFactory_iface;
++    IThreadPoolTimerStatics IThreadPoolTimerStatics_iface;
++    LONG refcount;
++};
++
++static struct timer_factory *impl_from_IActivationFactory(IActivationFactory *iface)
++{
++    return CONTAINING_RECORD(iface, struct timer_factory, IActivationFactory_iface);
++}
++
++static struct timer_factory *impl_from_IThreadPoolTimerStatics(IThreadPoolTimerStatics *iface)
++{
++    return CONTAINING_RECORD(iface, struct timer_factory, IThreadPoolTimerStatics_iface);
++}
++
++static HRESULT STDMETHODCALLTYPE factory_QueryInterface(IActivationFactory *iface, REFIID iid, void **out)
++{
++    struct timer_factory *factory = impl_from_IActivationFactory(iface);
++    if (!out) return E_POINTER;
++    *out = NULL;
++    if (IsEqualGUID(iid, &IID_IUnknown) || IsEqualGUID(iid, &IID_IInspectable)
++            || IsEqualGUID(iid, &IID_IAgileObject) || IsEqualGUID(iid, &IID_IActivationFactory))
++        *out = iface;
++    else if (IsEqualGUID(iid, &IID_IThreadPoolTimerStatics))
++        *out = &factory->IThreadPoolTimerStatics_iface;
++    else return E_NOINTERFACE;
++    IActivationFactory_AddRef(iface);
++    return S_OK;
++}
++
++static ULONG STDMETHODCALLTYPE factory_AddRef(IActivationFactory *iface)
++{
++    return InterlockedIncrement(&impl_from_IActivationFactory(iface)->refcount);
++}
++
++static ULONG STDMETHODCALLTYPE factory_Release(IActivationFactory *iface)
++{
++    return InterlockedDecrement(&impl_from_IActivationFactory(iface)->refcount);
++}
++
++static HRESULT STDMETHODCALLTYPE factory_GetIids(IActivationFactory *iface, ULONG *count, IID **iids)
++{
++    return timer_get_iids(&IID_IThreadPoolTimerStatics, count, iids);
++}
++
++static HRESULT STDMETHODCALLTYPE factory_GetRuntimeClassName(IActivationFactory *iface, HSTRING *name)
++{
++    return timer_class_name(name);
++}
++
++static HRESULT STDMETHODCALLTYPE factory_GetTrustLevel(IActivationFactory *iface, TrustLevel *level)
++{
++    if (!level) return E_POINTER;
++    *level = BaseTrust;
++    return S_OK;
++}
++
++static HRESULT STDMETHODCALLTYPE factory_ActivateInstance(IActivationFactory *iface, IInspectable **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    return E_NOTIMPL; /* This class is created through its statics only. */
++}
++
++static const IActivationFactoryVtbl factory_vtbl =
++{
++    factory_QueryInterface, factory_AddRef, factory_Release,
++    factory_GetIids, factory_GetRuntimeClassName, factory_GetTrustLevel,
++    factory_ActivateInstance,
++};
++
++#define FORWARD_FACTORY(method, parameters, arguments) \
++static HRESULT STDMETHODCALLTYPE statics_##method parameters \
++{ \
++    return factory_##method arguments; \
++}
++FORWARD_FACTORY(QueryInterface, (IThreadPoolTimerStatics *iface, REFIID iid, void **out),
++        (&impl_from_IThreadPoolTimerStatics(iface)->IActivationFactory_iface, iid, out))
++FORWARD_FACTORY(GetIids, (IThreadPoolTimerStatics *iface, ULONG *count, IID **iids),
++        (&impl_from_IThreadPoolTimerStatics(iface)->IActivationFactory_iface, count, iids))
++FORWARD_FACTORY(GetRuntimeClassName, (IThreadPoolTimerStatics *iface, HSTRING *name),
++        (&impl_from_IThreadPoolTimerStatics(iface)->IActivationFactory_iface, name))
++FORWARD_FACTORY(GetTrustLevel, (IThreadPoolTimerStatics *iface, TrustLevel *level),
++        (&impl_from_IThreadPoolTimerStatics(iface)->IActivationFactory_iface, level))
++#undef FORWARD_FACTORY
++
++static ULONG STDMETHODCALLTYPE statics_AddRef(IThreadPoolTimerStatics *iface)
++{
++    return factory_AddRef(&impl_from_IThreadPoolTimerStatics(iface)->IActivationFactory_iface);
++}
++
++static ULONG STDMETHODCALLTYPE statics_Release(IThreadPoolTimerStatics *iface)
++{
++    return factory_Release(&impl_from_IThreadPoolTimerStatics(iface)->IActivationFactory_iface);
++}
++
++static HRESULT STDMETHODCALLTYPE statics_CreatePeriodicTimer(IThreadPoolTimerStatics *iface,
++        ITimerElapsedHandler *handler, TimeSpan period, IThreadPoolTimer **out)
++{
++    return timer_create(handler, period, TRUE, NULL, out);
++}
++
++static HRESULT STDMETHODCALLTYPE statics_CreateTimer(IThreadPoolTimerStatics *iface,
++        ITimerElapsedHandler *handler, TimeSpan delay, IThreadPoolTimer **out)
++{
++    return timer_create(handler, delay, FALSE, NULL, out);
++}
++
++static HRESULT STDMETHODCALLTYPE statics_CreatePeriodicTimerWithCompletion(IThreadPoolTimerStatics *iface,
++        ITimerElapsedHandler *handler, TimeSpan period, ITimerDestroyedHandler *destroyed, IThreadPoolTimer **out)
++{
++    return timer_create(handler, period, TRUE, destroyed, out);
++}
++
++static HRESULT STDMETHODCALLTYPE statics_CreateTimerWithCompletion(IThreadPoolTimerStatics *iface,
++        ITimerElapsedHandler *handler, TimeSpan delay, ITimerDestroyedHandler *destroyed, IThreadPoolTimer **out)
++{
++    return timer_create(handler, delay, FALSE, destroyed, out);
++}
++
++static const IThreadPoolTimerStaticsVtbl statics_vtbl =
++{
++    statics_QueryInterface, statics_AddRef, statics_Release,
++    statics_GetIids, statics_GetRuntimeClassName, statics_GetTrustLevel,
++    statics_CreatePeriodicTimer, statics_CreateTimer,
++    statics_CreatePeriodicTimerWithCompletion, statics_CreateTimerWithCompletion,
++};
++
++static struct timer_factory factory =
++{
++    {&factory_vtbl}, {&statics_vtbl}, 1,
++};
++IActivationFactory *threadpool_timer_factory = &factory.IActivationFactory_iface;

@@ -1,0 +1,127 @@
+--- a/dlls/d3d11/d3d11_private.h
++++ b/dlls/d3d11/d3d11_private.h
+@@ -569,6 +569,7 @@
+ struct d3d_device
+ {
+     IUnknown IUnknown_inner;
++    IUnknown partner_probe;
+     ID3D11Device5 ID3D11Device5_iface;
+     ID3D10Device1 ID3D10Device1_iface;
+     ID3D10Multithread ID3D10Multithread_iface;
+--- a/dlls/d3d11/device.c
++++ b/dlls/d3d11/device.c
+@@ -5498,6 +5498,94 @@
+     d3d11_device_CreateFence,
+ };
+ 
++/* Diagnostic private partner interface: preserve real device identity/lifetime,
++ * report zero optional partner capabilities, and fail explicitly on any actual
++ * operation not implemented. Enabled only by GHUB_D3D11_PARTNER_PROBE. */
++static const GUID partner_iid = {0x26c5dc23,0xe49c,0x4b0a,{0x8f,0x79,0xe7,0xb1,0xac,0x80,0x4d,0x32}};
++static struct d3d_device *partner_device(IUnknown *iface)
++{
++    return CONTAINING_RECORD(iface, struct d3d_device, partner_probe);
++}
++static HRESULT WINAPI partner_query(IUnknown *iface, REFIID iid, void **out)
++{
++    if (!out) return E_POINTER;
++    return IUnknown_QueryInterface(partner_device(iface)->outer_unk, iid, out);
++}
++static ULONG WINAPI partner_addref(IUnknown *iface)
++{
++    return IUnknown_AddRef(partner_device(iface)->outer_unk);
++}
++static ULONG WINAPI partner_release(IUnknown *iface)
++{
++    return IUnknown_Release(partner_device(iface)->outer_unk);
++}
++static HRESULT partner_unsupported(const char *name)
++{
++    ERR("GHUB partner probe: unsupported %s\n", name);
++    return E_NOTIMPL;
++}
++static void partner_unsupported_void(const char *name)
++{
++    partner_unsupported(name);
++    RaiseException(0xc0000002, EXCEPTION_NONCONTINUABLE, 0, NULL);
++}
++static HRESULT WINAPI partner_begin(IUnknown *iface) { return partner_unsupported("BeginGuardRectangleSupport"); }
++static void WINAPI partner_end(IUnknown *iface) { partner_unsupported_void("EndGuardRectangleSupport"); }
++static HRESULT WINAPI partner_texture(IUnknown *iface, const D3D11_TEXTURE2D_DESC *desc,
++        const D3D11_SUBRESOURCE_DATA *data, ID3D11Texture2D **out)
++{
++    if (!out) return E_POINTER;
++    *out = NULL;
++    return partner_unsupported("CreateGuardableTexture2D");
++}
++static void WINAPI partner_guard(IUnknown *iface, ID3D11Texture2D *texture, RECT rect) { partner_unsupported_void("SetGuardRect"); }
++static void WINAPI partner_empty(IUnknown *iface, ID3D11Texture2D *texture) { partner_unsupported_void("SetEmptyGuardRect"); }
++static void WINAPI partner_unguarded(IUnknown *iface, ID3D11Texture2D *texture) { partner_unsupported_void("SetUnguarded"); }
++static HRESULT WINAPI partner_offer(IUnknown *iface, UINT count, IDXGIResource *const *resources, UINT priority, UINT flags)
++{ return partner_unsupported("OfferResourcesInternal"); }
++static HRESULT WINAPI partner_reclaim(IUnknown *iface, UINT count, IDXGIResource *const *resources, UINT *results)
++{ return partner_unsupported("ReclaimResourcesInternal"); }
++static UINT WINAPI partner_caps(IUnknown *iface)
++{
++    ERR("GHUB partner probe: GetPartnerCaps -> 0 (no optional support)\n");
++    return 0;
++}
++static HRESULT WINAPI partner_buffer(IUnknown *iface, UINT width, UINT height, DXGI_FORMAT format,
++        BOOL flag, UINT a, UINT b, REFIID iid, void **out, void **other)
++{
++    if (out) *out = NULL;
++    if (other) *other = NULL;
++    return partner_unsupported("CreateCompositionBuffer");
++}
++static HRESULT WINAPI partner_present(IUnknown *iface, HANDLE handle, IUnknown *const *buffers, UINT count)
++{ return partner_unsupported("PresentCompositionBuffers"); }
++static void WINAPI partner_get_guard(IUnknown *iface, ID3D11Texture2D *texture, BOOL *guarded, RECT *rect)
++{ partner_unsupported_void("GetGuardRect"); }
++static HRESULT WINAPI partner_channel(IUnknown *iface, IUnknown **out)
++{
++    if (out) *out = NULL;
++    return partner_unsupported("CreateSynchronizedChannel");
++}
++static HRESULT WINAPI partner_open(IUnknown *iface, HANDLE handle, IUnknown **out)
++{
++    if (out) *out = NULL;
++    return partner_unsupported("OpenSynchronizedChannel");
++}
++static HRESULT WINAPI partner_flip(IUnknown *iface, HANDLE handle, UINT64 a, UINT64 b,
++        UINT c, UINT d, IUnknown *const *resources, UINT count)
++{ return partner_unsupported("PresentFlipManagerToken"); }
++static HRESULT WINAPI partner_cancel(IUnknown *iface, LUID adapter, UINT64 a, UINT64 b)
++{ return partner_unsupported("CancelFlipManagerPresent"); }
++static HRESULT WINAPI partner_refresh(IUnknown *iface) { return partner_unsupported("EnableVariableRefreshForProcess"); }
++static HRESULT WINAPI partner_flush(IUnknown *iface, LUID adapter, HANDLE handle)
++{ return partner_unsupported("FlushCompletedPresents"); }
++static const void *const partner_vtable[] = {
++    partner_query, partner_addref, partner_release, partner_begin, partner_end,
++    partner_texture, partner_guard, partner_empty, partner_unguarded, partner_offer,
++    partner_reclaim, partner_caps, partner_buffer, partner_present, partner_get_guard,
++    partner_channel, partner_open, partner_flip, partner_cancel, partner_refresh, partner_flush
++};
++
+ /* Inner IUnknown methods */
+ 
+ static inline struct d3d_device *impl_from_IUnknown(IUnknown *iface)
+@@ -5520,6 +5608,11 @@
+             || IsEqualGUID(riid, &IID_IUnknown))
+     {
+         *out = &device->ID3D11Device5_iface;
++    }
++    else if (IsEqualGUID(riid, &partner_iid) && GetEnvironmentVariableA("GHUB_D3D11_PARTNER_PROBE", NULL, 0))
++    {
++        ERR("GHUB partner probe: queried native partner interface\n");
++        *out = &device->partner_probe;
+     }
+     else if (!device->d3d11_only
+             && (IsEqualGUID(riid, &IID_ID3D10Device1)
+@@ -8150,6 +8243,7 @@
+ void d3d_device_init(struct d3d_device *device, void *outer_unknown)
+ {
+     device->IUnknown_inner.lpVtbl = &d3d_device_inner_unknown_vtbl;
++    device->partner_probe.lpVtbl = (const IUnknownVtbl *)partner_vtable;
+     device->ID3D11Device5_iface.lpVtbl = &d3d11_device_vtbl;
+     device->ID3D10Device1_iface.lpVtbl = &d3d10_device1_vtbl;
+     device->ID3D10Multithread_iface.lpVtbl = &d3d10_multithread_vtbl;

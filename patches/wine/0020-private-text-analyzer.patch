@@ -1,0 +1,188 @@
+Implement the private DirectWrite reading-direction interface used by WinUI.
+Pinned Wine 10.20; no native DLL is required by the implementation.
+The native DLL is an optional differential-test reference only.
+
+--- a/dlls/dwrite/analyzer.c
++++ b/dlls/dwrite/analyzer.c
+@@ -1284,6 +1284,28 @@
+     return S_OK;
+ }
+
++/* Private DirectWrite ABI consumed by FrameworkUdk TextAnalysis. The matching
++ * Microsoft PDB identifies a four-slot IUnknown-derived interface; it is not
++ * an alias of IDWriteTextAnalyzer (whose slot 3 is AnalyzeScript).
++ */
++static const GUID IID_IDWritePrivateTextAnalyzer =
++    {0xb7e6163e,0x7f46,0x43b4,{0x84,0xb3,0xe4,0xe6,0x24,0x9c,0x36,0x5e}};
++
++typedef struct private_textanalyzer private_textanalyzer;
++struct private_textanalyzer_vtbl
++{
++    HRESULT (WINAPI *QueryInterface)(private_textanalyzer *, REFIID, void **);
++    ULONG (WINAPI *AddRef)(private_textanalyzer *);
++    ULONG (WINAPI *Release)(private_textanalyzer *);
++    HRESULT (WINAPI *GetContentReadingDirection)(private_textanalyzer *, IDWriteTextAnalysisSource *,
++            UINT32, UINT32, DWRITE_READING_DIRECTION *, BOOL *);
++};
++struct private_textanalyzer
++{
++    const struct private_textanalyzer_vtbl *lpVtbl;
++};
++static private_textanalyzer private_analyzer;
++
+ static HRESULT WINAPI dwritetextanalyzer_QueryInterface(IDWriteTextAnalyzer2 *iface, REFIID riid, void **obj)
+ {
+     TRACE("%s, %p.\n", debugstr_guid(riid), obj);
+@@ -1294,6 +1316,12 @@
+         IsEqualIID(riid, &IID_IUnknown))
+     {
+         *obj = iface;
++        return S_OK;
++    }
++
++    if (IsEqualIID(riid, &IID_IDWritePrivateTextAnalyzer))
++    {
++        *obj = &private_analyzer;
+         return S_OK;
+     }
+
+@@ -2336,6 +2364,106 @@
+
+ static IDWriteTextAnalyzer2 textanalyzer = { &textanalyzervtbl };
+
++static HRESULT WINAPI private_analyzer_QueryInterface(private_textanalyzer *iface, REFIID iid, void **out)
++{
++    return IDWriteTextAnalyzer2_QueryInterface(&textanalyzer, iid, out);
++}
++
++static ULONG WINAPI private_analyzer_AddRef(private_textanalyzer *iface)
++{
++    return IDWriteTextAnalyzer2_AddRef(&textanalyzer);
++}
++
++static ULONG WINAPI private_analyzer_Release(private_textanalyzer *iface)
++{
++    return IDWriteTextAnalyzer2_Release(&textanalyzer);
++}
++
++struct direction_source
++{
++    IDWriteTextAnalysisSource *source;
++    const WCHAR *text;
++    UINT32 position, remaining, available;
++};
++
++static HRESULT direction_peek(struct direction_source *source, WCHAR *ch)
++{
++    HRESULT hr;
++    if (!source->available)
++    {
++        if (FAILED(hr = IDWriteTextAnalysisSource_GetTextAtPosition(source->source, source->position,
++                &source->text, &source->available))) return hr;
++        /* A source which ends before the requested range must not cause an
++         * out-of-bounds read or an infinite loop. */
++        if (!source->text || !source->available) return E_INVALIDARG;
++    }
++    *ch = *source->text;
++    return S_OK;
++}
++
++static void direction_advance(struct direction_source *source)
++{
++    ++source->position;
++    --source->remaining;
++    --source->available;
++    ++source->text;
++}
++
++static HRESULT WINAPI private_analyzer_GetContentReadingDirection(private_textanalyzer *iface,
++        IDWriteTextAnalysisSource *source, UINT32 position, UINT32 length,
++        DWRITE_READING_DIRECTION *direction, BOOL *is_neutral)
++{
++    struct direction_source context = {source, NULL, position, length, 0};
++    DWRITE_READING_DIRECTION base;
++    WCHAR first, second;
++    UINT32 ch;
++    int strong = -1;
++    HRESULT hr;
++
++    TRACE("source %p, position %u, length %u, direction %p, neutral %p.\n",
++            source, position, length, direction, is_neutral);
++    if (!direction || !is_neutral) return E_POINTER;
++    *direction = DWRITE_READING_DIRECTION_LEFT_TO_RIGHT;
++    *is_neutral = TRUE;
++    if (!source || position + length < position) return E_INVALIDARG;
++
++    base = IDWriteTextAnalysisSource_GetParagraphReadingDirection(source);
++    while (context.remaining)
++    {
++        if (FAILED(hr = direction_peek(&context, &first))) return hr;
++        direction_advance(&context);
++        ch = first;
++        if (IS_HIGH_SURROGATE(first) && context.remaining)
++        {
++            if (FAILED(hr = direction_peek(&context, &second))) return hr;
++            if (IS_LOW_SURROGATE(second))
++            {
++                ch = 0x10000 + ((first - 0xd800) << 10) + second - 0xdc00;
++                direction_advance(&context);
++            }
++        }
++        strong = bidi_get_char_direction(ch);
++        if (strong != -1) break;
++    }
++    /* Native scans to the first L/R/AL or paragraph separator, including
++     * inside isolates. Preserve the vertical bit of the paragraph direction.
++     * This private operation is not the full Unicode paragraph algorithm. */
++    *direction = strong >= 0 ? (base & ~1) | strong : base;
++    *is_neutral = strong < 0;
++    TRACE("result direction %u, neutral %d.\n", *direction, *is_neutral);
++    return S_OK;
++}
++
++static const struct private_textanalyzer_vtbl private_analyzer_vtbl =
++{
++    private_analyzer_QueryInterface,
++    private_analyzer_AddRef,
++    private_analyzer_Release,
++    private_analyzer_GetContentReadingDirection,
++};
++static private_textanalyzer private_analyzer = { &private_analyzer_vtbl };
++
++
+ IDWriteTextAnalyzer2 *get_text_analyzer(void)
+ {
+     return &textanalyzer;
+--- a/dlls/dwrite/bidi.c
++++ b/dlls/dwrite/bidi.c
+@@ -109,6 +109,20 @@
+     NI = ON,  /* alias, where ON, WS, S  and Isolates are treated the same */
+ };
+
++/* Return the first-strong classification used by the private text analyzer:
++ * horizontal direction, -1 for non-strong, or -2 for a paragraph boundary. */
++int bidi_get_char_direction(UINT32 ch)
++{
++    switch (get_table_entry_32(bidi_direction_table, ch))
++    {
++        case L: return DWRITE_READING_DIRECTION_LEFT_TO_RIGHT;
++        case R:
++        case AL: return DWRITE_READING_DIRECTION_RIGHT_TO_LEFT;
++        case B: return -2;
++        default: return -1;
++    }
++}
++
+ static const char debug_type[][4] =
+ {
+     "ON",      /* Other Neutral */
+--- a/dlls/dwrite/dwrite_private.h
++++ b/dlls/dwrite/dwrite_private.h
+@@ -578,6 +578,7 @@
+     UINT8 bidi_class;
+ };
+
++extern int bidi_get_char_direction(UINT32 ch);
+ extern HRESULT bidi_computelevels(struct bidi_char *chars, unsigned int count, UINT8 baselevel);
+
+ struct dwrite_glyphbitmap

@@ -1,0 +1,329 @@
+Wine 10.20 backport: Windows.UI.Core.CoreWindow factory and desktop thread query.
+
+Upstream author: Zhiyi Zhang, CodeWeavers. Original LGPL notices retained.
+Squashed from:
+  https://github.com/wine-mirror/wine/commit/26a56ddb48034258f7758d6a526b2127ba687b4d
+  https://github.com/wine-mirror/wine/commit/2acc62cfa072d13179b56edc6929eae11d013ef8
+  https://github.com/wine-mirror/wine/commit/17062b7f344c7e52438bccd09ae71eb259a8c79d
+
+No UWP CoreWindow creation/lifecycle implementation; GetForCurrentThread returns NULL.
+
+--- a/dlls/windows.ui/Makefile.in
++++ b/dlls/windows.ui/Makefile.in
+@@ -4,6 +4,7 @@
+ SOURCES = \
+ 	accessibilitysettings.c \
+ 	classes.idl \
++	corewindow.c \
+ 	inputpane.c \
+ 	main.c \
+ 	uisettings.c \
+--- a/dlls/windows.ui/classes.idl
++++ b/dlls/windows.ui/classes.idl
+@@ -35,6 +35,10 @@
+ import "windows.ui.windowmanagement.idl";
+ import "windows.ui.viewmanagement.idl";
+ 
++namespace Windows.UI.Core {
++    runtimeclass CoreWindow;
++}
++
+ namespace Windows.UI.ViewManagement {
+     runtimeclass AccessibilitySettings;
+     runtimeclass UISettings;
+--- /dev/null
++++ b/dlls/windows.ui/corewindow.c
+@@ -0,0 +1,148 @@
++/* WinRT Windows.UI.Core.CoreWindow Implementation
++ *
++ * Copyright 2025 Zhiyi Zhang for CodeWeavers
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++
++#include "private.h"
++
++#include "wine/debug.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(ui);
++
++struct corewindow_statics
++{
++    IActivationFactory IActivationFactory_iface;
++    ICoreWindowStatic ICoreWindowStatic_iface;
++    LONG ref;
++};
++
++static inline struct corewindow_statics *impl_from_IActivationFactory( IActivationFactory *iface )
++{
++    return CONTAINING_RECORD( iface, struct corewindow_statics, IActivationFactory_iface );
++}
++
++static HRESULT WINAPI factory_QueryInterface( IActivationFactory *iface, REFIID iid, void **out )
++{
++    struct corewindow_statics *impl = impl_from_IActivationFactory( iface );
++
++    TRACE( "iface %p, iid %s, out %p.\n", iface, debugstr_guid( iid ), out );
++
++    if (IsEqualGUID( iid, &IID_IUnknown ) ||
++        IsEqualGUID( iid, &IID_IAgileObject ) ||
++        IsEqualGUID( iid, &IID_IInspectable ) ||
++        IsEqualGUID( iid, &IID_IActivationFactory ))
++    {
++        *out = &impl->IActivationFactory_iface;
++        IActivationFactory_AddRef( &impl->IActivationFactory_iface );
++        return S_OK;
++    }
++    else if (IsEqualGUID( iid, &IID_ICoreWindowStatic ))
++    {
++        *out = &impl->ICoreWindowStatic_iface;
++        ICoreWindowStatic_AddRef( &impl->ICoreWindowStatic_iface );
++        return S_OK;
++    }
++
++    FIXME( "%s not implemented, returning E_NOINTERFACE.\n", debugstr_guid( iid ) );
++    *out = NULL;
++    return E_NOINTERFACE;
++}
++
++static ULONG WINAPI factory_AddRef( IActivationFactory *iface )
++{
++    struct corewindow_statics *impl = impl_from_IActivationFactory( iface );
++    ULONG ref = InterlockedIncrement( &impl->ref );
++    TRACE( "iface %p, ref %lu.\n", iface, ref );
++    return ref;
++}
++
++static ULONG WINAPI factory_Release( IActivationFactory *iface )
++{
++    struct corewindow_statics *impl = impl_from_IActivationFactory( iface );
++    ULONG ref = InterlockedDecrement( &impl->ref );
++    TRACE( "iface %p, ref %lu.\n", iface, ref );
++    return ref;
++}
++
++static HRESULT WINAPI factory_GetIids( IActivationFactory *iface, ULONG *iid_count, IID **iids )
++{
++    FIXME( "iface %p, iid_count %p, iids %p stub!\n", iface, iid_count, iids );
++    return E_NOTIMPL;
++}
++
++static HRESULT WINAPI factory_GetRuntimeClassName( IActivationFactory *iface, HSTRING *class_name )
++{
++    FIXME( "iface %p, class_name %p stub!\n", iface, class_name );
++    return E_NOTIMPL;
++}
++
++static HRESULT WINAPI factory_GetTrustLevel( IActivationFactory *iface, TrustLevel *trust_level )
++{
++    FIXME( "iface %p, trust_level %p stub!\n", iface, trust_level );
++    return E_NOTIMPL;
++}
++
++static HRESULT WINAPI factory_ActivateInstance( IActivationFactory *iface, IInspectable **instance )
++{
++    FIXME( "iface %p, instance %p.\n", iface, instance );
++    return E_NOTIMPL;
++}
++
++static const struct IActivationFactoryVtbl factory_vtbl =
++{
++    factory_QueryInterface,
++    factory_AddRef,
++    factory_Release,
++    /* IInspectable methods */
++    factory_GetIids,
++    factory_GetRuntimeClassName,
++    factory_GetTrustLevel,
++    /* IActivationFactory methods */
++    factory_ActivateInstance,
++};
++
++DEFINE_IINSPECTABLE( corewindow_static, ICoreWindowStatic, struct corewindow_statics, IActivationFactory_iface )
++
++static HRESULT STDMETHODCALLTYPE corewindow_static_GetForCurrentThread( ICoreWindowStatic *iface, ICoreWindow **windows )
++{
++    FIXME( "iface %p, windows %p stub!\n", iface, windows );
++
++    *windows = NULL;
++    return S_OK;
++}
++
++static const struct ICoreWindowStaticVtbl corewindow_static_vtbl =
++{
++    corewindow_static_QueryInterface,
++    corewindow_static_AddRef,
++    corewindow_static_Release,
++    /* IInspectable methods */
++    corewindow_static_GetIids,
++    corewindow_static_GetRuntimeClassName,
++    corewindow_static_GetTrustLevel,
++    /* ICoreWindowStatic methods */
++    corewindow_static_GetForCurrentThread
++};
++
++static struct corewindow_statics corewindow_statics =
++{
++    {&factory_vtbl},
++    {&corewindow_static_vtbl},
++    1,
++};
++
++IActivationFactory *corewindow_factory = &corewindow_statics.IActivationFactory_iface;
+--- a/dlls/windows.ui/main.c
++++ b/dlls/windows.ui/main.c
+@@ -50,6 +50,9 @@
+     if (!wcscmp( buffer, RuntimeClass_Windows_UI_ViewManagement_InputPane ))
+         IActivationFactory_QueryInterface( inputpane_factory, &IID_IActivationFactory, (void **)factory );
+ 
++    if (!wcscmp( buffer, RuntimeClass_Windows_UI_Core_CoreWindow ))
++        IActivationFactory_QueryInterface( corewindow_factory, &IID_IActivationFactory, (void **)factory );
++
+     if (*factory) return S_OK;
+     return CLASS_E_CLASSNOTAVAILABLE;
+ }
+--- a/dlls/windows.ui/private.h
++++ b/dlls/windows.ui/private.h
+@@ -33,6 +33,8 @@
+ #include "windows.foundation.h"
+ #define WIDL_using_Windows_UI
+ #include "windows.ui.h"
++#define WIDL_using_Windows_UI_Core
++#include "windows.ui.core.h"
+ #define WIDL_using_Windows_UI_ViewManagement
+ #include "windows.ui.viewmanagement.h"
+ 
+@@ -40,6 +42,7 @@
+ extern IActivationFactory *uisettings_factory;
+ extern IActivationFactory *uiviewsettings_factory;
+ extern IActivationFactory *inputpane_factory;
++extern IActivationFactory *corewindow_factory;
+ 
+ #define DEFINE_IINSPECTABLE_( pfx, iface_type, impl_type, impl_from, iface_mem, expr )             \
+     static inline impl_type *impl_from( iface_type *iface )                                        \
+--- a/dlls/windows.ui/tests/Makefile.in
++++ b/dlls/windows.ui/tests/Makefile.in
+@@ -2,4 +2,5 @@
+ IMPORTS = combase advapi32 user32
+ 
+ SOURCES = \
++	corewindow.c \
+ 	uisettings.c
+--- /dev/null
++++ b/dlls/windows.ui/tests/corewindow.c
+@@ -0,0 +1,103 @@
++/*
++ * Copyright 2025 Zhiyi Zhang for CodeWeavers
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++#include <stdarg.h>
++#define COBJMACROS
++#include "windef.h"
++#include "winbase.h"
++#include "winstring.h"
++#include "roapi.h"
++#include "wine/test.h"
++
++#define WIDL_using_Windows_UI_Core
++#include "windows.ui.core.h"
++
++#define check_interface( obj, iid, exp ) check_interface_( __LINE__, obj, iid, exp )
++static void check_interface_( unsigned int line, void *obj, const IID *iid, BOOL supported )
++{
++    IUnknown *unk, *iface = obj;
++    HRESULT hr, expected_hr;
++
++    expected_hr = supported ? S_OK : E_NOINTERFACE;
++    hr = IUnknown_QueryInterface( iface, iid, (void **)&unk );
++    ok_(__FILE__, line)( hr == expected_hr, "Got hr %#lx, expected %#lx.\n", hr, expected_hr );
++    if (SUCCEEDED( hr ))
++        IUnknown_Release( unk );
++}
++
++static void test_CoreWindow(void)
++{
++    static const WCHAR *class_name = RuntimeClass_Windows_UI_Core_CoreWindow;
++    ICoreWindowStatic *core_window_static;
++    IActivationFactory *factory;
++    ICoreWindow *core_window;
++    HSTRING str;
++    HRESULT hr;
++    LONG ref;
++
++    hr = WindowsCreateString( class_name, wcslen( class_name ), &str );
++    ok( hr == S_OK, "Got unexpected hr %#lx.\n", hr );
++
++    hr = RoGetActivationFactory( str, &IID_IActivationFactory, (void **)&factory );
++    ok( hr == S_OK || broken( hr == REGDB_E_CLASSNOTREG ), "got hr %#lx.\n", hr );
++    WindowsDeleteString( str );
++    if (FAILED( hr ))
++    {
++        win_skip( "%s runtimeclass not registered, skipping tests.\n", wine_dbgstr_w( class_name ) );
++        return;
++    }
++
++    check_interface( factory, &IID_IUnknown, TRUE );
++    check_interface( factory, &IID_IAgileObject, TRUE );
++    check_interface( factory, &IID_IInspectable, TRUE );
++    check_interface( factory, &IID_IActivationFactory, TRUE );
++    check_interface( factory, &IID_ICoreWindowStatic, TRUE );
++
++    /* Test ICoreWindowStatic */
++    hr = IActivationFactory_QueryInterface( factory, &IID_ICoreWindowStatic, (void **)&core_window_static );
++    ok( hr == S_OK, "Got unexpected hr %#lx.\n", hr );
++
++    /* Crash on Windows */
++    if (0)
++    {
++    hr = ICoreWindowStatic_GetForCurrentThread( core_window_static, 0 );
++    ok( hr == E_INVALIDARG, "Got unexpected hr %#lx.\n", hr );
++    }
++
++    /* How to create a ICoreWindow? */
++    core_window = (ICoreWindow *)0xdeadbeef;
++    hr = ICoreWindowStatic_GetForCurrentThread( core_window_static, &core_window );
++    ok( hr == S_OK, "Got unexpected hr %#lx.\n", hr );
++    ok( core_window == NULL, "Got unexpected core_window.\n" );
++
++    ICoreWindowStatic_Release( core_window_static );
++
++    ref = IActivationFactory_Release( factory );
++    ok( ref == 1, "Got unexpected ref %ld.\n", ref );
++}
++
++START_TEST(corewindow)
++{
++    HRESULT hr;
++
++    hr = RoInitialize( RO_INIT_MULTITHREADED );
++    ok( hr == S_OK, "RoInitialize failed, hr %#lx\n", hr );
++
++    test_CoreWindow();
++
++    RoUninitialize();
++}

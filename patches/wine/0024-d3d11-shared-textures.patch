@@ -1,0 +1,626 @@
+--- a/dlls/d3d11/device.c
++++ b/dlls/d3d11/device.c
+@@ -5232,18 +5232,46 @@
+ static HRESULT STDMETHODCALLTYPE d3d11_device_OpenSharedResource1(ID3D11Device5 *iface, HANDLE handle,
+         REFIID iid, void **resource)
+ {
+-    FIXME("iface %p, handle %p, iid %s, resource %p stub!\n", iface, handle, debugstr_guid(iid), resource);
+-
+-    return E_NOTIMPL;
++    struct d3d_device *device = impl_from_ID3D11Device5(iface);
++    struct wined3d_resource_desc shared_desc;
++    D3D11_TEXTURE2D_DESC desc = {0};
++    struct d3d_texture2d *texture;
++    unsigned int flags;
++    HRESULT hr;
++
++    if (!resource) return E_INVALIDARG;
++    *resource = NULL;
++    if (FAILED(hr = wined3d_shared_texture_get_desc(handle, &shared_desc, &flags))) return hr;
++    desc.Width = shared_desc.width;
++    desc.Height = shared_desc.height;
++    desc.MipLevels = desc.ArraySize = desc.SampleDesc.Count = 1;
++    desc.Format = dxgi_format_from_wined3dformat(shared_desc.format);
++    desc.BindFlags = d3d11_bind_flags_from_wined3d(shared_desc.bind_flags);
++    desc.MiscFlags = flags;
++    if (FAILED(hr = d3d_texture2d_create(device, &desc, NULL, NULL, &texture))) return hr;
++    wined3d_mutex_lock();
++    hr = wined3d_resource_open_shared_handle(wined3d_texture_get_resource(texture->wined3d_texture), handle);
++    wined3d_mutex_unlock();
++    if (SUCCEEDED(hr)) hr = ID3D11Texture2D_QueryInterface(&texture->ID3D11Texture2D_iface, iid, resource);
++    ID3D11Texture2D_Release(&texture->ID3D11Texture2D_iface);
++    return hr;
+ }
+
+ static HRESULT STDMETHODCALLTYPE d3d11_device_OpenSharedResourceByName(ID3D11Device5 *iface, const WCHAR *name,
+         DWORD access, REFIID iid, void **resource)
+ {
+-    FIXME("iface %p, name %s, access %#lx, iid %s, resource %p stub!\n", iface, debugstr_w(name), access,
+-            debugstr_guid(iid), resource);
+-
+-    return E_NOTIMPL;
++    HANDLE handle;
++    HRESULT hr;
++
++    if (!resource) return E_INVALIDARG;
++    *resource = NULL;
++    if (!name) return E_INVALIDARG;
++    if (access != (DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE)) return E_NOTIMPL;
++    if (!(handle = OpenFileMappingW(FILE_MAP_READ | FILE_MAP_WRITE, FALSE, name)))
++        return HRESULT_FROM_WIN32(GetLastError());
++    hr = d3d11_device_OpenSharedResource1(iface, handle, iid, resource);
++    CloseHandle(handle);
++    return hr;
+ }
+
+ static void STDMETHODCALLTYPE d3d11_device_GetImmediateContext2(ID3D11Device5 *iface,
+--- a/dlls/d3d11/texture.c
++++ b/dlls/d3d11/texture.c
+@@ -1046,6 +1046,7 @@
+         texture->desc.MipLevels = levels;
+     }
+
++    wined3d_resource_set_shared_flags(wined3d_texture_get_resource(texture->wined3d_texture), desc->MiscFlags);
+     needs_surface = desc->MipLevels == 1 && desc->ArraySize == 1;
+     hr = d3d_device_create_dxgi_resource((IUnknown *)&device->ID3D10Device1_iface,
+             wined3d_texture_get_resource(texture->wined3d_texture), (IUnknown *)&texture->ID3D10Texture2D_iface,
+--- a/dlls/dxgi/resource.c
++++ b/dlls/dxgi/resource.c
+@@ -478,10 +478,15 @@
+ static HRESULT STDMETHODCALLTYPE dxgi_resource_CreateSharedHandle(IDXGIResource1 *iface,
+         const SECURITY_ATTRIBUTES *attributes, DWORD access, const WCHAR *name, HANDLE *handle)
+ {
+-    FIXME("iface %p, attributes %p, access %#lx, name %s, handle %p stub!\n", iface, attributes,
+-            access, wine_dbgstr_w(name), handle);
+-
+-    return E_NOTIMPL;
++    struct dxgi_resource *resource = impl_from_IDXGIResource1(iface);
++    HRESULT hr;
++
++    if (!handle) return E_INVALIDARG;
++    *handle = NULL;
++    wined3d_mutex_lock();
++    hr = wined3d_resource_create_shared_handle(resource->wined3d_resource, attributes, access, name, handle);
++    wined3d_mutex_unlock();
++    return hr;
+ }
+
+ static const struct IDXGIResource1Vtbl dxgi_resource_vtbl =
+--- a/dlls/wined3d/Makefile.in
++++ b/dlls/wined3d/Makefile.in
+@@ -26,0 +27 @@
++	shared_texture.c \
+--- a/dlls/wined3d/cs.c
++++ b/dlls/wined3d/cs.c
+@@ -3213,6 +3213,84 @@
+     /* WINED3D_CS_OP_EXECUTE_COMMAND_LIST        */ wined3d_cs_exec_execute_command_list,
+ };
+
++/* Execute shared-texture accesses as transactions. Readback makes the pixels
++ * available before releasing the interprocess mutex; this favors correctness
++ * over performance and is enabled only for explicitly exported lab textures. */
++struct shared_access
++{
++    struct wined3d_resource *resource;
++    BOOL write;
++};
++static void shared_add(struct shared_access *entries, unsigned int *count, struct wined3d_resource *r, BOOL write)
++{
++    unsigned int i;
++    if (!r || !r->shared_texture)
++        return;
++    for (i = 0; i < *count; ++i)
++        if (entries[i].resource == r)
++        {
++            entries[i].write |= write;
++            return;
++        }
++    entries[*count] = (struct shared_access){r, write};
++    ++*count;
++}
++static void wined3d_cs_exec_shared(struct wined3d_cs *cs, enum wined3d_cs_op opcode, const void *data)
++{
++    struct shared_access entries[WINED3D_SHADER_TYPE_COUNT * MAX_SHADER_RESOURCE_VIEWS + WINED3D_MAX_RENDER_TARGETS];
++    unsigned int count = 0, i, j, first, last;
++
++    switch (opcode)
++    {
++    case WINED3D_CS_OP_CLEAR: {
++        const struct wined3d_cs_clear *op = data;
++        for (i = 0; i < op->rt_count; ++i)
++            if (op->fb.render_targets[i])
++                shared_add(entries, &count, op->fb.render_targets[i]->resource, TRUE);
++        break;
++    }
++    case WINED3D_CS_OP_CLEAR_SYSMEM_TEXTURE:
++        shared_add(entries, &count, &((const struct wined3d_cs_clear_sysmem_texture *)data)->texture->resource, TRUE);
++        break;
++    case WINED3D_CS_OP_DRAW:
++    case WINED3D_CS_OP_DISPATCH:
++        if (opcode == WINED3D_CS_OP_DRAW)
++            for (i = 0; i < ARRAY_SIZE(cs->state.fb.render_targets); ++i)
++                if (cs->state.fb.render_targets[i])
++                    shared_add(entries, &count, cs->state.fb.render_targets[i]->resource, TRUE);
++        first = opcode == WINED3D_CS_OP_DISPATCH ? WINED3D_SHADER_TYPE_COMPUTE : 0;
++        last = opcode == WINED3D_CS_OP_DISPATCH ? WINED3D_SHADER_TYPE_COMPUTE + 1 : WINED3D_SHADER_TYPE_COMPUTE;
++        for (i = first; i < last; ++i)
++            for (j = 0; j < MAX_SHADER_RESOURCE_VIEWS; ++j)
++                if (cs->state.shader_resource_view[i][j])
++                    shared_add(entries, &count, cs->state.shader_resource_view[i][j]->resource, FALSE);
++        break;
++    case WINED3D_CS_OP_BLT_SUB_RESOURCE: {
++        const struct wined3d_cs_blt_sub_resource *op = data;
++        shared_add(entries, &count, op->src_resource, FALSE);
++        shared_add(entries, &count, op->dst_resource, TRUE);
++        break;
++    }
++    case WINED3D_CS_OP_UPDATE_SUB_RESOURCE:
++        shared_add(entries, &count, ((const struct wined3d_cs_update_sub_resource *)data)->resource, TRUE);
++        break;
++    default:
++        break;
++    }
++    for (i = 0; i < count; ++i)
++        if (!wined3d_shared_texture_begin(entries[i].resource))
++        {
++            ERR("Shared texture import failed, dropping opcode %u.\n", opcode);
++            while (i--)
++                wined3d_shared_texture_end(entries[i].resource, FALSE);
++            return;
++        }
++    wined3d_cs_op_handlers[opcode](cs, data);
++    for (i = count; i; --i)
++        if (!wined3d_shared_texture_end(entries[i - 1].resource, entries[i - 1].write))
++            ERR("Shared texture publication failed, opcode %u.\n", opcode);
++}
++
+ void wined3d_device_context_emit_execute_command_list(struct wined3d_device_context *context,
+         struct wined3d_command_list *list, bool restore_state)
+ {
+@@ -3275,7 +3353,7 @@
+     if (opcode >= WINED3D_CS_OP_STOP)
+         ERR("Invalid opcode %#x.\n", opcode);
+     else
+-        wined3d_cs_op_handlers[opcode](cs, &data[start]);
++        wined3d_cs_exec_shared(cs, opcode, &data[start]);
+
+     if (cs->data == data)
+         cs->start = cs->end = start;
+@@ -3665,7 +3743,7 @@
+         }
+
+         wined3d_cs_command_lock(cs);
+-        wined3d_cs_op_handlers[opcode](cs, packet->data);
++        wined3d_cs_exec_shared(cs, opcode, packet->data);
+         wined3d_cs_command_unlock(cs);
+         TRACE("%s at %p executed.\n", debug_cs_op(opcode), packet);
+     }
+@@ -3698,7 +3776,7 @@
+         if (opcode >= WINED3D_CS_OP_STOP)
+             ERR("Invalid opcode %#x.\n", opcode);
+         else
+-            wined3d_cs_op_handlers[opcode](cs, packet->data);
++            wined3d_cs_exec_shared(cs, opcode, packet->data);
+         TRACE("%s executed.\n", debug_cs_op(opcode));
+     }
+ }
+--- a/dlls/wined3d/resource.c
++++ b/dlls/wined3d/resource.c
+@@ -167,6 +167,8 @@
+             return WINED3DERR_INVALIDCALL;
+     }
+
++    resource->shared_texture = NULL;
++    resource->shared_flags = 0;
+     resource->guard_mode = 0;
+     resource->ref = 1;
+     resource->device = device;
+@@ -218,6 +220,7 @@
+
+     TRACE("resource %p.\n", resource);
+
++    wined3d_shared_texture_cleanup(resource);
+     wined3d_resource_free_sysmem(resource);
+     context_resource_released(resource->device, resource);
+ }
+--- a/dlls/wined3d/wined3d.spec
++++ b/dlls/wined3d/wined3d.spec
+@@ -405,3 +405,7 @@
+ @ cdecl -ret64 wined3d_device_get_conservative_flush_count(ptr)
+ @ cdecl wined3d_resource_set_guard_rect(ptr long ptr)
+ @ cdecl wined3d_resource_get_guard_rect(ptr ptr)
++@ cdecl wined3d_resource_create_shared_handle(ptr ptr long wstr ptr)
++@ cdecl wined3d_resource_set_shared_flags(ptr long)
++@ cdecl wined3d_shared_texture_get_desc(ptr ptr ptr)
++@ cdecl wined3d_resource_open_shared_handle(ptr ptr)
+--- a/dlls/wined3d/wined3d_private.h
++++ b/dlls/wined3d/wined3d_private.h
+@@ -3304,6 +3304,8 @@
+     LONG rtv_bind_count_device;
+
+     /* Producer-side guard state. Commands snapshot it before queueing. */
++    struct wined3d_shared_texture *shared_texture;
++    unsigned int shared_flags;
+     unsigned int guard_mode; /* 0: unguarded, 1: rectangle, 2: empty. */
+     RECT guard_rect;
+ };
+@@ -3325,6 +3327,9 @@
+ }
+
+ void resource_cleanup(struct wined3d_resource *resource);
++BOOL wined3d_shared_texture_begin(struct wined3d_resource *resource);
++BOOL wined3d_shared_texture_end(struct wined3d_resource *resource, BOOL write);
++void wined3d_shared_texture_cleanup(struct wined3d_resource *resource);
+ HRESULT resource_init(struct wined3d_resource *resource, struct wined3d_device *device,
+         enum wined3d_resource_type type, const struct wined3d_format *format,
+         enum wined3d_multisample_type multisample_type, unsigned int multisample_quality, unsigned int usage,
+--- a/include/wine/wined3d.h
++++ b/include/wine/wined3d.h
+@@ -2738,6 +2738,12 @@
+
+ void __cdecl wined3d_resource_get_desc(const struct wined3d_resource *resource,
+         struct wined3d_resource_desc *desc);
++HRESULT __cdecl wined3d_resource_create_shared_handle(struct wined3d_resource *resource,
++        const SECURITY_ATTRIBUTES *attributes, DWORD access, const WCHAR *name, HANDLE *handle);
++void __cdecl wined3d_resource_set_shared_flags(struct wined3d_resource *resource, unsigned int flags);
++HRESULT __cdecl wined3d_shared_texture_get_desc(HANDLE handle, struct wined3d_resource_desc *desc,
++        unsigned int *flags);
++HRESULT __cdecl wined3d_resource_open_shared_handle(struct wined3d_resource *resource, HANDLE handle);
+ void * __cdecl wined3d_resource_get_parent(const struct wined3d_resource *resource);
+ HRESULT __cdecl wined3d_resource_set_guard_rect(struct wined3d_resource *resource, unsigned int mode, const RECT *rect);
+ unsigned int __cdecl wined3d_resource_get_guard_rect(struct wined3d_resource *resource, RECT *rect);
+--- a/dlls/wined3d/shared_texture.c
++++ b/dlls/wined3d/shared_texture.c
+@@ -0,0 +1,352 @@
++/* Private Wine 10.20 shared-texture transport for the G HUB compositor.
++ * CPU-backed, opt-in, single-subresource RT/SRV textures only. This is not
++ * the Windows DxgkSharedResource wire format or GPU external-memory sharing.
++ *
++ * Copyright 2026 Cencyte D
++ * SPDX-License-Identifier: LGPL-2.1-or-later
++ */
++#include "wined3d_private.h"
++#include "wined3d_gl.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(d3d);
++
++#define SHARED_FLAGS 0x802        /* D3D11_RESOURCE_MISC_SHARED | SHARED_NTHANDLE */
++#define SHARED_ACCESS 0x80000001u /* DXGI_SHARED_RESOURCE_READ | WRITE */
++#define SHARED_MAX_BYTES (256u * 1024 * 1024)
++
++struct shared_header
++{
++    DWORD magic[4], version, bytes, row_pitch;
++    struct wined3d_resource_desc desc;
++    unsigned int flags;
++    LONG broken;
++    LONG64 generation;
++};
++struct wined3d_shared_texture
++{
++    HANDLE section, mutex;
++    struct shared_header *view, info;
++    LONG64 generation;
++};
++static const DWORD shared_magic[4] = {0x55424847, 0x48535844, 0x45524152, 0x00000001};
++
++static BOOL enabled(void)
++{
++    char value[2];
++    return GetEnvironmentVariableA("GHUB_D3D11_SHARED_TEXTURES", value, sizeof(value)) == 1 && value[0] == '1';
++}
++static BOOL valid_header(const struct shared_header *h)
++{
++    return !memcmp(h->magic, shared_magic, sizeof(shared_magic)) && h->version == 1 &&
++           h->desc.resource_type == WINED3D_RTYPE_TEXTURE_2D && h->desc.width && h->desc.width <= 8192 &&
++           h->desc.height && h->desc.height <= 8192 && h->desc.depth == 1 &&
++           h->desc.multisample_type == WINED3D_MULTISAMPLE_NONE && !h->desc.multisample_quality &&
++           h->flags == SHARED_FLAGS &&
++           !(h->desc.bind_flags & ~(WINED3D_BIND_RENDER_TARGET | WINED3D_BIND_SHADER_RESOURCE)) && h->row_pitch &&
++           h->row_pitch <= 8192 * 16 && h->bytes <= SHARED_MAX_BYTES && h->bytes == h->row_pitch * h->desc.height;
++}
++static void destroy_shared(struct wined3d_shared_texture *shared)
++{
++    if (!shared)
++        return;
++    if (shared->view)
++        UnmapViewOfFile(shared->view);
++    if (shared->mutex)
++        CloseHandle(shared->mutex);
++    if (shared->section)
++        CloseHandle(shared->section);
++    free(shared);
++}
++void wined3d_shared_texture_cleanup(struct wined3d_resource *resource)
++{
++    destroy_shared(resource->shared_texture);
++    resource->shared_texture = NULL;
++}
++/* One prefix-local mutex serializes multi-resource commands, including copies
++ * in opposite directions on different processes. No process pointer registry. */
++static HANDLE create_mutex(void)
++{
++    return CreateMutexW(NULL, FALSE, L"Local\\WineGHubSharedTextureV1");
++}
++static BOOL lock_shared(struct wined3d_shared_texture *shared)
++{
++    DWORD result = WaitForSingleObject(shared->mutex, 10000);
++    if (result == WAIT_ABANDONED)
++    {
++        /* A writer died with a possible incomplete GPU readback. */
++        shared->view->broken = TRUE;
++        ReleaseMutex(shared->mutex);
++        return FALSE;
++    }
++    return result == WAIT_OBJECT_0;
++}
++static BOOL header_unchanged(struct wined3d_shared_texture *shared)
++{
++    return !memcmp(shared->view, &shared->info, offsetof(struct shared_header, broken)) && !shared->view->broken &&
++           shared->view->generation > 0 && !(shared->view->generation & 1);
++}
++static HRESULT open_shared(HANDLE handle, struct wined3d_shared_texture **out)
++{
++    struct wined3d_shared_texture *shared;
++    struct shared_header *view;
++    HRESULT hr = E_INVALIDARG;
++
++    *out = NULL;
++    if (!enabled())
++        return E_NOTIMPL;
++    if (!(shared = calloc(1, sizeof(*shared))))
++        return E_OUTOFMEMORY;
++    if (!DuplicateHandle(GetCurrentProcess(), handle, GetCurrentProcess(), &shared->section, 0, FALSE,
++                         DUPLICATE_SAME_ACCESS))
++        goto fail;
++    if (!(view = MapViewOfFile(shared->section, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, sizeof(*view))))
++        goto fail;
++    shared->info = *view;
++    UnmapViewOfFile(view);
++    if (!valid_header(&shared->info))
++        goto fail;
++    if (!(shared->view =
++              MapViewOfFile(shared->section, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, sizeof(*view) + shared->info.bytes)))
++        goto fail;
++    if (!(shared->mutex = create_mutex()))
++    {
++        hr = HRESULT_FROM_WIN32(GetLastError());
++        goto fail;
++    }
++    if (!lock_shared(shared))
++    {
++        hr = E_FAIL;
++        goto fail;
++    }
++    if (!header_unchanged(shared))
++    {
++        ReleaseMutex(shared->mutex);
++        goto fail;
++    }
++    ReleaseMutex(shared->mutex);
++    *out = shared;
++    return S_OK;
++fail:
++    destroy_shared(shared);
++    return hr;
++}
++HRESULT CDECL wined3d_shared_texture_get_desc(HANDLE handle, struct wined3d_resource_desc *desc, unsigned int *flags)
++{
++    struct wined3d_shared_texture *shared;
++    HRESULT hr = open_shared(handle, &shared);
++    if (FAILED(hr))
++        return hr;
++    *desc = shared->info.desc;
++    *flags = shared->info.flags;
++    destroy_shared(shared);
++    return S_OK;
++}
++void CDECL wined3d_resource_set_shared_flags(struct wined3d_resource *resource, unsigned int flags)
++{
++    resource->shared_flags = flags;
++}
++static BOOL supported(struct wined3d_resource *resource)
++{
++    struct wined3d_texture *texture;
++    if (wined3d_get_renderer() != WINED3D_RENDERER_OPENGL || resource->device->wined3d->flags & WINED3D_NO3D ||
++        resource->type != WINED3D_RTYPE_TEXTURE_2D || resource->shared_flags != SHARED_FLAGS ||
++        resource->access != WINED3D_RESOURCE_ACCESS_GPU || resource->multisample_type ||
++        resource->multisample_quality || resource->width > 8192 || resource->height > 8192 ||
++        resource->bind_flags & ~(WINED3D_BIND_RENDER_TARGET | WINED3D_BIND_SHADER_RESOURCE) ||
++        resource->format->block_width != 1 || resource->format->block_height != 1 ||
++        resource->format->attrs & WINED3D_FORMAT_ATTR_PLANAR || !resource->format->byte_count)
++        return FALSE;
++    texture = texture_from_resource(resource);
++    return texture->level_count == 1 && texture->layer_count == 1;
++}
++/* Called on the CS thread, with the transport mutex held. */
++static BOOL transfer(struct wined3d_resource *resource, BOOL publish)
++{
++    struct wined3d_texture *texture = texture_from_resource(resource);
++    struct wined3d_shared_texture *shared = resource->shared_texture;
++    struct wined3d_context *context = context_acquire(resource->device, NULL, 0);
++    struct wined3d_bo_address address;
++    BOOL ret;
++
++    if (!wined3d_context_gl(context)->valid)
++    {
++        ERR("Invalid GL context for shared texture %p.\n", resource);
++        shared->view->broken = TRUE;
++        context_release(context);
++        return FALSE;
++    }
++    if (publish)
++        ret = wined3d_texture_load_location(texture, 0, context, WINED3D_LOCATION_SYSMEM);
++    else
++        ret = wined3d_texture_prepare_location(texture, 0, context, WINED3D_LOCATION_SYSMEM);
++    if (ret)
++    {
++        wined3d_texture_get_bo_address(texture, 0, &address, WINED3D_LOCATION_SYSMEM);
++        if (publish)
++        {
++            /* Odd generation means publication was interrupted. */
++            InterlockedIncrement64(&shared->view->generation);
++            memcpy(shared->view + 1, address.addr, shared->info.bytes);
++            shared->generation = InterlockedIncrement64(&shared->view->generation);
++        }
++        else
++        {
++            memcpy((void *)address.addr, shared->view + 1, shared->info.bytes);
++            wined3d_texture_validate_location(texture, 0, WINED3D_LOCATION_SYSMEM);
++            wined3d_texture_invalidate_location(texture, 0, ~WINED3D_LOCATION_SYSMEM);
++            shared->generation = shared->view->generation;
++        }
++    }
++    context_release(context);
++    if (!ret)
++        shared->view->broken = TRUE;
++    return ret;
++}
++BOOL wined3d_shared_texture_begin(struct wined3d_resource *resource)
++{
++    struct wined3d_shared_texture *shared = resource->shared_texture;
++    if (!lock_shared(shared))
++        return FALSE;
++    if (!header_unchanged(shared) || (shared->generation != shared->view->generation && !transfer(resource, FALSE)))
++    {
++        ReleaseMutex(shared->mutex);
++        return FALSE;
++    }
++    return TRUE;
++}
++BOOL wined3d_shared_texture_end(struct wined3d_resource *resource, BOOL write)
++{
++    struct wined3d_shared_texture *shared = resource->shared_texture;
++    BOOL ret = !write || transfer(resource, TRUE);
++    ReleaseMutex(shared->mutex);
++    return ret;
++}
++struct attach_args
++{
++    struct wined3d_resource *resource;
++    struct wined3d_shared_texture *shared;
++    BOOL publish;
++    HRESULT hr;
++};
++static void attach_shared(void *arg)
++{
++    struct attach_args *args = arg;
++    struct wined3d_resource *resource = args->resource;
++    args->hr = E_FAIL;
++    if (!lock_shared(args->shared))
++        return;
++    if (!args->publish && !header_unchanged(args->shared))
++    {
++        ReleaseMutex(args->shared->mutex);
++        return;
++    }
++    resource->shared_texture = args->shared;
++    if (transfer(resource, args->publish))
++        args->hr = S_OK;
++    else
++        resource->shared_texture = NULL;
++    ReleaseMutex(args->shared->mutex);
++}
++HRESULT CDECL wined3d_resource_create_shared_handle(struct wined3d_resource *resource,
++                                                    const SECURITY_ATTRIBUTES *attributes, DWORD access,
++                                                    const WCHAR *name, HANDLE *handle)
++{
++    struct wined3d_shared_texture *shared;
++    struct attach_args args;
++    unsigned int pitch, slice;
++    HRESULT hr;
++
++    TRACE("resource %p, access %#lx, name %s.\n", resource, access, debugstr_w(name));
++    if (!enabled())
++        return E_NOTIMPL;
++    if (!(resource->shared_flags & 0x800))
++        return E_INVALIDARG;
++    if (!supported(resource))
++        return E_NOTIMPL;
++    if (resource->shared_texture)
++        return DXGI_ERROR_INVALID_CALL;
++    /* Narrow transport contract: read/write NT handles only; reject reduced
++     * rights explicitly rather than handing out an overprivileged handle. */
++    if (access != SHARED_ACCESS && access != (GENERIC_ALL | SHARED_ACCESS))
++        return E_NOTIMPL;
++    wined3d_texture_get_pitch(texture_from_resource(resource), 0, &pitch, &slice);
++    if (!slice || slice > SHARED_MAX_BYTES)
++        return E_NOTIMPL;
++    if (!(shared = calloc(1, sizeof(*shared))))
++        return E_OUTOFMEMORY;
++    shared->section = CreateFileMappingW(INVALID_HANDLE_VALUE, (SECURITY_ATTRIBUTES *)attributes, PAGE_READWRITE, 0,
++                                         sizeof(struct shared_header) + slice, name);
++    if (!shared->section)
++    {
++        hr = HRESULT_FROM_WIN32(GetLastError());
++        goto fail;
++    }
++    if (GetLastError() == ERROR_ALREADY_EXISTS)
++    {
++        hr = DXGI_ERROR_NAME_ALREADY_EXISTS;
++        goto fail;
++    }
++    if (!(shared->view = MapViewOfFile(shared->section, FILE_MAP_WRITE, 0, 0, sizeof(struct shared_header) + slice)))
++    {
++        hr = HRESULT_FROM_WIN32(GetLastError());
++        goto fail;
++    }
++    if (!(shared->mutex = create_mutex()))
++    {
++        hr = HRESULT_FROM_WIN32(GetLastError());
++        goto fail;
++    }
++    memcpy(shared->info.magic, shared_magic, sizeof(shared_magic));
++    shared->info.version = 1;
++    shared->info.bytes = slice;
++    shared->info.row_pitch = pitch;
++    shared->info.flags = resource->shared_flags;
++    wined3d_resource_get_desc(resource, &shared->info.desc);
++    *shared->view = shared->info;
++    /* Reserve caller handle before attaching so failure leaves resource intact. */
++    if (!DuplicateHandle(GetCurrentProcess(), shared->section, GetCurrentProcess(), handle,
++                         SECTION_QUERY | SECTION_MAP_READ | SECTION_MAP_WRITE, attributes && attributes->bInheritHandle,
++                         0))
++    {
++        hr = HRESULT_FROM_WIN32(GetLastError());
++        goto fail;
++    }
++    args = (struct attach_args){resource, shared, TRUE, E_FAIL};
++    wined3d_cs_init_object(resource->device->cs, attach_shared, &args);
++    resource->device->cs->c.ops->finish(&resource->device->cs->c, WINED3D_CS_QUEUE_DEFAULT);
++    if (SUCCEEDED(hr = args.hr))
++        return hr;
++    CloseHandle(*handle);
++    *handle = NULL;
++fail:
++    destroy_shared(shared);
++    return hr;
++}
++HRESULT CDECL wined3d_resource_open_shared_handle(struct wined3d_resource *resource, HANDLE handle)
++{
++    struct wined3d_shared_texture *shared;
++    struct attach_args args;
++    unsigned int pitch, slice;
++    HRESULT hr;
++
++    if (!supported(resource))
++        return E_NOTIMPL;
++    if (resource->shared_texture)
++        return E_INVALIDARG;
++    if (FAILED(hr = open_shared(handle, &shared)))
++        return hr;
++    wined3d_texture_get_pitch(texture_from_resource(resource), 0, &pitch, &slice);
++    if (pitch != shared->info.row_pitch || slice != shared->info.bytes || resource->width != shared->info.desc.width ||
++        resource->height != shared->info.desc.height || resource->format->id != shared->info.desc.format ||
++        resource->bind_flags != shared->info.desc.bind_flags)
++    {
++        destroy_shared(shared);
++        return E_INVALIDARG;
++    }
++    args = (struct attach_args){resource, shared, FALSE, E_FAIL};
++    wined3d_cs_init_object(resource->device->cs, attach_shared, &args);
++    resource->device->cs->c.ops->finish(&resource->device->cs->c, WINED3D_CS_QUEUE_DEFAULT);
++    if (FAILED(args.hr))
++        destroy_shared(shared);
++    return args.hr;
++}

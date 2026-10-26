@@ -1,0 +1,5 @@
+LIBRARY ghub_dispatcher_queue
+EXPORTS
+    CreateDispatcherQueueController
+    DllGetActivationFactory
+    DllCanUnloadNow
