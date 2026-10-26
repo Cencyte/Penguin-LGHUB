@@ -18,12 +18,19 @@ Copyright and license notices already present in files remain in effect.
 - **Dockur:** the acquisition experiment references the MIT-licensed Dockur
   project. Its notice is retained in `packaging/dockur/Dockur-LICENSE.txt`.
   Neither that notice nor this project's license grants rights to Windows.
+- **Optional Linux runtime experiment:** the tools download Valve's pinned
+  Steam Linux Runtime and Debian's pinned libunwind package. These contain
+  independently licensed components, not project-GPL artifacts. The extractor
+  preserves their supplied notices and records upstream source locations in
+  `packaging/linux-runtime.lock.json`. No runtime/package binaries are in this
+  source snapshot. Any future binary release must satisfy each component's
+  corresponding-source and notice requirements.
 - **Proprietary inputs:** Logitech applications/resources and Microsoft Windows
   DLLs/fonts retain their own terms. Download metadata, hashes, acquisition
   recipes and local transformation code do not relicense those inputs. Their
   binaries and generated resource archives are absent from this snapshot.
 - **Project artwork:** `assets/penguin-lghub-logo.png` is the owner-supplied
-  project identity image, included unchanged at the owner's request. It is not
+  project identity image, with the circle-edge cleanup requested by the owner. It is not
   covered by the source-code licensing statement above; no new permission for
   separately sourced elements is asserted. Tux, where derived from Larry
   Ewing's original, requires credit to Larry Ewing and GIMP. This notice does

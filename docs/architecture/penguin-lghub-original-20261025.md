@@ -1,0 +1,125 @@
+# Penguin LGHUB System
+
+2026/10/26 · Current tested architecture. Purple is project implementation; turquoise is vendor application code; amber marks externally sourced Windows dependencies; blue is the Linux host. Dotted arrows identify setup, configuration or optional diagnostics. This is not a claim of redistribution clearance.
+
+## Graph 1: Current runtime and the sources that configure it
+
+```mermaid
+%%{init: {"theme":"default","themeVariables":{"background":"transparent","fontSize":"18px","lineColor":"#9399b2","edgeLabelBackground":"#e8e8e8"},"themeCSS":".edgeLabel rect{opacity:1}","flowchart":{"htmlLabels":false,"useMaxWidth":false,"curve":"basis","padding":12,"nodeSpacing":45,"rankSpacing":55,"wrappingWidth":300}}}%%
+flowchart LR
+    subgraph PREP["Preparation · no analysis corpus is needed at runtime"]
+        RESEARCH["DragonShard / Ghidra evidence and regression fixtures · development only"]
+        SOURCES["Project sources: patches/wine and tools/wine"]
+        DEPOT["Official pinned G HUB core.depot and required depots · clean extraction/install PENDING"]
+        PREPARE["Build helpers and prepare_tested_desktop.py · currently promote an installed lab prefix"]
+        ASARPATCH["prepare_color_picker_fix.py · generates color-preview.asar"]
+        TRAYPATCH["prepare_tray_background.py · patches MainWindow.xbf and resources.pri"]
+        RESEARCH -. "informs implementation" .-> SOURCES
+        SOURCES --> PREPARE
+        SOURCES --> ASARPATCH
+        SOURCES --> TRAYPATCH
+        DEPOT -. "future automated acquisition" .-> PREPARE
+    end
+
+    subgraph START["Launch and configuration"]
+        DESKTOP["G HUB Desktop launcher · open / quit / snapshot / recording / logs"]
+        RUNNER["tested_desktop_launch.py · launch.json · 48 pinned files · process ownership and readiness"]
+        MOUNTS["run_private_build.py · sudo mount namespace · private bind overlays · drop to user UID"]
+        FREEZE["G HUB update freeze: periodic checks/downloads off; lghub_software_manager.exe blocked; app files read-only"]
+        PREFIX["One active WINEPREFIX · drive_c · registry · services · DLL overrides · persistent user settings"]
+        REGISTRY["WinRT registrations: ApiInformation, CoreApplication, DispatcherQueue, ThreadPoolTimer, streams/DataWriter, InputSite/activation; lghubapp URL handler"]
+        DIAG["agent_snapshot.cjs · read-only readiness / device / profile checks; color_picker_monitor.cjs · optional diagnostics"]
+        DESKTOP --> RUNNER --> MOUNTS
+        RUNNER --> FREEZE
+        RUNNER --> DIAG
+        RUNNER --> PREFIX
+        REGISTRY -. "activation and launch configuration" .-> PREFIX
+        PREPARE -. "copies and pins" .-> RUNNER
+        PREPARE -. "copies installed prefix" .-> PREFIX
+    end
+
+    subgraph APP["Original Logitech application · G HUB 2026.6.974819"]
+        AGENT["lghub_agent.exe · devices, assignments, macros, G-Shift, profiles, lighting"]
+        FRONT["lghub.exe · Electron main interface"]
+        ASAR["Original resources/app.asar · privately overlaid with patched color-preview.asar"]
+        TRAY["lghub_system_tray.exe · original tray menu"]
+        TRAYASSETS["MainWindow.xbf and resources.pri · solid tray background fix"]
+        UPDATER["lghub_updater.exe · service retained; automatic updating frozen"]
+        OTHER["Other vendor assets and device depots · Chromium resources, modules, metadata"]
+        FRONT <-- "local agent API" --> AGENT
+        TRAY <-- "agent integration" --> AGENT
+        FRONT --> ASAR
+        TRAY --> TRAYASSETS
+        UPDATER --> AGENT
+        OTHER --> AGENT
+        ASARPATCH -. "local asset transformation" .-> ASAR
+        TRAYPATCH -. "local asset transformation" .-> TRAYASSETS
+        MOUNTS --> AGENT
+        MOUNTS --> FRONT
+        PREFIX -. "installed application state" .-> AGENT
+        FREEZE -. "scoped update policy" .-> UPDATER
+        DIAG -. "ws://127.0.0.1:9010" .-> AGENT
+    end
+
+    subgraph COMPAT["Supplementary compatibility components · separate from the Wine build"]
+        APIPROXY["api_information_proxy.dll · targeted capability query override"]
+        COREAPP["core_application_experiment.dll · required CoreApplication ABI"]
+        SENSOR["mfsensorgroup.dll · optional sensor-monitor unavailable response"]
+        QUEUE["ghub_dispatcher_queue.dll · DispatcherQueue and tray popup anchoring"]
+        COREMSG["CoreMessaging.dll · custom adapter"]
+        XP["CoreMessagingXP.dll · original module with guarded in-memory adaptation"]
+        UDK["Microsoft.Internal.FrameworkUdk.dll · original module with guarded in-memory adaptation"]
+        FALLBACK["ghub_wine_coremessaging.dll · renamed Wine fallback"]
+        DCOMP["dcomp.dll · project DirectComposition implementation · surfaces, visual trees and input binding"]
+        WINUI["Vendor WinUI / composition stack: Microsoft.UI.Xaml, Controls, Phone, UI.Input, InputStateManager, DirectManipulation, dcompi, dwmcorei, marshal and runtime resources"]
+        NATIVE["Windows-sourced d2d1.dll · ninput.dll · D3DCompiler_47.dll · general acquisition clearance UNRESOLVED"]
+        FONTS["Windows fonts: Arial, Segoe UI, Times New Roman, Courier New · licensing or tested replacements PENDING"]
+        AGENT --> APIPROXY
+        AGENT --> COREAPP
+        AGENT --> SENSOR
+        TRAY --> WINUI
+        TRAY --> QUEUE
+        WINUI --> COREMSG
+        COREMSG --> XP
+        COREMSG --> UDK
+        COREMSG --> FALLBACK
+        WINUI --> DCOMP
+        WINUI --> NATIVE
+        FRONT --> FONTS
+        WINUI --> FONTS
+    end
+
+    subgraph RUNTIME["Wine runtime · currently hybrid, not yet a standalone bundle"]
+        WINE["Custom Wine 10.20: ntdll, wineserver, win32u, user32, winex11, kernelbase, setupapi, ntoskrnl, shcore, dwmapi, d3d11, dxgi, wined3d, dwrite, windows.ui, windows.storage, threadpoolwinrt"]
+        STOCK["Remaining stock Wine 10.20 modules · currently borrowed from host installation"]
+        MOUNTS -. "matched private modules and server" .-> WINE
+        STOCK --> WINE
+        DCOMP --> WINE
+        NATIVE --> WINE
+        AGENT --> WINE
+        FRONT --> WINE
+        QUEUE --> WINE
+        PREPARE -. "five private build groups" .-> WINE
+    end
+
+    subgraph HOST["Linux host · current validated desktop is X11"]
+        DEVICES["G502 X PLUS and G915 X LIGHTSPEED TKL · USB/HID via host kernel, permissions and Wine device drivers"]
+        DISPLAY["X11 / XTEST · window manager and compositor · Plasma panel tray integration"]
+        KEYS["Native Linux applications · key output through opt-in G HUB XTEST bridge"]
+        GPU["Host GPU driver · OpenGL / WineD3D · shared-texture presentation"]
+        SESSION["User session · D-Bus · audio · filesystem · local sockets"]
+        WINE <-- "device traffic" --> DEVICES
+        WINE --> DISPLAY --> KEYS
+        WINE --> GPU
+        WINE <--> SESSION
+    end
+
+    class SOURCES,PREPARE,ASARPATCH,TRAYPATCH,DESKTOP,RUNNER,MOUNTS,FREEZE,REGISTRY,DIAG,APIPROXY,COREAPP,SENSOR,QUEUE,COREMSG,DCOMP,WINE c1
+    class DEPOT,AGENT,FRONT,ASAR,TRAY,TRAYASSETS,UPDATER,OTHER,XP,UDK,WINUI c2
+    class NATIVE,FONTS c3
+    class DEVICES,DISPLAY,KEYS,GPU,SESSION c4
+    classDef c1 fill:#a78bfa,stroke:#7c3aed,color:#111,stroke-width:2px
+    classDef c2 fill:#2dd4bf,stroke:#0d9488,color:#111,stroke-width:2px
+    classDef c3 fill:#f59e0b,stroke:#b45309,color:#111,stroke-width:2px
+    classDef c4 fill:#60a5fa,stroke:#2563eb,color:#111,stroke-width:2px
+```

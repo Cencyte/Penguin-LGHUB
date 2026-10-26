@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "kind": "steam-linux-runtime-development-layer",
+  "build_id": "4.0.20260928.262390",
+  "pressure_vessel_version": "0.20260925.0",
+  "architecture": "x86_64",
+  "support_packages": [
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libu/libunwind/libunwind8_1.8.1-0.1_amd64.deb",
+      "local_name": "libunwind8_1.8.1-0.1_amd64.deb",
+      "size": 56252,
+      "sha256": "db21a86dd05c93413f0ef36282a9c64d32410d240f332273a53be1408bec1f62",
+      "checksum_source": "https://packages.debian.org/trixie/amd64/libunwind8/download",
+      "source_package": "https://deb.debian.org/debian/pool/main/libu/libunwind/",
+      "purpose": "Wine ntdll requires libunwind.so.8; extracted privately, never installed on the host"
+    }
+  ],
+  "archive": {
+    "url": "https://repo.steampowered.com/steamrt4/images/4.0.20260928.262390/SteamLinuxRuntime_4.tar.xz",
+    "local_name": "SteamLinuxRuntime_4-4.0.20260928.262390.tar.xz",
+    "size": 165046124,
+    "sha256": "4f48ea7fb5e4bc170d9f9e1f16cf22e15af4c5b9ebef7f3ad5b87563e11a4f5a"
+  },
+  "checksum_source": "https://repo.steampowered.com/steamrt4/images/4.0.20260928.262390/SHA256SUMS",
+  "source_packages": "https://repo.steampowered.com/steamrt4/images/4.0.20260928.262390/sources/",
+  "platform_manifest": "https://repo.steampowered.com/steamrt4/images/4.0.20260928.262390/com.valvesoftware.SteamRuntime.Platform-amd64,i386-steamrt4.manifest.deb822.gz",
+  "policy": "Download official runtime with original notices; no Steam client or account required. Hardware, graphics and desktop qualification remain separate. Do not relicense runtime components under the project license."
+}

@@ -1,16 +1,23 @@
-# Penguin-LGHUB
+<h1 align="center">Penguin LGHUB</h1>
+
+<p align="center">
+  <img src="assets/penguin-lghub-logo.png" alt="Penguin LGHUB logo" width="200">
+</p>
+<hr>
 
 An experimental compatibility layer for running the original **Logitech G HUB** on Linux through a custom Wine runtime. The working setup retains the actual G HUB agent and main interface for device configuration, key bindings, macros, profiles, lighting and G-Shift.
 
-![Penguin-LGHUB project logo](assets/penguin-lghub-logo.png)
-
 **Development source snapshot.** The original G HUB works on the author's Manjaro/X11 workstation. A separate packaged Wine runtime and fresh-prefix backend startup have also been verified; fresh-install GUI/device testing and Linux-library/graphics-driver portability remain ahead. There is **no ready-to-install binary release yet**.
 
-[![Penguin-LGHUB system overview](docs/architecture/penguin-lghub-overview.png)](docs/architecture/penguin-lghub-views.md)
+[![Complete Penguin LGHUB architecture: all six diagrams](docs/architecture/penguin-lghub-views.png)](docs/architecture/penguin-lghub-views.png?raw=1)
+
+**Click the image to open the full-resolution PNG and zoom in.**
 
 [Six native Mermaid diagrams / Obsidian note](docs/architecture/penguin-lghub-views.md) · [Full diagram image](docs/architecture/penguin-lghub-views.png) · [Editable rendering source](docs/architecture/penguin-lghub-views.mmd)
 
-The Markdown note uses ordinary `mermaid` fences. Open the `.md` in an Obsidian vault in Reading view or Live Preview. [Mermaid Tools](https://github.com/dartungar/obsidian-mermaid) supplies editing tools; Obsidian performs the rendering. No plugin-specific file format is required. The PNG preserves the checked layout on GitHub; native rendering follows the viewer's Mermaid version and theme.
+The Markdown note uses ordinary `mermaid` fences. Open the `.md` in an Obsidian vault in Reading view or Live Preview. [Mermaid Tools](https://github.com/dartungar/obsidian-mermaid) supplies editing tools; Obsidian performs the rendering. No plugin-specific file format is required. The complete PNG is shown above; native rendering follows the viewer's Mermaid version and theme.
+
+Earlier detailed charts are preserved separately: [original October 25 chart](docs/architecture/penguin-lghub-original-20261025.png?raw=1) · [detailed chart immediately before the GitHub edit](docs/architecture/penguin-lghub-detailed-preserved.png?raw=1). Both are exports of their saved original Mermaid sources, with no rewritten graph content.
 
 ### ⚠️ **Requires a custom-patched, version-pinned Wine runtime**
 
@@ -24,12 +31,25 @@ Setup will need privileged host integration, including appropriate device access
 
 The owner reports working key bindings, macros, tray controls, lighting/Lightsync, profile switching and G-Shift with a G502 X PLUS and G915 X LIGHTSPEED TKL on Manjaro/X11. This is not certification of every device or feature. Native Wayland global key output and clean installations on other machines have not been validated.
 
+## Distribution setup status
+
+These badges describe **installer and desktop compatibility**, not whether a CI build passed. No fresh distribution installation is certified yet.
+
+| Distribution | Current status | What has actually been verified |
+|---|---|---|
+| Manjaro | ![Manjaro: existing desktop works](https://img.shields.io/badge/Manjaro-existing_desktop_works-brightgreen) | Owner's existing X11 workstation: bindings, macros, G-Shift, lighting, profiles and tray. Fresh installer qualification pending. |
+| CachyOS | ![CachyOS: unverified](https://img.shields.io/badge/CachyOS-unverified-yellow) | First external target, after a fresh Manjaro control. |
+| Debian | ![Debian: planned, unverified](https://img.shields.io/badge/Debian-planned%20%2F%20unverified-lightgrey) | Later target; a Debian-derived runtime container is not equivalent to testing a Debian host. |
+| Bazzite | ![Bazzite: unverified, Wayland gap](https://img.shields.io/badge/Bazzite-unverified%20%2F%20Wayland_gap-orange) | No installer or device validation. The current XTEST bridge does not provide global input to native Wayland applications. |
+
+[Reddit discussion and original announcement](https://www.reddit.com/r/LogitechG/comments/1xe5jw2/comment/19rp0hjphnyjo/?context=1&screen_view_count=2)
+
 ## Availability and scope
 
 **This is a development repository, not yet a novice-ready installer.** The existing workstation result is useful, but missing dependency clearance and clean-install reproduction prevent a public installation claim.
 
 - First release targets: Arch-derived systems, with **CachyOS the first external target**. Establish a clean Manjaro control first.
-- Debian: planned subsequent target. Fedora: outside the current scope.
+- Debian: planned subsequent target. Bazzite: tracked as unverified with a Wayland input gap; general Fedora qualification remains outside the initial release scope.
 - Existing desktop: six of six owner-reported feature groups work. This is user acceptance, not exhaustive automated coverage.
 - Independent clean-install validation: **0 of 2 initial target distributions** (fresh Manjaro and CachyOS). No cross-distribution completion percentage is inferred from the working desktop.
 - Host package upgrades, firmware updates and replacing the user's system Wine are not installation prerequisites we intend to impose.
@@ -162,6 +182,8 @@ The fresh installer masks the host's Wine module/data directories and loader/ser
 
 **Portability boundary:** this bundles Wine, not all Linux userspace. The audit inspected **46 ELF files** and found no unresolved `DT_NEEDED` libraries on the development host; their highest required glibc symbol version is **2.38**. This is a minimum symbol requirement, not a claim that every system with glibc 2.38 works. Direct dependencies include X11, libudev, libusb, libunwind and media/audio libraries; optional modules include FFmpeg 62/60 sonames. Dynamically loaded libraries, codec plugins and host GPU drivers require further validation. `provenance/unix-dependencies.json` records per-module dependencies and candidate `dlopen` names. Cross-distro compatibility, GUI rendering and hardware behavior remain unverified in this new installation.
 
+**Linux userspace experiment, October 26:** a separately downloaded, checksum-pinned Steam Linux Runtime 4 plus a private Debian libunwind package now loads **39/46 native Wine modules (84.8%)** and **38/54 candidate dynamic libraries (70.4%)**. A real Windows `cmd.exe` command succeeds inside it with the host Wine, live desktop, network and physical devices unavailable. A startup D-Bus assertion remains in the captured diagnostic output; this is not a clean G HUB startup qualification. Seven native modules still have unresolved dependencies. These are dependency-check percentages, **not overall application completion**. See [the exact results, reproduction commands and next implementation steps](docs/packaging/linux-runtime.md). This experiment does not change the working Desktop launcher and does not require Steam or an account.
+
 <details>
 <summary><strong>Dependency sourcing findings and the prefix question</strong></summary>
 
@@ -250,6 +272,6 @@ Acceptance on each initial target covers: installation/relaunch; device discover
 
 ## Branding and licenses
 
-This is an independent community project, not affiliated with or endorsed by Logitech. Logitech and its product names belong to their respective rights-holders. The README uses the project owner's supplied Penguin-LGHUB artwork, copied unchanged into [assets/penguin-lghub-logo.png](assets/penguin-lghub-logo.png).
+This is an independent community project, not affiliated with or endorsed by Logitech. Logitech and its product names belong to their respective rights-holders. The README uses the project owner's supplied Penguin-LGHUB artwork, with the outer circle's pale edge cleaned up in [assets/penguin-lghub-logo.png](assets/penguin-lghub-logo.png). The original supplied file remains on the owner's Desktop.
 
 The existing repository [GPLv3 license](LICENSE) covers original project source except where a file or component carries another license. **Wine patches and Wine-derived material retain LGPL-2.1-or-later and upstream notices.** See [NOTICE.md](NOTICE.md) for component boundaries, including the supplied artwork. No proprietary G HUB/Windows binaries, Windows fonts, populated Wine prefixes or decompilation corpus are included. Publishing this implementation does not settle the separate dependency-use questions described above.

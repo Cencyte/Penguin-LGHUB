@@ -1,0 +1,584 @@
+{
+  "schema": 1,
+  "linux_runtime_build": "4.0.20260928.262390",
+  "libc": "glibc 2.41",
+  "scope": "Isolated native loader, dlopen and disposable-prefix PE command checks; no UI, GPU context or devices",
+  "live_desktop_used": false,
+  "physical_devices_exposed": false,
+  "host_graphics_imported": false,
+  "modules_total": 46,
+  "modules_linked": 39,
+  "dlopen_total": 54,
+  "dlopen_loadable": 38,
+  "pe_command": {
+    "exit_code": 0,
+    "passed": true,
+    "stdout": "PENGUIN_LINUX_RUNTIME_OK",
+    "stderr": "wine: created the configuration directory '@OUTPUT@/prefix'\ndbus[402]: arguments to dbus_connection_send_with_reply_and_block() were incorrect, assertion \"(error) == NULL || !dbus_error_is_set ((error))\" failed in file ../../dbus/dbus-connection.c line 3562.\nThis is normally a bug in some application using the D-Bus library.\n\n  D-Bus not built with -rdynamic so unable to print a backtrace"
+  },
+  "modules": {
+    "usr/bin/widl": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fffda381000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe985c73000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fe985f1e000)\n"
+    },
+    "usr/bin/wine": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffe3755e000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fdfa7152000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fdfa7355000)\n"
+    },
+    "usr/bin/winebuild": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffd32dee000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f0b5b69d000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f0b5b8cd000)\n"
+    },
+    "usr/bin/winedump": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffce7146000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fd12b932000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fd12bbc4000)\n"
+    },
+    "usr/bin/winegcc": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffe2f751000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fee4aff6000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fee4b206000)\n"
+    },
+    "usr/bin/wineserver": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffd0c3f0000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fc94db68000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fc94de65000)\n"
+    },
+    "usr/bin/wmc": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffe88fd4000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f60632b4000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f60634c5000)\n"
+    },
+    "usr/bin/wrc": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fff0e29c000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3e8ab9a000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f3e8addc000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/avicap32.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffe5e7dd000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fbe24dc9000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fbe24bcd000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fbe24bb0000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fbe24e9a000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fbe24b7d000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/bcrypt.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffe9bbfe000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fb34d160000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb34cf64000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fb34cf47000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fb34d239000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fb34cf14000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/crypt32.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc05f5b000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f6032216000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f603201a000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f6031ffd000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f60322e8000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f6031fca000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/ctapi32.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffd6b5ad000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f4b25dcf000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4b25bd3000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f4b25bb6000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f4b25ea0000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f4b25b83000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/dnsapi.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc77d76000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fb53ca05000)\n\tlibresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007fb53c9eb000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb53c7f7000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fb53c7d8000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fb53cad6000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fb53c7a7000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/dwrite.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fff35fd8000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f24871e2000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f2486fe6000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f2486fc9000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f24872b4000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f2486f96000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/gphoto2.so": {
+      "missing": [
+        "libgphoto2.so.6",
+        "libgphoto2_port.so.12"
+      ],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": false,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc04156000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fa50c728000)\n\tlibgphoto2.so.6 => not found\n\tlibgphoto2_port.so.12 => not found\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fa50c52a000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fa50c50d000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fa50c7fb000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fa50c4dc000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/kerberos.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fff72d6a000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f933a8bd000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f933a6c1000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f933a6a4000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f933a992000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f933a671000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/localspl.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffd634ce000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f575b1f5000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f575aff9000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f575afdc000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f575b2c7000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f575afa9000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/mountmgr.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffd2c3cc000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fc9c62c4000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fc9c60c8000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fc9c60ab000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fc9c6399000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fc9c6078000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/msv1_0.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc7b56d000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f5d11b2d000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f5d11931000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f5d11914000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f5d11bfe000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f5d118e1000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/netapi32.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fff315ab000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f2cea4b4000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f2cea2b8000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f2cea29b000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f2cea587000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f2cea268000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/nsiproxy.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fffde7f2000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f29c77a8000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f29c75ac000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f29c758f000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f29c7886000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f29c755c000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/ntdll.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffda1085000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f22a5216000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f22a501a000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f22a52ff000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f22a4fe9000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/odbc32.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fff5a999000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f24ce857000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f24ce65b000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f24ce63e000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f24ce930000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f24ce60b000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/opencl.so": {
+      "missing": [
+        "libOpenCL.so.1"
+      ],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": false,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc699a1000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fda798ac000)\n\tlibOpenCL.so.1 => not found\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fda796b0000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fda79691000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fda7997f000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fda79660000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/opengl32.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffeb6fde000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fc3910ed000)\n\twin32u.so => @WINE@/usr/lib/wine/x86_64-unix/win32u.so (0x00007fc390eab000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fc390caf000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fc390c90000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fc390ba0000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fc391320000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fc390b6f000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/qcap.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc5fb22000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f786df16000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f786dd1a000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f786dcfd000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f786dfec000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f786dcca000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/sane.so": {
+      "missing": [
+        "libsane.so.1"
+      ],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": false,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fff1ebe4000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f8b786d0000)\n\tlibsane.so.1 => not found\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f8b784d4000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f8b784b5000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f8b787a1000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f8b78484000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/secur32.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc8b3fb000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f17fdbaa000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f17fd9ae000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f17fd991000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f17fdc80000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f17fd95e000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/win32u.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffcafd30000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f1600f99000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f1600ea1000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f1600cad000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f1600c8e000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f16012a7000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f1600c5d000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/wine": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffcffada000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe3997ce000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fe3999d1000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/wine-preloader": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tstatically linked\n"
+    },
+    "usr/lib/wine/x86_64-unix/winealsa.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffce84a4000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fc933896000)\n\tlibasound.so.2 => /lib/x86_64-linux-gnu/libasound.so.2 (0x00007fc93376d000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fc933579000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fc93355a000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fc93346a000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fc933978000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fc933439000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winebth.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fff66328000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fdba94f9000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fdba92fd000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fdba92e0000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fdba95d4000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fdba92ad000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winebus.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc6f1fc000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f84ddeca000)\n\tlibudev.so.1 => /lib/x86_64-linux-gnu/libudev.so.1 (0x00007f84dde7d000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f84ddc89000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f84ddc6a000)\n\tlibcap.so.2 => /lib/x86_64-linux-gnu/libcap.so.2 (0x00007f84ddc5e000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f84ddfab000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f84ddc2d000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winedmo.so": {
+      "missing": [
+        "libavcodec.so.62",
+        "libavformat.so.62",
+        "libavutil.so.60"
+      ],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": false,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc39d3f000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f4af7430000)\n\tlibavformat.so.62 => not found\n\tlibavcodec.so.62 => not found\n\tlibavutil.so.60 => not found\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4af7232000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f4af7215000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f4af750a000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f4af71e4000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winegstreamer.so": {
+      "missing": [
+        "libgstaudio-1.0.so.0",
+        "libgstbase-1.0.so.0",
+        "libgstreamer-1.0.so.0",
+        "libgsttag-1.0.so.0",
+        "libgstvideo-1.0.so.0"
+      ],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": false,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc5b1b3000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f40a084e000)\n\tlibgstvideo-1.0.so.0 => not found\n\tlibgstaudio-1.0.so.0 => not found\n\tlibgsttag-1.0.so.0 => not found\n\tlibgstbase-1.0.so.0 => not found\n\tlibgstreamer-1.0.so.0 => not found\n\tlibgobject-2.0.so.0 => /lib/x86_64-linux-gnu/libgobject-2.0.so.0 (0x00007f40a07e1000)\n\tlibglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007f40a0688000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f40a0492000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f40a0475000)\n\tlibffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007f40a0468000)\n\tlibatomic.so.1 => /lib/x86_64-linux-gnu/libatomic.so.1 (0x00007f40a045e000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f40a036e000)\n\tlibpcre2-8.so.0 => /lib/x86_64-linux-gnu/libpcre2-8.so.0 (0x00007f40a02bd000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f40a093d000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f40a028c000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/wineps.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fffb97ec000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f9be1071000)\n\twin32u.so => @WINE@/usr/lib/wine/x86_64-unix/win32u.so (0x00007f9be0e2f000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f9be0d37000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f9be0b41000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f9be0b24000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f9be114a000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f9be0af3000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winepulse.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fff247d4000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f630b203000)\n\tlibpulse.so.0 => /lib/x86_64-linux-gnu/libpulse.so.0 (0x00007f630b1a6000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f630b0b6000)\n\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f630b089000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f630ae93000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f630ae76000)\n\tlibpulsecommon-17.0.so => /usr/lib/x86_64-linux-gnu/pulseaudio/libpulsecommon-17.0.so (0x00007f630adee000)\n\tlibdbus-1.so.3 => /lib/x86_64-linux-gnu/libdbus-1.so.3 (0x00007f630ad97000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f630b2e4000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f630ad66000)\n\tlibsndfile.so.1 => /lib/x86_64-linux-gnu/libsndfile.so.1 (0x00007f630acda000)\n\tlibX11-xcb.so.1 => /lib/x86_64-linux-gnu/libX11-xcb.so.1 (0x00007f630acd5000)\n\tlibX11.so.6 => /lib/x86_64-linux-gnu/libX11.so.6 (0x00007f630ab8d000)\n\tlibxcb.so.1 => /lib/x86_64-linux-gnu/libxcb.so.1 (0x00007f630ab62000)\n\tlibsystemd.so.0 => /lib/x86_64-linux-gnu/libsystemd.so.0 (0x00007f630aa4c000)\n\tlibasyncns.so.0 => /lib/x86_64-linux-gnu/libasyncns.so.0 (0x00007f630aa45000)\n\tlibFLAC.so.14 => /lib/x86_64-linux-gnu/libFLAC.so.14 (0x00007f630a9d9000)\n\tlibvorbis.so.0 => /lib/x86_64-linux-gnu/libvorbis.so.0 (0x00007f630a9ab000)\n\tlibvorbisenc.so.2 => /lib/x86_64-linux-gnu/libvorbisenc.so.2 (0x00007f630a900000)\n\tlibopus.so.0 => /lib/x86_64-linux-gnu/libopus.so.0 (0x00007f630a59c000)\n\tlibogg.so.0 => /lib/x86_64-linux-gnu/libogg.so.0 (0x00007f630a592000)\n\tlibXau.so.6 => /lib/x86_64-linux-gnu/libXau.so.6 (0x00007f630a58b000)\n\tlibXdmcp.so.6 => /lib/x86_64-linux-gnu/libXdmcp.so.6 (0x00007f630a583000)\n\tlibcap.so.2 => /lib/x86_64-linux-gnu/libcap.so.2 (0x00007f630a577000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/wineusb.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffe84176000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f7f0a774000)\n\tlibusb-1.0.so.0 => /lib/x86_64-linux-gnu/libusb-1.0.so.0 (0x00007f7f0a74c000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f7f0a558000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f7f0a539000)\n\tlibudev.so.1 => /lib/x86_64-linux-gnu/libudev.so.1 (0x00007f7f0a4f4000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f7f0a846000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f7f0a4c3000)\n\tlibcap.so.2 => /lib/x86_64-linux-gnu/libcap.so.2 (0x00007f7f0a4b7000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winevulkan.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffeb41c0000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fe7abc92000)\n\twin32u.so => @WINE@/usr/lib/wine/x86_64-unix/win32u.so (0x00007fe7aba50000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe7ab854000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fe7ab835000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fe7ab745000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fe7abe12000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fe7ab714000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winewayland.so": {
+      "missing": [
+        "libxkbregistry.so.0"
+      ],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": false,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc14fcd000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fe6be852000)\n\twin32u.so => @WINE@/usr/lib/wine/x86_64-unix/win32u.so (0x00007fe6be610000)\n\tlibwayland-client.so.0 => /lib/x86_64-linux-gnu/libwayland-client.so.0 (0x00007fe6be5f5000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fe6be503000)\n\tlibwayland-egl.so.1 => /lib/x86_64-linux-gnu/libwayland-egl.so.1 (0x00007fe6be4fe000)\n\tlibxkbcommon.so.0 => /lib/x86_64-linux-gnu/libxkbcommon.so.0 (0x00007fe6be4b3000)\n\tlibxkbregistry.so.0 => not found\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe6be2bf000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fe6be2a0000)\n\tlibffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007fe6be293000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fe6be944000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fe6be262000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winex11.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc6dbba000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fd693083000)\n\twin32u.so => @WINE@/usr/lib/wine/x86_64-unix/win32u.so (0x00007fd692e41000)\n\tlibXext.so.6 => /lib/x86_64-linux-gnu/libXext.so.6 (0x00007fd692e24000)\n\tlibX11.so.6 => /lib/x86_64-linux-gnu/libX11.so.6 (0x00007fd692cda000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fd692bea000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fd6929f6000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fd6929d9000)\n\tlibxcb.so.1 => /lib/x86_64-linux-gnu/libxcb.so.1 (0x00007fd6929ae000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fd6931c7000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fd69297b000)\n\tlibXau.so.6 => /lib/x86_64-linux-gnu/libXau.so.6 (0x00007fd692976000)\n\tlibXdmcp.so.6 => /lib/x86_64-linux-gnu/libXdmcp.so.6 (0x00007fd69296e000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winscard.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffe16731000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fe4a2730000)\n\tlibpcsclite.so.1 => /lib/x86_64-linux-gnu/libpcsclite.so.1 (0x00007fe4a2723000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fe4a2706000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe4a2510000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fe4a2801000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fe4a24df000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/winspool.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffc17eea000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fe9b4f7e000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe9b4d82000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fe9b4d65000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fe9b5050000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fe9b4d32000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/wpcap.so": {
+      "missing": [
+        "libpcap.so.1"
+      ],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": false,
+      "resolution": "\tlinux-vdso.so.1 (0x00007ffcaf1f0000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007f73317cc000)\n\tlibpcap.so.1 => not found\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f73315d0000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007f73315b1000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f733189f000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f7331580000)\n"
+    },
+    "usr/lib/wine/x86_64-unix/ws2_32.so": {
+      "missing": [],
+      "version_errors": [],
+      "loader_status": 0,
+      "linked": true,
+      "resolution": "\tlinux-vdso.so.1 (0x00007fffad1f1000)\n\tntdll.so => @WINE@/usr/lib/wine/x86_64-unix/ntdll.so (0x00007fe485147000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe484f4b000)\n\tlibunwind.so.8 => @LINUX@/SteamLinuxRuntime_4/penguin-libraries/usr/lib/x86_64-linux-gnu/libunwind.so.8 (0x00007fe484f2e000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007fe485219000)\n\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fe484efb000)\n"
+    }
+  },
+  "dlopen": {
+    "libEGL.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libGL.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libOpenCL.so.1": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libOpenCL.so.1: cannot open shared object file: No such file or directory"
+    },
+    "libSDL2-2.0.so.0": {
+      "loadable": true,
+      "error": ""
+    },
+    "libX11.so.6": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXcomposite.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXcursor.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXext.so.6": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXfixes.so.3": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXi.so.6": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXinerama.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXrandr.so.2": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXrender.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXtst.so.6": {
+      "loadable": true,
+      "error": ""
+    },
+    "libXxf86vm.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libasound.so.2": {
+      "loadable": true,
+      "error": ""
+    },
+    "libavcodec.so.62": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libavcodec.so.62: cannot open shared object file: No such file or directory"
+    },
+    "libavformat.so.62": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libavformat.so.62: cannot open shared object file: No such file or directory"
+    },
+    "libavutil.so.60": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libavutil.so.60: cannot open shared object file: No such file or directory"
+    },
+    "libc.so.6": {
+      "loadable": true,
+      "error": ""
+    },
+    "libcups.so.2": {
+      "loadable": true,
+      "error": ""
+    },
+    "libdbus-1.so.3": {
+      "loadable": true,
+      "error": ""
+    },
+    "libfontconfig.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libfreetype.so.6": {
+      "loadable": true,
+      "error": ""
+    },
+    "libgcc_s.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libglib-2.0.so.0": {
+      "loadable": true,
+      "error": ""
+    },
+    "libgnutls.so.30": {
+      "loadable": true,
+      "error": ""
+    },
+    "libgobject-2.0.so.0": {
+      "loadable": true,
+      "error": ""
+    },
+    "libgphoto2.so.6": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libgphoto2.so.6: cannot open shared object file: No such file or directory"
+    },
+    "libgphoto2_port.so.12": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libgphoto2_port.so.12: cannot open shared object file: No such file or directory"
+    },
+    "libgssapi_krb5.so.2": {
+      "loadable": true,
+      "error": ""
+    },
+    "libgstaudio-1.0.so.0": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libgstaudio-1.0.so.0: cannot open shared object file: No such file or directory"
+    },
+    "libgstbase-1.0.so.0": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libgstbase-1.0.so.0: cannot open shared object file: No such file or directory"
+    },
+    "libgstreamer-1.0.so.0": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libgstreamer-1.0.so.0: cannot open shared object file: No such file or directory"
+    },
+    "libgsttag-1.0.so.0": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libgsttag-1.0.so.0: cannot open shared object file: No such file or directory"
+    },
+    "libgstvideo-1.0.so.0": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libgstvideo-1.0.so.0: cannot open shared object file: No such file or directory"
+    },
+    "libkrb5.so.3": {
+      "loadable": true,
+      "error": ""
+    },
+    "libm.so.6": {
+      "loadable": true,
+      "error": ""
+    },
+    "libnetapi.so.1": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libnetapi.so.1: cannot open shared object file: No such file or directory"
+    },
+    "libodbc.so.2": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libodbc.so.2: cannot open shared object file: No such file or directory"
+    },
+    "libpcap.so.1": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libpcap.so.1: cannot open shared object file: No such file or directory"
+    },
+    "libpcsclite.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libpulse.so.0": {
+      "loadable": true,
+      "error": ""
+    },
+    "libresolv.so.2": {
+      "loadable": true,
+      "error": ""
+    },
+    "libsane.so.1": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libsane.so.1: cannot open shared object file: No such file or directory"
+    },
+    "libudev.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libunwind.so.8": {
+      "loadable": true,
+      "error": ""
+    },
+    "libusb-1.0.so.0": {
+      "loadable": true,
+      "error": ""
+    },
+    "libv4l2.so.0": {
+      "loadable": true,
+      "error": ""
+    },
+    "libvulkan.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libwayland-client.so.0": {
+      "loadable": true,
+      "error": ""
+    },
+    "libwayland-egl.so.1": {
+      "loadable": true,
+      "error": ""
+    },
+    "libxkbcommon.so.0": {
+      "loadable": true,
+      "error": ""
+    },
+    "libxkbregistry.so.0": {
+      "loadable": false,
+      "error": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import ctypes,sys; ctypes.CDLL(sys.argv[1])\n                       ~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/ctypes/__init__.py\", line 390, in __init__\n    self._handle = _dlopen(self._name, mode)\n                   ~~~~~~~^^^^^^^^^^^^^^^^^^\nOSError: libxkbregistry.so.0: cannot open shared object file: No such file or directory"
+    }
+  },
+  "end_to_end_qualified": false,
+  "checked_on": "2026-10-26"
+}

@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "prepared_on": "2026-10-26",
-  "development_revision": "b99cbea76563c3cc9584fd070201d8917284a9a3",
-  "github_base_commit": "8826e20018f39a2acdcc11aee0ba46a3822dcf90",
+  "development_revision": "e75d45ac2109cdbff67a352923dda51bacb6ed8e",
+  "github_base_commit": "2968b193a3def304e497be3403392960a50415bd",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source snapshot; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -42,20 +42,56 @@
     {
       "path": "NOTICE.md",
       "mode": "100644",
-      "sha256": "728e35362d20d30a5b70555a457a1bb9de486079eff9d88a8ee059cd48596c04",
-      "bytes": 2533
+      "sha256": "1c3d86498d57bd637f592f9c3eedd3da6c8a6d78092975917623e05aa30ec1dc",
+      "bytes": 3049
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "c6614799b391c9f9bb3678622014981789f287589e98cb67ab8d4e107b840cd4",
-      "bytes": 39755
+      "sha256": "4b46a2f5a69342e6815c1afed6cb74420d99376cb5a58194be9b07c4cd87fd77",
+      "bytes": 42556
     },
     {
       "path": "assets/penguin-lghub-logo.png",
       "mode": "100644",
-      "sha256": "47ba6052f644b643a5f5204e25fe20e34b1217cabc9e08f07f6aae848b9e9c9e",
-      "bytes": 17639
+      "sha256": "0558bfbc3bad243e20f1ec22c84a74fc748b28b54039d65497724b1be40ce04f",
+      "bytes": 806581
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-detailed-preserved.md",
+      "mode": "100644",
+      "sha256": "59efd7b138d51a2643186491a4e64f2187cd35fb357fed57c5e2f28e550e1164",
+      "bytes": 7881
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-detailed-preserved.mmd",
+      "mode": "100644",
+      "sha256": "1065c01cba7d33406eccdd57c01f5529f123e072d763f261ab0d0827a2aeb86d",
+      "bytes": 7456
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-detailed-preserved.png",
+      "mode": "100644",
+      "sha256": "54304edb53e23e2a939233fe2f1b1e63a1265b4a57e6246c0903346471c08a89",
+      "bytes": 953301
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-original-20261025.md",
+      "mode": "100644",
+      "sha256": "bbc3909311b13e1399ef41567bbe28635fb68adc035b453a03243c409d34b583",
+      "bytes": 7502
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-original-20261025.mmd",
+      "mode": "100644",
+      "sha256": "86a6989447761a5cd68cebd57a3c9ae67ea173099a3e34702085fe505fcdc439",
+      "bytes": 7077
+    },
+    {
+      "path": "docs/architecture/penguin-lghub-original-20261025.png",
+      "mode": "100644",
+      "sha256": "45cf590c5372ba8f4b8aa254d97855c324a267b91badd4d860becf9019fb1aba",
+      "bytes": 966785
     },
     {
       "path": "docs/architecture/penguin-lghub-overview.png",
@@ -226,6 +262,18 @@
       "bytes": 16824
     },
     {
+      "path": "docs/packaging/linux-runtime-verification.json",
+      "mode": "100644",
+      "sha256": "75e8780688705d0feeb9b41822291eaa7b1399a4ee85eb2bf7aa8833bd488f83",
+      "bytes": 41983
+    },
+    {
+      "path": "docs/packaging/linux-runtime.md",
+      "mode": "100644",
+      "sha256": "7ba3766272d015c1b2f4937c84c073e46709adbb6ec4ae3b21b9907004727399",
+      "bytes": 7414
+    },
+    {
       "path": "docs/packaging/source-publication.md",
       "mode": "100644",
       "sha256": "f96b1bcb4d85b769124b143c3d82b0c56d1a6a9d1d094809ec7cbb8fc57e5760",
@@ -272,6 +320,12 @@
       "mode": "100644",
       "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c",
       "bytes": 26434
+    },
+    {
+      "path": "packaging/linux-runtime.lock.json",
+      "mode": "100644",
+      "sha256": "97def84293b7551a5e5b39d45006d0108c49ae160cad38dcbad792326ddffeaf",
+      "bytes": 1653
     },
     {
       "path": "packaging/logitech-depots-verification.json",
@@ -620,6 +674,12 @@
       "mode": "100644",
       "sha256": "114f7426aaf37521d658893a3c19c4b261e98629ecca223814ca9bb2e90b2d71",
       "bytes": 6081
+    },
+    {
+      "path": "tests/packaging/test_linux_runtime.py",
+      "mode": "100644",
+      "sha256": "925bafa8e7e7c83bc44893ba9d65722da08b46ed171c7d62d93bdbd03ec1f4ac",
+      "bytes": 5477
     },
     {
       "path": "tests/packaging/test_logitech_depots.py",
@@ -1154,6 +1214,12 @@
       "mode": "100644",
       "sha256": "df01b9f00dc2dae0b8cb34b6d1606213d068768d990ede6b1e3e87d76b4e7263",
       "bytes": 18204
+    },
+    {
+      "path": "tools/packaging/linux_runtime.py",
+      "mode": "100644",
+      "sha256": "bfee02f5a7a9e41b6ca9b4fcb39e6126dd6eedcfcef9c4e1407e069bbd69d69f",
+      "bytes": 15188
     },
     {
       "path": "tools/packaging/logitech_capsule.py",
