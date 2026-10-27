@@ -100,7 +100,8 @@ class LinuxRuntimeTests(unittest.TestCase):
 
     def test_audit_drops_live_session_and_injected_loaders(self):
         injected = {k: 'bad' for k in ('DISPLAY', 'WAYLAND_DISPLAY', 'XAUTHORITY',
-                    'DBUS_SESSION_BUS_ADDRESS', 'LD_PRELOAD', 'WINESERVER', 'LD_LIBRARY_PATH')}
+                    'DBUS_SESSION_BUS_ADDRESS', 'DBUS_SYSTEM_BUS_ADDRESS',
+                    'LD_PRELOAD', 'WINESERVER', 'LD_LIBRARY_PATH')}
         with patch.dict(os.environ, injected):
             env = m.clean_environment()
         self.assertFalse(set(injected) & set(env))
@@ -108,6 +109,17 @@ class LinuxRuntimeTests(unittest.TestCase):
         for item in ('--unshare-net', '--unshare-pid', '--graphics-provider=', '--dev'):
             self.assertIn(item, cmd)
         self.assertNotIn('sudo', cmd)
+
+    def test_private_samba_dependency_directory_is_in_loader_path(self):
+        paths = m.library_path(Path('/linux'), Path('/wine')).split(':')
+        self.assertEqual(paths[0], '/wine/usr/lib/wine/x86_64-unix')
+        self.assertIn('/linux/' + m.DEPOT + '/penguin-libraries/usr/lib/x86_64-linux-gnu/samba', paths)
+
+    def test_headless_audit_hides_system_bus_socket(self):
+        with patch.object(Path, 'is_dir', return_value=True):
+            cmd = m.isolated_command(Path('/linux'), Path('/result'), ['true'])
+        index = cmd.index('/run/dbus')
+        self.assertEqual(cmd[index - 1], '--tmpfs')
 
 
 if __name__ == '__main__':

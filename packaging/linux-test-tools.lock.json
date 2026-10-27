@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "kind": "penguin-headless-test-tools",
+  "node": {
+    "url": "https://nodejs.org/dist/v22.21.0/node-v22.21.0-linux-x64.tar.xz",
+    "local_name": "node-v22.21.0-linux-x64.tar.xz",
+    "size": 30763172,
+    "sha256": "71a04f4b9144870c9407b8019fe912514229e50246bc706862eded3ac8e9025d"
+  },
+  "packages": [
+    {
+      "url": "https://deb.debian.org/debian-security/pool/updates/main/x/xorg-server/xvfb_21.1.16-1.3+deb13u4_amd64.deb",
+      "local_name": "xvfb_21.1.16-1.3+deb13u4_amd64.deb",
+      "size": 3198660,
+      "sha256": "893d87bf159b6de077a929fc796a73c39f837d45310b2076e3eeebebb80552b6"
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/pool/updates/main/x/xorg-server/xserver-common_21.1.16-1.3+deb13u4_all.deb",
+      "local_name": "xserver-common_21.1.16-1.3+deb13u4_all.deb",
+      "size": 2410256,
+      "sha256": "94bc0dcceeefabd4f706af19b3424de7f827758d0ebad5c18c52e73365d7f3ab"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libx/libxfont/libxfont2_2.0.6-1+deb13u1_amd64.deb",
+      "local_name": "libxfont2_2.0.6-1+deb13u1_amd64.deb",
+      "size": 132904,
+      "sha256": "79a7f56e4a0c7b1defa706c7b1f3076f7d80aaeea9de253b2a87406253319681"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libf/libfontenc/libfontenc1_1.1.8-1+b2_amd64.deb",
+      "local_name": "libfontenc1_1.1.8-1+b2_amd64.deb",
+      "size": 23328,
+      "sha256": "49f7330e1bbe3f48946fee5c07870df660374f9f77b378840d6edf1a3b3444cd"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/a/audit/libaudit1_4.0.2-2+deb13u1_amd64.deb",
+      "local_name": "libaudit1_4.0.2-2+deb13u1_amd64.deb",
+      "size": 57680,
+      "sha256": "3d1dd3f031a56f01b747e2acc0e14575212580e6fa63d800c44cb0a31f1edfd7"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/a/audit/libaudit-common_4.0.2-2+deb13u1_all.deb",
+      "local_name": "libaudit-common_4.0.2-2+deb13u1_all.deb",
+      "size": 12812,
+      "sha256": "b9d32e5ff04fd747aacb7d6b3ebbbbf734ddefb2f1695f0b1b2a4b5e51b1052e"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/x/x11-xkb-utils/x11-xkb-utils_7.7+9_amd64.deb",
+      "local_name": "x11-xkb-utils_7.7+9_amd64.deb",
+      "size": 158552,
+      "sha256": "745e29c79bb435d057cdbf8bb59a35fa33e818e566cb754674f44d381ccd4317"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/x/xkeyboard-config/xkb-data_2.42-1_all.deb",
+      "local_name": "xkb-data_2.42-1_all.deb",
+      "size": 789736,
+      "sha256": "196ff18533382f64e057ea49df2bb486bd4275a4cc0917361edb560b8756dada"
+    }
+  ],
+  "scope": "Isolated developer backend tests only; no host installation or live display. Debian checksums from signed apt metadata; Node checksum from official SHASUMS256.txt."
+}

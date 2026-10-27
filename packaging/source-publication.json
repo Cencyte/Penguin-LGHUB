@@ -1,11 +1,12 @@
 {
   "schema": 1,
   "prepared_on": "2026-10-26",
-  "development_revision": "e75d45ac2109cdbff67a352923dda51bacb6ed8e",
-  "github_base_commit": "2968b193a3def304e497be3403392960a50415bd",
+  "development_revision": "6db16cd1ff9d8c1c99da4407747a3b3649f12fe2",
+  "github_base_commit": "d44b3d68d86b7046c641e66711b8db88794b2fd0",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source snapshot; no compiled runtime or proprietary inputs",
   "include_roots": [
+    ".github/",
     "assets/",
     "docs/architecture/",
     "docs/packaging/",
@@ -26,6 +27,12 @@
   "exclude_files": [],
   "self_excluded": "packaging/source-publication.json",
   "files": [
+    {
+      "path": ".github/FUNDING.yml",
+      "mode": "100644",
+      "sha256": "69c0e588487e07fede6381c20cdfc29ed11110c548555f52c2554edac91ef899",
+      "bytes": 87
+    },
     {
       "path": ".gitignore",
       "mode": "100644",
@@ -48,8 +55,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "4b46a2f5a69342e6815c1afed6cb74420d99376cb5a58194be9b07c4cd87fd77",
-      "bytes": 42556
+      "sha256": "dea4d9f8616f9764bf3f9c98cc8c26a793f7fe1e67524deda5550192ba5937f9",
+      "bytes": 43377
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -262,22 +269,28 @@
       "bytes": 16824
     },
     {
+      "path": "docs/packaging/linux-backend-verification.json",
+      "mode": "100644",
+      "sha256": "8e4b454a658a43b8b0f3a02219d9e67669cea3d6a359b9bb12cd57f6acca3424",
+      "bytes": 7206
+    },
+    {
       "path": "docs/packaging/linux-runtime-verification.json",
       "mode": "100644",
-      "sha256": "75e8780688705d0feeb9b41822291eaa7b1399a4ee85eb2bf7aa8833bd488f83",
-      "bytes": 41983
+      "sha256": "570b8375d609f7412d54f23f4c4354a5830377bd82bdbfabe06bcde4087bee46",
+      "bytes": 49714
     },
     {
       "path": "docs/packaging/linux-runtime.md",
       "mode": "100644",
-      "sha256": "7ba3766272d015c1b2f4937c84c073e46709adbb6ec4ae3b21b9907004727399",
-      "bytes": 7414
+      "sha256": "557ba35013b5efb37b7e44631f91f1008f826741dc33c60dabde62779d7d1507",
+      "bytes": 10552
     },
     {
       "path": "docs/packaging/source-publication.md",
       "mode": "100644",
-      "sha256": "f96b1bcb4d85b769124b143c3d82b0c56d1a6a9d1d094809ec7cbb8fc57e5760",
-      "bytes": 3583
+      "sha256": "f4912c9ecc2fbcb4733e4023fbebf0407a7ab7acfd8eebf2b0c1b4f8d58cf028",
+      "bytes": 3750
     },
     {
       "path": "docs/packaging/third-party-use.md",
@@ -324,8 +337,20 @@
     {
       "path": "packaging/linux-runtime.lock.json",
       "mode": "100644",
-      "sha256": "97def84293b7551a5e5b39d45006d0108c49ae160cad38dcbad792326ddffeaf",
-      "bytes": 1653
+      "sha256": "2176527a287d94b7490683d8c09f1f99be36aa747825f5df2c5720960de16a79",
+      "bytes": 42798
+    },
+    {
+      "path": "packaging/linux-sdk.lock.json",
+      "mode": "100644",
+      "sha256": "d337f2016b24d8d8da022fa4d5fde867a9ef0323dc2d974b1d726e7ed782dcba",
+      "bytes": 43810
+    },
+    {
+      "path": "packaging/linux-test-tools.lock.json",
+      "mode": "100644",
+      "sha256": "8615825689dbf0ef10d123fb058787eb8a50c249ef2be60b47ad0ffd1972b88e",
+      "bytes": 2779
     },
     {
       "path": "packaging/logitech-depots-verification.json",
@@ -678,8 +703,14 @@
     {
       "path": "tests/packaging/test_linux_runtime.py",
       "mode": "100644",
-      "sha256": "925bafa8e7e7c83bc44893ba9d65722da08b46ed171c7d62d93bdbd03ec1f4ac",
-      "bytes": 5477
+      "sha256": "1dbaac7bfd0dc27892004d26bafaa19f9da2fbe3430e146641bcecfcab0c2b1d",
+      "bytes": 6137
+    },
+    {
+      "path": "tests/packaging/test_linux_sdk.py",
+      "mode": "100644",
+      "sha256": "d518088bafc73660121dc68fc7a80a5e7d1effdb70e4bd499724c4c53a780a0a",
+      "bytes": 5584
     },
     {
       "path": "tests/packaging/test_logitech_depots.py",
@@ -1216,10 +1247,22 @@
       "bytes": 18204
     },
     {
+      "path": "tools/packaging/linux_probe.py",
+      "mode": "100644",
+      "sha256": "9a38fe29fa1a8e6bd0dff628c41896b8ae74b3d988fa392373603217bbcc8042",
+      "bytes": 8996
+    },
+    {
       "path": "tools/packaging/linux_runtime.py",
       "mode": "100644",
-      "sha256": "bfee02f5a7a9e41b6ca9b4fcb39e6126dd6eedcfcef9c4e1407e069bbd69d69f",
-      "bytes": 15188
+      "sha256": "74db399d069073b93a031f85dd44d1006271d34324725d73b8dd1a695ff8b388",
+      "bytes": 15762
+    },
+    {
+      "path": "tools/packaging/linux_sdk.py",
+      "mode": "100644",
+      "sha256": "6b8c3071f83bafab6d86ec33763b5e806b00600352bd249140e12e5407654d85",
+      "bytes": 9043
     },
     {
       "path": "tools/packaging/logitech_capsule.py",

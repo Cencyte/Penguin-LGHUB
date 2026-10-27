@@ -1,0 +1,942 @@
+{
+  "schema": 1,
+  "kind": "penguin-linux-sdk",
+  "build_id": "4.0.20260928.262390",
+  "archive": {
+    "url": "https://repo.steampowered.com/steamrt4/images/4.0.20260928.262390/com.valvesoftware.SteamRuntime.Sdk-amd64,i386-steamrt4-sysroot.tar.gz",
+    "local_name": "steamrt4-sdk-4.0.20260928.262390.tar.gz",
+    "size": 1118030083,
+    "sha256": "00d93ff371a8a41d3ebf336b9c11f7b14a4aba448ca24a6b7aff29254b9de690"
+  },
+  "wine_source": {
+    "url": "https://codeload.github.com/wine-mirror/wine/tar.gz/refs/tags/wine-10.20",
+    "local_name": "wine-10.20-source.tar.gz",
+    "size": 53765986,
+    "sha256": "b53683fb89b891fa1d5e3c7ca8c2f7f023ee0b6e397edc6084fb75519eb047df"
+  },
+  "build_packages": [
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/sane-backends/libsane-common_1.3.1-3_all.deb",
+      "local_name": "libsane-common_1.3.1-3_all.deb",
+      "size": 1307040,
+      "sha256": "ab5887db59bb39c2f19063da069cb065d69f04675aa2f0b53600e621bc9ba07f",
+      "package": "libsane-common",
+      "version": "1.3.1-3",
+      "source_package": "sane-backends",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/i/iso-codes/iso-codes_4.18.0-1_all.deb",
+      "local_name": "iso-codes_4.18.0-1_all.deb",
+      "size": 3124584,
+      "sha256": "969582afb02fd3f0833a666b2112931a999c4f6b23e7fe514f8051dfd7672a45",
+      "package": "iso-codes",
+      "version": "4.18.0-1",
+      "source_package": "iso-codes",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/a/aom/libaom3_3.12.1-1%2bdeb13u1_amd64.deb",
+      "local_name": "libaom3_3.12.1-1+deb13u1_amd64.deb",
+      "size": 1871712,
+      "sha256": "743eec7c94ae30295bc557ebac3dfae948e7390e89a2743c585d56297e9d312e",
+      "package": "libaom3",
+      "version": "3.12.1-1+deb13u1",
+      "source_package": "aom",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libv/libvpl/libvpl2_2.14.0-1%2bb1_amd64.deb",
+      "local_name": "libvpl2_2.14.0-1+b1_amd64.deb",
+      "size": 129124,
+      "sha256": "cee5b3fdfb5c2a944f4366406bf245992c7aaa234cdfb41acffba8f2bfbed1b4",
+      "package": "libvpl2",
+      "version": "1:2.14.0-1+b1",
+      "source_package": "libvpl (1:2.14.0-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/o/ocl-icd/ocl-icd-libopencl1_2.3.3-1_amd64.deb",
+      "local_name": "ocl-icd-libopencl1_2.3.3-1_amd64.deb",
+      "size": 42896,
+      "sha256": "99dfd409ae92505ee56742feea4e82a1e052818c5b0036ee618a371b5e28c9d1",
+      "package": "ocl-icd-libopencl1",
+      "version": "2.3.3-1",
+      "source_package": "ocl-icd",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/f/ffmpeg/libavutil59_7.1.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libavutil59_7.1.5-0+deb13u1_amd64.deb",
+      "size": 424956,
+      "sha256": "bb5fe4ea1eef338c8346bf67cc728dac20b94451ad31db391d03d1f2b3fa37c1",
+      "package": "libavutil59",
+      "version": "7:7.1.5-0+deb13u1",
+      "source_package": "ffmpeg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/c/codec2/libcodec2-1.2_1.2.0-3_amd64.deb",
+      "local_name": "libcodec2-1.2_1.2.0-3_amd64.deb",
+      "size": 8170032,
+      "sha256": "d68a3b754be7aa2d724d01d2079c542fc7cfa53eaa4ac89fbc6e63d950c02bd6",
+      "package": "libcodec2-1.2",
+      "version": "1.2.0-3",
+      "source_package": "codec2",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libg/libgsm/libgsm1_1.0.22-1%2bb2_amd64.deb",
+      "local_name": "libgsm1_1.0.22-1+b2_amd64.deb",
+      "size": 29304,
+      "sha256": "388909810b0133b0dd8ea84884cd34db7bcbbd0f2643a7a65296a34644704a5e",
+      "package": "libgsm1",
+      "version": "1.0.22-1+b2",
+      "source_package": "libgsm (1.0.22-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/h/highway/libhwy1t64_1.2.0-2%2bb2_amd64.deb",
+      "local_name": "libhwy1t64_1.2.0-2+b2_amd64.deb",
+      "size": 676044,
+      "sha256": "540c4ff28255fbfa89468061b722dfc2b773b0c1ecf163a063202482dea5b119",
+      "package": "libhwy1t64",
+      "version": "1.2.0-2+b2",
+      "source_package": "highway (1.2.0-2)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/l/lcms2/liblcms2-2_2.16-2%2bdeb13u2_amd64.deb",
+      "local_name": "liblcms2-2_2.16-2+deb13u2_amd64.deb",
+      "size": 160264,
+      "sha256": "32e53c2002ccea8c60c02779bea0ba49ac132fef702988a30d64af79b6617806",
+      "package": "liblcms2-2",
+      "version": "2.16-2+deb13u2",
+      "source_package": "lcms2",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/pool/updates/main/j/jpeg-xl/libjxl0.11_0.11.2-0.1%7edeb13u3_amd64.deb",
+      "local_name": "libjxl0.11_0.11.2-0.1~deb13u3_amd64.deb",
+      "size": 1133480,
+      "sha256": "ddcb149f875b2ed6ab9160c59c1f46eef48b821005033e574dc829e6deacc26e",
+      "package": "libjxl0.11",
+      "version": "0.11.2-0.1~deb13u3",
+      "source_package": "jpeg-xl",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/l/lame/libmp3lame0_3.100-6%2bb3_amd64.deb",
+      "local_name": "libmp3lame0_3.100-6+b3_amd64.deb",
+      "size": 362660,
+      "sha256": "3867319c9fbbc8cc25f2d1dc1d75d13548c84c37fa709c1ac9ca02ac051b63ab",
+      "package": "libmp3lame0",
+      "version": "3.100-6+b3",
+      "source_package": "lame (3.100-6)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/o/openjpeg2/libopenjp2-7_2.5.3-2.1%7edeb13u2_amd64.deb",
+      "local_name": "libopenjp2-7_2.5.3-2.1~deb13u2_amd64.deb",
+      "size": 204616,
+      "sha256": "7ddf6360e8845853ba3c9cfaefc2ad6b92b2627eb8564a257f5f2a4c857f8748",
+      "package": "libopenjp2-7",
+      "version": "2.5.3-2.1~deb13u2",
+      "source_package": "openjpeg2",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/r/rust-rav1e/librav1e0.7_0.7.1-9%2bb2_amd64.deb",
+      "local_name": "librav1e0.7_0.7.1-9+b2_amd64.deb",
+      "size": 946396,
+      "sha256": "d5b1373a8d6905ee4523faf1db7a626dc660e03836ec91b616e57ba386f47eb6",
+      "package": "librav1e0.7",
+      "version": "0.7.1-9+b2",
+      "source_package": "rust-rav1e (0.7.1-9)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/pool/updates/main/libr/librsvg/librsvg2-2_2.60.0%2bdfsg-1%2bdeb13u1_amd64.deb",
+      "local_name": "librsvg2-2_2.60.0+dfsg-1+deb13u1_amd64.deb",
+      "size": 1794824,
+      "sha256": "5f68f720eccefebda3855a30007cab9d7662042ccbc01c126aa5f697ae6e5791",
+      "package": "librsvg2-2",
+      "version": "2.60.0+dfsg-1+deb13u1",
+      "source_package": "librsvg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/shine/libshine3_3.1.1-2%2bb2_amd64.deb",
+      "local_name": "libshine3_3.1.1-2+b2_amd64.deb",
+      "size": 23128,
+      "sha256": "8908eb0c70893d122ee9cbed7186736ad94b45716404ef9622845bdd7d17b29d",
+      "package": "libshine3",
+      "version": "3.1.1-2+b2",
+      "source_package": "shine (3.1.1-2)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/snappy/libsnappy1v5_1.2.2-1_amd64.deb",
+      "local_name": "libsnappy1v5_1.2.2-1_amd64.deb",
+      "size": 29252,
+      "sha256": "53ec5f1050d64375a63cd1c30ee4a6d21ef0cfd485f9999aa0b70dd424ca3465",
+      "package": "libsnappy1v5",
+      "version": "1.2.2-1",
+      "source_package": "snappy",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/svt-av1/libsvtav1enc2_2.3.0%2bdfsg-1_amd64.deb",
+      "local_name": "libsvtav1enc2_2.3.0+dfsg-1_amd64.deb",
+      "size": 2489492,
+      "sha256": "cdaf961c3cc4fe78a19ff18c17d83d813f78a378fdcc4c86ccbb9b54e84ae599",
+      "package": "libsvtav1enc2",
+      "version": "2.3.0+dfsg-1",
+      "source_package": "svt-av1",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libs/libsoxr/libsoxr0_0.1.3-4%2bb2_amd64.deb",
+      "local_name": "libsoxr0_0.1.3-4+b2_amd64.deb",
+      "size": 81008,
+      "sha256": "384caa47b6cfe780f30d33c5dfb1c18f6579aed9f3bdbf7f8cd0395ab2d537b7",
+      "package": "libsoxr0",
+      "version": "0.1.3-4+b2",
+      "source_package": "libsoxr (0.1.3-4)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/f/ffmpeg/libswresample5_7.1.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libswresample5_7.1.5-0+deb13u1_amd64.deb",
+      "size": 109260,
+      "sha256": "abe0f2f6a27db64a0d2d344e333880be997b2ec5431fc187a100078075680d94",
+      "package": "libswresample5",
+      "version": "7:7.1.5-0+deb13u1",
+      "source_package": "ffmpeg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/t/twolame/libtwolame0_0.4.0-2%2bb2_amd64.deb",
+      "local_name": "libtwolame0_0.4.0-2+b2_amd64.deb",
+      "size": 51340,
+      "sha256": "f3e739c8dd8b7c77043406bb4a4eef16d192e2e0aa5f8d9f39e09ff087844e6d",
+      "package": "libtwolame0",
+      "version": "0.4.0-2+b2",
+      "source_package": "twolame (0.4.0-2)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/x/x264/libx264-164_0.164.3108%2bgit31e19f9-2%2bb1_amd64.deb",
+      "local_name": "libx264-164_0.164.3108+git31e19f9-2+b1_amd64.deb",
+      "size": 558464,
+      "sha256": "325c90dc0888be316c8979b94aee546d223d4edf03b30927d1e9d431f67e33b2",
+      "package": "libx264-164",
+      "version": "2:0.164.3108+git31e19f9-2+b1",
+      "source_package": "x264 (2:0.164.3108+git31e19f9-2)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/n/numactl/libnuma1_2.0.19-1_amd64.deb",
+      "local_name": "libnuma1_2.0.19-1_amd64.deb",
+      "size": 22212,
+      "sha256": "e578583f73f8208564e5035b18aa729c441fc7ecb389c666923552e123f4d655",
+      "package": "libnuma1",
+      "version": "2.0.19-1",
+      "source_package": "numactl",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/x/x265/libx265-215_4.1-2_amd64.deb",
+      "local_name": "libx265-215_4.1-2_amd64.deb",
+      "size": 1236592,
+      "sha256": "4bb075b465dbc136b0c5050b956432ea7e443a16d592aa89ef28bcaf4b0ad734",
+      "package": "libx265-215",
+      "version": "4.1-2",
+      "source_package": "x265",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/x/xvidcore/libxvidcore4_1.3.7-1%2bb2_amd64.deb",
+      "local_name": "libxvidcore4_1.3.7-1+b2_amd64.deb",
+      "size": 251532,
+      "sha256": "a3ea54e60cbc13dcd5f4a64c5635c52701274ae52baa9902d87ad742af4e4977",
+      "package": "libxvidcore4",
+      "version": "2:1.3.7-1+b2",
+      "source_package": "xvidcore (2:1.3.7-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/z/zvbi/libzvbi-common_0.2.44-1_all.deb",
+      "local_name": "libzvbi-common_0.2.44-1_all.deb",
+      "size": 71436,
+      "sha256": "98ab88223df2380c79d048c6bd276449c64603eef4e43aa99d52406877ebee59",
+      "package": "libzvbi-common",
+      "version": "0.2.44-1",
+      "source_package": "zvbi",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/z/zvbi/libzvbi0t64_0.2.44-1_amd64.deb",
+      "local_name": "libzvbi0t64_0.2.44-1_amd64.deb",
+      "size": 278492,
+      "sha256": "ff9b1227f8812b4d51d24130bfeb436a3cc3159410d507cb370f6908e9059112",
+      "package": "libzvbi0t64",
+      "version": "0.2.44-1",
+      "source_package": "zvbi",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/f/ffmpeg/libavcodec61_7.1.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libavcodec61_7.1.5-0+deb13u1_amd64.deb",
+      "size": 5821268,
+      "sha256": "6c07da16b276827973463bdd22607721df1c2877641c753d2418cf6bf49a0f2e",
+      "package": "libavcodec61",
+      "version": "7:7.1.5-0+deb13u1",
+      "source_package": "ffmpeg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/f/ffmpeg/libavutil-dev_7.1.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libavutil-dev_7.1.5-0+deb13u1_amd64.deb",
+      "size": 580148,
+      "sha256": "71aae526cbdb5fb55cb8269427769eca120308393f70590843ba4d1a1b6befdd",
+      "package": "libavutil-dev",
+      "version": "7:7.1.5-0+deb13u1",
+      "source_package": "ffmpeg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/f/ffmpeg/libswresample-dev_7.1.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libswresample-dev_7.1.5-0+deb13u1_amd64.deb",
+      "size": 123620,
+      "sha256": "f1dc861dcdbcf61d757a0b7e7f189cf1695433a0935c3ceabcaf58709af2b51b",
+      "package": "libswresample-dev",
+      "version": "7:7.1.5-0+deb13u1",
+      "source_package": "ffmpeg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/f/ffmpeg/libavcodec-dev_7.1.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libavcodec-dev_7.1.5-0+deb13u1_amd64.deb",
+      "size": 6449272,
+      "sha256": "36f190f54441bd3bac0eddcfa4713e41c3b41da6476ac9bb868cc3c9f027fe02",
+      "package": "libavcodec-dev",
+      "version": "7:7.1.5-0+deb13u1",
+      "source_package": "ffmpeg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libu/libudfread/libudfread0_1.1.2-1%2bb2_amd64.deb",
+      "local_name": "libudfread0_1.1.2-1+b2_amd64.deb",
+      "size": 17712,
+      "sha256": "dbb34708521e4e895d1e061b765548ea408e670c8b2a17e84529166afa88e5f1",
+      "package": "libudfread0",
+      "version": "1.1.2-1+b2",
+      "source_package": "libudfread (1.1.2-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libb/libbluray/libbluray2_1.3.4-1%2bb2_amd64.deb",
+      "local_name": "libbluray2_1.3.4-1+b2_amd64.deb",
+      "size": 138412,
+      "sha256": "82f9e58e8dfdfeb57b273111433c335500c26553eb82f2a025e94ed9fdae2c21",
+      "package": "libbluray2",
+      "version": "1:1.3.4-1+b2",
+      "source_package": "libbluray (1:1.3.4-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/c/chromaprint/libchromaprint1_1.5.1-7_amd64.deb",
+      "local_name": "libchromaprint1_1.5.1-7_amd64.deb",
+      "size": 42948,
+      "sha256": "ed8decea8352ae56e80862c4630c83f4f863d4eea653382ed8ae43ffacda60b5",
+      "package": "libchromaprint1",
+      "version": "1.5.1-7",
+      "source_package": "chromaprint",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libd/libdvdread/libdvdread8t64_6.1.3-2_amd64.deb",
+      "local_name": "libdvdread8t64_6.1.3-2_amd64.deb",
+      "size": 86248,
+      "sha256": "f753a23580c00a2166211607a5511a9c25d75c9ebfc34598b6526637de150fec",
+      "package": "libdvdread8t64",
+      "version": "6.1.3-2",
+      "source_package": "libdvdread",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libd/libdvdnav/libdvdnav4_6.1.1-3%2bb1_amd64.deb",
+      "local_name": "libdvdnav4_6.1.1-3+b1_amd64.deb",
+      "size": 44532,
+      "sha256": "8368250b65cc26911fd37acdeeed58e9ce5bd390e941f687abecca9d5cd659f0",
+      "package": "libdvdnav4",
+      "version": "6.1.1-3+b1",
+      "source_package": "libdvdnav (6.1.1-3)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/g/game-music-emu/libgme0_0.6.3-7%2bb2_amd64.deb",
+      "local_name": "libgme0_0.6.3-7+b2_amd64.deb",
+      "size": 130908,
+      "sha256": "fbcef23f20099dd7b88a3d9edb79482359b2ab845632acb929313df7d2c5b6b7",
+      "package": "libgme0",
+      "version": "0.6.3-7+b2",
+      "source_package": "game-music-emu (0.6.3-7)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libo/libopenmpt/libopenmpt0t64_0.7.13-1%2bb1_amd64.deb",
+      "local_name": "libopenmpt0t64_0.7.13-1+b1_amd64.deb",
+      "size": 855104,
+      "sha256": "37537d1b0dc3798d9157aa453427609a3e7f52c0c89b36563764c193194aaa6a",
+      "package": "libopenmpt0t64",
+      "version": "0.7.13-1+b1",
+      "source_package": "libopenmpt (0.7.13-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libr/librabbitmq/librabbitmq4_0.15.0-1%2bdeb13u2_amd64.deb",
+      "local_name": "librabbitmq4_0.15.0-1+deb13u2_amd64.deb",
+      "size": 42508,
+      "sha256": "7b81f891935c05a01ddca461564906dbc3c48f02519b2c20b8ca7590f2868112",
+      "package": "librabbitmq4",
+      "version": "0.15.0-1+deb13u2",
+      "source_package": "librabbitmq",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/c/cjson/libcjson1_1.7.18-3.1%2bdeb13u1_amd64.deb",
+      "local_name": "libcjson1_1.7.18-3.1+deb13u1_amd64.deb",
+      "size": 29848,
+      "sha256": "e10b7fb966251f4f09690cb35f9e8fed6924194ec2d6973910d9e157cda82657",
+      "package": "libcjson1",
+      "version": "1.7.18-3.1+deb13u1",
+      "source_package": "cjson",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/m/mbedtls/libmbedcrypto16_3.6.6-0.1%7edeb13u1_amd64.deb",
+      "local_name": "libmbedcrypto16_3.6.6-0.1~deb13u1_amd64.deb",
+      "size": 365220,
+      "sha256": "b38baf2ecaca7b28b3005d34b8108ee9b17681426b20662813995e939aea6dfa",
+      "package": "libmbedcrypto16",
+      "version": "3.6.6-0.1~deb13u1",
+      "source_package": "mbedtls",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libr/librist/librist4_0.2.11%2bdfsg-1_amd64.deb",
+      "local_name": "librist4_0.2.11+dfsg-1_amd64.deb",
+      "size": 72092,
+      "sha256": "a3f66bd87fdd95561ec41894a782ca9e2e9272ed72c925be8a44da95e41a03b2",
+      "package": "librist4",
+      "version": "0.2.11+dfsg-1",
+      "source_package": "librist",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/srt/libsrt1.5-gnutls_1.5.4-1%2bdeb13u1_amd64.deb",
+      "local_name": "libsrt1.5-gnutls_1.5.4-1+deb13u1_amd64.deb",
+      "size": 347996,
+      "sha256": "234ed0b5fcff17d2ecce4c625d897b78545f94f5096b1ec689e9a678f9067f1c",
+      "package": "libsrt1.5-gnutls",
+      "version": "1.5.4-1+deb13u1",
+      "source_package": "srt",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libs/libssh/libssh-4_0.11.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libssh-4_0.11.5-0+deb13u1_amd64.deb",
+      "size": 211924,
+      "sha256": "bc8cbc13617d1b21fa6f686f9f269a4f849f00624d5bb179785a058981701233",
+      "package": "libssh-4",
+      "version": "0.11.5-0+deb13u1",
+      "source_package": "libssh",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/n/norm/libnorm1t64_1.5.9%2bdfsg-3.1%2bb2_amd64.deb",
+      "local_name": "libnorm1t64_1.5.9+dfsg-3.1+b2_amd64.deb",
+      "size": 221468,
+      "sha256": "cf48143ffa3886224cd0af63a8ecfac6f87177d80e7a053793c8621781b944ea",
+      "package": "libnorm1t64",
+      "version": "1.5.9+dfsg-3.1+b2",
+      "source_package": "norm (1.5.9+dfsg-3.1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libp/libpgm/libpgm-5.3-0t64_5.3.128%7edfsg-2.1%2bb1_amd64.deb",
+      "local_name": "libpgm-5.3-0t64_5.3.128~dfsg-2.1+b1_amd64.deb",
+      "size": 161816,
+      "sha256": "865c47a7865da63e7d620f0999ab7d10cdae8b638b691061166975c654a0e5f9",
+      "package": "libpgm-5.3-0t64",
+      "version": "5.3.128~dfsg-2.1+b1",
+      "source_package": "libpgm (5.3.128~dfsg-2.1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libs/libsodium/libsodium23_1.0.18-1%2bdeb13u1_amd64.deb",
+      "local_name": "libsodium23_1.0.18-1+deb13u1_amd64.deb",
+      "size": 165028,
+      "sha256": "9ff9d97bb7ce3aee7f6e6ec3a785cdbe237454a7b9fd84728121bc4ef2bebebe",
+      "package": "libsodium23",
+      "version": "1.0.18-1+deb13u1",
+      "source_package": "libsodium",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/z/zeromq3/libzmq5_4.3.5-1%2bb3_amd64.deb",
+      "local_name": "libzmq5_4.3.5-1+b3_amd64.deb",
+      "size": 283476,
+      "sha256": "82348834b94ae5288dd1dde1c6a59488d30e3ee97fd4183c0b60ed79c3ab0b57",
+      "package": "libzmq5",
+      "version": "4.3.5-1+b3",
+      "source_package": "zeromq3 (4.3.5-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/f/ffmpeg/libavformat61_7.1.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libavformat61_7.1.5-0+deb13u1_amd64.deb",
+      "size": 1203340,
+      "sha256": "4b580060cebbd33a25589ba71074e3106caf2826bcdb82cf8936b52960f34fb2",
+      "package": "libavformat61",
+      "version": "7:7.1.5-0+deb13u1",
+      "source_package": "ffmpeg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/f/ffmpeg/libavformat-dev_7.1.5-0%2bdeb13u1_amd64.deb",
+      "local_name": "libavformat-dev_7.1.5-0+deb13u1_amd64.deb",
+      "size": 1411016,
+      "sha256": "73edfc824646be309a8379b2e7dd2faa3b9806815ae815651b8ec15f1088da0e",
+      "package": "libavformat-dev",
+      "version": "7:7.1.5-0+deb13u1",
+      "source_package": "ffmpeg",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libg/libgav1/libgav1-1_0.19.0-3%2bb1_amd64.deb",
+      "local_name": "libgav1-1_0.19.0-3+b1_amd64.deb",
+      "size": 352956,
+      "sha256": "94010041e59c7a8d2d3d1f5e62afd523f002b7b1caa3189419160b66d71c0195",
+      "package": "libgav1-1",
+      "version": "0.19.0-3+b1",
+      "source_package": "libgav1 (0.19.0-3)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/liby/libyuv/libyuv0_0.0.1904.20250204-1_amd64.deb",
+      "local_name": "libyuv0_0.0.1904.20250204-1_amd64.deb",
+      "size": 173700,
+      "sha256": "1a6827fe94fa5572a032332df7313ed408e9c0ad78f3a1248391bddc6d920ef2",
+      "package": "libyuv0",
+      "version": "0.0.1904.20250204-1",
+      "source_package": "libyuv",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/liba/libavif/libavif16_1.2.1-1.2_amd64.deb",
+      "local_name": "libavif16_1.2.1-1.2_amd64.deb",
+      "size": 133120,
+      "sha256": "ba6c334454d3562560ad583fbe2c998e203b0fc5a0e0e91112ddcd3cff4704bb",
+      "package": "libavif16",
+      "version": "1.2.1-1.2",
+      "source_package": "libavif",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libd/libde265/libde265-0_1.0.15-1%2bdeb13u2_amd64.deb",
+      "local_name": "libde265-0_1.0.15-1+deb13u2_amd64.deb",
+      "size": 190116,
+      "sha256": "4a76cf0ff4502176e780bfedfc848aedf4a1a55b1d154b27164ca4ce698c1aad",
+      "package": "libde265-0",
+      "version": "1.0.15-1+deb13u2",
+      "source_package": "libde265",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libe/libexif/libexif12_0.6.25-1%2bdeb13u1_amd64.deb",
+      "local_name": "libexif12_0.6.25-1+deb13u1_amd64.deb",
+      "size": 422668,
+      "sha256": "74ff427590c93278da9125363e60b532b5cfca0eb6d649b75712dc5e2325c1db",
+      "package": "libexif12",
+      "version": "0.6.25-1+deb13u1",
+      "source_package": "libexif",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/pool/updates/main/libh/libheif/libheif-plugin-libde265_1.23.6-2%7edeb13u1_amd64.deb",
+      "local_name": "libheif-plugin-libde265_1.23.6-2~deb13u1_amd64.deb",
+      "size": 20876,
+      "sha256": "87ceca51500055813fb4f435423df0290461e5e1104b8581ed71afb8620581c5",
+      "package": "libheif-plugin-libde265",
+      "version": "1.23.6-2~deb13u1",
+      "source_package": "libheif",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/pool/updates/main/libh/libheif/libheif-plugin-dav1d_1.23.6-2%7edeb13u1_amd64.deb",
+      "local_name": "libheif-plugin-dav1d_1.23.6-2~deb13u1_amd64.deb",
+      "size": 23368,
+      "sha256": "952194072fd0fb66bf8923fab262f38bb008dfaee53f351828c27b907e0fa4cd",
+      "package": "libheif-plugin-dav1d",
+      "version": "1.23.6-2~deb13u1",
+      "source_package": "libheif",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/pool/updates/main/libh/libheif/libheif1_1.23.6-2%7edeb13u1_amd64.deb",
+      "local_name": "libheif1_1.23.6-2~deb13u1_amd64.deb",
+      "size": 828232,
+      "sha256": "66e992705f29ebc4499b7b9c142f2ed92cfca1e17df81b7a646c82d42cd28864",
+      "package": "libheif1",
+      "version": "1.23.6-2~deb13u1",
+      "source_package": "libheif",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libi/libimagequant/libimagequant0_2.18.0-1%2bb2_amd64.deb",
+      "local_name": "libimagequant0_2.18.0-1+b2_amd64.deb",
+      "size": 35184,
+      "sha256": "83a86fe813ca44d5c6ede86684d6ebe5c8f8b1b01d19743fa382315b38080b64",
+      "package": "libimagequant0",
+      "version": "2.18.0-1+b2",
+      "source_package": "libimagequant (2.18.0-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libg/libgd2/libgd3_2.3.3-14%7edeb13u1_amd64.deb",
+      "local_name": "libgd3_2.3.3-14~deb13u1_amd64.deb",
+      "size": 126372,
+      "sha256": "26814d821656ef587e841d186aa8be1e3794214acb7bdd0d938e2a6d172aa0a9",
+      "package": "libgd3",
+      "version": "2.3.3-14~deb13u1",
+      "source_package": "libgd2",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/g/gpgme1.0/libgpgme11t64_1.24.2-3_amd64.deb",
+      "local_name": "libgpgme11t64_1.24.2-3_amd64.deb",
+      "size": 345612,
+      "sha256": "6650203af59ccf73b22cd6904fb179a799cb70d62885b19ae725c0655c04241c",
+      "package": "libgpgme11t64",
+      "version": "1.24.2-3",
+      "source_package": "gpgme1.0",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/g/gpgme1.0/libgpgmepp6t64_1.24.2-3_amd64.deb",
+      "local_name": "libgpgmepp6t64_1.24.2-3_amd64.deb",
+      "size": 340548,
+      "sha256": "81860c69f1480af6969de16845e2091dba9fca1e33732411e28437ea62e1a625",
+      "package": "libgpgmepp6t64",
+      "version": "1.24.2-3",
+      "source_package": "gpgme1.0",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libt/libtool/libltdl7_2.5.4-4_amd64.deb",
+      "local_name": "libltdl7_2.5.4-4_amd64.deb",
+      "size": 415648,
+      "sha256": "ab38167fc5aba8d133309fa98ca0a8b4e8b3c31588214ea70803a2bf3c6aa5ba",
+      "package": "libltdl7",
+      "version": "2.5.4-4",
+      "source_package": "libtool",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libg/libgphoto2/libgphoto2-port12t64_2.5.31-4_amd64.deb",
+      "local_name": "libgphoto2-port12t64_2.5.31-4_amd64.deb",
+      "size": 136744,
+      "sha256": "b0b8a52fab642cad40df08b7fcf46cae6cbe53bf1c087a7e31bfef910f898240",
+      "package": "libgphoto2-port12t64",
+      "version": "2.5.31-4",
+      "source_package": "libgphoto2",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libg/libgphoto2/libgphoto2-6t64_2.5.31-4_amd64.deb",
+      "local_name": "libgphoto2-6t64_2.5.31-4_amd64.deb",
+      "size": 760028,
+      "sha256": "c8d4507550ac623502c214259728c5b9bb2372c6e5246f9c3d9487b1dced485f",
+      "package": "libgphoto2-6t64",
+      "version": "2.5.31-4",
+      "source_package": "libgphoto2",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/g/gstreamer1.0/libgstreamer1.0-0_1.26.2-2_amd64.deb",
+      "local_name": "libgstreamer1.0-0_1.26.2-2_amd64.deb",
+      "size": 1421116,
+      "sha256": "08b463307fbde5496a346b1bb300b465cd22bd326f6f4634f482bf441af28a9b",
+      "package": "libgstreamer1.0-0",
+      "version": "1.26.2-2",
+      "source_package": "gstreamer1.0",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/o/orc/liborc-0.4-0t64_0.4.41-1_amd64.deb",
+      "local_name": "liborc-0.4-0t64_0.4.41-1_amd64.deb",
+      "size": 189604,
+      "sha256": "5b9afe78be0dd71399c0d4d7e5f26beb6ddf207279997942d8280be1b20bd58c",
+      "package": "liborc-0.4-0t64",
+      "version": "1:0.4.41-1",
+      "source_package": "orc",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian-security/pool/updates/main/g/gst-plugins-base1.0/libgstreamer-plugins-base1.0-0_1.26.2-1%2bdeb13u2_amd64.deb",
+      "local_name": "libgstreamer-plugins-base1.0-0_1.26.2-1+deb13u2_amd64.deb",
+      "size": 996672,
+      "sha256": "b476f0e622edf46394c8f7eb40032a5db30d60eccae3332d2cd8d03ac65b8a8a",
+      "package": "libgstreamer-plugins-base1.0-0",
+      "version": "1.26.2-1+deb13u2",
+      "source_package": "gst-plugins-base1.0",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libi/libieee1284/libieee1284-3t64_0.2.11-14.1%2bb1_amd64.deb",
+      "local_name": "libieee1284-3t64_0.2.11-14.1+b1_amd64.deb",
+      "size": 28180,
+      "sha256": "7555a7cd2da0acc421bed44ff8a63792e09e869c7b839b6f8d1d4223d3e2d9ea",
+      "package": "libieee1284-3t64",
+      "version": "0.2.11-14.1+b1",
+      "source_package": "libieee1284 (0.2.11-14.1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/c/cyrus-sasl2/libsasl2-modules-db_2.1.28%2bdfsg1-9_amd64.deb",
+      "local_name": "libsasl2-modules-db_2.1.28+dfsg1-9_amd64.deb",
+      "size": 19768,
+      "sha256": "a5c38659fbd62c33c6d9bfa2be43e75a572d1818531aad32dd74d0a58cc4bd19",
+      "package": "libsasl2-modules-db",
+      "version": "2.1.28+dfsg1-9",
+      "source_package": "cyrus-sasl2",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/c/cyrus-sasl2/libsasl2-2_2.1.28%2bdfsg1-9_amd64.deb",
+      "local_name": "libsasl2-2_2.1.28+dfsg1-9_amd64.deb",
+      "size": 57512,
+      "sha256": "66e49d7ae026811b49a0050f18b0325960a2625ffd1ff60d91b7844a815fa9d2",
+      "package": "libsasl2-2",
+      "version": "2.1.28+dfsg1-9",
+      "source_package": "cyrus-sasl2",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/o/openldap/libldap2_2.6.10%2bdfsg-1_amd64.deb",
+      "local_name": "libldap2_2.6.10+dfsg-1_amd64.deb",
+      "size": 193576,
+      "sha256": "60069e4a550ca890113fa89d3001417781b18e146ec5d637d31e368dec9909bd",
+      "package": "libldap2",
+      "version": "2.6.10+dfsg-1",
+      "source_package": "openldap",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/l/lmdb/liblmdb0_0.9.31-1%2bb2_amd64.deb",
+      "local_name": "liblmdb0_0.9.31-1+b2_amd64.deb",
+      "size": 45240,
+      "sha256": "97636442b412a6dff51d23ba74f0cdc12ac1edece661a16c43cba294a98cf543",
+      "package": "liblmdb0",
+      "version": "0.9.31-1+b2",
+      "source_package": "lmdb (0.9.31-1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/samba/libtalloc2_2.4.3%2bsamba4.22.11%2bdfsg-0%2bdeb13u1_amd64.deb",
+      "local_name": "libtalloc2_2.4.3+samba4.22.11+dfsg-0+deb13u1_amd64.deb",
+      "size": 63644,
+      "sha256": "b4cc8aa74c8b7c05a64efb6577acc955f522a8e39d8f37fe60b1b3fe6634ce96",
+      "package": "libtalloc2",
+      "version": "2:2.4.3+samba4.22.11+dfsg-0+deb13u1",
+      "source_package": "samba (2:4.22.11+dfsg-0+deb13u1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/samba/libtdb1_1.4.13%2bsamba4.22.11%2bdfsg-0%2bdeb13u1_amd64.deb",
+      "local_name": "libtdb1_1.4.13+samba4.22.11+dfsg-0+deb13u1_amd64.deb",
+      "size": 83444,
+      "sha256": "49f805c2c7e6e29a9f026689241b493bbd2bbf56037f296a66991448954333d7",
+      "package": "libtdb1",
+      "version": "2:1.4.13+samba4.22.11+dfsg-0+deb13u1",
+      "source_package": "samba (2:4.22.11+dfsg-0+deb13u1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/samba/libtevent0t64_0.16.2%2bsamba4.22.11%2bdfsg-0%2bdeb13u1_amd64.deb",
+      "local_name": "libtevent0t64_0.16.2+samba4.22.11+dfsg-0+deb13u1_amd64.deb",
+      "size": 78548,
+      "sha256": "f558a1c251768eeb8898e8ec8064f665653a10e2584785868ca36d412511d996",
+      "package": "libtevent0t64",
+      "version": "2:0.16.2+samba4.22.11+dfsg-0+deb13u1",
+      "source_package": "samba (2:4.22.11+dfsg-0+deb13u1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/samba/libldb2_2.11.0%2bsamba4.22.11%2bdfsg-0%2bdeb13u1_amd64.deb",
+      "local_name": "libldb2_2.11.0+samba4.22.11+dfsg-0+deb13u1_amd64.deb",
+      "size": 179964,
+      "sha256": "8c61310699c84116540e4bff05085e8a4bcf302b4ed58cee1cb4c0c40eaa9670",
+      "package": "libldb2",
+      "version": "2:2.11.0+samba4.22.11+dfsg-0+deb13u1",
+      "source_package": "samba (2:4.22.11+dfsg-0+deb13u1)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/u/unixodbc/libodbc2_2.3.12-2%2bdeb13u1_amd64.deb",
+      "local_name": "libodbc2_2.3.12-2+deb13u1_amd64.deb",
+      "size": 151400,
+      "sha256": "c106c001b9e81f75d89e1126ff4eb10b437371dfaee6c4457f218846796e7187",
+      "package": "libodbc2",
+      "version": "2.3.12-2+deb13u1",
+      "source_package": "unixodbc",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libp/libpcap/libpcap0.8t64_1.10.5-2_amd64.deb",
+      "local_name": "libpcap0.8t64_1.10.5-2_amd64.deb",
+      "size": 168608,
+      "sha256": "6a756d536a5b0cd3ef92f19ff9f22ed80c66baadbc0fe55d599f4aa0c27d3f86",
+      "package": "libpcap0.8t64",
+      "version": "1.10.5-2",
+      "source_package": "libpcap",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libp/libpcap/libpcap0.8-dev_1.10.5-2_amd64.deb",
+      "local_name": "libpcap0.8-dev_1.10.5-2_amd64.deb",
+      "size": 284112,
+      "sha256": "ff09ac0f76e113ccdef974645a394788d1afd07c5de1c15a0408cfadf625e2a6",
+      "package": "libpcap0.8-dev",
+      "version": "1.10.5-2",
+      "source_package": "libpcap",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/p/poppler/libpoppler147_25.03.0-5%2bdeb13u4_amd64.deb",
+      "local_name": "libpoppler147_25.03.0-5+deb13u4_amd64.deb",
+      "size": 2036064,
+      "sha256": "2466115f6d92266415f53c5fb88348d980710880bae888d96d6e3cc3a0a1ed3b",
+      "package": "libpoppler147",
+      "version": "25.03.0-5+deb13u4",
+      "source_package": "poppler",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/p/poppler/libpoppler-glib8t64_25.03.0-5%2bdeb13u4_amd64.deb",
+      "local_name": "libpoppler-glib8t64_25.03.0-5+deb13u4_amd64.deb",
+      "size": 155156,
+      "sha256": "bbd83b923c33a51d3c21233e05d8eecdc1d6df8df96811470363beb3ccbb8ee0",
+      "package": "libpoppler-glib8t64",
+      "version": "25.03.0-5+deb13u4",
+      "source_package": "poppler",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/t/tcp-wrappers/libwrap0_7.6.q-36_amd64.deb",
+      "local_name": "libwrap0_7.6.q-36_amd64.deb",
+      "size": 55256,
+      "sha256": "cde12afa15d6b1556c5e0564d22edf3b99e6b8fa94c59ccd8b8eebbb62dc19ec",
+      "package": "libwrap0",
+      "version": "7.6.q-36",
+      "source_package": "tcp-wrappers",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/n/net-snmp/libsnmp-base_5.9.4%2bdfsg-2%2bdeb13u1_all.deb",
+      "local_name": "libsnmp-base_5.9.4+dfsg-2+deb13u1_all.deb",
+      "size": 1769852,
+      "sha256": "a6221118a34ef418a77e923617ba009efae93b592abc4d7c373d46cb5daac69f",
+      "package": "libsnmp-base",
+      "version": "5.9.4+dfsg-2+deb13u1",
+      "source_package": "net-snmp",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/n/net-snmp/libsnmp40t64_5.9.4%2bdfsg-2%2bdeb13u1_amd64.deb",
+      "local_name": "libsnmp40t64_5.9.4+dfsg-2+deb13u1_amd64.deb",
+      "size": 2579228,
+      "sha256": "4e454a4c7ca0e5a4acbd433c4d5ddf246335a508df99faf8c996842c09688fcd",
+      "package": "libsnmp40t64",
+      "version": "5.9.4+dfsg-2+deb13u1",
+      "source_package": "net-snmp",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/sane-backends/libsane1_1.3.1-3%2bb1_amd64.deb",
+      "local_name": "libsane1_1.3.1-3+b1_amd64.deb",
+      "size": 2651012,
+      "sha256": "dfa1bcff10ff5507f70f76145750ced038ec47fe2a42f5caf22e1ee8439b9177",
+      "package": "libsane1",
+      "version": "1.3.1-3+b1",
+      "source_package": "sane-backends (1.3.1-3)",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libt/libtirpc/libtirpc-common_1.3.6%2bds-1_all.deb",
+      "local_name": "libtirpc-common_1.3.6+ds-1_all.deb",
+      "size": 11004,
+      "sha256": "300f582e2c9151a8d329568c705cadc76252c417147312fe331c4560d2c7a6c3",
+      "package": "libtirpc-common",
+      "version": "1.3.6+ds-1",
+      "source_package": "libtirpc",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libt/libtirpc/libtirpc3t64_1.3.6%2bds-1_amd64.deb",
+      "local_name": "libtirpc3t64_1.3.6+ds-1_amd64.deb",
+      "size": 83300,
+      "sha256": "ef4536c09bf5063554310e22d586ae90990100ba66d2fe7c35660e9e658913b6",
+      "package": "libtirpc3t64",
+      "version": "1.3.6+ds-1",
+      "source_package": "libtirpc",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/samba/libwbclient0_4.22.11%2bdfsg-0%2bdeb13u1_amd64.deb",
+      "local_name": "libwbclient0_4.22.11+dfsg-0+deb13u1_amd64.deb",
+      "size": 72220,
+      "sha256": "a133ae6f275d737d26f642f9e7d22b0cbef16c8f3ea58f63ec9da8fbbb6bd2f8",
+      "package": "libwbclient0",
+      "version": "2:4.22.11+dfsg-0+deb13u1",
+      "source_package": "samba",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/libx/libxkbcommon/libxkbregistry0_1.7.0-2_amd64.deb",
+      "local_name": "libxkbregistry0_1.7.0-2_amd64.deb",
+      "size": 15660,
+      "sha256": "e9b5a7051efa2b299348b4f6b1ebc1416f2523c4224af495d9cca4adbb22183a",
+      "package": "libxkbregistry0",
+      "version": "1.7.0-2",
+      "source_package": "libxkbcommon",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/s/samba/samba-libs_4.22.11%2bdfsg-0%2bdeb13u1_amd64.deb",
+      "local_name": "samba-libs_4.22.11+dfsg-0+deb13u1_amd64.deb",
+      "size": 6048068,
+      "sha256": "1b35a51399d31a4cf56ab3340320d790ed28397f17bafad038c535a430de7f03",
+      "package": "samba-libs",
+      "version": "2:4.22.11+dfsg-0+deb13u1",
+      "source_package": "samba",
+      "purpose": "SDK-resolved Debian dependency; private extraction only"
+    }
+  ],
+  "targets": [
+    "dlls/winedmo/winedmo.so",
+    "dlls/wpcap/wpcap.so"
+  ],
+  "configure": [
+    "--enable-win64",
+    "--without-x",
+    "--without-wayland",
+    "--without-opengl",
+    "--without-vulkan",
+    "--disable-tests"
+  ],
+  "scope": "Rebuild only the listed unmodified Unix modules; retain every pinned compatibility artifact."
+}

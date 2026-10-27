@@ -44,7 +44,9 @@ portable installation instructions. In particular, the historical
 `tools/wine/installation_probe_results.json` is an investigation record, not
 the current compatibility status. Use the README and the packaging verification
 summaries for the current measured scope. The complete source-to-runtime build
-sequence and Linux-library portability remain release work.
+sequence and real desktop/driver/device portability remain release work.
+The pinned Linux userspace now passes the recorded native loader inventory
+and isolated G HUB backend checks; see [the measured scope](linux-runtime.md).
 
 The Obsidian deliverable is `docs/architecture/penguin-lghub-views.md`: copy the
 Markdown file into a vault and use Reading view or Live Preview. Mermaid Tools

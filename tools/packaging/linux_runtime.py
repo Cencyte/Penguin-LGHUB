@@ -35,15 +35,16 @@ def official_url(url):
 def support_url(url):
     u = urllib.parse.urlsplit(url)
     if (u.scheme != 'https' or u.netloc != 'deb.debian.org' or u.query or u.fragment
-            or not re.fullmatch(r'/debian/pool/main/libu/libunwind/libunwind8_[0-9.\-]+_amd64\.deb', u.path)):
-        raise ValueError('Expected the official pinned libunwind package')
+            or not re.fullmatch(r'/debian(?:-security)?/pool/(?:updates/)?main/[a-z0-9][a-z0-9+./_%~:-]*_(?:amd64|all)\.deb', u.path)
+            or '..' in urllib.parse.unquote(u.path).split('/')):
+        raise ValueError('Expected an official pinned Debian package')
     return url
 
 
 def extract_support(archive, output):
     """Read a pinned Debian data archive; never execute maintainer scripts."""
     data = archive.read_bytes()
-    if not data.startswith(b'!<arch>\n') or len(data) > 1024**2:
+    if not data.startswith(b'!<arch>\n') or len(data) > 128 * 1024**2:
         raise ValueError('Invalid support package')
     offset, payloads = 8, []
     while offset < len(data):
@@ -69,7 +70,7 @@ def extract_support(archive, output):
             if m.issym() and (Path(m.linkname).is_absolute() or
                              not (output / str(p)).parent.joinpath(m.linkname).resolve().is_relative_to(output)):
                 raise ValueError('Escaping support package link')
-        if total > 16 * 1024**2 or len(members) > 1000:
+        if total > 512 * 1024**2 or len(members) > 20000:
             raise ValueError('Unexpected support package size')
         tar.extractall(output, members=members, filter='data')
 
@@ -178,6 +179,10 @@ def isolated_command(root, output, command, freeze_app=False, read_only_paths=()
                    freeze_app=freeze_app)
     boundary = args.index('--')
     args[boundary:boundary] = ['--bind', str(root), str(root)]
+    # A read-only socket still permits IPC. This headless audit must not talk
+    # to the host system bus (the session bus is already hidden by sandbox()).
+    if Path('/run/dbus').is_dir():
+        args[boundary:boundary] = ['--tmpfs', '/run/dbus']
     return args
 
 
@@ -189,14 +194,18 @@ def classify_ldd(text, status, needed):
             'linked': not missing and not versions and (status == 0 or static)}
 
 
+def library_path(root, wine):
+    libs = root / DEPOT / 'penguin-libraries/usr/lib/x86_64-linux-gnu'
+    return ':'.join(map(str, (wine / 'usr/lib/wine/x86_64-unix', libs, libs / 'samba')))
+
+
 def worker(wine, output, root):
     identity = Path('/etc/os-release').read_text()
     expected = json.loads(LOCK.read_text())['build_id']
     if f'BUILD_ID="{expected}"' not in identity:
         raise RuntimeError('Dependency audit is not inside the pinned Linux userspace')
     baseline = json.loads((wine / 'provenance/unix-dependencies.json').read_text())
-    env = dict(os.environ, LD_LIBRARY_PATH=':'.join(map(str, (
-        wine / 'usr/lib/wine/x86_64-unix', root / DEPOT / 'penguin-libraries/usr/lib/x86_64-linux-gnu'))))
+    env = dict(os.environ, LD_LIBRARY_PATH=library_path(root, wine))
     modules = {}
     for name, item in baseline['elf_modules'].items():
         proc = subprocess.run(['/usr/bin/ldd', str(wine / name)], env=env,
@@ -233,6 +242,7 @@ def worker(wine, output, root):
               'libc': subprocess.check_output(['getconf', 'GNU_LIBC_VERSION'], text=True).strip(),
               'scope': 'Isolated native loader, dlopen and disposable-prefix PE command checks; no UI, GPU context or devices',
               'live_desktop_used': False, 'physical_devices_exposed': False, 'host_graphics_imported': False,
+              'host_system_bus_exposed': False,
               'modules_total': len(modules), 'modules_linked': sum(x['linked'] for x in modules.values()),
               'dlopen_total': len(dynamic), 'dlopen_loadable': sum(x['loadable'] for x in dynamic.values()),
               'pe_command': execution,
@@ -260,7 +270,9 @@ def audit(root, wine, output):
     verify(root)
     report = json.loads((output / 'linux-audit.json').read_text())
     print(json.dumps({k: v for k, v in report.items() if k not in ('modules', 'dlopen')}, indent=2))
-    return 0 if report['modules_linked'] == report['modules_total'] and report['pe_command']['passed'] else 1
+    return 0 if (report['modules_linked'] == report['modules_total']
+                 and report['dlopen_loadable'] == report['dlopen_total']
+                 and report['pe_command']['passed']) else 1
 
 
 def main():
