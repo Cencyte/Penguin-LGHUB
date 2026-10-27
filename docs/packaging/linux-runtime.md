@@ -146,12 +146,11 @@ process/network isolation.
 
 ## Remaining portability work
 
-1. **Integrate a real-session container launcher** with explicit X11/tray
-   connections, host graphics-driver import, the existing input bridge and
-   narrowly scoped HID/USB access and hotplug. The current tools intentionally
-   expose none of those. A headless backend pass is not a working desktop
-   container. Do not replace the known-working launcher until this candidate
-   passes user-driven tests.
+1. **Qualify the new real-session container launcher** on actual X11 desktops.
+   It now imports host graphics, preserves device-node access, shares desktop
+   connections and carries the existing input bridge. Device reconnect, tray
+   actions and actual rendering remain interactive acceptance work. Keep the
+   known-working launcher until this candidate passes those checks.
 2. **Finish the complete corresponding-source/build pipeline**, dependency
    acquisition policy, font/UI qualification and installer/uninstaller
    integration. No ready-to-install binary release is supplied yet.
@@ -171,3 +170,117 @@ Wayland input. No Bazzite implementation or validation is included here.
 - [Pinned official runtime/SDK publication](https://repo.steampowered.com/steamrt4/images/4.0.20260928.262390/)
 - [Official Node 22.21.0 checksums](https://nodejs.org/dist/v22.21.0/SHASUMS256.txt)
 - [Debian package archive](https://deb.debian.org/debian/)
+
+## X11 container launcher
+
+`tools/packaging/desktop_runtime.py` creates a separate working prefix from the
+verified clean candidate. It does not replace system Wine or the working
+workstation prefix. The copied candidate is private test material, not a
+redistributable payload. It preserves the recorded compatibility gates and
+update exclusion, makes the application directory read-only, and keeps settings
+and logs writable. Launches reject Wayland/Xwayland sessions, foreign agents
+on port 9010 and unmanaged processes in the selected prefix. Repeated launches
+use the existing authenticated reopen endpoint; Stop checks PID/start-time/boot
+identity before signaling only that supervisor.
+
+The container is a portability environment, **not a security sandbox**. A real
+launch shares the host network, X11 session and devices permitted to the user.
+It imports host GPU libraries through pressure-vessel, retains those loader
+paths, and adds the pinned non-graphics library directory. A nested application
+freeze must use `--dev-bind /dev /dev`: a plain recursive root bind adds `nodev`
+and even makes `/dev/null` unusable. This defect was found in cross-host
+supervisor testing and corrected in both desktop and headless overlay paths.
+
+The optional [udev rules](../../packaging/70-penguin-lghub.rules) grant the active
+local-seat user HID/USB access for Logitech's vendor ID only. They do not grant
+world-write access or add users to a broad input group. Install with sudo, reload
+rules, then reconnect the target device or start a new local login. SSH alone
+does not confer a local-seat ACL. The runtime does not run as root.
+
+```sh
+python3 tools/packaging/desktop_runtime.py prepare \
+  --candidate /path/to/verified-candidate \
+  --linux-runtime /path/to/private-linux \
+  --wine /path/to/private-wine \
+  --test-tools /path/to/pinned-test-tools \
+  --output /path/to/new-desktop-install
+
+python3 tools/packaging/desktop_runtime.py \
+  --config /path/to/new-desktop-install/desktop.json check
+python3 tools/packaging/desktop_runtime.py \
+  --config /path/to/new-desktop-install/desktop.json install-entry \
+  --destination "$HOME/Desktop/Penguin-LGHUB Container Test.desktop"
+```
+
+Use the Desktop entry in an X11 login. Its context actions check setup and stop
+this installation. There is no user-testing deadline. These development
+commands consume verified inputs; they are not yet a complete public installer.
+
+### Independent hosts, October 26
+
+[Recorded results](../../packaging/independent-host-verification.json):
+
+- Manjaro VM, kernel 6.12.77: 46/46 ELF modules, 54/54 dlopen names, Windows
+  command, 8/8 factories, 4/4 registry routes and 5/5 agent requests passed.
+- CachyOS bare metal, kernel 7.2.9: the same complete set passed.
+- An additional owned-Xvfb test started the new supervisor and Electron
+  frontend on both hosts, exercised its authenticated status endpoint and
+  stopped cleanly. The tray process was observed on CachyOS; it was not
+  observed within the short Manjaro sample. This is process/lifecycle evidence,
+  not a screenshot or tray-menu acceptance test.
+- Both machines have X11 login options installed, with current Wayland sessions
+  left running. Neither had Logitech hardware attached during validation.
+- **2/2 hosts pass loader/backend validation (100% of this gate); 0/2 have
+  completed interactive X11/physical-device acceptance.** Neither percentage
+  estimates overall project completion.
+
+A target compiler is no longer necessary for backend probes. On a trusted
+build machine, use `linux_probe.py build-activation-probe --output /path/probe.exe`;
+transfer that executable and adjacent JSON receipt, then add
+`--activation-probe /path/probe.exe` to the target's `probe` command. The receipt
+checks source identity and transferred bytes; it does not authenticate an
+untrusted publisher. No probe executable or vendor binary is in this repository.
+
+## Bazzite test environment recommendation (research only)
+
+Use a **QEMU/KVM virtual machine** for the later Bazzite qualification phase.
+A Distrobox is useful for userspace packaging checks but does not reproduce
+Bazzite's own boot, kernel, SELinux policy, atomic deployment/update behavior or
+Wayland desktop. The [Bazzite Distrobox guide](https://docs.bazzite.gg/Installing_and_Managing_Software/Distrobox/) explicitly describes containers as minimal distribution subsystems, not VMs.
+
+The [official hardware requirements](https://docs.bazzite.gg/Gaming/Hardware_compatibility_for_gaming/) specify UEFI, 8 GB RAM, four CPU cores,
+50 GB minimum storage and 120 GB recommended storage; gaming graphics requirements
+are a separate limitation for a virtual GPU. The [installation guide](https://docs.bazzite.gg/General/Installation_Guide/install-guide/) provides
+the official image-selection/checksum workflow. Do not select a host-NVIDIA
+image merely because the machine running QEMU has NVIDIA: the guest normally
+sees a virtio GPU.
+
+Proposed VM: KDE desktop image (no Steam Gaming Mode), UEFI/OVMF, four vCPUs,
+8–12 GiB RAM, a **120 GiB sparse qcow2** disk, virtio storage/network, and
+SPICE plus virtio display. Start without physical USB passthrough. Enable
+virtual 3D only where the host/guest driver combination supports it. A virtual
+GPU can test installation, desktop integration and Wayland behavior; it cannot
+certify bare-metal NVIDIA/AMD rendering. USB passthrough of a spare Logitech
+device is a later explicit test, not an automatic detachment from the host.
+
+Storage planning estimates, not measurements of an installed Bazzite VM:
+
+| Choice | Planning allowance | Fidelity |
+|---|---|---|
+| Minimal Distrobox with test dependencies | About 5–15 GiB, varying by image/packages | Userspace only; cannot qualify Bazzite or solve Wayland key injection |
+| Bazzite KVM guest | 120 GiB virtual capacity; budget at least 60–80 GiB actual free space initially, preferably 120 GiB | Actual OS/login/update/security policies; virtual graphics |
+| Bazzite on separate SSD | Official 120 GB recommendation plus test payloads | Best final graphics/device validation; more setup |
+
+The VM budget includes a provisional installer-download allowance, deployed OS,
+updates/rollback growth and our test payload. Exact ISO bytes and initial disk
+use must be measured after selecting the image; qcow2's virtual capacity is
+not preallocated physical use, and snapshots can grow substantially.
+
+At this check, the main workstation had about 39 GiB free, so do not allocate
+this test there yet. The remote CachyOS disk had about 881 GiB free, but that
+machine has only 8 GiB RAM total. An image stored on that host and served over
+NFS to local QEMU is technically possible, but introduces network-storage
+behavior into the experiment. Prefer freeing space on a local SSD first, then
+install, record the image digest, snapshot the clean guest, and run the same
+loader/backend probes before user-driven desktop tests. No Bazzite download,
+VM or container was created during this pass.

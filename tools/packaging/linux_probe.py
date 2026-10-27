@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
@@ -20,6 +21,27 @@ from windows_media_acquire import (ROOT, check_asset, digest_file, download_asse
 from wine_runtime import inventory, runtime_environment, verify_runtime
 
 LOCK = ROOT / 'packaging/linux-test-tools.lock.json'
+
+
+def build_activation_probe(output):
+    if output.exists() or output.with_suffix('.json').exists():
+        raise ValueError('Use a new activation-probe output')
+    source = ROOT / 'tools/packaging/clean_prefix_probe.cpp'
+    subprocess.run(['x86_64-w64-mingw32-g++', '-O2', '-Wall', '-Wextra', '-Werror', '-static',
+                    str(source), '-o', str(output), '-lruntimeobject', '-lole32', '-luuid', '-ladvapi32'],
+                   check=True, timeout=120)
+    receipt = {'source_sha256': digest_file(source)['sha256'], 'exe_sha256': digest_file(output)['sha256']}
+    output.with_suffix('.json').write_text(json.dumps(receipt, indent=2) + '\n')
+
+
+def verify_activation_probe(exe):
+    receipt = json.loads(exe.with_suffix('.json').read_text())
+    if (receipt.get('source_sha256') != digest_file(ROOT / 'tools/packaging/clean_prefix_probe.cpp')['sha256']
+            or receipt.get('exe_sha256') != digest_file(exe)['sha256']):
+        raise ValueError('Activation probe or its source identity changed')
+    # This receipt detects transfer corruption/source drift, not publisher
+    # authenticity. Supply only a probe built locally or by a trusted builder.
+
 
 
 def node_url(url):
@@ -90,7 +112,10 @@ def test_command(root, test_tools, command):
     bwrap = root / linux.DEPOT / 'pressure-vessel/libexec/steam-runtime-tools-0/srt-bwrap'
     # Preserve the outer sandbox's mount permissions, including its writable
     # disposable output and /tmp. It already made the host filesystem read-only.
-    return [str(bwrap), '--bind', '/', '/', '--die-with-parent',
+    # A normal recursive bind adds nodev, including to /dev's submounts.
+    # Preserve the outer namespace's device permissions. In headless probes
+    # this is still the synthetic /dev, with no physical devices present.
+    return [str(bwrap), '--bind', '/', '/', '--dev-bind', '/dev', '/dev', '--die-with-parent',
             '--overlay-src', '/usr/bin', '--overlay-src', str(test_tools / 'xvfb/usr/bin'),
             '--ro-overlay', '/usr/bin',
             '--overlay-src', '/usr/share/X11', '--overlay-src', str(test_tools / 'xvfb/usr/share/X11'),
@@ -120,12 +145,14 @@ def worker(root, wine, test_tools, output):
         subprocess.run([str(wine / 'usr/bin/wineserver'), '-k'], env=env, capture_output=True, timeout=10)
 
 
-def probe(root, wine, test_tools, candidate, output):
+def probe(root, wine, test_tools, candidate, output, activation_probe=None):
     linux.verify(root)
     verify(test_tools)
     verify_prepared(candidate)
     config = json.loads((candidate / 'clean-prefix.json').read_text())
     matching_runtime(config, wine)
+    if activation_probe:
+        verify_activation_probe(activation_probe)
     if (output.exists() or output.is_symlink() or not output.parent.is_dir()
             or any(output.is_relative_to(p) or p.is_relative_to(output)
                    for p in (root, wine, test_tools, candidate, ROOT))):
@@ -134,9 +161,11 @@ def probe(root, wine, test_tools, candidate, output):
     output.mkdir(mode=0o700)
     (output / 'home').mkdir()
     subprocess.run(['cp', '-a', '--reflink=auto', str(candidate / 'prefix'), str(output / 'prefix')], check=True)
-    subprocess.run(['x86_64-w64-mingw32-g++', '-O2', '-Wall', '-Wextra', '-Werror', '-static',
-                    str(ROOT / 'tools/packaging/clean_prefix_probe.cpp'), '-o', str(output / 'clean_prefix_probe.exe'),
-                    '-lruntimeobject', '-lole32', '-luuid', '-ladvapi32'], check=True, timeout=120)
+    if activation_probe:
+        shutil.copy2(activation_probe, output / 'clean_prefix_probe.exe')
+        shutil.copy2(activation_probe.with_suffix('.json'), output / 'clean_prefix_probe.json')
+    else:
+        build_activation_probe(output / 'clean_prefix_probe.exe')
     (output / 'probe-config.json').write_text(json.dumps(config['runtime_environment']) + '\n')
     args = ['/usr/bin/python3', str(Path(__file__).resolve()), 'worker',
             '--linux-runtime', root, '--wine', wine, '--test-tools', test_tools, '--output', output]
@@ -154,24 +183,29 @@ def probe(root, wine, test_tools, candidate, output):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('action', choices=('fetch', 'prepare', 'probe', 'worker'))
+    p.add_argument('action', choices=('fetch', 'prepare', 'probe', 'worker', 'build-activation-probe'))
+    p.add_argument('--activation-probe', type=Path, help='Locally built/trusted probe with adjacent .json receipt; avoids a target compiler')
     for name in ('cache', 'linux-runtime', 'wine', 'test-tools', 'candidate', 'output'):
         p.add_argument('--' + name, type=Path)
     a = p.parse_args()
     required = {'fetch': ('cache',), 'prepare': ('cache', 'output'),
                 'probe': ('linux_runtime', 'wine', 'test_tools', 'candidate', 'output'),
-                'worker': ('linux_runtime', 'wine', 'test_tools', 'output')}[a.action]
+                'worker': ('linux_runtime', 'wine', 'test_tools', 'output'),
+                'build-activation-probe': ('output',)}[a.action]
     for name in required:
         if getattr(a, name) is None:
             p.error('Missing --' + name.replace('_', '-'))
         if a.action != 'worker':
             setattr(a, name, external_path(getattr(a, name)))
-    if a.action == 'fetch':
+    if a.action == 'build-activation-probe':
+        build_activation_probe(a.output)
+    elif a.action == 'fetch':
         fetch(a.cache)
     elif a.action == 'prepare':
         prepare(a.cache, a.output)
     elif a.action == 'probe':
-        probe(a.linux_runtime, a.wine, a.test_tools, a.candidate, a.output)
+        probe(a.linux_runtime, a.wine, a.test_tools, a.candidate, a.output,
+              external_path(a.activation_probe) if a.activation_probe else None)
     else:
         return worker(a.linux_runtime, a.wine, a.test_tools, a.output)
     return 0

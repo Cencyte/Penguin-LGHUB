@@ -1,0 +1,5 @@
+# Penguin LGHUB: active local-seat access to Logitech HID/USB only.
+# No world-write permissions, fixed usernames or broad input-group membership.
+# Install before 73-seat-late.rules so systemd-logind applies the uaccess ACL.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="046d", TAG+="uaccess"

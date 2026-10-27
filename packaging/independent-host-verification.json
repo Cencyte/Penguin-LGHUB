@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "date": "2026-10-26",
+  "scope": "Independent-host packaged Linux/Wine loader and clean-prefix backend validation",
+  "hosts": {
+    "manjaro_vm": {
+      "kernel": "6.12.77-1-MANJARO",
+      "python": "3.14.3",
+      "loader": {
+        "modules_total": 46,
+        "modules_linked": 46,
+        "dlopen_total": 54,
+        "dlopen_loadable": 54,
+        "end_to_end_qualified": false,
+        "pe_command_passed": true
+      },
+      "backend": {
+        "isolated_network": true,
+        "physical_devices_exposed": false,
+        "live_desktop_used": false,
+        "agent_ready": true,
+        "routes_succeeded": [
+          "/devices/list",
+          "/input/gshift",
+          "/profile/active",
+          "/profiles",
+          "/profiles/auto_switching"
+        ],
+        "scope": "Backend API with no physical devices",
+        "host_wine_hidden": true,
+        "linux_runtime_build": "4.0.20260928.262390",
+        "activation_factories_verified": 8,
+        "registry_routes_verified": 4,
+        "host_graphics_imported": false,
+        "host_system_bus_exposed": false,
+        "end_to_end_qualified": false,
+        "mapped_runtime_image_count": 128
+      },
+      "supervisor": {
+        "supervisor_running": true,
+        "authenticated_control": true,
+        "frontend_present": true,
+        "tray_present": false,
+        "physical_devices_exposed": false,
+        "live_desktop_used": false,
+        "host_graphics_imported": false,
+        "end_to_end_qualified": false,
+        "clean_stop": true
+      },
+      "driver_import": {
+        "uid": 1000,
+        "os_release": "PRETTY_NAME=\"Steam Runtime 4\"\nNAME=\"Steam Runtime\"\nVERSION_ID=\"4\"\nVERSION=\"4\"\nVERSION_CODENAME=steamrt4\nDEBIAN_VERSION_FULL=13.7\nID=steamrt\nID_LIKE=debian\nHOME_URL=\"https://store.steampowered.com/\"\nSUPPORT_URL=\"https://help.steampowered.com/\"\nBUG_REPORT_URL=\"https://github.com/ValveSoftware/steam-runtime/issues\"\nBUILD_ID=\"4.0.20260928.262390\"\nVARIANT=Platform\nVARIANT_ID=\"com.valvesoftware.steamruntime.platform-amd64_i386-steamrt4\"\n",
+        "device_nodes": [
+          "/dev/dri/by-path",
+          "/dev/dri/card1",
+          "/dev/dri/renderD128"
+        ],
+        "libraries": {
+          "libGL.so.1": "loaded",
+          "libEGL.so.1": "loaded",
+          "libvulkan.so.1": "loaded"
+        },
+        "device_mount_usable": true,
+        "graphics_mappings": [
+          "/run/host/usr/lib/libEGL.so.1.1.0",
+          "/run/host/usr/lib/libGL.so.1.7.0",
+          "/run/host/usr/lib/libGLX.so.0.0.0",
+          "/run/host/usr/lib/libGLdispatch.so.0.0.0",
+          "/run/host/usr/lib/libvulkan.so.1.4.341"
+        ]
+      }
+    },
+    "cachyos_bare_metal": {
+      "kernel": "7.2.9-1-cachyos",
+      "python": "3.14.7",
+      "loader": {
+        "modules_total": 46,
+        "modules_linked": 46,
+        "dlopen_total": 54,
+        "dlopen_loadable": 54,
+        "end_to_end_qualified": false,
+        "pe_command_passed": true
+      },
+      "backend": {
+        "isolated_network": true,
+        "physical_devices_exposed": false,
+        "live_desktop_used": false,
+        "agent_ready": true,
+        "routes_succeeded": [
+          "/devices/list",
+          "/input/gshift",
+          "/profile/active",
+          "/profiles",
+          "/profiles/auto_switching"
+        ],
+        "scope": "Backend API with no physical devices",
+        "host_wine_hidden": true,
+        "linux_runtime_build": "4.0.20260928.262390",
+        "activation_factories_verified": 8,
+        "registry_routes_verified": 4,
+        "host_graphics_imported": false,
+        "host_system_bus_exposed": false,
+        "end_to_end_qualified": false,
+        "mapped_runtime_image_count": 130
+      },
+      "supervisor": {
+        "supervisor_running": true,
+        "authenticated_control": true,
+        "frontend_present": true,
+        "tray_present": true,
+        "physical_devices_exposed": false,
+        "live_desktop_used": false,
+        "host_graphics_imported": false,
+        "end_to_end_qualified": false,
+        "clean_stop": true
+      },
+      "driver_import": {
+        "uid": 1000,
+        "os_release": "PRETTY_NAME=\"Steam Runtime 4\"\nNAME=\"Steam Runtime\"\nVERSION_ID=\"4\"\nVERSION=\"4\"\nVERSION_CODENAME=steamrt4\nDEBIAN_VERSION_FULL=13.7\nID=steamrt\nID_LIKE=debian\nHOME_URL=\"https://store.steampowered.com/\"\nSUPPORT_URL=\"https://help.steampowered.com/\"\nBUG_REPORT_URL=\"https://github.com/ValveSoftware/steam-runtime/issues\"\nBUILD_ID=\"4.0.20260928.262390\"\nVARIANT=Platform\nVARIANT_ID=\"com.valvesoftware.steamruntime.platform-amd64_i386-steamrt4\"\n",
+        "device_nodes": [
+          "/dev/dri/by-path",
+          "/dev/dri/card1",
+          "/dev/dri/renderD128",
+          "/dev/dri/card0"
+        ],
+        "libraries": {
+          "libGL.so.1": "loaded",
+          "libEGL.so.1": "loaded",
+          "libvulkan.so.1": "loaded"
+        },
+        "device_mount_usable": true,
+        "graphics_mappings": [
+          "/run/host/usr/lib/libEGL.so.1.1.0",
+          "/run/host/usr/lib/libGL.so.1.7.0",
+          "/run/host/usr/lib/libGLX.so.0.0.0",
+          "/run/host/usr/lib/libGLdispatch.so.0.0.0",
+          "/run/host/usr/lib/libvulkan.so.1.4.363"
+        ]
+      }
+    }
+  },
+  "hosts_passed": 2,
+  "hosts_tested": 2,
+  "real_x11_desktop_device_acceptance_passed": 0,
+  "real_x11_desktop_device_acceptance_required": 2
+}

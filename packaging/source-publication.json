@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "prepared_on": "2026-10-26",
-  "development_revision": "6db16cd1ff9d8c1c99da4407747a3b3649f12fe2",
-  "github_base_commit": "d44b3d68d86b7046c641e66711b8db88794b2fd0",
+  "development_revision": "b76e404fa79cad34521e9f84b72809f2d22c8424",
+  "github_base_commit": "5552fc25150baa56e0ce030441385e96f32bcef2",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source snapshot; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -34,6 +34,12 @@
       "bytes": 87
     },
     {
+      "path": ".github/workflows/packaging-tests.yml",
+      "mode": "100644",
+      "sha256": "75c3852e238ec6735ff9494a1116c4476f0fab250954e157e9db4fadc1ce5c65",
+      "bytes": 700
+    },
+    {
       "path": ".gitignore",
       "mode": "100644",
       "sha256": "c21fc8cb9165b59e33b5022d3622741ee86d1409e080ac6fd6a11c24f337fc3d",
@@ -55,14 +61,14 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "dea4d9f8616f9764bf3f9c98cc8c26a793f7fe1e67524deda5550192ba5937f9",
-      "bytes": 43377
+      "sha256": "9566c96f1fa5840c0c293d5753017a70bc7bd19cac254b3d4cf99a5be4c7806c",
+      "bytes": 43606
     },
     {
       "path": "assets/penguin-lghub-logo.png",
       "mode": "100644",
-      "sha256": "0558bfbc3bad243e20f1ec22c84a74fc748b28b54039d65497724b1be40ce04f",
-      "bytes": 806581
+      "sha256": "f76b0520fbcc1c9af17177f38d63b3d878952d4ce3e9c5226c159a3b96636f0c",
+      "bytes": 945225
     },
     {
       "path": "docs/architecture/penguin-lghub-detailed-preserved.md",
@@ -283,8 +289,8 @@
     {
       "path": "docs/packaging/linux-runtime.md",
       "mode": "100644",
-      "sha256": "557ba35013b5efb37b7e44631f91f1008f826741dc33c60dabde62779d7d1507",
-      "bytes": 10552
+      "sha256": "fb20f79c727a764b77fa8bee26e8199c2df8662f6615918170aa9c70946b59ff",
+      "bytes": 17506
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -297,6 +303,12 @@
       "mode": "100644",
       "sha256": "a2003545b5ded100090a5d7136beae85586940fe0120b012edeff3d5ef9b538d",
       "bytes": 7784
+    },
+    {
+      "path": "packaging/70-penguin-lghub.rules",
+      "mode": "100644",
+      "sha256": "75386cbafbd1e2a031a08c41e8a25fc1cc4db4200b645bf28b1c1a9833061bb5",
+      "bytes": 372
     },
     {
       "path": "packaging/clean-prefix-verification.json",
@@ -327,6 +339,12 @@
       "mode": "100644",
       "sha256": "24e5aac95b3190e863365a0a952010027f605f023693e5a4cdcf7b6fb009fac8",
       "bytes": 1208
+    },
+    {
+      "path": "packaging/independent-host-verification.json",
+      "mode": "100644",
+      "sha256": "888cca0fde06728681e568b5c664f0602673107be32373004032619a510e4a95",
+      "bytes": 5426
     },
     {
       "path": "packaging/licenses/Wine-LGPL-2.1.txt",
@@ -693,6 +711,12 @@
       "mode": "100644",
       "sha256": "caed7af3c465f067611553e075a4f3e0bb8b586ba021c34f50864d035d25038b",
       "bytes": 7637
+    },
+    {
+      "path": "tests/packaging/test_desktop_runtime.py",
+      "mode": "100644",
+      "sha256": "9e23c34105dc0bc82ca7595446bec1eddcd4a52238f6a94806ee43a44b0d026a",
+      "bytes": 4311
     },
     {
       "path": "tests/packaging/test_dockur_acquire.py",
@@ -1241,6 +1265,12 @@
       "bytes": 3665
     },
     {
+      "path": "tools/packaging/desktop_runtime.py",
+      "mode": "100644",
+      "sha256": "9734c025176f1f21850de1729da168dfe59d6470814709864a711ab2819fec5c",
+      "bytes": 11978
+    },
+    {
       "path": "tools/packaging/dockur_acquire.py",
       "mode": "100644",
       "sha256": "df01b9f00dc2dae0b8cb34b6d1606213d068768d990ede6b1e3e87d76b4e7263",
@@ -1249,8 +1279,8 @@
     {
       "path": "tools/packaging/linux_probe.py",
       "mode": "100644",
-      "sha256": "9a38fe29fa1a8e6bd0dff628c41896b8ae74b3d988fa392373603217bbcc8042",
-      "bytes": 8996
+      "sha256": "275f9d21ef859e06209e41f3b0aa0e7afc6667b5fc025992086da64f42b1c788",
+      "bytes": 10883
     },
     {
       "path": "tools/packaging/linux_runtime.py",

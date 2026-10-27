@@ -7,7 +7,7 @@
 
 An experimental compatibility layer for running the original **Logitech G HUB** on Linux through a custom Wine runtime. The working setup retains the actual G HUB agent and main interface for device configuration, key bindings, macros, profiles, lighting and G-Shift.
 
-**Development source snapshot.** The original G HUB works on the author's Manjaro/X11 workstation. A separate packaged Wine runtime and fresh-prefix backend startup have also been verified; fresh-install GUI/device testing and Linux-library/graphics-driver portability remain ahead. There is **no ready-to-install binary release yet**.
+**Development source snapshot.** The original G HUB works on the author's Manjaro/X11 workstation. The private Wine/Linux runtime now passes dependency and fresh-prefix backend checks on a newer Manjaro VM and a separate CachyOS machine. The X11 container launcher is ready for interactive testing; graphics rendering, tray interaction and physical-device qualification remain in progress. There is **no ready-to-install binary release yet**.
 
 [![Complete Penguin LGHUB architecture: all six diagrams](docs/architecture/penguin-lghub-views.png)](docs/architecture/penguin-lghub-views.png?raw=1)
 
@@ -15,32 +15,47 @@ An experimental compatibility layer for running the original **Logitech G HUB** 
 
 [Six native Mermaid diagrams / Obsidian note](docs/architecture/penguin-lghub-views.md) · [Full diagram image](docs/architecture/penguin-lghub-views.png) · [Editable rendering source](docs/architecture/penguin-lghub-views.mmd)
 
-The Markdown note uses ordinary `mermaid` fences. Open the `.md` in an Obsidian vault in Reading view or Live Preview. [Mermaid Tools](https://github.com/dartungar/obsidian-mermaid) supplies editing tools; Obsidian performs the rendering. No plugin-specific file format is required. The complete PNG is shown above; native rendering follows the viewer's Mermaid version and theme.
-
-Earlier detailed charts are preserved separately: [original October 25 chart](docs/architecture/penguin-lghub-original-20261025.png?raw=1) · [detailed chart immediately before the GitHub edit](docs/architecture/penguin-lghub-detailed-preserved.png?raw=1). Both are exports of their saved original Mermaid sources, with no rewritten graph content.
-
-### ⚠️ **Requires a custom-patched, version-pinned Wine runtime**
+<details>
+<summary><strong>⚠️ Requires a custom-patched, version-pinned Wine runtime</strong></summary>
 
 The tested baseline is **Wine 10.20 with this project's patches**, paired with **G HUB 2026.6.974819**. Neither stock Wine nor another Wine version is an interchangeable replacement. The new development bundle carries a complete private runner and dedicated prefix, independent of system Wine. Its complete recorded Linux-library loader inventory and isolated backend now pass in a pinned userspace; desktop, driver and device integration remain to be qualified. The older Desktop runner retains a host Wine 10.20 dependency.
 
-### ⚠️ **Installation requires sudo permissions**
 
-Setup will need privileged host integration, including appropriate device access. The current runner also uses sudo for a private mount namespace at launch, then drops back to the invoking user before running G HUB. Do not run the G HUB application as root. A scoped installation/launch privilege mechanism remains release work.
+</details>
 
-### ⚠️ **Experimental: validated on one X11 workstation, not across Linux setups**
+<details>
+<summary><strong>⚠️ Installation requires sudo permissions</strong></summary>
+
+Setup needs sudo for scoped device-access rules and any missing host prerequisites. The new container launcher runs as your normal user through pressure-vessel/bubblewrap; it does not require sudo at each launch. The older workstation runner uses a privileged private mount namespace before dropping privileges. Do not run G HUB itself as root.
+
+
+</details>
+
+<details>
+<summary><strong>⚠️ Tested on X11 only. Wayland support not yet implemented.</strong></summary>
 
 The owner reports working key bindings, macros, tray controls, lighting/Lightsync, profile switching and G-Shift with a G502 X PLUS and G915 X LIGHTSPEED TKL on Manjaro/X11. This is not certification of every device or feature. Native Wayland global key output and clean installations on other machines have not been validated.
 
+
+</details>
+
 ## Distribution setup status
 
-These badges describe **installer and desktop compatibility**, not whether a CI build passed. No fresh distribution installation is certified yet.
+<p>
+  <img src="https://img.shields.io/badge/Manjaro-X11_baseline-brightgreen" alt="Manjaro: X11 baseline">
+  <img src="https://img.shields.io/badge/CachyOS-testing-yellow" alt="CachyOS: testing">
+  <img src="https://img.shields.io/badge/Debian-planned-lightgrey" alt="Debian: planned">
+  <img src="https://img.shields.io/badge/Bazzite-deferred-lightgrey" alt="Bazzite: deferred">
+</p>
 
-| Distribution | Current status | What has actually been verified |
-|---|---|---|
-| Manjaro | ![Manjaro: existing desktop works](https://img.shields.io/badge/Manjaro-existing_desktop_works-brightgreen) | Owner's existing X11 workstation: bindings, macros, G-Shift, lighting, profiles and tray. Fresh installer qualification pending. |
-| CachyOS | ![CachyOS: unverified](https://img.shields.io/badge/CachyOS-unverified-yellow) | First external target, after a fresh Manjaro control. |
-| Debian | ![Debian: planned, unverified](https://img.shields.io/badge/Debian-planned%20%2F%20unverified-lightgrey) | Later target; a Debian-derived runtime container is not equivalent to testing a Debian host. |
-| Bazzite | ![Bazzite: deferred](https://img.shields.io/badge/Bazzite-deferred-lightgrey) | Outside the current scope. Native Wayland global input needs a separate design and validation effort. |
+[![Packaging tests](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml/badge.svg)](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml)
+
+| Distribution | Validation scope |
+|---|---|
+| Manjaro | Working X11 baseline; newer VM passes loader/backend checks. Interactive VM testing is next. |
+| CachyOS | Separate bare-metal host passes loader/backend checks; X11 desktop/device qualification is next. |
+| Debian | Planned after the initial Arch-family release. |
+| Bazzite | Deferred; native Wayland input requires separate work. |
 
 [Reddit discussion and original announcement](https://www.reddit.com/r/LogitechG/comments/1xe5jw2/comment/19rp0hjphnyjo/?context=1&screen_view_count=2)
 
@@ -52,13 +67,30 @@ These badges describe **installer and desktop compatibility**, not whether a CI 
 
 ## Availability and scope
 
-**This is a development repository, not yet a novice-ready installer.** The existing workstation result is useful, but missing dependency clearance and clean-install reproduction prevent a public installation claim.
+Penguin LGHUB brings the original Logitech G HUB interface and agent to Linux,
+with device configuration, key bindings, macros, profiles, lighting and G-Shift.
+The first release is being prepared for **Manjaro and CachyOS on X11**. Debian
+support is planned; Bazzite and native Wayland support will follow separate work.
 
-- Current release scope: **Manjaro and CachyOS on X11**, with CachyOS the first external target. Establish a clean Manjaro control first.
-- Debian: planned subsequent target. **Bazzite and Wayland work are deferred.** A container such as Distrobox does not by itself replace the current XTEST bridge with native Wayland input support.
-- Existing desktop: six of six owner-reported feature groups work. This is user acceptance, not exhaustive automated coverage.
-- Independent clean-install validation: **0 of 2 initial target distributions** (fresh Manjaro and CachyOS). No cross-distribution completion percentage is inferred from the working desktop.
-- Host package upgrades, firmware updates and replacing the user's system Wine are not installation prerequisites we intend to impose.
+The intended setup uses a dedicated, version-pinned Wine runtime and its own
+G HUB prefix, alongside any Wine already installed on your system. Device-access
+setup requires sudo; G HUB itself runs as your regular user. Updates are
+controlled so that a vendor update cannot silently replace the tested setup.
+
+**Release preparation is in progress.** The installation experience described
+here is the release target; use the validation results below to distinguish
+what is verified today. A general-purpose installer is not published yet.
+
+## What the project contains
+
+| Resource | Source or configuration | Role |
+|---|---|---|
+| Custom Wine build | [43 patch topics](patches/wine/), [build/run tools](tools/wine/), [private runtime packager](tools/packaging/wine_runtime.py) | Windows API, composition, input, graphics, device and native X11 key-output compatibility. The packager assembles all runtime modules with 20 pinned replacements from five build groups; Unix-library portability and a complete corresponding-source release audit remain. |
+| Supplementary DLL implementations | [DirectComposition](tools/wine/dcomp_experiment.cpp), [CoreMessaging adapter](tools/wine/coremessaging_xp_adapter.c), [DispatcherQueue](tools/wine/dispatcher_queue_experiment.cpp), [CoreApplication](tools/wine/core_application_experiment.cpp), [ApiInformation proxy](tools/wine/api_information_proxy.cpp), [sensor fallback](tools/wine/sensor_monitor_unavailable.c) | Separate app-local helpers. Some implement only the contracts the observed application needs; they are not complete replacements for their Windows subsystems. |
+| Local vendor-resource transformations | [Color preview](tools/wine/prepare_color_picker_fix.py), [tray background](tools/wine/prepare_tray_background.py) | Generate local modified assets from the acquired application. Do not treat generated `app.asar`, XBF or PRI files as project-owned source. |
+| Prefix and launch definition | [Observed runtime baseline](packaging/runtime-baseline.json), [runtime registration helper](tools/wine/configure_runtime.py), [snapshot preparation](tools/wine/prepare_tested_desktop.py), [legacy launcher](tools/wine/tested_desktop_launch.py), [container launcher](tools/packaging/desktop_runtime.py) | Preserve the working configuration: 48 recorded file hashes, environment flags, DLL load policy and eight recorded WinRT activation classes. The baseline is evidence, not an executable installer or complete prefix recipe. |
+| Diagnostics | [Agent snapshot](tools/wine/agent_snapshot.cjs), [color-picker recorder](tools/wine/color_picker_monitor.cjs), [composition regression runner](tools/wine/run_dcomp_tests.py) | Readiness, device/profile evidence and targeted regression checks. The Node helpers need a version with built-in WebSocket support. |
+| Analysis tools and technical history | [DragonShard tools](tools/dragonshard-2/), [technical notes](docs/dragonshard/) | Optional contributor tools and saved findings. The earlier native remapper is not the backend of this G HUB/Wine path and is outside this source snapshot. Ghidra databases and full decompilation exports are not runtime dependencies. |
 
 ## Inspecting this snapshot
 
@@ -70,18 +102,8 @@ python3 -m unittest discover -s tests/packaging -p 'test_*.py'
 
 Python 3.12+ is required for the packaging tools. The unit suite uses synthetic fixtures; it does not download vendor files, install packages or launch G HUB. Acquisition, prefix preparation and runtime-assembly commands below are **development procedures**, not a complete installation command. In particular, `wine_runtime.py build` still consumes prebuilt compatibility artifacts; this checkout does not supply them or yet provide a single end-to-end source build recipe. Contributors can inspect and improve that pipeline without changing their system Wine.
 
-## What the project contains
-
-| Resource | Source or configuration | Role |
-|---|---|---|
-| Custom Wine build | [43 patch topics](patches/wine/), [build/run tools](tools/wine/), [private runtime packager](tools/packaging/wine_runtime.py) | Windows API, composition, input, graphics, device and native X11 key-output compatibility. The packager assembles all runtime modules with 20 pinned replacements from five build groups; Unix-library portability and a complete corresponding-source release audit remain. |
-| Supplementary DLL implementations | [DirectComposition](tools/wine/dcomp_experiment.cpp), [CoreMessaging adapter](tools/wine/coremessaging_xp_adapter.c), [DispatcherQueue](tools/wine/dispatcher_queue_experiment.cpp), [CoreApplication](tools/wine/core_application_experiment.cpp), [ApiInformation proxy](tools/wine/api_information_proxy.cpp), [sensor fallback](tools/wine/sensor_monitor_unavailable.c) | Separate app-local helpers. Some implement only the contracts the observed application needs; they are not complete replacements for their Windows subsystems. |
-| Local vendor-resource transformations | [Color preview](tools/wine/prepare_color_picker_fix.py), [tray background](tools/wine/prepare_tray_background.py) | Generate local modified assets from the acquired application. Do not treat generated `app.asar`, XBF or PRI files as project-owned source. |
-| Prefix and launch definition | [Observed runtime baseline](packaging/runtime-baseline.json), [runtime registration helper](tools/wine/configure_runtime.py), [snapshot preparation](tools/wine/prepare_tested_desktop.py), [launcher](tools/wine/tested_desktop_launch.py) | Preserve the working configuration: 48 recorded file hashes, environment flags, DLL load policy and eight recorded WinRT activation classes. The baseline is evidence, not an executable installer or complete prefix recipe. |
-| Diagnostics | [Agent snapshot](tools/wine/agent_snapshot.cjs), [color-picker recorder](tools/wine/color_picker_monitor.cjs), [composition regression runner](tools/wine/run_dcomp_tests.py) | Readiness, device/profile evidence and targeted regression checks. The Node helpers need a version with built-in WebSocket support. |
-| Analysis tools and technical history | [DragonShard tools](tools/dragonshard-2/), [technical notes](docs/dragonshard/) | Optional contributor tools and saved findings. The earlier native remapper is not the backend of this G HUB/Wine path and is outside this source snapshot. Ghidra databases and full decompilation exports are not runtime dependencies. |
-
-## Publication gates
+<details>
+<summary><strong>Publication gates</strong></summary>
 
 These gates are open; their order prevents building a polished installer around dependencies we cannot supply.
 
@@ -92,7 +114,10 @@ These gates are open; their order prevents building a polished installer around 
 5. **Reproduce on clean Manjaro, then CachyOS.** Validate real devices and native desktop key output as well as the GUI. Add Debian only after this baseline holds. Publish clear supported combinations and limitations.
 6. **Keep releases reproducible and reviewable.** This source snapshot preserves GitHub's initial commit and excludes the lab history, captures, vendor payloads and populated prefixes. See the [source publication record](docs/packaging/source-publication.md). Wine notices remain LGPL; a complete corresponding-source/build-sequence audit is still required before publishing the packaged runtime binary.
 
-## Verified Logitech depot extraction
+</details>
+
+<details>
+<summary><strong>Verified Logitech depot extraction</strong></summary>
 
 [The lock file](packaging/logitech-depots.lock.json) pins G HUB **2026.6.974819**, build **869589**, to official Logitech URLs, sizes, SHA-256 values, dependency closure and expected file lists. `tested_setup` selects the 30 depots marked present in the working setup, including the G502 X PLUS and G915 X LIGHTSPEED TKL resources. It does **not** cover all 779 catalog entries or claim support for every Logitech device. `core` selects the six-depot core closure; `required` follows the vendor-required roots and their dependencies.
 
@@ -120,7 +145,10 @@ The encrypted resource keys are fetched without authentication from [Logitech's 
 
 The **43 recorded installer declaration groups** are now classified by the clean-prefix recipe: two configured, one replaced, two frozen, one partial, 35 deferred and two unresolved. The deferred groups include eight extension packages and 17 conditional/external copy rules. Two core copy rules name `trueforce_sdk_x86.dll` and `trueforce_sdk_x64.dll`, which are absent from the core archive; the separate Trueforce manager's installation must be investigated before claiming those rules complete. Counts describe declaration groups of different sizes, not a percentage of installer functionality.
 
-## Fresh-prefix development installer
+</details>
+
+<details>
+<summary><strong>Wine prefix development installer</strong></summary>
 
 The [preparation script](tools/packaging/prepare_clean_prefix.py) builds a **new** Wine prefix from the verified depot stage and reconstructed Windows DLLs. It generates depot metadata, public-key records, update settings, installation inventory, eight WinRT registrations and the `lghubapp` URL handler. It registers `LGHUBUpdaterService` through Wine's service manager with its correct command, deliberately **stopped and demand-start** pending full qualification. This differs from the existing Desktop installation's automatic service startup.
 
@@ -146,13 +174,16 @@ python tools/packaging/probe_clean_agent.py \
 
 Use new output directories outside the repository with existing parents. Preparation reserves 5 GiB above the 20 GiB free-space floor; the probe reserves another 4 GiB for its disposable clone. The candidate is left pristine; the agent test runs in that clone. Both use a read-only host filesystem, a private network and PID namespace, a private temporary directory and no physical device nodes. Wine processes are stopped within their own namespace after each check. The agent probe uses its own Xvfb with GLX disabled; it neither connects to the live desktop nor evaluates graphics performance. Acquisition inputs and host files remain readable inside this test environment: this is operational isolation, not a hardened sandbox for hostile executables.
 
-[Initial validation](packaging/clean-prefix-verification.json) recorded 1,599 managed files with copied private builds. [Packaged-runtime validation](packaging/wine-runtime-verification.json) records 1,574 prefix files plus the separate 2,571-entry runtime inventory. Both pass **8/8 activation factories**, **4/4 registry routes**, **1/1 updater service configuration**, and **5/5 agent API routes**. The API test covers `/devices/list`, `/profiles`, `/profile/active`, `/profiles/auto_switching` and `/input/gshift`, each returning `SUCCESS`. No physical devices are exposed, so an empty device list is expected. These results establish fresh installation and backend startup; they do not establish working mouse bindings or profile switching on real hardware. The full packaging suite now has **55 passing tests**.
+[Initial validation](packaging/clean-prefix-verification.json) recorded 1,599 managed files with copied private builds. [Packaged-runtime validation](packaging/wine-runtime-verification.json) records 1,574 prefix files plus the separate 2,571-entry runtime inventory. Both pass **8/8 activation factories**, **4/4 registry routes**, **1/1 updater service configuration**, and **5/5 agent API routes**. The API test covers `/devices/list`, `/profiles`, `/profile/active`, `/profiles/auto_switching` and `/input/gshift`, each returning `SUCCESS`. No physical devices are exposed, so an empty device list is expected. These results establish fresh installation and backend startup; they do not establish working mouse bindings or profile switching on real hardware. The packaging suite now has **78 passing tests**, plus five desktop-device policy checks in CI.
 
 The private output contains `clean-prefix.json`, `verification.json`, `installer-actions.json` and per-step logs. Verification checks the managed application/depot/artifact trees and four installed Wine fallback modules against its local receipt; it does not authenticate an edited receipt or qualify all stock Wine files and mutable registry state. The probe writes `agent-verification.json`, its API snapshot and logs separately. None of those populated prefixes, vendor files or downloaded keys belongs in Git.
 
 **Next:** qualify native-library portability, fonts and the original UI/tray, resolve required deferred installer actions, then test devices on clean Manjaro and CachyOS before promoting a Desktop launcher. Optional vendor installers are not executed or falsely marked installed, and this recipe does not replace the user's working installation.
 
-## Packaged private Wine runtime
+</details>
+
+<details>
+<summary><strong>Packaged private Wine runtime</strong></summary>
 
 [The runtime lock](packaging/wine-runtime.lock.json) pins the complete runtime payload from [Arch's Wine 10.20-2 archive](https://archive.archlinux.org/packages/w/wine/wine-10.20-2-x86_64.pkg.tar.zst), its detached signature, **20 Wine replacements**, five protocol markers and seven app-local compatibility DLLs. The archive's signature was verified against the installed Arch keyring: signer `D2E95FEC015CF1F911AAAB0C3D4C5008BB5C8D29` (Peter Jung). Subsequent fetches and builds enforce the pinned SHA-256 of both archive and signature. They do not download a key or change the system trust store.
 
@@ -189,6 +220,10 @@ The fresh installer masks the host's Wine module/data directories and loader/ser
 **Base Wine bundle:** the archive above supplies Wine itself; use the separate Linux userspace layer below for its native dependencies. The initial host audit inspected **46 ELF files** and found no unresolved `DT_NEEDED` libraries on the development host; their highest required glibc symbol version is **2.38**. This is a minimum symbol requirement, not a claim that every system with glibc 2.38 works. Direct dependencies include X11, libudev, libusb, libunwind and media/audio libraries; optional modules include FFmpeg 62/60 sonames. The subsequent container check below resolves the recorded dynamic-library candidates; codec behavior/plugins and host GPU drivers still require validation. `provenance/unix-dependencies.json` records per-module dependencies and candidate `dlopen` names. Cross-distro compatibility, GUI rendering and hardware behavior remain unverified in this new installation.
 
 **Linux userspace verification, October 26:** the pinned Steam Linux Runtime 4 and private Debian library set now resolve **46/46 native Wine modules (100%)** and **54/54 candidate dynamic libraries (100%)**. Two upstream Unix modules (`winedmo.so` and `wpcap.so`) are rebuilt in the matching pinned SDK; all existing pinned compatibility artifacts are preserved. A real Windows command succeeds with no D-Bus assertion after the headless test stops exposing the host system bus. The same container also passes **8/8 WinRT activation checks, 4/4 registry checks and 5/5 read-only G HUB API requests** using pinned Node and an isolated Xvfb. These are dependency/backend checks, **not overall application completion**. See [the results and reproducible SDK/container checks](docs/packaging/linux-runtime.md). No system package changes, Steam installation or account are required for these checks; the working Desktop launcher is unchanged.
+
+The same **46/46 + 54/54 + 8/8 + 4/4 + 5/5** checks now pass on both a newer Manjaro VM and a separate bare-metal CachyOS host. [Independent-host evidence](packaging/independent-host-verification.json) records the exact scope. The [X11 container launcher](tools/packaging/desktop_runtime.py) imports host graphics, shares the X11 session and permitted devices, uses a dedicated prefix, and supports reopen/stop actions. Its [usage and validation limits](docs/packaging/linux-runtime.md#x11-container-launcher) distinguish these passes from real graphics and peripheral acceptance.
+
+</details>
 
 <details>
 <summary><strong>Dependency sourcing findings and the prefix question</strong></summary>
@@ -278,6 +313,6 @@ Acceptance on each initial target covers: installation/relaunch; device discover
 
 ## Branding and licenses
 
-This is an independent community project, not affiliated with or endorsed by Logitech. Logitech and its product names belong to their respective rights-holders. The README uses the project owner's supplied Penguin-LGHUB artwork, with the outer circle's pale edge cleaned up in [assets/penguin-lghub-logo.png](assets/penguin-lghub-logo.png). The original supplied file remains on the owner's Desktop.
+This is an independent community project, not affiliated with or endorsed by Logitech. Logitech and its product names belong to their respective rights-holders. The README uses the project owner's supplied Penguin-LGHUB artwork, with a smooth white outline around the black circle in [assets/penguin-lghub-logo.png](assets/penguin-lghub-logo.png). The original supplied file remains on the owner's Desktop.
 
 The existing repository [GPLv3 license](LICENSE) covers original project source except where a file or component carries another license. **Wine patches and Wine-derived material retain LGPL-2.1-or-later and upstream notices.** See [NOTICE.md](NOTICE.md) for component boundaries, including the supplied artwork. No proprietary G HUB/Windows binaries, Windows fonts, populated Wine prefixes or decompilation corpus are included. Publishing this implementation does not settle the separate dependency-use questions described above.
