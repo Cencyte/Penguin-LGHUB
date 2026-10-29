@@ -5,10 +5,16 @@ src=$(realpath -e -- "${1:?Provide a Wine 10.20 source directory}")
 out=$(realpath -e -- "${2:?Provide its configured build directory}")
 repo=$(cd -- "$(dirname -- "$0")/../.." && pwd)
 [[ $(cat "$src/VERSION") == 'Wine version 10.20' && -f "$out/Makefile" ]]
+extra=()
+case ${3:-} in
+    '') ;;
+    --restore-state) extra+=("$repo/patches/wine/0044-x11-restore-state-and-buffered-events.patch") ;;
+    *) echo 'Expected optional --restore-state (use a separate source/build tree).' >&2; exit 2 ;;
+esac
 python3 "$repo/tools/wine/apply_patch_series.py" "$src" \
     "$repo/patches/wine/0033-x11-ignore-released-mouse-moveresize.patch" \
     "$repo/patches/wine/0035-x11-flush-direct-image-upload.patch" \
-    "$repo/patches/wine/0039-x11-layered-surface-format.patch"
+    "$repo/patches/wine/0039-x11-layered-surface-format.patch" "${extra[@]}"
 make -C "$out" -j4 dlls/winex11.drv/x86_64-windows/winex11.drv dlls/winex11.drv/winex11.so
 x86_64-w64-mingw32-gcc -O2 -municode -Wall -Wextra -Werror \
     "$repo/tools/wine/window_command_probe.c" -o "$out/window_command_probe.exe"

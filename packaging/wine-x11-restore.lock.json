@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "wine_version": "10.20",
+  "target": "usr/lib/wine/x86_64-unix/winex11.so",
+  "base_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+  "module_sha256": "11b02e4251f06ddb5463e223924d62e5d47a5da7c02cf0aab6084820b3114386",
+  "patch": "patches/wine/0044-x11-restore-state-and-buffered-events.patch",
+  "patch_sha256": "05fd24c8ec275fc148af1c61913927c7a86a98b4e5d9f891226cb4d0109dafd1",
+  "scope": "Opt-in Plasma Xwayland restore-state candidate; real-session acceptance pending"
+}

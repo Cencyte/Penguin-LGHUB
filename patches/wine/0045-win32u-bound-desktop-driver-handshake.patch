@@ -1,0 +1,20 @@
+--- a/dlls/win32u/driver.c
++++ b/dlls/win32u/driver.c
+@@ -950,8 +950,15 @@
+     user_check_not_lock();
+ 
+     asciiz_to_unicode( driver_load_error, "The explorer process failed to start." );  /* default error */
+-    /* wait for graphics driver to be ready */
+-    send_message( hwnd, WM_NULL, 0, 0 );
++    /* Explorer can be in an outbound COM call while Electron waits for a
++     * newly created Crashpad child. The child must not wait indefinitely for
++     * Explorer to dispatch WM_NULL. The display GUID and registry entry below
++     * are published after the graphics driver loads; still validate them. */
++    if (getenv( "WINE_GHUB_DESKTOP_INIT_TIMEOUT" ) &&
++        !strcmp( getenv( "WINE_GHUB_DESKTOP_INIT_TIMEOUT" ), "1" ))
++        send_message_timeout( hwnd, WM_NULL, 0, 0, SMTO_NORMAL, 5000, FALSE );
++    else
++        send_message( hwnd, WM_NULL, 0, 0 );
+ 
+     guid_atom = HandleToULong( NtUserGetProp( hwnd, prop_nameW ));
+     memcpy( key, guid_key_prefixW, sizeof(guid_key_prefixW) );

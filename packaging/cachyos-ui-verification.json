@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "checks": {
+    "required_files_present": true,
+    "bundled_fonts_loaded": true,
+    "desktop_and_default_profile": true,
+    "first_run_prompt_readable": true
+  },
+  "passed": true,
+  "fonts": {
+    "status": "ready",
+    "faces": [
+      {
+        "family": "BrownPro-Regular",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro",
+        "weight": "100",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro-Light",
+        "weight": "100",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro-Thin",
+        "weight": "100",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownLogitechPan",
+        "weight": "100",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro-Bold",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownLogitechPan",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownLogitechPan",
+        "weight": "400",
+        "status": "loaded"
+      }
+    ]
+  },
+  "missing": [],
+  "visible_text": "HELP US MAKE G HUB BETTER\nAllow G HUB to automatically send diagnostics and usage data.\nABOUT DEVICE ANALYTICS AND PRIVACY\nNO, THANKS\nYES, PLEASE",
+  "application_count": 1,
+  "profile_count": 1,
+  "scope": "Isolated first-run UI; no input injection, physical devices, tray or host GPU validation",
+  "linux_runtime_build": "4.0.20260928.262390",
+  "host_wine_hidden": true,
+  "mapped_runtime_image_count": 130,
+  "live_desktop_used": false,
+  "physical_devices_exposed": false,
+  "isolated_network": true,
+  "end_to_end_qualified": false,
+  "date": "2026-10-27",
+  "host": "cachyos_bare_metal",
+  "kernel": "7.2.9-1-cachyos",
+  "development_revision": "6cce5ca",
+  "packaging_tests": {
+    "passed": 84,
+    "total": 84
+  },
+  "managed_files_verified": 1605,
+  "desktop_installation": "separate new installation, ready for user X11 acceptance",
+  "input_origin": "verified clean candidate transferred from builder; no personal working prefix"
+}

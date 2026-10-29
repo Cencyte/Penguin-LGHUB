@@ -1,0 +1,3209 @@
+{
+  "schema": 1,
+  "scope": "Historical QPainter cases and subsequent private OpenGL/llvmpipe KWin tests; no live desktop input or capture",
+  "packaging_tests": {
+    "passed": 115,
+    "total": 115
+  },
+  "real_session_acceptance": "User accepted basic restore behavior. Brief first-frame flash remains; shutdown polish awaiting user visual acceptance.",
+  "cases": [
+    {
+      "case": "wayland-restore-001",
+      "repaint_enabled": false,
+      "restore_method": "window-manager",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": false,
+      "snapshots": {
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 732,
+          "nonblack": 3816
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-1": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 732,
+          "nonblack": 3816
+        },
+        "minimized-2": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-2": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 732,
+          "nonblack": 3816
+        },
+        "minimized-3": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-3": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 732,
+          "nonblack": 3816
+        }
+      },
+      "harness_result": true,
+      "error": null,
+      "launcher_exit": 0,
+      "remaining_process_count": 0,
+      "installation_intact_after_exit": true,
+      "interpretation": "Diagnostic captures; original first two runs kept remote debugging enabled."
+    },
+    {
+      "case": "wayland-restore-002",
+      "repaint_enabled": false,
+      "restore_method": "window-manager",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": false,
+      "snapshots": {
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 732,
+          "nonblack": 3816
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-1": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 732,
+          "nonblack": 3816
+        },
+        "minimized-2": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-2": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 732,
+          "nonblack": 3816
+        },
+        "minimized-3": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-3": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 732,
+          "nonblack": 3816
+        }
+      },
+      "harness_result": true,
+      "error": null,
+      "launcher_exit": 0,
+      "remaining_process_count": 0,
+      "installation_intact_after_exit": true,
+      "interpretation": "Diagnostic captures; original first two runs kept remote debugging enabled."
+    },
+    {
+      "case": "wayland-restore-003",
+      "repaint_enabled": false,
+      "restore_method": "window-manager",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": true,
+      "snapshots": {
+        "relaunch": {
+          "debugger_enabled": false
+        },
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-1": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 196608
+        },
+        "minimized-2": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-2": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        },
+        "minimized-3": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-3": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        }
+      },
+      "harness_result": true,
+      "error": null,
+      "launcher_exit": 0,
+      "remaining_process_count": 0,
+      "installation_intact_after_exit": true,
+      "interpretation": "Blank white frame observed in first restore; later restores recovered. Older harness did not score pixels."
+    },
+    {
+      "case": "wayland-restore-004",
+      "repaint_enabled": true,
+      "restore_method": "window-manager",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": true,
+      "snapshots": {
+        "relaunch": {
+          "debugger_enabled": false
+        },
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-1": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-2": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-2": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-3": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-3": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        }
+      },
+      "harness_result": true,
+      "error": null,
+      "launcher_exit": 0,
+      "remaining_process_count": 0,
+      "installation_intact_after_exit": true,
+      "interpretation": "Pixel-scored restore test."
+    },
+    {
+      "case": "wayland-restore-005",
+      "repaint_enabled": false,
+      "restore_method": "window-manager",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": true,
+      "snapshots": {
+        "relaunch": {
+          "debugger_enabled": false
+        },
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-1": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-2": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-2": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-3": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-3": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-4": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-4": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-5": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-5": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-6": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-6": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-7": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-7": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-8": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-8": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-9": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-9": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-10": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-10": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-11": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-11": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-12": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-12": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        }
+      },
+      "harness_result": true,
+      "error": null,
+      "launcher_exit": 0,
+      "remaining_process_count": 0,
+      "installation_intact_after_exit": true,
+      "interpretation": "Pixel-scored restore test."
+    },
+    {
+      "case": "wayland-restore-006",
+      "repaint_enabled": true,
+      "restore_method": "launcher-reopen",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": true,
+      "snapshots": {
+        "relaunch": {
+          "debugger_enabled": false,
+          "frontend_process_count": 5
+        },
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        }
+      },
+      "harness_result": false,
+      "error": "Unexpected WM_STATE None",
+      "launcher_exit": 0,
+      "remaining_process_count": 0,
+      "installation_intact_after_exit": true,
+      "interpretation": "Invalid run: pre-restore XID became stale during launcher reopen; corrected in next run."
+    },
+    {
+      "case": "wayland-restore-007",
+      "repaint_enabled": true,
+      "restore_method": "launcher-reopen",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": true,
+      "snapshots": {
+        "relaunch": {
+          "debugger_enabled": false,
+          "frontend_process_count": 5
+        },
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-1": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-2": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-2": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-3": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-3": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-4": {
+          "xid": 33554436,
+          "wm_state": 3
+        }
+      },
+      "harness_result": false,
+      "error": "Unexpected WM_STATE 3",
+      "launcher_exit": -15,
+      "remaining_process_count": 1,
+      "installation_intact_after_exit": true,
+      "interpretation": "Three pixel passes then launcher reopen did not restore within the sampling interval; shutdown timed out."
+    },
+    {
+      "case": "wayland-restore-008",
+      "repaint_enabled": true,
+      "restore_method": "window-manager",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": true,
+      "snapshots": {
+        "relaunch": {
+          "debugger_enabled": false,
+          "frontend_process_count": 5
+        },
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-1": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-2": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-2": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-3": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-3": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-4": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-4": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-5": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-5": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-6": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-6": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-7": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-7": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-8": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-8": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-9": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-9": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-10": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-10": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-11": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-11": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-12": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-12": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        }
+      },
+      "harness_result": true,
+      "error": null,
+      "launcher_exit": 0,
+      "remaining_process_count": 0,
+      "installation_intact_after_exit": true,
+      "interpretation": "Pixel-scored restore test."
+    },
+    {
+      "case": "wayland-restore-009",
+      "repaint_enabled": true,
+      "restore_method": "launcher-reopen",
+      "debugger_enabled_at_startup": true,
+      "debugger_free_frontend_restarted": true,
+      "snapshots": {
+        "relaunch": {
+          "debugger_enabled": false,
+          "frontend_process_count": 5
+        },
+        "initial": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385
+        },
+        "minimized-1": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-1": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-2": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-2": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-3": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-3": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-4": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-4": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-5": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-5": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-6": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-6": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-7": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-7": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-8": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-8": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-9": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-9": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-10": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-10": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-11": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-11": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        },
+        "minimized-12": {
+          "xid": 33554436,
+          "wm_state": 3
+        },
+        "restored-12": {
+          "xid": 33554436,
+          "wm_state": 1,
+          "width": 1024,
+          "height": 768,
+          "nonblack": 4385,
+          "reference_match_fraction": 1.0,
+          "passed": true
+        }
+      },
+      "harness_result": true,
+      "error": null,
+      "launcher_exit": 0,
+      "remaining_process_count": 0,
+      "installation_intact_after_exit": true,
+      "interpretation": "Pixel-scored restore test."
+    }
+  ],
+  "follow_up": {
+    "scope": "Private OpenGL/llvmpipe KWin compositor and Xwayland; debugger-free frontend; Windows minimize, pager restore, Win32 state and composed-pixel comparison",
+    "packaging_tests": {
+      "passed": 109,
+      "total": 109
+    },
+    "candidate_restore_cycles": {
+      "passed": 24,
+      "total": 24,
+      "cases": [
+        "wayland-restore-015",
+        "wayland-restore-017"
+      ]
+    },
+    "real_session_acceptance": "Basic Wine restore-state correction accepted by user; residual first-frame flash reported.",
+    "live_observation": {
+      "xwayland_state": "Normal / focused",
+      "win32_iconic": true,
+      "win32_rect": [
+        -32000,
+        -32000,
+        160,
+        31
+      ],
+      "driver_wm_states": [
+        1,
+        1,
+        1
+      ],
+      "desired_size": [
+        1024,
+        768
+      ],
+      "current_size": [
+        1024,
+        743
+      ],
+      "configure_serial": 4837,
+      "monitor_size": [
+        1280,
+        800
+      ],
+      "monitor_workarea": [
+        1280,
+        756
+      ],
+      "inspection": "read-only APIs and narrow driver structure inspection; no live input or capture"
+    },
+    "candidate_recipe": {
+      "schema": 1,
+      "wine_version": "10.20",
+      "target": "usr/lib/wine/x86_64-unix/winex11.so",
+      "base_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+      "module_sha256": "11b02e4251f06ddb5463e223924d62e5d47a5da7c02cf0aab6084820b3114386",
+      "patch": "patches/wine/0044-x11-restore-state-and-buffered-events.patch",
+      "patch_sha256": "05fd24c8ec275fc148af1c61913927c7a86a98b4e5d9f891226cb4d0109dafd1",
+      "scope": "Opt-in Plasma Xwayland restore-state candidate; real-session acceptance pending"
+    },
+    "maximum_glibc_symbol": "GLIBC_2.38",
+    "cases": [
+      {
+        "case": "wayland-restore-011",
+        "passed": true,
+        "controls": {
+          "restore_repaint": true,
+          "reopen": false,
+          "windows_minimize": true,
+          "compositor_capture": true,
+          "render_node": "/dev/dri/renderD128"
+        },
+        "snapshots": {
+          "relaunch": {
+            "debugger_enabled": false,
+            "frontend_process_count": 5
+          },
+          "initial": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-1": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-1": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-2": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-2": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-3": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-3": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-4": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-4": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-5": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-5": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-6": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-6": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-7": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-7": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-8": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-8": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-9": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-9": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-10": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-10": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-11": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-11": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          },
+          "minimized-12": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-12": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4385,
+              "passed": true
+            }
+          }
+        },
+        "error": null,
+        "launcher_exit": 0,
+        "installation_intact_after_exit": true,
+        "remaining_prefix_processes": [],
+        "tray_dock_requests": 1,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "f2d7bd07dafff5d5b53a8596703ee15cbbeb99da0bdeaba77bb4bc1843d34922",
+          "tools/packaging/desktop_runtime.py": "7584b9bf9d3c1bd5bb607ffa3fb32c7caa332af39ed8d3d8f4bc0dc2d16ff555",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "34d8e22cd21b00e6f2770f3dc263d3474edd5b38f0de3fe114227f451ffcafd1",
+          "tools/wine/prepare_frontend_startup.py": "f9d3e822805c70803bd034ea1b50333a65fa5a758f8149b2469b34f7e3103dd8"
+        }
+      },
+      {
+        "case": "wayland-restore-012",
+        "passed": true,
+        "controls": {
+          "restore_repaint": true,
+          "reopen": false,
+          "windows_minimize": true,
+          "compositor_capture": true,
+          "render_node": "/dev/dri/renderD128",
+          "trace_window_state": true
+        },
+        "snapshots": {
+          "relaunch": {
+            "debugger_enabled": false,
+            "frontend_process_count": 5
+          },
+          "initial": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-1": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-1": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-2": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-2": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-3": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-3": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-4": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-4": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-5": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-5": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-6": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-6": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-7": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-7": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-8": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-8": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-9": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-9": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-10": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-10": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-11": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-11": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          },
+          "minimized-12": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-12": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 4373,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 4373,
+              "passed": true
+            }
+          }
+        },
+        "error": null,
+        "launcher_exit": 0,
+        "installation_intact_after_exit": true,
+        "remaining_prefix_processes": [],
+        "tray_dock_requests": 1,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "ce574c7cb60afd3166214799f1b70c02ec2ff088bbf0da5b9af3d7a39dbf6914",
+          "tools/packaging/desktop_runtime.py": "7584b9bf9d3c1bd5bb607ffa3fb32c7caa332af39ed8d3d8f4bc0dc2d16ff555",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "34d8e22cd21b00e6f2770f3dc263d3474edd5b38f0de3fe114227f451ffcafd1",
+          "tools/wine/prepare_frontend_startup.py": "f9d3e822805c70803bd034ea1b50333a65fa5a758f8149b2469b34f7e3103dd8"
+        }
+      },
+      {
+        "case": "wayland-restore-013",
+        "passed": false,
+        "controls": {
+          "restore_repaint": false,
+          "reopen": false,
+          "windows_minimize": true,
+          "compositor_capture": true,
+          "render_node": "/dev/dri/renderD128",
+          "trace_window_state": true
+        },
+        "snapshots": {
+          "relaunch": {
+            "debugger_enabled": false,
+            "frontend_process_count": 5
+          },
+          "initial": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-1": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-1": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-2": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-2": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-3": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-3": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-4": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-4": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-5": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-5": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-6": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-6": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-7": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-7": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-8": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-8": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-9": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-9": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-10": {
+            "xid": 33554436,
+            "wm_state": 3
+          },
+          "restored-10": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "width": 1024,
+            "height": 743,
+            "nonblack": 0,
+            "reference_match_fraction": 0.006713984270093996,
+            "passed": false,
+            "compositor": {
+              "reference_match_fraction": 0.0,
+              "nonblack": 0,
+              "passed": false
+            }
+          }
+        },
+        "error": "Unexpected WM_STATE 1",
+        "launcher_exit": 0,
+        "installation_intact_after_exit": true,
+        "remaining_prefix_processes": [],
+        "tray_dock_requests": null,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "ce574c7cb60afd3166214799f1b70c02ec2ff088bbf0da5b9af3d7a39dbf6914",
+          "tools/packaging/desktop_runtime.py": "84e76b76351f27c0320e0f82a0607b8c5148ddb763be22142ee9e132a2b9bfbd",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "34d8e22cd21b00e6f2770f3dc263d3474edd5b38f0de3fe114227f451ffcafd1",
+          "tools/wine/prepare_frontend_startup.py": "4bc96eba6f21af29bc08ade1cca0334fc5b30b4abd0ac9d57caba21df5a82b47"
+        }
+      },
+      {
+        "case": "wayland-restore-014",
+        "passed": false,
+        "controls": {
+          "restore_repaint": false,
+          "reopen": false,
+          "windows_minimize": true,
+          "compositor_capture": true,
+          "render_node": "/dev/dri/renderD128",
+          "trace_window_state": true,
+          "height": 800,
+          "panel_height": 44,
+          "without_workarea_fit": false,
+          "x11_module_sha256": "11b02e4251f06ddb5463e223924d62e5d47a5da7c02cf0aab6084820b3114386"
+        },
+        "snapshots": {},
+        "error": "Initial private KWin output differs from X window pixels",
+        "launcher_exit": 0,
+        "installation_intact_after_exit": true,
+        "remaining_prefix_processes": [],
+        "tray_dock_requests": null,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "79a1cfcc0fbac1f2a3ba70f5c77176ba528d7662f2f7f3f698831f64a573d1df",
+          "tools/packaging/desktop_runtime.py": "84e76b76351f27c0320e0f82a0607b8c5148ddb763be22142ee9e132a2b9bfbd",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "35273e31fee9479eeb9ddfe327fe32378ea6becb95b6f90afbd454b7adda55eb",
+          "tools/wine/prepare_frontend_startup.py": "4bc96eba6f21af29bc08ade1cca0334fc5b30b4abd0ac9d57caba21df5a82b47"
+        },
+        "classification": "invalid fixture: simulated dock centered over UI; corrected in case 017"
+      },
+      {
+        "case": "wayland-restore-015",
+        "passed": true,
+        "controls": {
+          "restore_repaint": false,
+          "reopen": false,
+          "windows_minimize": true,
+          "compositor_capture": true,
+          "render_node": "/dev/dri/renderD128",
+          "trace_window_state": true,
+          "height": 743,
+          "panel_height": 0,
+          "without_workarea_fit": false,
+          "x11_module_sha256": "11b02e4251f06ddb5463e223924d62e5d47a5da7c02cf0aab6084820b3114386"
+        },
+        "snapshots": {
+          "relaunch": {
+            "debugger_enabled": false,
+            "frontend_process_count": 5
+          },
+          "initial": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-1": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-1": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-2": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-2": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-3": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-3": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-4": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-4": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-5": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-5": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-6": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-6": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-7": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-7": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-8": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-8": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-9": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-9": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-10": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-10": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-11": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-11": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          },
+          "minimized-12": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-12": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 743
+            },
+            "width": 1024,
+            "height": 743,
+            "nonblack": 5213,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 1.0,
+              "nonblack": 5213,
+              "passed": true
+            }
+          }
+        },
+        "error": null,
+        "launcher_exit": 0,
+        "installation_intact_after_exit": true,
+        "remaining_prefix_processes": [],
+        "tray_dock_requests": 1,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "79a1cfcc0fbac1f2a3ba70f5c77176ba528d7662f2f7f3f698831f64a573d1df",
+          "tools/packaging/desktop_runtime.py": "84e76b76351f27c0320e0f82a0607b8c5148ddb763be22142ee9e132a2b9bfbd",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "35273e31fee9479eeb9ddfe327fe32378ea6becb95b6f90afbd454b7adda55eb",
+          "tools/wine/prepare_frontend_startup.py": "4bc96eba6f21af29bc08ade1cca0334fc5b30b4abd0ac9d57caba21df5a82b47"
+        }
+      },
+      {
+        "case": "wayland-restore-016",
+        "passed": false,
+        "controls": {
+          "restore_repaint": true,
+          "reopen": false,
+          "windows_minimize": true,
+          "compositor_capture": true,
+          "render_node": "/dev/dri/renderD128",
+          "trace_window_state": true,
+          "height": 800,
+          "panel_height": 44,
+          "without_workarea_fit": false,
+          "x11_module_sha256": "11b02e4251f06ddb5463e223924d62e5d47a5da7c02cf0aab6084820b3114386"
+        },
+        "snapshots": {
+          "relaunch": {
+            "debugger_enabled": false,
+            "frontend_process_count": 5
+          },
+          "initial": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "compositor": {
+              "reference_match_fraction": 0.8287343215507411,
+              "nonblack": 3622,
+              "passed": false
+            }
+          }
+        },
+        "error": "Initial private KWin output differs from X window pixels",
+        "launcher_exit": 0,
+        "installation_intact_after_exit": true,
+        "remaining_prefix_processes": [],
+        "tray_dock_requests": null,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "0ec59c00f76b41fdfd1b2b09d0017ea27bf03caba6f9e167ae839ad54bfe5957",
+          "tools/packaging/desktop_runtime.py": "29875d6628bb9eb1d48a743a94636d8e2edf7e0656495b253bdfcfe15f45adb1",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "465206a2376d68ff9ceb941176e68aa921f911dc31dcbc8222580bb5389e2a44",
+          "tools/wine/prepare_frontend_startup.py": "4bc96eba6f21af29bc08ade1cca0334fc5b30b4abd0ac9d57caba21df5a82b47"
+        },
+        "classification": "invalid fixture: simulated dock centered over UI; corrected in case 017"
+      },
+      {
+        "case": "wayland-restore-017",
+        "passed": true,
+        "controls": {
+          "restore_repaint": true,
+          "reopen": false,
+          "windows_minimize": true,
+          "compositor_capture": true,
+          "render_node": "/dev/dri/renderD128",
+          "trace_window_state": true,
+          "height": 800,
+          "panel_height": 44,
+          "without_workarea_fit": false,
+          "x11_module_sha256": "11b02e4251f06ddb5463e223924d62e5d47a5da7c02cf0aab6084820b3114386"
+        },
+        "snapshots": {
+          "relaunch": {
+            "debugger_enabled": false,
+            "frontend_process_count": 5
+          },
+          "initial": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-1": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-1": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-2": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-2": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-3": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-3": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-4": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-4": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-5": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-5": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-6": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-6": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-7": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-7": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-8": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-8": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-9": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-9": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-10": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-10": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-11": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-11": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          },
+          "minimized-12": {
+            "xid": 33554436,
+            "wm_state": 3,
+            "win32": {
+              "iconic": 1,
+              "visible": 1,
+              "width": 160,
+              "height": 31
+            }
+          },
+          "restored-12": {
+            "xid": 33554436,
+            "wm_state": 1,
+            "win32": {
+              "iconic": 0,
+              "visible": 1,
+              "width": 1024,
+              "height": 768
+            },
+            "width": 1024,
+            "height": 768,
+            "nonblack": 4385,
+            "reference_match_fraction": 1.0,
+            "passed": true,
+            "compositor": {
+              "reference_match_fraction": 0.9968072976054732,
+              "nonblack": 4371,
+              "passed": true
+            }
+          }
+        },
+        "error": null,
+        "launcher_exit": 0,
+        "installation_intact_after_exit": true,
+        "remaining_prefix_processes": [],
+        "tray_dock_requests": 1,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "0ec59c00f76b41fdfd1b2b09d0017ea27bf03caba6f9e167ae839ad54bfe5957",
+          "tools/packaging/desktop_runtime.py": "29875d6628bb9eb1d48a743a94636d8e2edf7e0656495b253bdfcfe15f45adb1",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "7d633ec253910f19af5902b72af443b5a9d4674ae8241a7fd6de6badc5b508ac",
+          "tools/wine/prepare_frontend_startup.py": "4bc96eba6f21af29bc08ade1cca0334fc5b30b4abd0ac9d57caba21df5a82b47"
+        }
+      }
+    ],
+    "deployment": {
+      "installation": "Manjaro VM wayland-desktop-002",
+      "frontend_sha256": "47b5c7ec3c6e6277a4ef6ab81d15d23e55fe85b456b1dceb668c6ee33e6267a5",
+      "wine_overlay_sha256": "11b02e4251f06ddb5463e223924d62e5d47a5da7c02cf0aab6084820b3114386",
+      "base_driver_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+      "post_stage_verification_passed": true,
+      "running_session_retained": true,
+      "takes_effect": "next user cold launch",
+      "previous_config": "desktop-before-47b5c7ec3c6e.json",
+      "system_packages_changed": false,
+      "pushed": false
+    }
+  },
+  "polish": {
+    "scope": "Private Manjaro KWin/OpenGL llvmpipe, no live desktop input or capture; requested opacity and X drawable sampling are not physical scanout.",
+    "packaging_tests": {
+      "passed": 115,
+      "total": 115
+    },
+    "implementation": {
+      "shutdown_polish": "staged",
+      "restore_flash_eliminated": false,
+      "opacity_experiments_shipped": false
+    },
+    "validated_close_workflows": {
+      "passed": 2,
+      "total": 2,
+      "actions": [
+        "WM_CLOSE preserves agent/tray and reopens with matching pixels",
+        "Desktop Quit waits for graceful frontend exit then stops the session"
+      ]
+    },
+    "native_tray_cli_quit": "Case 021 reached explicit shutdown hooks but timed out waiting for launcher exit; actual tray menu acceptance pending.",
+    "real_session_polish_acceptance": "pending",
+    "cases": [
+      {
+        "case": "wayland-restore-018",
+        "raw_result_sha256": "796f4899f37caf9f0fc1dd49bbefb3e7466773bb74f3f92cb9b4913251f01f3d",
+        "raw_passed": true,
+        "error": null,
+        "settled_cycles": 12,
+        "measured_cycles": 12,
+        "cycles_with_visible_incomplete_samples": 3,
+        "incomplete_sample_counts": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "first_complete_ms": [
+          2.43,
+          0.1,
+          0.08,
+          0.13,
+          12.94,
+          0.1,
+          16.46,
+          0.09,
+          0.08,
+          0.07,
+          0.12,
+          13.26
+        ],
+        "first_presented_complete_ms": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "window_close": null,
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact": true,
+        "tray_dock_requests": 1,
+        "lifecycle_log": [],
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "d4420cac1b391eb2e16efb5646754044e21b1469ae863a89dbdf892cffeda144",
+          "tools/packaging/desktop_runtime.py": "29875d6628bb9eb1d48a743a94636d8e2edf7e0656495b253bdfcfe15f45adb1",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "3487b16177c3ca5fa0e68893cedf2f0919c8608886b7847d46d61361ccb22470",
+          "tools/wine/prepare_frontend_startup.py": "4bc96eba6f21af29bc08ade1cca0334fc5b30b4abd0ac9d57caba21df5a82b47"
+        },
+        "classification": "accepted restore baseline"
+      },
+      {
+        "case": "wayland-restore-019",
+        "raw_result_sha256": "d788459749ace5e0b789108fef8bbeec8315504902aefbc4f9e1647600ec6288",
+        "raw_passed": true,
+        "error": null,
+        "settled_cycles": 12,
+        "measured_cycles": 12,
+        "cycles_with_visible_incomplete_samples": 4,
+        "incomplete_sample_counts": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "first_complete_ms": [
+          15.59,
+          0.2,
+          14.4,
+          0.1,
+          2.76,
+          0.09,
+          50.61,
+          0.19,
+          1.42,
+          0.15,
+          0.1,
+          13.15
+        ],
+        "first_presented_complete_ms": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "window_close": null,
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact": true,
+        "tray_dock_requests": 1,
+        "lifecycle_log": [
+          "Penguin LGHUB window hidden for orderly shutdown",
+          "Frontend graceful stop complete: True"
+        ],
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "d4420cac1b391eb2e16efb5646754044e21b1469ae863a89dbdf892cffeda144",
+          "tools/packaging/desktop_runtime.py": "8870babb006f5a55368488a6b3a5d74d1a1029243eff8abddc8af46944181095",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "3487b16177c3ca5fa0e68893cedf2f0919c8608886b7847d46d61361ccb22470",
+          "tools/wine/prepare_frontend_startup.py": "fcb21199e525bbd4c29545bd75b435f61f660231d1dcb324afd44b2807132438"
+        },
+        "classification": "synchronous repaint: rejected as insufficient"
+      },
+      {
+        "case": "wayland-restore-020",
+        "raw_result_sha256": "2042e722f975b124c9cdb94392d920904fc284f19e6d56089415791325d5d261",
+        "raw_passed": true,
+        "error": null,
+        "settled_cycles": 12,
+        "measured_cycles": 12,
+        "cycles_with_visible_incomplete_samples": 8,
+        "incomplete_sample_counts": [
+          1,
+          1,
+          4,
+          1,
+          0,
+          0,
+          1,
+          5,
+          1,
+          2,
+          0,
+          0
+        ],
+        "first_complete_ms": [
+          13.78,
+          25.64,
+          54.43,
+          14.25,
+          0.07,
+          0.07,
+          13.92,
+          59.14,
+          26.98,
+          28.85,
+          13.62,
+          16.68
+        ],
+        "first_presented_complete_ms": [
+          13.78,
+          25.64,
+          54.43,
+          14.25,
+          0.07,
+          0.07,
+          13.92,
+          59.14,
+          26.98,
+          28.85,
+          13.62,
+          16.68
+        ],
+        "window_close": null,
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact": true,
+        "tray_dock_requests": 1,
+        "lifecycle_log": [
+          "Penguin LGHUB window hidden for orderly shutdown",
+          "Frontend graceful stop complete: True"
+        ],
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "add733aad0e39a8e06745012ff7bc4b46e5da5ddd4c6599e03488732c179b237",
+          "tools/packaging/desktop_runtime.py": "8870babb006f5a55368488a6b3a5d74d1a1029243eff8abddc8af46944181095",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "3487b16177c3ca5fa0e68893cedf2f0919c8608886b7847d46d61361ccb22470",
+          "tools/packaging/restore_timing.py": "50e771353af414521d1646ee0a0fca483db9b18b7b940ae5e535c42b210e156f",
+          "tools/wine/tested_desktop_launch.py": "d3a3e49fae0ef84507f8a200dd3dc14b26940a1e930606fbfcd35c7d49476c0b",
+          "tools/wine/prepare_frontend_startup.py": "fffbdc230a92677992433bb58ddbd4d2b0cd0bafade1b76b8ef52ef0479c0154"
+        },
+        "classification": "opacity plus frame callback: rejected"
+      },
+      {
+        "case": "wayland-restore-021",
+        "raw_result_sha256": "40d0550a309a2a876dc62036a6f9be2aa3d054e0ce9b344aed34b370bf7eb928",
+        "raw_passed": true,
+        "error": "Command '['/usr/bin/python3', '/home/firesongz/Source2/Penguin-LGHUB-wayland-repair-20261027/tools/packaging/wayland_restore_diagnostic.py', '--launch', '--config', '/home/firesongz/.local/state/penguin-lghub-validation/wayland-restore-021/installation/desktop.json']' timed out after 25 seconds",
+        "settled_cycles": 12,
+        "measured_cycles": 12,
+        "cycles_with_visible_incomplete_samples": 12,
+        "incomplete_sample_counts": [
+          12,
+          12,
+          12,
+          11,
+          12,
+          12,
+          13,
+          12,
+          11,
+          12,
+          12,
+          11
+        ],
+        "first_complete_ms": [
+          14.41,
+          29.81,
+          0.1,
+          27.1,
+          13.49,
+          19.18,
+          14.83,
+          0.06,
+          15.22,
+          14.91,
+          27.65,
+          26.43
+        ],
+        "first_presented_complete_ms": [
+          229.27,
+          231.38,
+          214.35,
+          108.08,
+          235.92,
+          235.27,
+          239.93,
+          228.56,
+          95.25,
+          236.91,
+          239.75,
+          231.52
+        ],
+        "window_close": null,
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact": true,
+        "tray_dock_requests": 1,
+        "lifecycle_log": [
+          "Penguin LGHUB window hidden for orderly shutdown backend-shutdown",
+          "Penguin LGHUB window hidden for orderly shutdown quit-request"
+        ],
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "58c20a2b4023bdf1353678b5c755b644c3f4267c62f9086073232fce46d31c75",
+          "tools/packaging/desktop_runtime.py": "8870babb006f5a55368488a6b3a5d74d1a1029243eff8abddc8af46944181095",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "3487b16177c3ca5fa0e68893cedf2f0919c8608886b7847d46d61361ccb22470",
+          "tools/packaging/restore_timing.py": "50e771353af414521d1646ee0a0fca483db9b18b7b940ae5e535c42b210e156f",
+          "tools/wine/tested_desktop_launch.py": "d3a3e49fae0ef84507f8a200dd3dc14b26940a1e930606fbfcd35c7d49476c0b",
+          "tools/wine/prepare_frontend_startup.py": "7213b115baa5ef4563c741736bba1daa31c6c97828aea414a21652b03407cea1"
+        },
+        "classification": "opacity plus 100 ms grace: rejected; native CLI quit timed out",
+        "corrected_passed": false
+      },
+      {
+        "case": "wayland-restore-022",
+        "raw_result_sha256": "a69e841b721095aabae5f941b49a10e386bd8ffbeb30786ce0b0b4988f8c6dcd",
+        "raw_passed": true,
+        "error": null,
+        "settled_cycles": 12,
+        "measured_cycles": 12,
+        "cycles_with_visible_incomplete_samples": 5,
+        "incomplete_sample_counts": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          1
+        ],
+        "first_complete_ms": [
+          28.33,
+          0.23,
+          0.06,
+          0.07,
+          0.05,
+          0.06,
+          0.13,
+          14.37,
+          14.32,
+          15.03,
+          0.06,
+          15.95
+        ],
+        "first_presented_complete_ms": [
+          28.33,
+          0.23,
+          0.06,
+          0.07,
+          0.05,
+          0.06,
+          0.13,
+          14.37,
+          14.32,
+          15.03,
+          0.06,
+          15.95
+        ],
+        "window_close": {
+          "supervisor_alive": true,
+          "agent_alive": true,
+          "tray_alive": true,
+          "reopened": true,
+          "reopened_pixels": true
+        },
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact": true,
+        "tray_dock_requests": 1,
+        "lifecycle_log": [
+          "Penguin LGHUB window hidden for orderly shutdown window-close",
+          "Penguin LGHUB window hidden for orderly shutdown quit-request",
+          "Penguin LGHUB window hidden for orderly shutdown window-close",
+          "Frontend graceful stop complete: True"
+        ],
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "299bf40159d5f200c1281240d915001c5b3fb8aa71950a46459f57e90706eb3b",
+          "tools/packaging/desktop_runtime.py": "8870babb006f5a55368488a6b3a5d74d1a1029243eff8abddc8af46944181095",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "3487b16177c3ca5fa0e68893cedf2f0919c8608886b7847d46d61361ccb22470",
+          "tools/packaging/restore_timing.py": "50e771353af414521d1646ee0a0fca483db9b18b7b940ae5e535c42b210e156f",
+          "tools/wine/tested_desktop_launch.py": "d3a3e49fae0ef84507f8a200dd3dc14b26940a1e930606fbfcd35c7d49476c0b",
+          "tools/wine/prepare_frontend_startup.py": "9c4245786973a82f27e8844e8c6d8b02c32c903fd6f8e987e96407f66983a5a4"
+        },
+        "classification": "accepted restore behavior plus final closing polish"
+      }
+    ],
+    "deployment": {
+      "installation": "Manjaro VM wayland-desktop-002",
+      "frontend_sha256": "f341b69b9a7c07309d24744c49fb1d0368b128ee4773abaa69270018702340e3",
+      "matches_test_case": "wayland-restore-022",
+      "post_stage_verification_passed": true,
+      "previous_config": "desktop-before-f341b69b9a7c.json",
+      "takes_effect": "next user cold launch",
+      "live_desktop_launched": false,
+      "system_packages_changed": false,
+      "pushed": false
+    },
+    "final_source_sha256": {
+      "tools/wine/prepare_frontend_startup.py": "233677a73d297de3bd7ff6b1eacd0c3d15ba9ec2733fd458e2e5c3e7fa0c0d26",
+      "tools/wine/tested_desktop_launch.py": "d3a3e49fae0ef84507f8a200dd3dc14b26940a1e930606fbfcd35c7d49476c0b",
+      "tools/packaging/desktop_runtime.py": "8870babb006f5a55368488a6b3a5d74d1a1029243eff8abddc8af46944181095",
+      "tools/packaging/restore_timing.py": "50e771353af414521d1646ee0a0fca483db9b18b7b940ae5e535c42b210e156f",
+      "tools/packaging/wayland_restore_diagnostic.py": "299bf40159d5f200c1281240d915001c5b3fb8aa71950a46459f57e90706eb3b"
+    }
+  },
+  "startup_and_quit": {
+    "owner_acceptance_before_checkpoint": {
+      "red_shutdown_banner_fixed": true,
+      "brief_restore_flash": "deferred by user"
+    },
+    "diagnosis": {
+      "frontend_wait": "Crashpad handshake through TransactNamedPipe",
+      "child_wait": "unbounded WM_NULL to Wine Explorer desktop during load_desktop_driver",
+      "desktop_wait": "outbound COM/RPC; remote callee not identified",
+      "method": "Read-only /proc syscall and memory inspection with PE unwind records",
+      "dead_network_mount": false
+    },
+    "packaging_tests": {
+      "passed": 126,
+      "total": 126
+    },
+    "implementation": {
+      "requested_behaviors_staged": 3,
+      "requested_behaviors_total": 3,
+      "real_session_acceptance": {
+        "confirmed": 0,
+        "total": 3
+      },
+      "restore_logic_changed": false,
+      "desktop_handshake_timeout_ms": 5000,
+      "frontend_ready_timeout_seconds": 60,
+      "maximum_cold_retries": 1,
+      "retry_after_normal_exit": false,
+      "busy_feedback": "Application registration and StartupNotify; X11 completion on readiness/error, Wayland feedback/timeout owned by Plasma"
+    },
+    "cases": [
+      {
+        "case": "wayland-restore-023",
+        "raw_result_sha256": "3634d53027ab18f4984a2070bfb79ce075e08445253deb90faa52d7b4ccb1e7d",
+        "passed": true,
+        "error": null,
+        "settled_restores": {
+          "passed": 12,
+          "total": 12
+        },
+        "ui_checks": {
+          "required_files_present": true,
+          "bundled_fonts_loaded": true,
+          "desktop_and_default_profile": true,
+          "first_run_prompt_readable": true
+        },
+        "tray_dock_requests": 1,
+        "window_close": {
+          "supervisor_alive": true,
+          "agent_alive": true,
+          "tray_alive": true,
+          "reopened": true,
+          "reopened_pixels": true
+        },
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact": true,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "42549881f788333853bbf19182010fb53cc7dc9f1090b065e962253fec787dc5",
+          "tools/packaging/desktop_runtime.py": "867553c4f5e097549f0d4656ab5342cd01f0815e0a9997e2de1c7acb7b9e9557",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "3487b16177c3ca5fa0e68893cedf2f0919c8608886b7847d46d61361ccb22470",
+          "tools/packaging/restore_timing.py": "50e771353af414521d1646ee0a0fca483db9b18b7b940ae5e535c42b210e156f",
+          "tools/wine/tested_desktop_launch.py": "d774db0d2d6ffb5d93ab2138371b0a91cad45045540a3219ff33b0857f364ff4",
+          "tools/wine/prepare_frontend_startup.py": "3e4e69c07af3b36934b15410edd449ebf954bced9040e75595beff33d363b43f"
+        },
+        "lifecycle_log": [
+          "Penguin LGHUB frontend ready",
+          "Frontend window readiness acknowledged",
+          "Penguin LGHUB frontend ready",
+          "Penguin LGHUB window hidden for orderly shutdown window-close",
+          "Penguin LGHUB frontend ready",
+          "Penguin LGHUB window hidden for orderly shutdown quit-request",
+          "Penguin LGHUB window hidden for orderly shutdown window-close",
+          "Frontend graceful stop complete: True"
+        ],
+        "frontend": {
+          "source_sha256": "04afa23969d90e3f315f9183a5babf84bfcc9559ff2fc8ae190d8a2d8466cd15",
+          "output_sha256": "b96eb2d10932d02c3b751c84d1d25e6d846ae9b73fc09d03f128e104a37edfa5",
+          "changed_entries": [
+            "index.html",
+            "main.js"
+          ],
+          "packed_entries_verified": 267,
+          "startup_protocol": 1
+        },
+        "desktop_init_fault_probe": {
+          "0": {
+            "exit": 0,
+            "output": "DESKTOP_INIT before_resume=0 elapsed_ms=8008\n",
+            "error": ""
+          },
+          "1": {
+            "exit": 0,
+            "output": "DESKTOP_INIT before_resume=1 elapsed_ms=5115\n",
+            "error": ""
+          }
+        }
+      },
+      {
+        "case": "wayland-restore-024",
+        "raw_result_sha256": "fc4e0d9055f3f4f03d260cb96e2298099bf514a8928dbccd81543bfdfb7d999b",
+        "passed": true,
+        "error": null,
+        "settled_restores": {
+          "passed": 12,
+          "total": 12
+        },
+        "ui_checks": {
+          "required_files_present": true,
+          "bundled_fonts_loaded": true,
+          "desktop_and_default_profile": true,
+          "first_run_prompt_readable": true
+        },
+        "tray_dock_requests": 1,
+        "window_close": {
+          "supervisor_alive": true,
+          "agent_alive": true,
+          "tray_alive": true,
+          "reopened": true,
+          "reopened_pixels": true
+        },
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact": true,
+        "source_sha256": {
+          "tools/packaging/wayland_restore_diagnostic.py": "4799b03c8d1a30f763e7304d642fe49d941d7b79becc893b31b9bc39b436967c",
+          "tools/packaging/desktop_runtime.py": "867553c4f5e097549f0d4656ab5342cd01f0815e0a9997e2de1c7acb7b9e9557",
+          "tools/packaging/restore_observer.cjs": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+          "tools/packaging/restore_capture.py": "3487b16177c3ca5fa0e68893cedf2f0919c8608886b7847d46d61361ccb22470",
+          "tools/packaging/restore_timing.py": "039dcd05b11659e5e2de69f73d978f1403f8fb75691cbe4cdeb17f402b31e6c2",
+          "tools/wine/tested_desktop_launch.py": "d774db0d2d6ffb5d93ab2138371b0a91cad45045540a3219ff33b0857f364ff4",
+          "tools/wine/prepare_frontend_startup.py": "68444714cbeed6041f67620f37e15ca1b23c45b223db2f9d09272d6313594d1e",
+          "tools/packaging/wine_desktop_init.py": "dd295b8e1e8f7cc52b3b262126e792e9558349ec97bb3cf2b92a4a1ec70aba88",
+          "tools/packaging/startup_feedback.py": "85aad1cefffd16a10e0f0d30679b45d202f483e1e4aca72133b66ce855d73ca9"
+        },
+        "lifecycle_log": [
+          "Private diagnostic: withholding first frontend startup",
+          "G HUB did not create its window within 60 seconds. The private Wine session will be stopped; settings are preserved.",
+          "Frontend startup timed out; retrying the stopped private session once.",
+          "Penguin LGHUB frontend ready",
+          "Frontend window readiness acknowledged",
+          "Penguin LGHUB frontend ready",
+          "Penguin LGHUB window hidden for orderly shutdown window-close",
+          "Penguin LGHUB frontend ready",
+          "Penguin LGHUB window hidden for orderly shutdown quit-request",
+          "Penguin LGHUB window hidden for orderly shutdown window-close",
+          "Frontend graceful stop complete: True"
+        ],
+        "frontend": {
+          "source_sha256": "04afa23969d90e3f315f9183a5babf84bfcc9559ff2fc8ae190d8a2d8466cd15",
+          "output_sha256": "fa22d434c981a0677c9ad3f07a8031a194be3a1aaa1337abeaa8801c1ca2380e",
+          "changed_entries": [
+            "index.html",
+            "main.js"
+          ],
+          "packed_entries_verified": 267,
+          "startup_protocol": 1
+        },
+        "shutdown_presentation": {
+          "initial_size": [
+            1024,
+            743
+          ],
+          "visible_size_changes": 0,
+          "scope": "Private X geometry/opacity sampling; not physical scanout or compositor animation",
+          "sample_count": 190,
+          "opacity_zero_observed": true,
+          "window_gone_observed": true,
+          "last_sample": {
+            "ms": 2013.17,
+            "gone": true
+          }
+        }
+      }
+    ],
+    "x11_startup_protocol_test": {
+      "private_xvfb": true,
+      "escaped_identifier_received_exactly": true,
+      "chunks_received": 4,
+      "live_desktop_used": false
+    },
+    "deployment": {
+      "installation": "Manjaro VM wayland-desktop-002",
+      "frontend_sha256": "fa22d434c981a0677c9ad3f07a8031a194be3a1aaa1337abeaa8801c1ca2380e",
+      "desktop_init_module_sha256": "5fb3d5e404c8935cfa8f74f0277188f75c14c7841beecd9c084d010d0601386e",
+      "base_win32u_sha256": "33a3c8758866ff30d87ba12c4ce101eb9def2da6e0476fb4e5c6713e99625831",
+      "restore_driver_unchanged": true,
+      "post_stage_verification_passed": true,
+      "old_stalled_session_stopped": true,
+      "remaining_prefix_processes": [],
+      "previous_configs": [
+        "desktop-before-fa22d434c981.json",
+        "desktop-before-init-5fb3d5e404c8.json"
+      ],
+      "desktop_entry": "Penguin-LGHUB Wayland Test.desktop",
+      "application_registration": true,
+      "live_gui_launched": false,
+      "system_packages_changed": false,
+      "pushed": false
+    },
+    "scope": "Isolated KWin OpenGL llvmpipe runs, no physical input or live desktop manipulation. Shutdown sampling is X geometry/opacity, not compositor animation or physical scanout."
+  },
+  "owner_scope_update": {
+    "date": "2026-10-28",
+    "red_shutdown_banner_fixed": true,
+    "remaining_windowing_anomalies_fixed": false,
+    "remaining_windowing_anomalies": "explicitly out of scope per owner",
+    "next_requested_checkpoint": "Deploy current Wayland fixes to CachyOS for owner testing"
+  }
+}

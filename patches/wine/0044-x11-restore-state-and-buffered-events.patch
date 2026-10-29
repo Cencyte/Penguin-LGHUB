@@ -1,0 +1,33 @@
+--- a/dlls/winex11.drv/window.c
++++ b/dlls/winex11.drv/window.c
+@@ -1668,7 +1668,14 @@
+     if (data->wm_state_serial) return 0; /* another WM_STATE update is pending, wait for it to complete */
+     if (data->net_wm_state_serial) return 0; /* another _NET_WM_STATE update is pending, wait for it to complete */
+     if (data->mwm_hints_serial) return 0; /* another MWM_HINT update is pending, wait for it to complete */
+-    if (data->configure_serial) return 0; /* another config update is pending, wait for it to complete */
++    /* A pending geometry reply must not leave a remapped window iconic on
++     * the Win32 side. KWin can constrain (or omit a redundant acknowledgement
++     * of) a requested size. Its confirmed NormalState is sufficient to restore;
++     * geometry synchronization below still waits for ConfigureNotify. */
++    if (data->configure_serial &&
++        !((old_style & WS_MINIMIZE) && data->current_state.wm_state == NormalState &&
++          getenv("WINE_GHUB_RESTORE_STATE") &&
++          !strcmp(getenv("WINE_GHUB_RESTORE_STATE"), "1"))) return 0;
+
+     new_style = old_style & ~(WS_VISIBLE | WS_MINIMIZE | WS_MAXIMIZE);
+     if (data->current_state.wm_state != WithdrawnState) new_style |= WS_VISIBLE;
+--- a/dlls/winex11.drv/event.c
++++ b/dlls/winex11.drv/event.c
+@@ -544,7 +544,11 @@
+     XFlush( gdi_display );
+     if (count) TRACE( "processed %d events\n", count );
+
+-    if (mask != QS_ALLINPUT || check_fd_events( ConnectionNumber( data->display ), POLLIN )) return FALSE;
++    /* The last handler can read a property reply and buffer additional events
++     * in Xlib after XCheckIfEvent found an empty queue. Those events no longer
++     * make the socket readable. Do not clear QS_DRIVER until they are drained. */
++    if (mask != QS_ALLINPUT || XEventsQueued( data->display, QueuedAlready ) ||
++        check_fd_events( ConnectionNumber( data->display ), POLLIN )) return FALSE;
+     XFlush( data->display ); /* all events have been processed, flush any pending request */
+     return TRUE;
+ }

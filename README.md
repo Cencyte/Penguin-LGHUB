@@ -7,7 +7,7 @@
 
 An experimental compatibility layer for running the original **Logitech G HUB** on Linux through a custom Wine runtime. The working setup retains the actual G HUB agent and main interface for device configuration, key bindings, macros, profiles, lighting and G-Shift.
 
-**Development source snapshot.** The original G HUB works on the author's Manjaro/X11 workstation. The private Wine/Linux runtime now passes dependency and fresh-prefix backend checks on a newer Manjaro VM and a separate CachyOS machine. The X11 container launcher is ready for interactive testing; graphics rendering, tray interaction and physical-device qualification remain in progress. There is **no ready-to-install binary release yet**.
+**Release preparation.** The owner has confirmed working G HUB on Manjaro and CachyOS, including the tested Plasma Wayland path through Xwayland. The newer Manjaro VM also provides clean-prefix UI and lifecycle evidence. Bazzite is the final initial-release target and awaits application testing. The public source now includes the later font, depot-state, tray, startup, Wayland and shutdown corrections. The complete beginner installation workflow is being consolidated; there is **no ready-to-install binary release yet**.
 
 [![Complete Penguin LGHUB architecture: all six diagrams](docs/architecture/penguin-lghub-views.png)](docs/architecture/penguin-lghub-views.png?raw=1)
 
@@ -31,31 +31,43 @@ Setup needs sudo for scoped device-access rules and any missing host prerequisit
 
 </details>
 
-<details>
-<summary><strong>⚠️ Tested on X11 only. Wayland support not yet implemented.</strong></summary>
-
-The owner reports working key bindings, macros, tray controls, lighting/Lightsync, profile switching and G-Shift with a G502 X PLUS and G915 X LIGHTSPEED TKL on Manjaro/X11. This is not certification of every device or feature. Native Wayland global key output and clean installations on other machines have not been validated.
-
-
-</details>
 
 ## Distribution setup status
 
-<p>
-  <img src="https://img.shields.io/badge/Manjaro-X11_baseline-brightgreen" alt="Manjaro: X11 baseline">
-  <img src="https://img.shields.io/badge/CachyOS-testing-yellow" alt="CachyOS: testing">
-  <img src="https://img.shields.io/badge/Debian-planned-lightgrey" alt="Debian: planned">
-  <img src="https://img.shields.io/badge/Bazzite-deferred-lightgrey" alt="Bazzite: deferred">
-</p>
+![Manjaro](https://img.shields.io/badge/Manjaro-X11_%2B_Wayland-tested-brightgreen)
+![CachyOS](https://img.shields.io/badge/CachyOS-X11_%2B_Wayland-tested-brightgreen)
+![Bazzite](https://img.shields.io/badge/Bazzite-validation_pending-yellow)
 
 [![Packaging tests](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml/badge.svg)](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml)
 
-| Distribution | Validation scope |
-|---|---|
-| Manjaro | Working X11 baseline; newer VM passes loader/backend checks. Interactive VM testing is next. |
-| CachyOS | Separate bare-metal host passes loader/backend checks; X11 desktop/device qualification is next. |
-| Debian | Planned after the initial Arch-family release. |
-| Bazzite | Deferred; native Wayland input requires separate work. |
+### Recorded test environments
+
+Versions are comparison points, **not minimum requirements or a compatibility guarantee**.
+Rolling systems are identified by their recorded test date. Bazzite's column is an
+installed-image inventory, not a passed application test. Full revisions, evidence
+and validation boundaries are in the [environment record](packaging/tested-environments.json).
+
+| Component | Manjaro desktop | Manjaro VM | CachyOS | Bazzite |
+|---|---|---|---|---|
+| OS / snapshot | 26.0.0 | rolling, Oct 28 | rolling, Oct 28 | 44.20261012.0 |
+| Kernel | 6.6.128¹ | 6.12.77 | 7.2.9 | 7.2.9 |
+| KWin | 6.5.4 | 6.5.6 | 6.7.5 | 6.7.5 |
+| Xwayland | 24.1.9 | 24.1.9 | 24.1.13 | 26.0.99.903 |
+| libei | 1.5.0 | 1.5.0 | 1.6.0 | 1.6.0 |
+| Portal / KDE backend | 1.20.3 / 6.5.4 | 1.20.3 / 6.5.6 | 1.22.1 / 6.7.5 | 1.22.1 / 6.7.5 |
+| Evidence | Owner X11 use | X11/Wayland UI | Owner X11/Wayland use | Inventory only |
+
+¹ Original working baseline; the October 29 inventory reports kernel 6.12.74-rt16.
+The VM does not qualify physical Logitech hardware. Owner acceptance and automated
+checks remain separately identified; none establishes an unassisted fresh-clone install.
+Graphics and package revisions are retained in the linked record rather than widening
+this table. Revisit this table after the Bazzite end-to-end test.
+
+Shared application baseline: **G HUB 2026.6.974819**, custom **Wine 10.20**,
+Steam Linux Runtime **4.0.20260928.262390**. The Wayland route uses Wine's patched
+X11 driver, Xwayland, libei and KWin authorization; it is not Wine's native Wayland driver.
+Bazzite's full-X11-session requirement remains under review; its default Plasma Wayland
+session is the current installation target.
 
 [Reddit discussion and original announcement](https://www.reddit.com/r/LogitechG/comments/1xe5jw2/comment/19rp0hjphnyjo/?context=1&screen_view_count=2)
 
@@ -69,8 +81,9 @@ The owner reports working key bindings, macros, tray controls, lighting/Lightsyn
 
 Penguin LGHUB brings the original Logitech G HUB interface and agent to Linux,
 with device configuration, key bindings, macros, profiles, lighting and G-Shift.
-The first release is being prepared for **Manjaro and CachyOS on X11**. Debian
-support is planned; Bazzite and native Wayland support will follow separate work.
+The first release is being prepared for **Manjaro, CachyOS and Bazzite**.
+Manjaro and CachyOS have X11 and Plasma Wayland evidence; Bazzite qualification
+is pending. Other distributions are outside this initial release.
 
 The intended setup uses a dedicated, version-pinned Wine runtime and its own
 G HUB prefix, alongside any Wine already installed on your system. Device-access
@@ -85,7 +98,7 @@ what is verified today. A general-purpose installer is not published yet.
 
 | Resource | Source or configuration | Role |
 |---|---|---|
-| Custom Wine build | [43 patch topics](patches/wine/), [build/run tools](tools/wine/), [private runtime packager](tools/packaging/wine_runtime.py) | Windows API, composition, input, graphics, device and native X11 key-output compatibility. The packager assembles all runtime modules with 20 pinned replacements from five build groups; Unix-library portability and a complete corresponding-source release audit remain. |
+| Custom Wine build | [45 patch topics](patches/wine/), [build/run tools](tools/wine/), [private runtime packager](tools/packaging/wine_runtime.py) | Windows API, composition, input, graphics, device and native X11 key-output compatibility. The packager assembles all runtime modules with 20 pinned replacements from five build groups; Unix-library portability and a complete corresponding-source release audit remain. |
 | Supplementary DLL implementations | [DirectComposition](tools/wine/dcomp_experiment.cpp), [CoreMessaging adapter](tools/wine/coremessaging_xp_adapter.c), [DispatcherQueue](tools/wine/dispatcher_queue_experiment.cpp), [CoreApplication](tools/wine/core_application_experiment.cpp), [ApiInformation proxy](tools/wine/api_information_proxy.cpp), [sensor fallback](tools/wine/sensor_monitor_unavailable.c) | Separate app-local helpers. Some implement only the contracts the observed application needs; they are not complete replacements for their Windows subsystems. |
 | Local vendor-resource transformations | [Color preview](tools/wine/prepare_color_picker_fix.py), [tray background](tools/wine/prepare_tray_background.py) | Generate local modified assets from the acquired application. Do not treat generated `app.asar`, XBF or PRI files as project-owned source. |
 | Prefix and launch definition | [Observed runtime baseline](packaging/runtime-baseline.json), [runtime registration helper](tools/wine/configure_runtime.py), [snapshot preparation](tools/wine/prepare_tested_desktop.py), [legacy launcher](tools/wine/tested_desktop_launch.py), [container launcher](tools/packaging/desktop_runtime.py) | Preserve the working configuration: 48 recorded file hashes, environment flags, DLL load policy and eight recorded WinRT activation classes. The baseline is evidence, not an executable installer or complete prefix recipe. |
@@ -111,7 +124,7 @@ These gates are open; their order prevents building a polished installer around 
 2. **Verify the pinned vendor installation.** Clean acquisition and extraction pass for **30/30 selected depots, 1,115/1,115 files**, including the three encrypted resource depots. Every extracted file matches the working installation's depot cache. The manifest-driven application layout contains 438 files. A fresh prefix now passes eight activation-factory checks, four registry checks, updater service configuration and five agent API requests. Installer extensions and end-to-end desktop/device validation remain pending. See the reproducible commands and exact scope below. Preserve vendor notices and review the applicable installation terms before automating deployment.
 3. **Qualify the packaged runtime for release.** The complete Wine payload, matched server/client replacements and supplementary DLLs are now packaged and tested with host Wine hidden, including after relocation. A separate pinned Linux userspace now resolves all 46 native modules and all 54 recorded dynamic-library candidates without importing host graphics. Complete the corresponding-source/build-sequence audit and qualify real desktop/driver/device integration; the archive is a local development artifact, not yet a published release.
 4. **Finish and qualify the clean prefix.** The development recipe generates registry paths, overrides, factories, URL handler, a stopped updater service and update settings from acquired inputs. It copies no donor registry, personal settings or fonts. Font configuration, device policy, service startup, launcher promotion and independent-machine testing remain. Prefix preparation now accepts the runtime bundle; only the bundle-building step still requires the lab's compiled compatibility artifacts.
-5. **Reproduce on clean Manjaro, then CachyOS.** Validate real devices and native desktop key output as well as the GUI. Add Debian only after this baseline holds. Publish clear supported combinations and limitations.
+5. **Complete Bazzite and unassisted installation qualification.** Retain the existing Manjaro/CachyOS results, finish the published clone-and-run path, then have the owner perform the Bazzite installation and physical-device/session acceptance. Keep the three-distribution release boundary.
 6. **Keep releases reproducible and reviewable.** This source snapshot preserves GitHub's initial commit and excludes the lab history, captures, vendor payloads and populated prefixes. See the [source publication record](docs/packaging/source-publication.md). Wine notices remain LGPL; a complete corresponding-source/build-sequence audit is still required before publishing the packaged runtime binary.
 
 </details>

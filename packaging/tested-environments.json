@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "updated": "2026-10-29",
+  "review_after": "Bazzite end-to-end installation and owner acceptance",
+  "meaning": "Recorded environments, not supported minimum versions; inventory does not imply acceptance.",
+  "shared": {
+    "wine": "10.20 with project patches",
+    "ghub": "2026.6.974819",
+    "linux_runtime": "4.0.20260928.262390"
+  },
+  "hosts": {
+    "manjaro_desktop": {
+      "os": "Manjaro 26.0.0 Anh-Linh",
+      "initial_test_kernel": "6.6.128-1-MANJARO",
+      "inventory_kernel": "6.12.74-1-rt16-MANJARO",
+      "kwin": "6.5.4-3",
+      "xwayland": "24.1.9-1",
+      "libei": "1.5.0-1",
+      "portal": "1.20.3-2",
+      "portal_kde": "6.5.4-1",
+      "mesa": "25.3.1-2",
+      "nvidia": "610.43.02-2",
+      "bubblewrap": "0.11.0-1",
+      "pipewire": "1.4.9-2",
+      "evidence": "Owner original X11 acceptance; package inventory 2026-10-29. Not a fresh-clone install."
+    },
+    "manjaro_vm": {
+      "os": "Manjaro rolling",
+      "recorded": "2026-10-28",
+      "kernel": "6.12.77-1-MANJARO",
+      "kwin": "6.5.6-1",
+      "xwayland": "24.1.9",
+      "libei": "1.5.0",
+      "portal": "1.20.3",
+      "portal_kde": "6.5.6",
+      "graphics": "Virtualized; isolated probes additionally use llvmpipe. No physical GPU qualification.",
+      "evidence": [
+        "packaging/independent-host-verification.json",
+        "docs/packaging/manjaro-wayland-launcher-verification.json",
+        "docs/packaging/wayland-restore-verification.json"
+      ],
+      "owner_acceptance": "X11/Wayland GUI; accepted remaining cosmetic restore anomalies; no physical Logitech hardware."
+    },
+    "cachyos": {
+      "os": "CachyOS rolling",
+      "recorded": "2026-10-28",
+      "inventory_rechecked": "2026-10-29",
+      "kernel": "7.2.9-1-cachyos",
+      "kwin": "6.7.5-1.1",
+      "xwayland": "24.1.13-1.1",
+      "libei": "1.6.0-1",
+      "portal": "1.22.1-2.1",
+      "portal_kde": "6.7.5-1.1",
+      "mesa": "26.2.4-1",
+      "nvidia_package": "nvidia-470xx-utils 470.256.02-20 (installed package; not proof of active renderer)",
+      "bubblewrap": "0.13.0-1.1",
+      "pipewire": "1.6.9-1",
+      "evidence": [
+        "docs/packaging/cachyos-wayland-launcher-verification.json"
+      ],
+      "owner_acceptance": "Owner confirmed X11 tray and working Wayland installation; does not retroactively expand isolated automated test scope."
+    },
+    "bazzite": {
+      "os": "Bazzite 44.20261012.0 Kinoite NVIDIA Open",
+      "fedora": "44",
+      "kernel": "7.2.9-ogc3.1.fc44.x86_64",
+      "kwin": "6.7.5-1.fc44",
+      "xwayland": "terra-xorg-x11-server-Xwayland 26.0.99.903-1.fc44",
+      "libei": "1.6.0-2.fc44",
+      "portal": "1.22.1-1.fc44",
+      "portal_kde": "6.7.5-1.fc44",
+      "nvidia": "615.78.08-1.fc44",
+      "bubblewrap": "0.12.0-1.fc44",
+      "pipewire": "1.6.9-1.fc44",
+      "selinux": "enforcing/targeted configured",
+      "evidence": "Read-only installed-system RPM/configuration inventory on 2026-10-29; owner verified OS boots. Penguin-LGHUB not installed/tested."
+    }
+  }
+}

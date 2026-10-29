@@ -28,6 +28,7 @@ from prepare_tray_background import patch_resources
 BASELINE = ROOT / 'packaging/runtime-baseline.json'
 APP = 'drive_c/Program Files/LGHUB'
 DATA = 'drive_c/ProgramData/LGHUB'
+CATALOG = 'drive_c/ProgramData/LGHUBData/applications/applications_db.json'
 WIN_APP = r'C:\Program Files\LGHUB'
 WIN_DATA = r'C:\ProgramData\LGHUB'
 OWN_DLLS = ('api_information_proxy.dll', 'core_application_experiment.dll', 'mfsensorgroup.dll',
@@ -88,6 +89,41 @@ def metadata(lock, report, keys_document):
     }
 
 
+def install_depot_cache(cache, data, lock, report):
+    """Retain verified vendor archives required by the frontend's integrity check.
+
+    Extracted trees alone are insufficient. The updater uses content-addressed
+    archive names; never substitute a marker file for an installed depot.
+    """
+    for name in report['extracted']:
+        spec = lock['depots'][name]
+        source = cache / spec['local_name']
+        check_asset(source, spec)
+    for name in report['extracted']:
+        spec = lock['depots'][name]
+        copy_checked(cache / spec['local_name'], data / 'cache' / spec['sha256'], spec['sha256'])
+
+
+def initialize_application_catalog(prefix, report):
+    """Seed the agent's current catalog location from its pinned depot payload.
+
+    With apps_updater_enabled, 2026.6 reads this location even on first launch.
+    An absent catalog leaves Desktop/default-profile initialization empty when
+    the catalog CDN is unavailable. Do not import a user's settings database.
+    """
+    record = next(item for item in report['layout']['files']
+                  if item['destination'] == 'data/applications.json')
+    source = prefix / APP / record['destination']
+    if digest_file(source)['sha256'] != record['sha256']:
+        raise ValueError('Bundled application catalog changed')
+    catalog = json.loads(source.read_text())
+    if not any(app.get('applicationId') == '420fd454-0c36-499d-bde4-146823b16147'
+               and app.get('name') == 'APPLICATION_NAME_DESKTOP'
+               for app in catalog['applications']):
+        raise ValueError('Bundled catalog has no expected Desktop application')
+    copy_checked(source, prefix / CATALOG, record['sha256'])
+
+
 def disposition(declaration):
     kind = declaration['kind']
     policy = {
@@ -129,6 +165,7 @@ def registration(baseline, version):
               r'[HKEY_CURRENT_USER\Software\Wine\AppDefaults\lghub_agent.exe\DllOverrides]',
               '"mfsensorgroup"="native"', '',
               r'[HKEY_CURRENT_USER\Software\Wine\AppDefaults\lghub_system_tray.exe]', '"Version"="win11"', '',
+              r'[HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements]', '"Segoe UI"="DejaVu Sans"', '',
               r'[HKEY_CURRENT_USER\Software\Wine\DllOverrides]',
               '"lghub_software_manager.exe"=""', '',
               r'[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Penguin-LGHUB]',
@@ -167,8 +204,9 @@ def sandbox(output, command, hide_host_wine=False, freeze_app=False):
                 if target.exists():
                     args += ['--ro-bind', '/dev/null', str(target)]
     if freeze_app:
-        app = output / 'prefix' / APP
-        args += ['--ro-bind', str(app), str(app)]
+        for relative in (APP, DATA):
+            path = output / 'prefix' / relative
+            args += ['--ro-bind', str(path), str(path)]
     return args + ['--', *map(str, command)]
 
 
@@ -295,6 +333,8 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None):
     for name, records in report['extracted'].items():
         for item in records:
             copy_checked(stage / 'depots' / name / item['path'], data / 'depots' / lock['build_id'] / name / item['path'], item['sha256'])
+    install_depot_cache(cache, data, lock, report)
+    initialize_application_catalog(prefix, report)
     for name, value in metadata(lock, report, keys_document).items():
         write_json(data / name, value)
     print('Installing only pinned compatibility components and acquired Windows DLLs...', flush=True)
@@ -352,9 +392,11 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None):
     for module in PREFIX_MODULES:
         name = f'prefix/drive_c/windows/system32/{module}.dll'
         installed[name] = digest_file(output / name)['sha256']
+    installed['prefix/' + CATALOG] = digest_file(prefix / CATALOG)['sha256']
     result = {'schema': 1, 'kind': 'clean-prefix-development-candidate', 'application_version': lock['application_version'],
               'generated_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'depot_lock': lock_digest(lock),
-              'depot_files': verified['depot_files_verified'], 'application_layout_files': verified['application_files_verified'],
+              'depot_files': verified['depot_files_verified'], 'cached_depots': len(report['extracted']),
+              'application_layout_files': verified['application_files_verified'],
               'donor_prefix_cloned': False, 'personal_state_copied': False, 'live_desktop_used': False,
               'vendor_applications_started': False, 'service_start': 'demand; stopped',
               'activation_factories_verified': 8, 'registry_routes_verified': 4, 'color_archive': color['output_sha256'],

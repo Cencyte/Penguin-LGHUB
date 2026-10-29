@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "prepared_on": "2026-10-26",
-  "development_revision": "b76e404fa79cad34521e9f84b72809f2d22c8424",
+  "prepared_on": "2026-10-29",
+  "development_revision": "f30bce750395397ba0d2a7c4fed986c7a9b7ce1d",
   "github_base_commit": "5552fc25150baa56e0ce030441385e96f32bcef2",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source snapshot; no compiled runtime or proprietary inputs",
@@ -43,8 +43,7 @@
       "path": ".gitignore",
       "mode": "100644",
       "sha256": "c21fc8cb9165b59e33b5022d3622741ee86d1409e080ac6fd6a11c24f337fc3d",
-      "bytes": 403,
-      "source": "packaging/source.gitignore"
+      "bytes": 403
     },
     {
       "path": "LICENSE",
@@ -61,8 +60,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "9566c96f1fa5840c0c293d5753017a70bc7bd19cac254b3d4cf99a5be4c7806c",
-      "bytes": 43606
+      "sha256": "f18bb69528afab42b259c4ef715151c905e7afb43231a3a4acd947e13f385268",
+      "bytes": 44546
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -269,6 +268,60 @@
       "bytes": 16375
     },
     {
+      "path": "docs/packaging/2026-10-27-cachyos-desktop.md",
+      "mode": "100644",
+      "sha256": "f27386713bdc86649a495b884652b5fa71d241b97865e173394277a3431019e9",
+      "bytes": 10247
+    },
+    {
+      "path": "docs/packaging/2026-10-27-cachyos-tray.md",
+      "mode": "100644",
+      "sha256": "531565829894228ed484072531acbb4aaa31e3c11a121908afb54263c6ccf1cf",
+      "bytes": 10021
+    },
+    {
+      "path": "docs/packaging/2026-10-27-desktop-regressions.md",
+      "mode": "100644",
+      "sha256": "b6711d9d009fa98f4e475807c69ccf5bea253ed890f176ceef348dc1e2f0ce15",
+      "bytes": 6065
+    },
+    {
+      "path": "docs/packaging/2026-10-27-manjaro-wayland-launcher.md",
+      "mode": "100644",
+      "sha256": "b39e669a1b9d3cedcdaa2893271202085457219b76c459e97a4f185b3bb0e38d",
+      "bytes": 6442
+    },
+    {
+      "path": "docs/packaging/2026-10-27-wayland-depot-repair.md",
+      "mode": "100644",
+      "sha256": "31c5502d28c2b13375a8289d48ade775eed6ff1771cccb2131f94621a514c4bb",
+      "bytes": 5858
+    },
+    {
+      "path": "docs/packaging/2026-10-27-wayland-packaged-wine.md",
+      "mode": "100644",
+      "sha256": "086cdead8bd2a601821452ed583c3f0b9c0383e0551959787d90fcd872c4b528",
+      "bytes": 8059
+    },
+    {
+      "path": "docs/packaging/2026-10-27-wayland-research.md",
+      "mode": "100644",
+      "sha256": "8e3a9e295666fb93f4da3cde70d5fb2fe47bd7c199c779760bf553d333a71eb5",
+      "bytes": 16179
+    },
+    {
+      "path": "docs/packaging/2026-10-28-wayland-restore.md",
+      "mode": "100644",
+      "sha256": "a3d52ae6891bfb199b1b7ea602d7ef7431441aee498176c4113eb749d4b51436",
+      "bytes": 25270
+    },
+    {
+      "path": "docs/packaging/cachyos-wayland-launcher-verification.json",
+      "mode": "100644",
+      "sha256": "a47feba9794b869dd2ef8138e48d90a8dfdff829df0a24861f7fe5b0e6a1b2b0",
+      "bytes": 5628
+    },
+    {
       "path": "docs/packaging/dockur-acquisition.md",
       "mode": "100644",
       "sha256": "aa5bf625230f407c33f3a2b43cfa056f0d9eda0a9039ddff08a4c601f99c608b",
@@ -289,8 +342,14 @@
     {
       "path": "docs/packaging/linux-runtime.md",
       "mode": "100644",
-      "sha256": "fb20f79c727a764b77fa8bee26e8199c2df8662f6615918170aa9c70946b59ff",
-      "bytes": 17506
+      "sha256": "80b98335456a5ec07bdf055667e1a11e83bc9c969bc7975f45d3a70177846e05",
+      "bytes": 23474
+    },
+    {
+      "path": "docs/packaging/manjaro-wayland-launcher-verification.json",
+      "mode": "100644",
+      "sha256": "0a0c5f15fb50432c3189f2fae2dc29702cb60977ad2ed7c447030fa2da008011",
+      "bytes": 3428
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -305,10 +364,40 @@
       "bytes": 7784
     },
     {
+      "path": "docs/packaging/wayland-depot-repair-verification.json",
+      "mode": "100644",
+      "sha256": "00e1c3d0aae1d4a942dd46a5e18ed3163ad089dbeaa8a7a051c9607e902e5418",
+      "bytes": 7028
+    },
+    {
+      "path": "docs/packaging/wayland-input-feasibility.json",
+      "mode": "100644",
+      "sha256": "0429bae9f4e663953843e16b069e3a92ad8b251c99a7884e67bb34dfbdbe61d3",
+      "bytes": 3529
+    },
+    {
+      "path": "docs/packaging/wayland-packaged-wine-verification.json",
+      "mode": "100644",
+      "sha256": "149876b584878ab61eeac1def1b781d9a7d05c3eacf4e8f0b7b4f10d773211fd",
+      "bytes": 47360
+    },
+    {
+      "path": "docs/packaging/wayland-restore-verification.json",
+      "mode": "100644",
+      "sha256": "f6ffa397dd63dc9c53723c12b3c7906adf86100932231ad77c39aa0ba96f2b27",
+      "bytes": 96563
+    },
+    {
       "path": "packaging/70-penguin-lghub.rules",
       "mode": "100644",
       "sha256": "75386cbafbd1e2a031a08c41e8a25fc1cc4db4200b645bf28b1c1a9833061bb5",
       "bytes": 372
+    },
+    {
+      "path": "packaging/cachyos-ui-verification.json",
+      "mode": "100644",
+      "sha256": "4dc4f1ce31433739b7395388de2d43a21ec9694ce19706095076465e53d1cfd8",
+      "bytes": 2288
     },
     {
       "path": "packaging/clean-prefix-verification.json",
@@ -339,6 +428,12 @@
       "mode": "100644",
       "sha256": "24e5aac95b3190e863365a0a952010027f605f023693e5a4cdcf7b6fb009fac8",
       "bytes": 1208
+    },
+    {
+      "path": "packaging/first-run-ui-verification.json",
+      "mode": "100644",
+      "sha256": "b9c1658f0e7378a56d349291130b954c7546b183c9222d6cff2931080623fd67",
+      "bytes": 2327
     },
     {
       "path": "packaging/independent-host-verification.json",
@@ -395,6 +490,12 @@
       "bytes": 403
     },
     {
+      "path": "packaging/tested-environments.json",
+      "mode": "100644",
+      "sha256": "70d196efc5780745490169bb8def74cd9ea69f416e0e9406c0336fd50d7e3052",
+      "bytes": 3033
+    },
+    {
       "path": "packaging/windows-acquisition-GPL-3.0.txt",
       "mode": "100644",
       "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
@@ -413,6 +514,12 @@
       "bytes": 7104
     },
     {
+      "path": "packaging/wine-desktop-init.lock.json",
+      "mode": "100644",
+      "sha256": "98734b5bfbe4c10a2777432dadcaff076c2ecafb5f38f4cbae76f860979fcb37",
+      "bytes": 516
+    },
+    {
       "path": "packaging/wine-runtime-verification.json",
       "mode": "100644",
       "sha256": "d3fb29a818042f7133043ea64e841254b5cfacbb10c836abe2d0e092f1989fa5",
@@ -423,6 +530,12 @@
       "mode": "100644",
       "sha256": "e6240889c5f1eb5532cfe815a447c9a553a133aa7b23c4cda6a77085964efe24",
       "bytes": 8436
+    },
+    {
+      "path": "packaging/wine-x11-restore.lock.json",
+      "mode": "100644",
+      "sha256": "8f51013738eef88d54a168fd5eebfe53147f822f32b8ab4d25529a439566bb1c",
+      "bytes": 524
     },
     {
       "path": "patches/wine/0001-findfirst-share-delete.patch",
@@ -683,6 +796,18 @@
       "bytes": 6480
     },
     {
+      "path": "patches/wine/0044-x11-restore-state-and-buffered-events.patch",
+      "mode": "100644",
+      "sha256": "05fd24c8ec275fc148af1c61913927c7a86a98b4e5d9f891226cb4d0109dafd1",
+      "bytes": 2040
+    },
+    {
+      "path": "patches/wine/0045-win32u-bound-desktop-driver-handshake.patch",
+      "mode": "100644",
+      "sha256": "f9f9ecf807a13fbd19f55f1b991fd847ecfbbdea7850f5de66f6ebb7d07be862",
+      "bytes": 1009
+    },
+    {
       "path": "patches/wine/experiments/composition-mouse-pointer.patch",
       "mode": "100644",
       "sha256": "c46954a9a2e640ab6dabd2e4434a5e036e73158badcaf262f770ea4b278e0d88",
@@ -709,20 +834,38 @@
     {
       "path": "tests/packaging/test_clean_prefix.py",
       "mode": "100644",
-      "sha256": "caed7af3c465f067611553e075a4f3e0bb8b586ba021c34f50864d035d25038b",
-      "bytes": 7637
+      "sha256": "d8b28b53a0ea78e6930ebf2a492f5a1340dd4cd7943204dd5b155de013c9a215",
+      "bytes": 9676
     },
     {
       "path": "tests/packaging/test_desktop_runtime.py",
       "mode": "100644",
-      "sha256": "9e23c34105dc0bc82ca7595446bec1eddcd4a52238f6a94806ee43a44b0d026a",
-      "bytes": 4311
+      "sha256": "1afaf9d4eb598f96292cda1b825bd4c66dc7b7a26e8dbb96329554750af43616",
+      "bytes": 16987
+    },
+    {
+      "path": "tests/packaging/test_desktop_shutdown.py",
+      "mode": "100644",
+      "sha256": "c3d7441bdfaf9966dc6a1beef4259b6f5dd559c1e88fc4ddf394024f1eccecb3",
+      "bytes": 1999
+    },
+    {
+      "path": "tests/packaging/test_desktop_startup.py",
+      "mode": "100644",
+      "sha256": "507f2c7a66542155fbe1d7de66c525c021979cf1ac55a78df487e3385abe4aef",
+      "bytes": 3750
     },
     {
       "path": "tests/packaging/test_dockur_acquire.py",
       "mode": "100644",
       "sha256": "114f7426aaf37521d658893a3c19c4b261e98629ecca223814ca9bb2e90b2d71",
       "bytes": 6081
+    },
+    {
+      "path": "tests/packaging/test_frontend_startup.py",
+      "mode": "100644",
+      "sha256": "4d6d437e54c012dbea10ed9435a9683153fd376358a10e37fc0b78c8a684c9ee",
+      "bytes": 10866
     },
     {
       "path": "tests/packaging/test_linux_runtime.py",
@@ -743,10 +886,22 @@
       "bytes": 10209
     },
     {
+      "path": "tests/packaging/test_server_sync.py",
+      "mode": "100644",
+      "sha256": "3481a72d3193988290adb3ac69d4f8b20098fca3eaab8ff818d484485057842a",
+      "bytes": 3626
+    },
+    {
+      "path": "tests/packaging/test_tray_registration.py",
+      "mode": "100644",
+      "sha256": "731a5c191aaea424fc10d6e3f08f980ae8f12a37b18448e6f4df526118d530ad",
+      "bytes": 1033
+    },
+    {
       "path": "tests/packaging/test_windows_media_acquire.py",
       "mode": "100644",
-      "sha256": "2973d776149f2332160af81022730037182dc49d1dc0bfde9b59a76b3660e44a",
-      "bytes": 5155
+      "sha256": "052fb69a8620ccaf34d8500daaaa94054f04d93a768b15464a3fe3a2742e4c44",
+      "bytes": 5874
     },
     {
       "path": "tests/packaging/test_windows_media_reconstruct.py",
@@ -757,8 +912,14 @@
     {
       "path": "tests/packaging/test_wine_runtime.py",
       "mode": "100644",
-      "sha256": "930e138b6dd508cc49d8ba60ab264fd836afaa34155a982a7e22747c3305a739",
-      "bytes": 8156
+      "sha256": "386a97c1508837732ae1bd97a923c9492c04152fde1e5a89de29690ab884ba53",
+      "bytes": 8309
+    },
+    {
+      "path": "tests/packaging/test_wine_x11_restore.py",
+      "mode": "100644",
+      "sha256": "2a1a5e3f07e46cb2ef9bf884b4c094fa86ccc8bd2b773368528bf38026deeeb1",
+      "bytes": 4288
     },
     {
       "path": "tools/dragonshard-2/SKILL.md",
@@ -1265,10 +1426,16 @@
       "bytes": 3665
     },
     {
+      "path": "tools/packaging/desktop_init_probe.c",
+      "mode": "100644",
+      "sha256": "be5499aace7b4584aff122eb390b28bfe53a8a6b5df9b70709a169f6b645755d",
+      "bytes": 1713
+    },
+    {
       "path": "tools/packaging/desktop_runtime.py",
       "mode": "100644",
-      "sha256": "9734c025176f1f21850de1729da168dfe59d6470814709864a711ab2819fec5c",
-      "bytes": 11978
+      "sha256": "1a1b3c292a760085cb1bca17d4c1f59810873bfb9c1e325e78e82e50ab0617a6",
+      "bytes": 29080
     },
     {
       "path": "tools/packaging/dockur_acquire.py",
@@ -1277,10 +1444,16 @@
       "bytes": 18204
     },
     {
+      "path": "tools/packaging/frontend_probe.cjs",
+      "mode": "100644",
+      "sha256": "6a855811199cef4b70bfb7e337c32a79fe08dc5508dbfab5eb2a2b46325630a8",
+      "bytes": 4895
+    },
+    {
       "path": "tools/packaging/linux_probe.py",
       "mode": "100644",
-      "sha256": "275f9d21ef859e06209e41f3b0aa0e7afc6667b5fc025992086da64f42b1c788",
-      "bytes": 10883
+      "sha256": "e4c727be274d50231095045169fd8884790b1fa9abeeb2fb5c30095578745ced",
+      "bytes": 10961
     },
     {
       "path": "tools/packaging/linux_runtime.py",
@@ -1293,6 +1466,12 @@
       "mode": "100644",
       "sha256": "6b8c3071f83bafab6d86ec33763b5e806b00600352bd249140e12e5407654d85",
       "bytes": 9043
+    },
+    {
+      "path": "tools/packaging/linux_ui_probe.py",
+      "mode": "100644",
+      "sha256": "f4f452b2211ff0675fc70808d920779ae241956448906b56208b4f806093de51",
+      "bytes": 7971
     },
     {
       "path": "tools/packaging/logitech_capsule.py",
@@ -1309,8 +1488,8 @@
     {
       "path": "tools/packaging/prepare_clean_prefix.py",
       "mode": "100644",
-      "sha256": "8fb2994ee94411f166044ff6b7f492410d8fb2d446520102ae0eb63f373269d5",
-      "bytes": 24770
+      "sha256": "09c3f7ea7be776f8833feec1d10d9b1b5d361a083f02a5a0e0fcafb2df96ba8b",
+      "bytes": 26927
     },
     {
       "path": "tools/packaging/probe_clean_agent.py",
@@ -1319,10 +1498,94 @@
       "bytes": 7717
     },
     {
+      "path": "tools/packaging/restore_capture.py",
+      "mode": "100644",
+      "sha256": "3487b16177c3ca5fa0e68893cedf2f0919c8608886b7847d46d61361ccb22470",
+      "bytes": 15416
+    },
+    {
+      "path": "tools/packaging/restore_observer.cjs",
+      "mode": "100644",
+      "sha256": "7b1a057a92fcb17f41131008c4bd557a65b710e11f06849430b5d0ea5dc07824",
+      "bytes": 8030
+    },
+    {
+      "path": "tools/packaging/restore_timing.py",
+      "mode": "100644",
+      "sha256": "039dcd05b11659e5e2de69f73d978f1403f8fb75691cbe4cdeb17f402b31e6c2",
+      "bytes": 6624
+    },
+    {
+      "path": "tools/packaging/restore_window_probe.c",
+      "mode": "100644",
+      "sha256": "d20b68337a8650b60eadb7cac4f77d7caad80e6a8e22f349b45d4f8a8e723077",
+      "bytes": 1109
+    },
+    {
+      "path": "tools/packaging/server_sync.py",
+      "mode": "100644",
+      "sha256": "c1b7da1fc05e61270ce852d00f485883c9d58f678c706fad917e5ccc0f1caa55",
+      "bytes": 2074
+    },
+    {
+      "path": "tools/packaging/startup_feedback.py",
+      "mode": "100644",
+      "sha256": "5e2d7627d5f5e3cc08e4d53b2d05ff64e1b1e1e7ae949aca74e58d9964d053d0",
+      "bytes": 3371
+    },
+    {
+      "path": "tools/packaging/tray_registration.py",
+      "mode": "100644",
+      "sha256": "e9fe6e300d6c9f8ee46a06e38d9b2e6653d890175061592b58d35ba156070927",
+      "bytes": 3870
+    },
+    {
+      "path": "tools/packaging/wayland_input_probe.py",
+      "mode": "100644",
+      "sha256": "2f723a8ee1fdff22b647c6d39b6038a474b19b7184172a7ff08a8ada63538476",
+      "bytes": 7964
+    },
+    {
+      "path": "tools/packaging/wayland_input_receiver.cpp",
+      "mode": "100644",
+      "sha256": "1c628bf76cca8a58c08f21b7c28596af527e63e6b60b4d155009526c63c26c66",
+      "bytes": 1317
+    },
+    {
+      "path": "tools/packaging/wayland_launcher_probe.py",
+      "mode": "100644",
+      "sha256": "99488dec11274eda976d4986f3aecc94672c7e557bd851744cbe9c1adf3d35fa",
+      "bytes": 12198
+    },
+    {
+      "path": "tools/packaging/wayland_restore_diagnostic.py",
+      "mode": "100644",
+      "sha256": "4799b03c8d1a30f763e7304d642fe49d941d7b79becc893b31b9bc39b436967c",
+      "bytes": 24185
+    },
+    {
+      "path": "tools/packaging/wayland_session.py",
+      "mode": "100644",
+      "sha256": "cc1c606cd8bfc270cd447d21d42922b67d4870f156fb086eb49b71bb6459d92a",
+      "bytes": 5270
+    },
+    {
+      "path": "tools/packaging/wayland_wine_probe.py",
+      "mode": "100644",
+      "sha256": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c",
+      "bytes": 17298
+    },
+    {
+      "path": "tools/packaging/wayland_xtest_sender.c",
+      "mode": "100644",
+      "sha256": "4518dd0db4b420d066bc98a02965ac8d6a891cf5a0adaaa8bdcdd5e002363452",
+      "bytes": 915
+    },
+    {
       "path": "tools/packaging/windows_media_acquire.py",
       "mode": "100644",
-      "sha256": "ebff2b5a690cb555f50a98f478c7f2d8282c788a63cb650c0e958bc017d79c2c",
-      "bytes": 9578
+      "sha256": "fb2fd2b78c38581250558e8fd1e6c7ceade223d93bb4955979c18ef9861ca58d",
+      "bytes": 9773
     },
     {
       "path": "tools/packaging/windows_media_reconstruct.py",
@@ -1331,10 +1594,22 @@
       "bytes": 11250
     },
     {
+      "path": "tools/packaging/wine_desktop_init.py",
+      "mode": "100644",
+      "sha256": "c9ac5c2394e1caba3b8aaba7291d4a5511425e89534f73a978fbf4d634d2df4f",
+      "bytes": 3233
+    },
+    {
       "path": "tools/packaging/wine_runtime.py",
       "mode": "100644",
       "sha256": "1e68d341ddd8b0d5f6f73a5b705cc360d5b28d8ccc9b2b5652a86dad42a991ea",
       "bytes": 14807
+    },
+    {
+      "path": "tools/packaging/wine_x11_restore.py",
+      "mode": "100644",
+      "sha256": "5c598fd01d2e4fc389e0ec5880331f83ec8d8c0d9e9d0376f3b80ca7c7922efe",
+      "bytes": 3141
     },
     {
       "path": "tools/packaging/xpress_acquisition_bridge.h",
@@ -1477,8 +1752,8 @@
     {
       "path": "tools/wine/build_private_x11.sh",
       "mode": "100755",
-      "sha256": "e0ac9546a39d238bcef28411422a06bf25a03c3821045f159d94c36265814a8c",
-      "bytes": 867
+      "sha256": "1c3ca36bba650c29e7d884bc1bed274b509f265767f6855a89e9e1926d65831f",
+      "bytes": 1123
     },
     {
       "path": "tools/wine/build_runtime_bridges.sh",
@@ -1865,6 +2140,12 @@
       "bytes": 1858
     },
     {
+      "path": "tools/wine/prepare_frontend_startup.py",
+      "mode": "100644",
+      "sha256": "68444714cbeed6041f67620f37e15ca1b23c45b223db2f9d09272d6313594d1e",
+      "bytes": 11483
+    },
+    {
       "path": "tools/wine/prepare_kernelbase_probe.py",
       "mode": "100644",
       "sha256": "2b026e97138463364efbbe4179d12176c43938f64726d86e8e7c11633f9a72c7",
@@ -2047,8 +2328,8 @@
     {
       "path": "tools/wine/tested_desktop_launch.py",
       "mode": "100644",
-      "sha256": "4c05d93d7ff5876d00ac24c004728e5a10ac8fc050400128a31f49a56e32ba96",
-      "bytes": 21218
+      "sha256": "d774db0d2d6ffb5d93ab2138371b0a91cad45045540a3219ff33b0857f364ff4",
+      "bytes": 23778
     },
     {
       "path": "tools/wine/text_reading_direction_test.c",
@@ -2134,5 +2415,6 @@
       "sha256": "b2fa0bef3df4380de8a4be04ceb5ff53db1b42e579fc296d628c62ead7a52181",
       "bytes": 1474
     }
-  ]
+  ],
+  "publication_note": "Includes later desktop/Wayland fixes and owner acceptance; no vendor payload or populated prefix."
 }

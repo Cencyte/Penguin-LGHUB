@@ -173,11 +173,16 @@ def external_path(value):
 
 
 @contextmanager
-def work_lock(work):
+def work_lock(work, *, busy_message=None):
     # One downloader/reconstructor per cache, including resumed partial files.
     fd = os.open(work / '.acquisition.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     with os.fdopen(fd, 'w') as guard:
-        fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        try:
+            fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            if busy_message is None:
+                raise
+            raise RuntimeError(busy_message) from error
         yield
 
 

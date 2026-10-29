@@ -95,11 +95,43 @@ class CleanPrefixTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 m.copy_checked(src, root/'new', sha)
 
+    def test_cache_retains_verified_archives_and_rejects_corruption_before_copy(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(m, 'space_check'):
+            root = Path(tmp); cache = root / 'downloads'; cache.mkdir()
+            archive = cache / 'core.depot'; archive.write_bytes(b'vendor archive')
+            sha = m.digest_file(archive)['sha256']
+            lock = {'depots': {'core': {'local_name': 'core.depot', 'sha256': sha,
+                                        'size': archive.stat().st_size}}}
+            report = {'extracted': {'core': []}}
+            m.install_depot_cache(cache, root / 'installed', lock, report)
+            self.assertEqual((root / 'installed/cache' / sha).read_bytes(), archive.read_bytes())
+            archive.write_bytes(b'broken archive')
+            with self.assertRaises(ValueError):
+                m.install_depot_cache(cache, root / 'bad', lock, report)
+            self.assertFalse((root / 'bad').exists())
+
     def test_existing_output_rejected_before_any_wine_execution(self):
         with tempfile.TemporaryDirectory() as tmp, patch.object(m.subprocess, 'run') as run:
             with self.assertRaisesRegex(ValueError, 'new directory'):
                 m.prepare(Path('/stage'), Path('/cache'), Path(tmp), Path('/artifacts'), Path('/dlls'))
             run.assert_not_called()
+
+    def test_catalog_seeds_desktop_from_verified_payload_without_user_state(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(m, 'space_check'):
+            prefix = Path(tmp)
+            source = prefix / m.APP / 'data/applications.json'
+            source.parent.mkdir(parents=True)
+            source.write_text(json.dumps({'applications': [{
+                'applicationId': '420fd454-0c36-499d-bde4-146823b16147',
+                'name': 'APPLICATION_NAME_DESKTOP'}]}))
+            report = {'layout': {'files': [{'destination': 'data/applications.json',
+                                            'sha256': m.digest_file(source)['sha256']}]}}
+            m.initialize_application_catalog(prefix, report)
+            self.assertEqual((prefix / m.CATALOG).read_bytes(), source.read_bytes())
+            self.assertFalse((prefix / 'drive_c/users').exists())
+            source.write_text('{}')
+            with self.assertRaisesRegex(ValueError, 'catalog changed'):
+                m.initialize_application_catalog(prefix, report)
 
     def test_receipt_checks_prefix_modules_and_extra_managed_files(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "wine_version": "10.20",
+  "target": "usr/lib/wine/x86_64-unix/win32u.so",
+  "base_sha256": "33a3c8758866ff30d87ba12c4ce101eb9def2da6e0476fb4e5c6713e99625831",
+  "module_sha256": "5fb3d5e404c8935cfa8f74f0277188f75c14c7841beecd9c084d010d0601386e",
+  "patch": "patches/wine/0045-win32u-bound-desktop-driver-handshake.patch",
+  "patch_sha256": "f9f9ecf807a13fbd19f55f1b991fd847ecfbbdea7850f5de66f6ebb7d07be862",
+  "scope": "Opt-in bounded desktop-driver initialization; no system Wine replacement"
+}

@@ -12,8 +12,30 @@ import struct
 import subprocess
 import sys
 import time
+import uuid
 
 SCRIPT = Path(__file__).resolve()
+
+
+class FrontendStartupTimeout(RuntimeError):
+    pass
+
+
+def frontend_ready(root, token):
+    try:
+        value = json.loads((root / 'logs/frontend-ready.json').read_text())
+        return bool(token and value.get('token') == token and value.get('ready') is True)
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
+def frontend_startup_pending(root, token, deadline, now):
+    if frontend_ready(root, token):
+        return False
+    if now >= deadline:
+        raise FrontendStartupTimeout('G HUB did not create its window within 60 seconds. '
+                                     'The private Wine session will be stopped; settings are preserved.')
+    return True
 
 
 def register_frontend_protocol():
@@ -87,6 +109,33 @@ def prefix_processes(prefix):
 
 def start_time(pid):
     return Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()[19]
+
+
+def stop_frontend(prefix, app):
+    """Let the single-instance frontend finish cleanup before killing its backend.
+
+    The pinned frontend handles a second-instance --killall as oT(false): it
+    quits itself without recursively requesting a backend stop. Keep a hard
+    deadline so a damaged frontend cannot prevent the existing session cleanup.
+    """
+    def running():
+        return any(Path(exe.replace('\\', '/')).name == 'lghub.exe'
+                   for _, exe in prefix_processes(prefix))
+
+    if not running():
+        return True
+    deadline = time.monotonic() + 8
+    try:
+        subprocess.run(['wine', str(app / 'lghub.exe'), '--killall'], cwd=app,
+                       timeout=5, check=False)
+        while running() and time.monotonic() < deadline:
+            time.sleep(.1)
+        complete = not running()
+    except (OSError, subprocess.TimeoutExpired) as error:
+        print('Frontend graceful stop request failed:', error, flush=True)
+        complete = False
+    print('Frontend graceful stop complete:', complete, flush=True)
+    return complete
 
 
 def check(config, root, mounted=False):
@@ -216,6 +265,9 @@ def session(config, root, state_path, performance=False):
     control.setblocking(False)
     state = dict(pid=pid, start_time=start_time(pid),
                  boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip(), control_protocol=1)
+    watch_startup = config.get('frontend_initialization', {}).get('startup_protocol') == 1
+    if watch_startup:
+        state['startup_token'] = uuid.uuid4().hex
     temporary = state_path.with_suffix('.new')
     temporary.write_text(json.dumps(state) + '\n')
     temporary.replace(state_path)
@@ -255,7 +307,11 @@ def session(config, root, state_path, performance=False):
                 debugger.bind(('127.0.0.1', 0))
                 port = debugger.getsockname()[1]
             gui_args += ['--remote-debugging-address=127.0.0.1', f'--remote-debugging-port={port}']
-        gui_children.append(subprocess.Popen(gui_args, cwd=app))
+        gui_env = dict(os.environ)
+        if watch_startup:
+            gui_env['PENGUIN_GHUB_STARTUP_TOKEN'] = state['startup_token']
+            gui_env['PENGUIN_GHUB_READY_FILE'] = 'Z:' + str(root / 'logs/frontend-ready.json').replace('/', '\\')
+        gui_children.append(subprocess.Popen(gui_args, cwd=app, env=gui_env))
         last_open = time.monotonic()
         print('Frontend launch requested:', gui_children[-1].pid, 'recording:', record, flush=True)
         if record and not existing:
@@ -320,9 +376,14 @@ def session(config, root, state_path, performance=False):
         if stopping:
             return 0
         open_gui(performance)
-        starting = False
+        starting = watch_startup
+        frontend_deadline = time.monotonic() + 60
         while not stopping:
             service_control()
+            if starting:
+                starting = frontend_startup_pending(root, state['startup_token'], frontend_deadline, time.monotonic())
+                if not starting:
+                    print('Frontend window readiness acknowledged', flush=True)
             # Closing the main window must not implicitly kill a running agent
             # or tray. The Desktop Quit action remains available indefinitely.
             if agent.poll() is not None and all(child.poll() is not None for child in gui_children):
@@ -334,6 +395,7 @@ def session(config, root, state_path, performance=False):
         return 0
     finally:
         control.close()
+        stop_frontend(prefix, app)
         if monitor and monitor.poll() is None:
             monitor.terminate()
             try:

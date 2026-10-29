@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "checks": {
+    "required_files_present": true,
+    "bundled_fonts_loaded": true,
+    "desktop_and_default_profile": true,
+    "first_run_prompt_readable": true
+  },
+  "passed": true,
+  "fonts": {
+    "status": "ready",
+    "faces": [
+      {
+        "family": "BrownPro",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro-Bold",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro-Regular",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro-Thin",
+        "weight": "100",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro-Light",
+        "weight": "100",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownPro",
+        "weight": "100",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownLogitechPan",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownLogitechPan",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "BrownLogitechPan",
+        "weight": "100",
+        "status": "loaded"
+      }
+    ]
+  },
+  "missing": [],
+  "visible_text": "HELP US MAKE G HUB BETTER\nAllow G HUB to automatically send diagnostics and usage data.\nABOUT DEVICE ANALYTICS AND PRIVACY\nNO, THANKS\nYES, PLEASE",
+  "application_count": 1,
+  "profile_count": 1,
+  "scope": "Isolated first-run UI; no input injection, physical devices, tray or host GPU validation",
+  "linux_runtime_build": "4.0.20260928.262390",
+  "host_wine_hidden": true,
+  "mapped_runtime_image_count": 130,
+  "live_desktop_used": false,
+  "physical_devices_exposed": false,
+  "isolated_network": true,
+  "end_to_end_qualified": false,
+  "recorded_date": "2026-10-27",
+  "target": "Manjaro VM",
+  "application_version": "2026.6.974819",
+  "wine_version": "10.20",
+  "candidate_managed_files_verified": 1605,
+  "cached_depots": 30,
+  "default_catalog_source": "Pinned core depot: data/applications.json",
+  "font_source": "Existing bundled Logitech OpenType resources; no Windows font copy",
+  "frontend_sha256": "cb4d85a034cf2583cc52413ef23905b6818dcef943968e918eaf624355828eb7"
+}

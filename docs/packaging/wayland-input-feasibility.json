@@ -1,0 +1,157 @@
+{
+  "approved": {
+    "result": {
+      "passed": true,
+      "live_desktop_touched": false,
+      "scope": "XTEST to native Wayland; no Wine or physical device",
+      "sender_exit": 0,
+      "events": [
+        [
+          "down",
+          "41",
+          "26",
+          "0",
+          "0"
+        ],
+        [
+          "up",
+          "41",
+          "26",
+          "0",
+          "0"
+        ],
+        [
+          "down",
+          "1000021",
+          "69",
+          "4000000",
+          "0"
+        ],
+        [
+          "down",
+          "41",
+          "26",
+          "4000000",
+          "0"
+        ],
+        [
+          "up",
+          "41",
+          "26",
+          "4000000",
+          "0"
+        ],
+        [
+          "up",
+          "1000021",
+          "69",
+          "0",
+          "0"
+        ],
+        [
+          "down",
+          "100003b",
+          "60",
+          "0",
+          "0"
+        ],
+        [
+          "up",
+          "100003b",
+          "60",
+          "0",
+          "0"
+        ]
+      ],
+      "expected": [
+        [
+          "down",
+          "41",
+          "26",
+          "0",
+          "0"
+        ],
+        [
+          "up",
+          "41",
+          "26",
+          "0",
+          "0"
+        ],
+        [
+          "down",
+          "1000021",
+          "69",
+          "4000000",
+          "0"
+        ],
+        [
+          "down",
+          "41",
+          "26",
+          "4000000",
+          "0"
+        ],
+        [
+          "up",
+          "41",
+          "26",
+          "4000000",
+          "0"
+        ],
+        [
+          "up",
+          "1000021",
+          "69",
+          "0",
+          "0"
+        ],
+        [
+          "down",
+          "100003b",
+          "60",
+          "0",
+          "0"
+        ],
+        [
+          "up",
+          "100003b",
+          "60",
+          "0",
+          "0"
+        ]
+      ],
+      "control": "approved",
+      "display": ":0",
+      "wayland_display": "wayland-0"
+    },
+    "versions": "kwin 6.7.5-1.1\nplasma-workspace 6.7.5-1.1\nxorg-xwayland 24.1.13-1.1\nlibei 1.6.0-1\nqt6-base 6.11.2-3.1\nbubblewrap 0.13.0-1.1\n",
+    "evidence_directory": "/home/antiultra/.local/state/penguin-lghub-validation/wayland-eis-approved-final"
+  },
+  "unapproved": {
+    "result": {
+      "passed": true,
+      "live_desktop_touched": false,
+      "scope": "XTEST to native Wayland; no Wine or physical device",
+      "authorization_prompt_running": true,
+      "sender_exit": 0,
+      "events": [],
+      "expected": [],
+      "control": "unapproved",
+      "display": ":0",
+      "wayland_display": "wayland-0"
+    },
+    "versions": "kwin 6.7.5-1.1\nplasma-workspace 6.7.5-1.1\nxorg-xwayland 24.1.13-1.1\nlibei 1.6.0-1\nqt6-base 6.11.2-3.1\nbubblewrap 0.13.0-1.1\n",
+    "evidence_directory": "/home/antiultra/.local/state/penguin-lghub-validation/wayland-eis-unapproved-final"
+  },
+  "date": "2026-10-27",
+  "host": "CachyOS validation machine",
+  "scope": "Headless KWin/Xwayland to native Qt Wayland. No Wine, G HUB, physical HID, live GPU or interactive permission acceptance tested.",
+  "controls_passed": 2,
+  "controls_total": 2,
+  "test_source_sha256": {
+    "tools/packaging/wayland_input_probe.py": "2f723a8ee1fdff22b647c6d39b6038a474b19b7184172a7ff08a8ada63538476",
+    "tools/packaging/wayland_input_receiver.cpp": "1c628bf76cca8a58c08f21b7c28596af527e63e6b60b4d155009526c63c26c66",
+    "tools/packaging/wayland_xtest_sender.c": "4518dd0db4b420d066bc98a02965ac8d6a891cf5a0adaaa8bdcdd5e002363452"
+  }
+}

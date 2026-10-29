@@ -34,6 +34,20 @@ class Opener:
 
 
 class MediaTests(unittest.TestCase):
+    def test_busy_lock_explains_contention_and_is_reusable_after_exit(self):
+        with tempfile.TemporaryDirectory() as d:
+            work = Path(d)
+            with m.work_lock(work):
+                with self.assertRaisesRegex(RuntimeError, 'shared runtime busy'):
+                    with m.work_lock(work, busy_message='shared runtime busy'):
+                        self.fail('Two writers acquired the same lock')
+            with m.work_lock(work):
+                pass
+            # EAGAIN from an operation inside the lock is not lock contention.
+            with self.assertRaises(BlockingIOError):
+                with m.work_lock(work):
+                    raise BlockingIOError(11, 'operation failed')
+
     def asset(self, data):
         return {'url': Response.url, 'local_name': 'fixture.esd', 'size': len(data),
                 'sha256': hashlib.sha256(data).hexdigest()}

@@ -1,0 +1,132 @@
+{
+  "date": "2026-10-28",
+  "scope": "CachyOS private KWin Wayland UI/tray startup and restart; user desktop acceptance pending",
+  "source_base_commit": "a3cda8e7f92c1afe7aa60c045a0071f84d02a4c2",
+  "source_sha256": {
+    "tools/packaging/wayland_launcher_probe.py": "99488dec11274eda976d4986f3aecc94672c7e557bd851744cbe9c1adf3d35fa",
+    "tools/packaging/desktop_runtime.py": "1a1b3c292a760085cb1bca17d4c1f59810873bfb9c1e325e78e82e50ab0617a6",
+    "tools/packaging/frontend_probe.cjs": "6a855811199cef4b70bfb7e337c32a79fe08dc5508dbfab5eb2a2b46325630a8",
+    "tools/packaging/server_sync.py": "c1b7da1fc05e61270ce852d00f485883c9d58f678c706fad917e5ccc0f1caa55",
+    "tools/packaging/wine_desktop_init.py": "c9ac5c2394e1caba3b8aaba7291d4a5511425e89534f73a978fbf4d634d2df4f",
+    "tools/packaging/wine_x11_restore.py": "5c598fd01d2e4fc389e0ec5880331f83ec8d8c0d9e9d0376f3b80ca7c7922efe",
+    "tools/wine/prepare_frontend_startup.py": "68444714cbeed6041f67620f37e15ca1b23c45b223db2f9d09272d6313594d1e",
+    "tools/wine/tested_desktop_launch.py": "d774db0d2d6ffb5d93ab2138371b0a91cad45045540a3219ff33b0857f364ff4"
+  },
+  "host_packages": [
+    "kwin 6.7.5-1.1",
+    "xorg-xwayland 24.1.13-1.1",
+    "libei 1.6.0-1",
+    "xdg-desktop-portal 1.22.1-2.1",
+    "xdg-desktop-portal-kde 6.7.5-1.1",
+    "pipewire 1:1.6.9-1",
+    "kdialog 26.08.1-1.1"
+  ],
+  "raw_result_sha256": "ebaf085f7898b0d6010e3d4e1b92592f6b9be4beb14832f2088298fa73bd6051",
+  "result": {
+    "passed": true,
+    "cycles": [
+      {
+        "passed": true,
+        "observer_exit": 0,
+        "tray_dock_requests": 1,
+        "worker_boundary": {
+          "wine_synchronization": "server",
+          "ntsync_mask_present": true
+        },
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact_after_exit": true,
+        "private_runtime_mapped_image_count": 154,
+        "frontend_checks": {
+          "required_files_present": true,
+          "bundled_fonts_loaded": true,
+          "desktop_and_default_profile": true,
+          "first_run_prompt_readable": true
+        }
+      },
+      {
+        "passed": true,
+        "observer_exit": 0,
+        "tray_dock_requests": 1,
+        "worker_boundary": {
+          "wine_synchronization": "server",
+          "ntsync_mask_present": true
+        },
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact_after_exit": true,
+        "private_runtime_mapped_image_count": 151,
+        "frontend_checks": {
+          "required_files_present": true,
+          "bundled_fonts_loaded": true,
+          "desktop_and_default_profile": true,
+          "first_run_prompt_readable": true
+        }
+      }
+    ],
+    "live_desktop_used": false,
+    "physical_devices_tested": false,
+    "permission_granted": false
+  },
+  "frontend": {
+    "source_sha256": "04afa23969d90e3f315f9183a5babf84bfcc9559ff2fc8ae190d8a2d8466cd15",
+    "output_sha256": "fa22d434c981a0677c9ad3f07a8031a194be3a1aaa1337abeaa8801c1ca2380e",
+    "changed_entries": [
+      "index.html",
+      "main.js"
+    ],
+    "packed_entries_verified": 267,
+    "startup_protocol": 1
+  },
+  "desktop_init_recipe": {
+    "schema": 1,
+    "wine_version": "10.20",
+    "target": "usr/lib/wine/x86_64-unix/win32u.so",
+    "base_sha256": "33a3c8758866ff30d87ba12c4ce101eb9def2da6e0476fb4e5c6713e99625831",
+    "module_sha256": "5fb3d5e404c8935cfa8f74f0277188f75c14c7841beecd9c084d010d0601386e",
+    "patch": "patches/wine/0045-win32u-bound-desktop-driver-handshake.patch",
+    "patch_sha256": "f9f9ecf807a13fbd19f55f1b991fd847ecfbbdea7850f5de66f6ebb7d07be862",
+    "scope": "Opt-in bounded desktop-driver initialization; no system Wine replacement"
+  },
+  "x11_restore_recipe": {
+    "schema": 1,
+    "wine_version": "10.20",
+    "target": "usr/lib/wine/x86_64-unix/winex11.so",
+    "base_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+    "module_sha256": "11b02e4251f06ddb5463e223924d62e5d47a5da7c02cf0aab6084820b3114386",
+    "patch": "patches/wine/0044-x11-restore-state-and-buffered-events.patch",
+    "patch_sha256": "05fd24c8ec275fc148af1c61913927c7a86a98b4e5d9f891226cb4d0109dafd1",
+    "scope": "Opt-in Plasma Xwayland restore-state candidate; real-session acceptance pending"
+  },
+  "unit_tests": {
+    "passed": 126,
+    "total": 126,
+    "node": "bundled Node 22.21.0",
+    "initial_attempt": "8 errors because host node absent; rerun with existing bundled node on PATH passed; no package installation"
+  },
+  "current_session_during_preparation": "Plasma X11; not changed",
+  "live_wayland_acceptance": {
+    "confirmed": 0,
+    "target_systems": 1
+  },
+  "physical_devices_detected": [],
+  "windowing_cosmetics": "Known remaining anomalies explicitly out of scope per owner",
+  "artifacts": "~/.local/state/penguin-lghub-validation/cachyos-wayland-startup-20261028-001",
+  "deployment": {
+    "status": "installed and ready for user testing",
+    "source": "~/Source2/Penguin-LGHUB-cachyos-wayland-20261028",
+    "installation": "~/.local/state/penguin-lghub-validation/cachyos-wayland-desktop-20261028",
+    "desktop_entry": "~/Desktop/Penguin-LGHUB Wayland Test.desktop",
+    "x11_installation_preserved": true,
+    "settings": "Separate fresh Wayland prefix; existing X11 settings retained in existing prefix",
+    "system_packages_changed": false,
+    "host_input_permissions_changed": false,
+    "live_gui_launched": false,
+    "pushed": false,
+    "desktop_file_validate_exit": 0,
+    "application_registration_matches": true,
+    "icon_installed": true,
+    "managed_files_verified": 1605,
+    "remaining_prefix_processes": []
+  }
+}

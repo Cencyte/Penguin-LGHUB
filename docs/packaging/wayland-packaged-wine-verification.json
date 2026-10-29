@@ -1,0 +1,1232 @@
+{
+  "schema": 1,
+  "date": "2026-10-27",
+  "scope": "packaged Wine keyboard transport in isolated KWin; no actual Logitech application or physical input",
+  "fixtures": {
+    "tools/packaging/wayland_input_receiver.cpp": "1c628bf76cca8a58c08f21b7c28596af527e63e6b60b4d155009526c63c26c66",
+    "tools/wine/host_keyboard_probe.c": "19ad380db8da36de9fe810f2654d3e86884b50c66cefb82159b054d1edbadf72",
+    "receiver": "d969939fda911a24560bd8ca7447b816ac7091ac93e5400eaa470eb0becf5f5c",
+    "host_keyboard_probe.exe": "7fb2483baa7bcdcd60997956a9bfa98ff035bbb5cebb7c4e3519cb75fbf7d620"
+  },
+  "hosts": {
+    "manjaro_vm": {
+      "runs": {
+        "test-direct": {
+          "result": {
+            "passed": true,
+            "scope": "packaged Wine to native Wayland keyboard transport",
+            "permission_policy": "test-direct",
+            "live_desktop_touched": false,
+            "physical_devices_tested": false,
+            "ghub_application_tested": false,
+            "cases": {
+              "bridge-enabled": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=0",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=1400",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=1400",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=1400",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=1400",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=1400",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=1400",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=1400",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=1400",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=1400",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=1400",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=1400",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=1400",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=1400",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=1400",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=1400",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=1400",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=1400",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=1400",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=1400",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=1400",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=1400"
+                ],
+                "submission_passed": true,
+                "events": [
+                  [
+                    "down",
+                    "5b",
+                    "22",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "5b",
+                    "22",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "5d",
+                    "23",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "5d",
+                    "23",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "30",
+                    "13",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "30",
+                    "13",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000007",
+                    "77",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000007",
+                    "77",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000021",
+                    "69",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "41",
+                    "26",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "41",
+                    "26",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000021",
+                    "69",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000012",
+                    "71",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000012",
+                    "71",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "41",
+                    "26",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "41",
+                    "26",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000004",
+                    "24",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000004",
+                    "24",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000005",
+                    "68",
+                    "20000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000005",
+                    "68",
+                    "20000000",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "100003b",
+                    "60",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "100003b",
+                    "60",
+                    "0",
+                    "0"
+                  ]
+                ],
+                "expected": [
+                  [
+                    "down",
+                    "5b",
+                    "22",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "5b",
+                    "22",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "5d",
+                    "23",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "5d",
+                    "23",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "30",
+                    "13",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "30",
+                    "13",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000007",
+                    "77",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000007",
+                    "77",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000021",
+                    "69",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "41",
+                    "26",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "41",
+                    "26",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000021",
+                    "69",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000012",
+                    "71",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000012",
+                    "71",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "41",
+                    "26",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "41",
+                    "26",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000004",
+                    "24",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000004",
+                    "24",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000005",
+                    "68",
+                    "20000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000005",
+                    "68",
+                    "20000000",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "100003b",
+                    "60",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "100003b",
+                    "60",
+                    "0",
+                    "0"
+                  ]
+                ],
+                "passed": true
+              },
+              "bridge-disabled": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=126",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=126",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=0"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              },
+              "other-executable": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=126",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=126",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=0"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              }
+            },
+            "runtime": {
+              "linux_build": "4.0.20260928.262390",
+              "server_sync": true,
+              "display": ":0"
+            }
+          },
+          "provenance": {
+            "receiver_sha256": "d969939fda911a24560bd8ca7447b816ac7091ac93e5400eaa470eb0becf5f5c",
+            "sender_sha256": "7fb2483baa7bcdcd60997956a9bfa98ff035bbb5cebb7c4e3519cb75fbf7d620",
+            "wine_manifest_sha256": "ace131662cc0a41d55fe7fab2ae86b97c628d3d2a20d2d8c1deb6827782d0560",
+            "linux_manifest_sha256": "75dd30717e565c9831278e72f91022204d16e0e62938435bb1bec1eff8e40818",
+            "harness_sha256": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c",
+            "packaged_wine_version": "10.20"
+          },
+          "versions": [
+            "kwin 6.5.6-1",
+            "plasma-workspace 6.5.6-2",
+            "xorg-xwayland 24.1.9-1",
+            "libei 1.5.0-1",
+            "qt6-base 6.10.2-1",
+            "bubblewrap 0.11.0-2",
+            "xdg-desktop-portal 1.20.3-2",
+            "xdg-desktop-portal-kde 6.5.6-1"
+          ],
+          "files_sha256": {
+            "result.json": "69433152b9d4333ffd169f13dc34ec73f293935ded0c80c56e39edb35c6bb857",
+            "provenance.json": "5c8b46d6d7224de4ffb2bb797f724898b52913767ee00558e123483a453097db",
+            "versions.txt": "76c7669b3dd420f31e1903587f2ee16c8b36a138972acd549f81ebc468c310ca",
+            "command.json": "65835f575c2b3c419e1338db0dbae67c2fa1da29ea832c6fdfb9943226b8e2ef",
+            "wine-container-command.json": "6dc150495bca7b3aad73cf43072f2fdbf8750a1cb7e52d50658b392e34318f4e",
+            "receiver.log": "cc263f7feef167c3f2a210e0950729b2289cf511ba03513bab66cb08ea368c0b",
+            "kwin.log": "9d2cd24e7077606caa761ad00dd3a6102a902247342fdb3d0e8e63544527f0ae",
+            "harness.py": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c"
+          },
+          "remote_output": "/home/firesongz/.local/state/penguin-lghub-validation/wayland-wine-final-test-direct"
+        },
+        "portal": {
+          "result": {
+            "passed": true,
+            "scope": "packaged Wine to native Wayland keyboard transport",
+            "permission_policy": "portal",
+            "live_desktop_touched": false,
+            "physical_devices_tested": false,
+            "ghub_application_tested": false,
+            "cases": {
+              "bridge-enabled": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=0",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=1400",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=1400",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=1400",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=1400",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=1400",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=1400",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=1400",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=1400",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=1400",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=1400",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=1400",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=1400",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=1400",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=1400",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=1400",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=1400",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=1400",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=1400",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=1400",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=1400",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=1400"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              },
+              "bridge-disabled": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=126",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=126",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=0"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              },
+              "other-executable": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=126",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=126",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=0"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              }
+            },
+            "runtime": {
+              "linux_build": "4.0.20260928.262390",
+              "server_sync": true,
+              "display": ":0"
+            },
+            "portal_start_requested": true,
+            "portal_eis_requested": false
+          },
+          "provenance": {
+            "receiver_sha256": "d969939fda911a24560bd8ca7447b816ac7091ac93e5400eaa470eb0becf5f5c",
+            "sender_sha256": "7fb2483baa7bcdcd60997956a9bfa98ff035bbb5cebb7c4e3519cb75fbf7d620",
+            "wine_manifest_sha256": "ace131662cc0a41d55fe7fab2ae86b97c628d3d2a20d2d8c1deb6827782d0560",
+            "linux_manifest_sha256": "75dd30717e565c9831278e72f91022204d16e0e62938435bb1bec1eff8e40818",
+            "harness_sha256": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c",
+            "packaged_wine_version": "10.20"
+          },
+          "versions": [
+            "kwin 6.5.6-1",
+            "plasma-workspace 6.5.6-2",
+            "xorg-xwayland 24.1.9-1",
+            "libei 1.5.0-1",
+            "qt6-base 6.10.2-1",
+            "bubblewrap 0.11.0-2",
+            "xdg-desktop-portal 1.20.3-2",
+            "xdg-desktop-portal-kde 6.5.6-1"
+          ],
+          "files_sha256": {
+            "result.json": "1e1f999d9823a1085cc71db430969972482df050fd9dcee987f95c499bafb16d",
+            "provenance.json": "5c8b46d6d7224de4ffb2bb797f724898b52913767ee00558e123483a453097db",
+            "versions.txt": "76c7669b3dd420f31e1903587f2ee16c8b36a138972acd549f81ebc468c310ca",
+            "command.json": "db4d85a659d4d89cf11e625bc5a2e0eb7fc8abeabed82b6255d8475712809013",
+            "wine-container-command.json": "6dc150495bca7b3aad73cf43072f2fdbf8750a1cb7e52d50658b392e34318f4e",
+            "receiver.log": "4f1d16dfb05441be5a69d9679e9938a5ee9620182baebb9c3949cd93e47ab068",
+            "kwin.log": "bdb2883a2db6f917772ac2eb187e18eefc8efe1bd2e2d848dcca2663a277699d",
+            "harness.py": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c",
+            "portal-monitor.log": "625c6d57869c09878839d7717d65ddd1a3133f5633007b9d640955f75f74ac13",
+            "portal-kde.log": "7d902c175cf3dc4b1396f97ac096d2bab8f8db36d1904d900d64df5734bc991c",
+            "sycoca.log": "a4f18fbe39010c14f05888bddd2c2cadbf8c19a84fdbcf6782e96d30aecb4a9d",
+            "pipewire.log": "9c05f0f8bc6a60dfb46a3a8fbaa0abe148f7706ac2a67150aa8cbef855b1bde8"
+          },
+          "remote_output": "/home/firesongz/.local/state/penguin-lghub-validation/wayland-wine-final-portal"
+        }
+      },
+      "remaining_kwin_processes": [
+        "52674 /usr/bin/kwin_x11 --replace"
+      ]
+    },
+    "cachyos_physical_host": {
+      "runs": {
+        "test-app": {
+          "result": {
+            "passed": true,
+            "scope": "packaged Wine to native Wayland keyboard transport",
+            "permission_policy": "test-app",
+            "live_desktop_touched": false,
+            "physical_devices_tested": false,
+            "ghub_application_tested": false,
+            "cases": {
+              "bridge-enabled": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=0",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=1400",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=1400",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=1400",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=1400",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=1400",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=1400",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=1400",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=1400",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=1400",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=1400",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=1400",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=1400",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=1400",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=1400",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=1400",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=1400",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=1400",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=1400",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=1400",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=1400",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=1400"
+                ],
+                "submission_passed": true,
+                "events": [
+                  [
+                    "down",
+                    "5b",
+                    "22",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "5b",
+                    "22",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "5d",
+                    "23",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "5d",
+                    "23",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "30",
+                    "13",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "30",
+                    "13",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000007",
+                    "77",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000007",
+                    "77",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000021",
+                    "69",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "41",
+                    "26",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "41",
+                    "26",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000021",
+                    "69",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000012",
+                    "71",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000012",
+                    "71",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "41",
+                    "26",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "41",
+                    "26",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000004",
+                    "24",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000004",
+                    "24",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000005",
+                    "68",
+                    "20000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000005",
+                    "68",
+                    "20000000",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "100003b",
+                    "60",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "100003b",
+                    "60",
+                    "0",
+                    "0"
+                  ]
+                ],
+                "expected": [
+                  [
+                    "down",
+                    "5b",
+                    "22",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "5b",
+                    "22",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "5d",
+                    "23",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "5d",
+                    "23",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "30",
+                    "13",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "30",
+                    "13",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000007",
+                    "77",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000007",
+                    "77",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000021",
+                    "69",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "41",
+                    "26",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "41",
+                    "26",
+                    "4000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000021",
+                    "69",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000012",
+                    "71",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000012",
+                    "71",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "41",
+                    "26",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "41",
+                    "26",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000004",
+                    "24",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000004",
+                    "24",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "1000005",
+                    "68",
+                    "20000000",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "1000005",
+                    "68",
+                    "20000000",
+                    "0"
+                  ],
+                  [
+                    "down",
+                    "100003b",
+                    "60",
+                    "0",
+                    "0"
+                  ],
+                  [
+                    "up",
+                    "100003b",
+                    "60",
+                    "0",
+                    "0"
+                  ]
+                ],
+                "passed": true
+              },
+              "bridge-disabled": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=126",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=126",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=0"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              },
+              "other-executable": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=126",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=126",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=0"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              }
+            },
+            "runtime": {
+              "linux_build": "4.0.20260928.262390",
+              "server_sync": true,
+              "display": ":0"
+            }
+          },
+          "provenance": {
+            "receiver_sha256": "d969939fda911a24560bd8ca7447b816ac7091ac93e5400eaa470eb0becf5f5c",
+            "sender_sha256": "7fb2483baa7bcdcd60997956a9bfa98ff035bbb5cebb7c4e3519cb75fbf7d620",
+            "wine_manifest_sha256": "ace131662cc0a41d55fe7fab2ae86b97c628d3d2a20d2d8c1deb6827782d0560",
+            "linux_manifest_sha256": "75dd30717e565c9831278e72f91022204d16e0e62938435bb1bec1eff8e40818",
+            "harness_sha256": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c",
+            "packaged_wine_version": "10.20"
+          },
+          "versions": [
+            "kwin 6.7.5-1.1",
+            "plasma-workspace 6.7.5-1.1",
+            "xorg-xwayland 24.1.13-1.1",
+            "libei 1.6.0-1",
+            "qt6-base 6.11.2-3.1",
+            "bubblewrap 0.13.0-1.1",
+            "xdg-desktop-portal 1.22.1-2.1",
+            "xdg-desktop-portal-kde 6.7.5-1.1"
+          ],
+          "files_sha256": {
+            "result.json": "4a0938352ee8ca307e6cafb52a176d739a5807ba68fe8c646f7d09b568f474a5",
+            "provenance.json": "5c8b46d6d7224de4ffb2bb797f724898b52913767ee00558e123483a453097db",
+            "versions.txt": "3606ada454196c99695d91032731012937c4ad3d3e897b5293f7570c22f3ff2d",
+            "command.json": "34995a78733dc1ecb42e95bcab72556dd4f231c57d77bded7f40df3ed3d17df2",
+            "wine-container-command.json": "8997a26d9000803315554d7cc6fc36033d20c5084d66258f3bd3a42daea4a885",
+            "receiver.log": "cc263f7feef167c3f2a210e0950729b2289cf511ba03513bab66cb08ea368c0b",
+            "kwin.log": "c6e69e6a0941508a218806aefdb18af8579407af58cab38a31b6ca94184e3596",
+            "harness.py": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c"
+          },
+          "remote_output": "/home/antiultra/.local/state/penguin-lghub-validation/wayland-wine-final-test-app"
+        },
+        "test-pending-app": {
+          "result": {
+            "passed": true,
+            "scope": "packaged Wine to native Wayland keyboard transport",
+            "permission_policy": "test-pending-app",
+            "live_desktop_touched": false,
+            "physical_devices_tested": false,
+            "ghub_application_tested": false,
+            "cases": {
+              "bridge-enabled": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=0",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=1400",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=1400",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=1400",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=1400",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=1400",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=1400",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=1400",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=1400",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=1400",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=1400",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=1400",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=1400",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=1400",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=1400",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=1400",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=1400",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=1400",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=1400",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=1400",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=1400",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=1400"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              },
+              "bridge-disabled": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=126",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=126",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=0"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              },
+              "other-executable": {
+                "exit": 0,
+                "submissions": [
+                  "INPUT vk=db scan=1a flags=0 sent=1 error=126",
+                  "INPUT vk=db scan=1a flags=2 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=0 sent=1 error=126",
+                  "INPUT vk=dd scan=1b flags=2 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=0 sent=1 error=126",
+                  "INPUT vk=30 scan=b flags=2 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=1 sent=1 error=126",
+                  "INPUT vk=2e scan=153 flags=3 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=1 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=0 sent=1 error=126",
+                  "INPUT vk=41 scan=1e flags=2 sent=1 error=126",
+                  "INPUT vk=a3 scan=11d flags=3 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=1 sent=1 error=126",
+                  "INPUT vk=25 scan=14b flags=3 sent=1 error=126",
+                  "INPUT vk=0 scan=1e flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1e flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=8 sent=1 error=0",
+                  "INPUT vk=0 scan=1c flags=a sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=9 sent=1 error=0",
+                  "INPUT vk=0 scan=11c flags=b sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=0 sent=1 error=0",
+                  "INPUT vk=7b scan=0 flags=2 sent=1 error=0"
+                ],
+                "submission_passed": true,
+                "events": [],
+                "expected": [],
+                "passed": true
+              }
+            },
+            "runtime": {
+              "linux_build": "4.0.20260928.262390",
+              "server_sync": true,
+              "display": ":0"
+            },
+            "authorization_prompts": [
+              [
+                "/usr/lib/kwin_eis_prompter",
+                "--client",
+                "lghub_agent.exe"
+              ]
+            ]
+          },
+          "provenance": {
+            "receiver_sha256": "d969939fda911a24560bd8ca7447b816ac7091ac93e5400eaa470eb0becf5f5c",
+            "sender_sha256": "7fb2483baa7bcdcd60997956a9bfa98ff035bbb5cebb7c4e3519cb75fbf7d620",
+            "wine_manifest_sha256": "ace131662cc0a41d55fe7fab2ae86b97c628d3d2a20d2d8c1deb6827782d0560",
+            "linux_manifest_sha256": "75dd30717e565c9831278e72f91022204d16e0e62938435bb1bec1eff8e40818",
+            "harness_sha256": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c",
+            "packaged_wine_version": "10.20"
+          },
+          "versions": [
+            "kwin 6.7.5-1.1",
+            "plasma-workspace 6.7.5-1.1",
+            "xorg-xwayland 24.1.13-1.1",
+            "libei 1.6.0-1",
+            "qt6-base 6.11.2-3.1",
+            "bubblewrap 0.13.0-1.1",
+            "xdg-desktop-portal 1.22.1-2.1",
+            "xdg-desktop-portal-kde 6.7.5-1.1"
+          ],
+          "files_sha256": {
+            "result.json": "63b059949ef95d15958dfc74f9626e68e47eb3b6980f6a67f49b510eb30de374",
+            "provenance.json": "5c8b46d6d7224de4ffb2bb797f724898b52913767ee00558e123483a453097db",
+            "versions.txt": "3606ada454196c99695d91032731012937c4ad3d3e897b5293f7570c22f3ff2d",
+            "command.json": "fc5ae4282adc1caed297fa657ff77783f647d661682637955d56ea76fc683c44",
+            "wine-container-command.json": "8997a26d9000803315554d7cc6fc36033d20c5084d66258f3bd3a42daea4a885",
+            "receiver.log": "4f1d16dfb05441be5a69d9679e9938a5ee9620182baebb9c3949cd93e47ab068",
+            "kwin.log": "2898cbe466d4923cb6262876aff9489a41e3601ee60161143401efc5c58d14af",
+            "harness.py": "5fb71c5d01de1eee302ce3fbb9a85fd433e83ee4edd4215314bbb8efb45c6c4c"
+          },
+          "remote_output": "/home/antiultra/.local/state/penguin-lghub-validation/wayland-wine-final-test-pending-app"
+        }
+      },
+      "remaining_kwin_processes": [
+        "49309 /usr/bin/kwin_x11 --replace"
+      ]
+    }
+  },
+  "coverage": {
+    "routing_cases": {
+      "passed": 6,
+      "total": 6
+    },
+    "pending_permission_controls": {
+      "passed": 2,
+      "total": 2
+    },
+    "end_to_end_ghub_wayland_targets": {
+      "passed": 0,
+      "total": 2
+    },
+    "consent_acceptance_tested": false,
+    "denial_revocation_persistence_tested": false
+  }
+}

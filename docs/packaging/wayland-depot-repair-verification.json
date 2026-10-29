@@ -1,0 +1,207 @@
+{
+  "date": "2026-10-27",
+  "scope": "Missing-depot repair; isolated frontend readiness, restart integrity and X11 regression",
+  "failure": {
+    "missing_extracted_depot_files": 1115,
+    "remaining_extracted_depot_files": 0,
+    "cached_archives_present": 30,
+    "updater_sentinel": {
+      "failures": [
+        {
+          "check": "depots_directory",
+          "detail": "Depots directory is empty: C:\\ProgramData\\LGHUB\\depots"
+        }
+      ],
+      "recovery_attempted": false,
+      "recovery_result": "none",
+      "status": "FAILING",
+      "timestamp": "2026-10-27T23:38:22Z"
+    },
+    "exact_deleting_routine_identified": false
+  },
+  "wayland": {
+    "passed": true,
+    "cycles": [
+      {
+        "passed": true,
+        "observer_exit": 0,
+        "ui": {
+          "schema": 1,
+          "checks": {
+            "required_files_present": true,
+            "bundled_fonts_loaded": true,
+            "desktop_and_default_profile": true,
+            "first_run_prompt_readable": true
+          },
+          "passed": true,
+          "missing": [],
+          "visible_text": "HELP US MAKE G HUB BETTER\nAllow G HUB to automatically send diagnostics and usage data.\nABOUT DEVICE ANALYTICS AND PRIVACY\nNO, THANKS\nYES, PLEASE",
+          "application_count": 1,
+          "profile_count": 1,
+          "scope": "Isolated first-run UI; no input injection, physical devices, tray or host GPU validation"
+        },
+        "tray_dock_requests": 1,
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact_after_exit": true,
+        "mapped_runtime_images_count": 154,
+        "private_wine_verified": true
+      },
+      {
+        "passed": true,
+        "observer_exit": 0,
+        "ui": {
+          "schema": 1,
+          "checks": {
+            "required_files_present": true,
+            "bundled_fonts_loaded": true,
+            "desktop_and_default_profile": true,
+            "first_run_prompt_readable": true
+          },
+          "passed": true,
+          "missing": [],
+          "visible_text": "HELP US MAKE G HUB BETTER\nAllow G HUB to automatically send diagnostics and usage data.\nABOUT DEVICE ANALYTICS AND PRIVACY\nNO, THANKS\nYES, PLEASE",
+          "application_count": 1,
+          "profile_count": 1,
+          "scope": "Isolated first-run UI; no input injection, physical devices, tray or host GPU validation"
+        },
+        "tray_dock_requests": 1,
+        "launcher_exit": 0,
+        "remaining_prefix_processes": [],
+        "installation_intact_after_exit": true,
+        "mapped_runtime_images_count": 151,
+        "private_wine_verified": true
+      }
+    ],
+    "live_desktop_used": false,
+    "physical_devices_tested": false,
+    "permission_granted": false
+  },
+  "x11": {
+    "schema": 1,
+    "checks": {
+      "required_files_present": true,
+      "bundled_fonts_loaded": true,
+      "desktop_and_default_profile": true,
+      "first_run_prompt_readable": true,
+      "native_tray_running": true,
+      "xembed_dock_received": true
+    },
+    "passed": true,
+    "fonts": {
+      "status": "ready",
+      "faces": [
+        {
+          "family": "BrownPro",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownPro-Regular",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownPro",
+          "weight": "700",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownPro-Bold",
+          "weight": "700",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownPro-Light",
+          "weight": "100",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownPro",
+          "weight": "100",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownPro-Thin",
+          "weight": "100",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownLogitechPan",
+          "weight": "400",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownLogitechPan",
+          "weight": "700",
+          "status": "loaded"
+        },
+        {
+          "family": "BrownLogitechPan",
+          "weight": "100",
+          "status": "loaded"
+        }
+      ]
+    },
+    "missing": [],
+    "visible_text": "HELP US MAKE G HUB BETTER\nAllow G HUB to automatically send diagnostics and usage data.\nABOUT DEVICE ANALYTICS AND PRIVACY\nNO, THANKS\nYES, PLEASE",
+    "application_count": 1,
+    "profile_count": 1,
+    "scope": "Isolated frontend and native tray startup/XEmbed registration; no Plasma popup/input, physical devices or host GPU validation",
+    "tray": {
+      "xembed_dock_requests": 1,
+      "native_process_running": true
+    },
+    "linux_runtime_build": "4.0.20260928.262390",
+    "host_wine_hidden": true,
+    "wine_synchronization": "server",
+    "ntsync_mask_present": false,
+    "mapped_runtime_image_count": 127,
+    "live_desktop_used": false,
+    "physical_devices_exposed": false,
+    "isolated_network": true,
+    "end_to_end_qualified": false
+  },
+  "integrity": {
+    "disposable_after_x11": {
+      "integrity_passed": true,
+      "fixed_files": 1603,
+      "depot_files": 1115,
+      "cache_archives": 30,
+      "installation_state": "frozen-depots-v1"
+    },
+    "new_user_installation": {
+      "integrity_passed": true,
+      "fixed_files": 1603,
+      "depot_files": 1115,
+      "cache_archives": 30,
+      "installation_state": "frozen-depots-v1"
+    }
+  },
+  "unit_tests": {
+    "passed": 98,
+    "total": 98
+  },
+  "source_sha256": {
+    "tools/packaging/desktop_runtime.py": "3467db38304c81c8df8dcfeb1041c8aa766f38915d916ae43e5230223be2f0af",
+    "tools/packaging/prepare_clean_prefix.py": "09c3f7ea7be776f8833feec1d10d9b1b5d361a083f02a5a0e0fcafb2df96ba8b",
+    "tools/packaging/wayland_launcher_probe.py": "c720907a91c85eba4a16628e97f304f2d87b53fd259504bcc2e30115a181b08a",
+    "tools/packaging/frontend_probe.cjs": "6a855811199cef4b70bfb7e337c32a79fe08dc5508dbfab5eb2a2b46325630a8"
+  },
+  "artifact_directory": "/home/firesongz/.local/state/penguin-lghub-validation/wayland-full-ui-001",
+  "artifact_sha256": {
+    "result.json": "5f6d7f5deeb0472ba70253b1eb84199aad2fc50a6f1fb3b147293faac0121b93",
+    "command.json": "7b1d39be9cbdeb029c94e633b4493c1144ed1c0a4f06d64af632380fdff72ebd",
+    "cycle-1/ui-verification.json": "099c0162ce51231b8405dd6b31aa99fc924a897a64663fd18776decca0c5b28c",
+    "cycle-2/ui-verification.json": "7f8ba0e34bcb32de0ffe65b2f776f8c9f68d63f09b6899e48c77dbd4924e64ad",
+    "installation/ui-verification.json": "8c8cd584bb083fec6ca345c03eebaae5c999e7f0f58cd20d40b354a82d86d39b"
+  },
+  "desktop_entry_sha256": "6ed617ec3eb19010be62df244ea6889a8d5ec6b966690a1c7ed4d9b725ee3ae0",
+  "desktop_validation_exit": 0,
+  "user_installation_not_launched": true,
+  "old_prefix_retained": true,
+  "x11_prefix_untouched": true,
+  "system_packages_changed": false,
+  "live_wayland_tray_owner_report": "functional",
+  "repaired_live_frontend_acceptance": "pending owner test"
+}

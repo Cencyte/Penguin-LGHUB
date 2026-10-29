@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-27",
+  "scope": "Opt-in Manjaro VM KDE/Xwayland launcher; isolated application startup, not physical desktop acceptance",
+  "source_sha256": {
+    "tools/packaging/desktop_runtime.py": "175ea259d4160bb1b41fe1751239f2c1cebdadf9eec54b7f55892eac098cf57f",
+    "tools/packaging/wayland_session.py": "f484bec7f963ea7681820a1600d89cf2f030caf0aeb803fed992f8fd0ff6b571",
+    "tests/packaging/test_desktop_runtime.py": "3d385e4689b0498ec24bfd9d93067bec1d3fa1e4599543098c7e77e2f5c64c5b"
+  },
+  "result": {
+    "passed": true,
+    "live_desktop_touched": false,
+    "physical_devices_tested": false,
+    "permission_granted": false,
+    "preflight_exit": 0,
+    "tray_dock_requests": 1,
+    "agent_ready": true,
+    "window_list": "_NET_CLIENT_LIST(WINDOW): window id # 0x2000004\n",
+    "stop_exit": 0,
+    "launcher_exit": 0,
+    "driver_configured": true,
+    "remaining_prefix_processes": [],
+    "packaged_runtime_mapped_images_count": 151,
+    "packaged_server_ntdll_x11_driver_confirmed": true,
+    "frontend_window_observed": true
+  },
+  "preflight": {
+    "runtime_integrity": "passed",
+    "session_errors": [],
+    "session": {
+      "mode": "experimental-kde-xwayland",
+      "errors": [],
+      "warnings": [
+        "Input permission is checked by KDE when you use an assignment. These capability checks do not grant or prove permission."
+      ],
+      "permission_granted": "not measured",
+      "end_to_end_qualified": false,
+      "x11_authenticated": true,
+      "xwayland": true,
+      "xtest": true,
+      "kwin_session": true,
+      "remote_desktop_portal": true,
+      "host_packages": [
+        "kwin 6.5.6-1",
+        "xorg-xwayland 24.1.9-1",
+        "libei 1.5.0-1",
+        "xdg-desktop-portal 1.20.3-2",
+        "xdg-desktop-portal-kde 6.5.6-1",
+        "pipewire 1:1.6.2-1"
+      ]
+    },
+    "logitech_hidraw": [],
+    "end_to_end_qualified": false
+  },
+  "unit_tests": {
+    "passed": 96,
+    "total": 96,
+    "launcher_tests": 14
+  },
+  "deployment": {
+    "desktop_entry": "/home/firesongz/Desktop/Penguin-LGHUB Wayland Test.desktop",
+    "desktop_entry_exists": true,
+    "desktop_entry_sha256": "8af482e84f8375d00353d1e7d28987777f81b19a0e992e917aa7237fc5ee051d",
+    "desktop_file_validate_exit": 0,
+    "installation": "/home/firesongz/.local/state/penguin-lghub-validation/wayland-desktop-001",
+    "x11_launcher_preserved": true
+  },
+  "test_artifacts": {
+    "directory": "/home/firesongz/.local/state/penguin-lghub-validation/wayland-launcher-smoke-003",
+    "sha256": {
+      "result.json": "f9a532fd1f668ad48558797e851ffff55c2f5236c4bcc4d40b35c340152a1118",
+      "command.json": "b178a0436d2fe5f1ae7fa163f09bf2bbbb530b4cf4577981dad2eefd8e6d8a9c",
+      "harness.py": "2f370a256f6938708be5ca7c4f0c79a907850ce7be8fcaf5bee8b89de8b4bb4e",
+      "preflight.json": "760536ae66a93e7de6182faf48f7e2a8259fb55b428efdf406e9c0c66f6fc05d"
+    }
+  },
+  "packages_installed": [
+    "kdialog 25.12.3-1",
+    "xorg-xwininfo 1.1.6-1"
+  ],
+  "new_package_archives_sha256": {
+    "kdialog-25.12.3-1-x86_64.pkg.tar.zst": "81274bbd1cea910f7c36a43ae4953cbc85579e1403cc44b4aee68f025e612271",
+    "xorg-xwininfo-1.1.6-1-x86_64.pkg.tar.zst": "3aacd867bd50792437033d6d8fb9a0992cc24dc3ff80e6def13457057c9619c7"
+  },
+  "package_dependencies_upgraded": false,
+  "live_session": "52674 /usr/bin/kwin_x11 --replace",
+  "full_wayland_desktop_acceptance": {
+    "qualified": 0,
+    "target_systems": 2
+  }
+}

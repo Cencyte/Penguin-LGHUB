@@ -1,7 +1,9 @@
 # Pinned Linux userspace: native libraries and G HUB backend verified
 
 Checked October 26, 2026. Current scope: **Manjaro and CachyOS on X11**.
-Bazzite/Wayland work is deferred; Debian is a later host target. These checks
+Bazzite remains deferred; Debian is a later host target. Wayland research now
+has a [packaged-Wine keyboard transport result on both targets](2026-10-27-wayland-packaged-wine.md), while
+the production launcher still requires X11. These checks
 leave the working Desktop launcher and prefix unchanged.
 
 ## Measured results
@@ -160,9 +162,12 @@ process/network isolation.
    resize/hover/color interactions, update freeze and rollback. Graphics and
    device checks remain available for the user to perform without a deadline.
 
-Debian host testing follows later. Bazzite and native Wayland need a separate
-plan; Distrobox alone does not translate XTEST global input into native
-Wayland input. No Bazzite implementation or validation is included here.
+Debian host testing follows later. Bazzite remains outside this validation.
+Distrobox alone does not translate XTEST input, but modern Xwayland can forward
+XTEST through libei to KWin's native Wayland input stack. The first isolated
+positive and authorization-pending controls now pass on CachyOS; see the
+[Wayland research and implementation sequence](2026-10-27-wayland-research.md).
+This does not yet qualify the packaged Wine bridge or enable Wayland launches.
 
 ## Upstream references
 
@@ -190,6 +195,17 @@ paths, and adds the pinned non-graphics library directory. A nested application
 freeze must use `--dev-bind /dev /dev`: a plain recursive root bind adds `nodev`
 and even makes `/dev/null` unusable. This defect was found in cross-host
 supervisor testing and corrected in both desktop and headless overlay paths.
+
+The application boundary also keeps Wine on **server synchronization**.
+Newer kernels can expose `/dev/ntsync`, which Wine 10.20 selects automatically;
+on CachyOS this caused the native CoreMessaging registrar to fail before tray
+registration. `server_sync.py` masks that device only inside the application
+namespace using an unreadable anonymous file. Host device permissions, other
+Wine sessions, graphics and HID access are unchanged. The worker verifies the
+policy before starting Wine. A complete quit/relaunch is required for an
+existing session to change backend. The UI probe deliberately challenges this
+boundary with host NTSYNC when available. See the
+[controlled comparison and deployment record](2026-10-27-cachyos-tray.md).
 
 The optional [udev rules](../../packaging/70-penguin-lghub.rules) grant the active
 local-seat user HID/USB access for Logitech's vendor ID only. They do not grant
@@ -240,6 +256,86 @@ transfer that executable and adjacent JSON receipt, then add
 `--activation-probe /path/probe.exe` to the target's `probe` command. The receipt
 checks source identity and transferred bytes; it does not authenticate an
 untrusted publisher. No probe executable or vendor binary is in this repository.
+
+### Fresh-start UI corrections, October 27
+
+The first interactive Manjaro VM attempt exposed defects that the earlier
+process/API checks could not detect. The two blank screens contained G HUB's
+missing-files error and its repair/download actions. Complete application bytes
+alone were insufficient to reproduce first-run installation state.
+
+The corrected recipe now:
+
+1. Retains the 30 verified depot archives under the updater's content-addressed
+   cache. The frontend's essential-files check previously reported `cache` missing.
+2. Seeds `ProgramData/LGHUBData/applications/applications_db.json` from the
+   pinned core depot's `data/applications.json`. This version selects the newer
+   cache path when `apps_updater_enabled` is enabled. Without a catalog, the
+   offline fresh agent returned no applications and an unnamed default profile.
+   The agent now creates its own Desktop application and named default profile;
+   no personal database or settings are copied.
+3. Activates the already verified color-picker archive in the desktop clone.
+   Previously the new launcher left that generated archive unused.
+4. Initializes the ten existing bundled font faces after the stylesheet has
+   loaded and before starting the UI application. Initial CSS loads failed in
+   this Wine/Electron combination, while explicit loads of the same bundled
+   bytes succeeded. This is a targeted startup workaround; the precise underlying
+   Wine/Chromium failure is not yet established. Only `index.html` changes in this
+   additional transformation, and all 267 packed entries are checked. The existing
+   color fix, font files and other resources remain byte-identical. No Windows
+   fonts, font substitutions, system package upgrades or sandbox-disable switch
+   are required by this tested frontend path.
+
+[Machine-readable result](../../packaging/first-run-ui-verification.json): a
+new candidate built by the corrected recipe verified 1,605 managed files, then
+passed **4/4 startup checks (100% of this gate)** in the Manjaro VM. The captured
+UI reached the readable first-run privacy prompt. The probe did not click it,
+choose privacy preferences, connect to the live desktop or expose physical
+devices. It used the pinned Linux runtime, private Wine and an owned Xvfb in a
+private network/PID namespace. The existing live VM installation stayed intact.
+All 83 packaging unit tests passed. This result does not qualify host GPU,
+tray interaction, peripheral behavior, all languages/fonts or CachyOS UI startup.
+
+Subsequent VM testing found a separate native-tray font prerequisite. The
+recipe now supplies a per-prefix Segoe UI replacement using DejaVu Sans from
+the pinned Linux runtime, and generated launchers install the project icon.
+See the [desktop regression investigation](2026-10-27-desktop-regressions.md)
+for the controlled tray result, configuration checks, and the still-open
+black-window report. The original four startup checks were a narrower gate.
+
+The October 27 CachyOS tray investigation extended this command to require a
+running native tray process and an XEmbed dock request on an owned tray host,
+with GLX enabled on the private Xvfb. The corrected candidate passed **6/6**
+checks. A deliberately disabled tray still passed the original four checks but
+failed both additions and returned a failing overall status. This validates the
+new failure detector; it does not certify a physical GPU or Plasma menu input.
+The generated frontend now retains native-tray errors and logs its exit status,
+instead of directing those diagnostics to `/dev/null`. Details and the remaining
+live failure are in [the CachyOS tray report](2026-10-27-cachyos-tray.md).
+
+The new repeatable gate is:
+
+```sh
+python3 tools/packaging/linux_ui_probe.py probe \
+  --candidate /path/to/newly-generated-candidate \
+  --linux-runtime /path/to/private-linux \
+  --wine /path/to/private-wine \
+  --test-tools /path/to/pinned-test-tools \
+  --output /path/to/new-ui-probe
+```
+
+The result and screenshot are `ui-verification.json` and `first-run.png` in the
+private output directory. Use an idle runtime or a separate verified runtime
+clone if a live session holds its lock. The test refuses to share live input
+devices or a desktop connection. A separate fresh desktop clone is still needed
+for user acceptance; do not promote a probe's modified settings database.
+
+Keep the verified depot installation path. The native installer could supply
+some missing setup state, but is not necessary to pass this reproduced startup
+case and would not itself supply the font workaround. Deferred optional SDK and
+integration installer actions remain separate qualification work. Updater remote
+execution still reports `NOT_READY` under the frozen/offline test; this does not
+prevent reaching first-run setup and is not presented as resolved.
 
 ## Bazzite test environment recommendation (research only)
 

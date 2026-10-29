@@ -109,8 +109,10 @@ class RuntimeTests(unittest.TestCase):
         self.assertIn('/usr/share/wine', cmd)
         self.assertIn('/usr/bin/wineserver', cmd)
         self.assertIn('/dev/null', cmd)
-        self.assertEqual(cmd[-6:], ['--ro-bind', '/candidate/prefix/' + prefix.APP,
-                                  '/candidate/prefix/' + prefix.APP, '--', 'wine', '--version'])
+        self.assertEqual(cmd[-9:], ['--ro-bind', '/candidate/prefix/' + prefix.APP,
+                                  '/candidate/prefix/' + prefix.APP,
+                                  '--ro-bind', '/candidate/prefix/' + prefix.DATA,
+                                  '/candidate/prefix/' + prefix.DATA, '--', 'wine', '--version'])
         self.assertNotIn('sudo', cmd)
 
     def test_edited_receipt_cannot_replace_pinned_artifacts(self):

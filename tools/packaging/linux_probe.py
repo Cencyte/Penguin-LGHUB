@@ -115,7 +115,8 @@ def test_command(root, test_tools, command):
     # A normal recursive bind adds nodev, including to /dev's submounts.
     # Preserve the outer namespace's device permissions. In headless probes
     # this is still the synthetic /dev, with no physical devices present.
-    return [str(bwrap), '--bind', '/', '/', '--dev-bind', '/dev', '/dev', '--die-with-parent',
+    return ['/usr/bin/python3', str(ROOT / 'tools/packaging/server_sync.py'),
+            str(bwrap), '--bind', '/', '/', '--dev-bind', '/dev', '/dev', '--die-with-parent',
             '--overlay-src', '/usr/bin', '--overlay-src', str(test_tools / 'xvfb/usr/bin'),
             '--ro-overlay', '/usr/bin',
             '--overlay-src', '/usr/share/X11', '--overlay-src', str(test_tools / 'xvfb/usr/share/X11'),
