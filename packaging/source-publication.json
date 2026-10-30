@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "67c46a4d2e3d6cd3fe092ee0afe3ee3014ad5069b522f8b7854f70c0253f30c3",
-      "bytes": 47016
+      "sha256": "91968e1a484db2fd7b15f22a1c72f46ab7a678f546e26eec6f6e5b58cb84fe3f",
+      "bytes": 58941
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -464,14 +464,26 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "38ed3c1160ab765b469301006897a854b1863f340809c13735e02abef60bafff",
-      "bytes": 7406
+      "sha256": "3c770f35d05d48f1e86bfb6cc3b7d60389bb3acc1888325973455a59a46b084f",
+      "bytes": 7668
     },
     {
       "path": "docs/packaging/source-publication.md",
       "mode": "100644",
       "sha256": "4ef9cd11d2cae2b6bd899ba6bd3864b37927d1f7fa2e57b89e7274b85942ca39",
       "bytes": 4590
+    },
+    {
+      "path": "docs/packaging/status-cachyos.svg",
+      "mode": "100644",
+      "sha256": "c3d92cc3c12e62bf65702f932404e554a2456183b178308764df81f0e4243bdf",
+      "bytes": 889
+    },
+    {
+      "path": "docs/packaging/status-manjaro.svg",
+      "mode": "100644",
+      "sha256": "fdd5adce4ed1be2991334b3d5d5fe2fde2ccb6a9e135e1ed90c5da019f686d52",
+      "bytes": 889
     },
     {
       "path": "docs/packaging/third-party-use.md",
@@ -2604,8 +2616,8 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Includes desktop/Wayland fixes, recorded manual acceptance, current architecture diagrams and release-installer documentation; no vendor payload or populated prefix.",
+  "publication_note": "Default installer branch with current diagrams, repository-hosted distribution badges, documented tests and glossary; no vendor payload or populated prefix.",
   "publication_branch": "release",
-  "file_count": 429,
-  "total_bytes": 10045588
+  "file_count": 431,
+  "total_bytes": 10059553
 }

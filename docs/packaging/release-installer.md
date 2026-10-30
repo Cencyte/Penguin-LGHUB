@@ -1,6 +1,6 @@
-# Release-candidate installer
+# Installation
 
-The `release` branch provides the complete source-to-launcher entry point.
+The installer provides the complete source-to-launcher entry point.
 It downloads pinned inputs, builds the changed Wine components and creates a
 fresh application prefix. No pre-existing lab build, donor prefix, host Wine,
 Docker daemon or host MinGW compiler is an input to this workflow.
@@ -8,7 +8,7 @@ Docker daemon or host MinGW compiler is an input to this workflow.
 Boot the target OS and run these commands in its normal KDE desktop terminal:
 
 ```sh
-git clone --branch release https://github.com/Cencyte/Penguin-LGHUB.git
+git clone https://github.com/Cencyte/Penguin-LGHUB.git
 cd Penguin-LGHUB
 ./install.sh --install
 ```
@@ -19,16 +19,21 @@ device-rule helper; it never starts G HUB as root. It installs a launcher for
 the current session in the resolved Desktop and application-menu directories,
 with the project icon and Quit/check/log actions. For the other session on an
 OS that offers both, use `desktop_runtime.py install-entry` with the installed
-`desktop/desktop.json` configuration and `--experimental-wayland` for Wayland.
+`desktop/desktop.json` configuration. For a Wayland launcher, add:
+
+- `--experimental-wayland` — enable the Plasma/Xwayland launcher path.
+
 Bazzite's intended test is its default Plasma Wayland session; setup does not
 add an unsupported full-X11 desktop.
 
 Initial scope: x86-64 Manjaro, CachyOS and Bazzite KDE. Reserve **80 GiB free**
 for the first build, downloaded media, extracted depots, verification copies and
 20 GiB of retained headroom. This is a working-space requirement, not a download
-size. The build reuses verified downloads on retry. Use
-`--directory /path/to/spacious/local/storage` if necessary. Keep that directory
-after installation: it contains the actual runtime and desktop prefix.
+size. The build reuses verified downloads on retry. To choose another storage location, add:
+
+- `--directory /path/to/spacious/local/storage` — store the runtime, prefix and build files here.
+
+Keep that directory after installation: it contains the actual runtime and desktop prefix.
 
 Host prerequisites are Python 3.12+, bubblewrap, zstd, sudo, udev, XDG user
 directories, gdbus and kdialog, with authenticated local X11/Xwayland access;
@@ -38,10 +43,17 @@ performed. Missing prerequisites produce a named error rather than silently
 changing an immutable image or a version-pinned workstation. OpenSSL libcrypto
 is used for the encrypted Logitech resource depots.
 
-`./install.sh --check` records host capabilities without installing the payload.
-`./install.sh --help` follows the project's USAGE/SUMMARY/FLAGS/EXAMPLES format.
-No arguments prints only usage. `--verbose` displays command output beneath
-each colored step; output is always retained in a mode-0600 log under
+Standalone commands:
+
+- `./install.sh --check` — record host readiness and explain blockers.
+- `./install.sh --help` — show usage, switches and examples.
+
+Optional installation switches:
+
+- `--verbose` — display command output beneath each colored step.
+- `--jobs 4` — select 1–16 Wine build jobs; the default is 4.
+
+No arguments prints only usage. Output is always retained in a mode-0600 log under
 `${XDG_STATE_HOME:-~/.local/state}/penguin-lghub/`. Host inventory and step-specific
 probe logs are retained too. Do not publish raw logs without checking them for
 local paths, usernames, device identifiers and application state.
@@ -81,8 +93,11 @@ the corresponding-source/notice audit remains required before such a release.
 The source build's SHA-256 inventory is recorded and checked before use.
 
 The Windows reconstruction engine defaults to bubblewrap on all three OSes.
-`--engine podman` uses existing rootless Podman for that acquisition step;
-the source build and application runtime still use bubblewrap/pressure-vessel.
+For existing rootless Podman installations, add:
+
+- `--engine podman` — select Podman for the Windows-resource acquisition step.
+
+The source build and application runtime still use bubblewrap/pressure-vessel.
 Podman needs working rootless user-namespace mappings. On SELinux hosts, only
 the dedicated private toolchain/work directories are labelled for container
 access. There is no Docker requirement, privileged container, host-home relabel,

@@ -15,45 +15,13 @@
 
 An experimental compatibility layer for running the original **Logitech G HUB** on Linux through a custom Wine runtime. The working setup retains the actual G HUB agent and main interface for device configuration, key bindings, macros, profiles, lighting and G-Shift.
 
-### Release candidate:
+### Current status:
 
-The `release` branch now has a clone-and-run installer that builds the custom Wine components from pinned source, acquires the required vendor resources, prepares the prefix and installs the desktop launcher. Manjaro and CachyOS have manually verified desktop results, including the Plasma Wayland path through Xwayland. The unassisted Bazzite installation and physical-device test is the next acceptance checkpoint. There is no hosted binary runtime release yet.
+The clone-and-run installer builds the custom Wine components from pinned source, acquires the required vendor resources, prepares the prefix and installs the desktop launcher. Manjaro and CachyOS have manually verified desktop results, including the Plasma Wayland path through Xwayland. The unassisted Bazzite installation and physical-device test is the next acceptance checkpoint. There is no hosted binary runtime release yet.
 
 ## Diagrams: LGHUB Wine Compatibility System
 
-The overviews show the main parts; the detailed maps show their dependencies. Click any image to open the full-resolution version.
-
-### 01 · Simple modular overview:
-
-Three short views: installation, runtime and Linux integration.
-
-[![Simple modular overview](docs/architecture/2026-10-29/simple-modular.png)](docs/architecture/2026-10-29/simple-modular.png?raw=1)
-
-[Mermaid source](docs/architecture/2026-10-29/simple-modular.mmd) · [Obsidian note](docs/architecture/2026-10-29/simple-modular.md)
-
-### 02 · Simple connected overview:
-
-One connected path from setup to the original application and Linux.
-
-[![Simple connected overview](docs/architecture/2026-10-29/simple-connected.png)](docs/architecture/2026-10-29/simple-connected.png?raw=1)
-
-[Mermaid source](docs/architecture/2026-10-29/simple-connected.mmd) · [Obsidian note](docs/architecture/2026-10-29/simple-connected.md)
-
-### 03 · Detailed modular architecture:
-
-Six views of the installer, launch flow, compatibility components and validation.
-
-[![Detailed modular architecture](docs/architecture/2026-10-29/detailed-modular.png)](docs/architecture/2026-10-29/detailed-modular.png?raw=1)
-
-[Mermaid source](docs/architecture/2026-10-29/detailed-modular.mmd) · [Obsidian note](docs/architecture/2026-10-29/detailed-modular.md)
-
-### 04 · Detailed connected architecture:
-
-The full connected system, preserving the original grouped four-color style.
-
-[![Detailed connected architecture](docs/architecture/2026-10-29/detailed-connected.png)](docs/architecture/2026-10-29/detailed-connected.png?raw=1)
-
-[Mermaid source](docs/architecture/2026-10-29/detailed-connected.mmd) · [Obsidian note](docs/architecture/2026-10-29/detailed-connected.md)
+<p align="center"><a href="docs/architecture/2026-10-29/simple-modular.png?raw=1"><img src="docs/architecture/2026-10-29/simple-modular.png" alt="Simple modular overview of installation, runtime and Linux integration"></a><br><a href="docs/architecture/2026-10-29/detailed-modular.png?raw=1">Expand detail</a><br><a href="docs/architecture/2026-10-29/simple-connected.png?raw=1"><img src="docs/architecture/2026-10-29/simple-connected.png" alt="Simple connected overview from setup through G HUB and Wine to Linux"></a><br><a href="docs/architecture/2026-10-29/detailed-connected.png?raw=1">Expand detail</a></p>
 
 ## Warning:
 
@@ -85,10 +53,10 @@ G HUB prefix, alongside any Wine already installed on the system. Device-access
 setup requires sudo; G HUB itself runs as a regular user. Updates are
 controlled so that a vendor update cannot silently replace the tested setup.
 
-The [release installer](docs/packaging/release-installer.md) is available for the next acceptance test. The source recipe and isolated verification are implemented; Bazzite's complete desktop/device result is pending. See the [Bazzite findings](docs/packaging/bazzite-readiness.md) for graphics, audio, device, SELinux and full-X11-session considerations.
+The [installer](docs/packaging/release-installer.md) is available for the next acceptance test. The source recipe and isolated verification are implemented; Bazzite's complete desktop/device result is pending. See the [Bazzite findings](docs/packaging/bazzite-readiness.md) for graphics, audio, device, SELinux and full-X11-session considerations.
 
-![Manjaro](https://img.shields.io/badge/Manjaro-X11_%2B_Wayland-tested-brightgreen)
-![CachyOS](https://img.shields.io/badge/CachyOS-X11_%2B_Wayland-tested-brightgreen)
+![Manjaro](docs/packaging/status-manjaro.svg)
+![CachyOS](docs/packaging/status-cachyos.svg)
 ![Bazzite](https://img.shields.io/badge/Bazzite-validation_pending-yellow)
 
 [![Packaging tests](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml/badge.svg)](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml)
@@ -124,40 +92,73 @@ session is the current installation target.
 
 [Reddit discussion and original announcement](https://www.reddit.com/r/LogitechG/comments/1xe5jw2/comment/19rp0hjphnyjo/?context=1&screen_view_count=2)
 
-## Install the release candidate
+## Installation:
 
 Run in the target OS's normal KDE desktop terminal, as a regular user:
 
 ```sh
-git clone --branch release https://github.com/Cencyte/Penguin-LGHUB.git
+git clone https://github.com/Cencyte/Penguin-LGHUB.git
 cd Penguin-LGHUB
 ./install.sh --install
 ```
 
-Allow **80 GiB of free working space** for the initial source build and acquisition. Use `--directory /path/to/spacious/local/storage` to choose another location. Add `--verbose` to see command output; all command output is logged either way, with the path printed below the logo. `./install.sh --help` explains the options, and `./install.sh --check` records prerequisites without installing the payload.
+Allow **80 GiB of free working space** for the initial source build and acquisition. All command output is saved to the log path printed below the logo.
 
-The installer supplies private build tools, Wine, Linux libraries and launcher helpers; it does not require system Wine, Docker, host MinGW or Distrobox. The default acquisition engine is bubblewrap; `--engine podman` supports an existing rootless Podman installation. The repository requires authorized GitHub access while it remains private. See [installation, retry and validation details](docs/packaging/release-installer.md).
+Optional switches, added to the installation command:
+
+- `--directory /path/to/spacious/local/storage` — choose where the runtime, prefix and build files are stored.
+- `--verbose` — also display each step's command output in the terminal.
+- `--jobs 4` — choose 1–16 build jobs; the default is 4.
+- `--engine podman` — use an existing rootless Podman installation for Windows-resource acquisition. The default is bubblewrap.
+
+Standalone commands, run from the cloned project directory:
+
+- `./install.sh --help` — show usage, switches and examples.
+- `./install.sh --check` — check the current host's installation prerequisites and save a report.
+
+The installer supplies private build tools, Wine, Linux libraries and launcher helpers. The repository requires authorized GitHub access while it remains private. See [installation, retry and validation details](docs/packaging/release-installer.md).
 
 ## What the project contains
 
 | Resource | Source or configuration | Role |
 |---|---|---|
-| Custom Wine build | [45 patch topics](patches/wine/), [build/run tools](tools/wine/), [private runtime packager](tools/packaging/wine_runtime.py) | Windows API, composition, input, graphics, device and native X11 key-output compatibility. The [source builder](https://github.com/Cencyte/Penguin-LGHUB/blob/release/tools/packaging/build_release_runtime.py) applies all 45 topics and compiles every changed module and helper inside the pinned SDK. A corresponding-source audit remains before hosting a binary runtime release. |
+| Custom Wine build | [45 patch topics](patches/wine/), [build/run tools](tools/wine/), [private runtime packager](tools/packaging/wine_runtime.py) | Windows API, composition, input, graphics, device and native X11 key-output compatibility. The [source builder](tools/packaging/build_release_runtime.py) applies all 45 topics and compiles every changed module and helper inside the pinned SDK. A corresponding-source audit remains before hosting a binary runtime release. |
 | Supplementary DLL implementations | [DirectComposition](tools/wine/dcomp_experiment.cpp), [CoreMessaging adapter](tools/wine/coremessaging_xp_adapter.c), [DispatcherQueue](tools/wine/dispatcher_queue_experiment.cpp), [CoreApplication](tools/wine/core_application_experiment.cpp), [ApiInformation proxy](tools/wine/api_information_proxy.cpp), [sensor fallback](tools/wine/sensor_monitor_unavailable.c) | Separate app-local helpers. Some implement only the contracts the observed application needs; they are not complete replacements for their Windows subsystems. |
 | Local vendor-resource transformations | [Color preview](tools/wine/prepare_color_picker_fix.py), [tray background](tools/wine/prepare_tray_background.py) | Generate local modified assets from the acquired application. Do not treat generated `app.asar`, XBF or PRI files as project-owned source. |
 | Prefix and launch definition | [Observed runtime baseline](packaging/runtime-baseline.json), [runtime registration helper](tools/wine/configure_runtime.py), [snapshot preparation](tools/wine/prepare_tested_desktop.py), [legacy launcher](tools/wine/tested_desktop_launch.py), [container launcher](tools/packaging/desktop_runtime.py) | Preserve the working configuration: 48 recorded file hashes, environment flags, DLL load policy and eight recorded WinRT activation classes. The baseline records evidence; the fresh-prefix generator and top-level installer turn it into the installed configuration. |
 | Diagnostics | [Agent snapshot](tools/wine/agent_snapshot.cjs), [color-picker recorder](tools/wine/color_picker_monitor.cjs), [composition regression runner](tools/wine/run_dcomp_tests.py) | Readiness, device/profile evidence and targeted regression checks. The Node helpers need a version with built-in WebSocket support. |
 | Analysis tools and technical history | [DragonShard tools](tools/dragonshard-2/), [technical notes](docs/dragonshard/) | Optional contributor tools and saved findings. The earlier native remapper is not the backend of this G HUB/Wine path and is outside this source snapshot. Ghidra databases and full decompilation exports are not runtime dependencies. |
 
-## Inspecting this snapshot
+## Running project tests:
+
+From the cloned project directory, run:
 
 ```sh
-git clone https://github.com/Cencyte/Penguin-LGHUB.git
-cd Penguin-LGHUB
 python3 -m unittest discover -s tests/packaging -p 'test_*.py'
+python3 -m unittest discover -s tools/wine -p 'test_desktop_device_policy.py'
 ```
 
-This optional check downloads the project's source code and runs small automated tests using sample data. It requires Python 3.12 or newer. A successful run ends with `OK`. It does not install G HUB, change system packages or test connected devices. For installation, use “Install the release candidate” above. The expandable sections below contain contributor-level technical details.
+These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. `OK` means all assertions passed; `FAILED` identifies failed checks or errors. The packaging suite contains 135 checks, with five additional device-policy checks.
+
+| Test area | What is checked |
+|---|---|
+| Downloads and extraction | Hash verification, encrypted sample depots, corrupt data and unsafe archive paths. |
+| Wine and prefix preparation | File inventories, registry definitions, DLL policy and protection of existing directories. |
+| Container and device policy | Generated isolation commands, scoped device access and per-application synchronization settings. |
+| Desktop behavior | Launcher/startup/shutdown logic, tray-registration handling and frontend resource transformations. |
+| Installer workflow | Step ordering, retry preservation, help, terminal output and persistent logs. |
+
+### Checking this computer's readiness:
+
+Run this from the target KDE desktop terminal:
+
+```sh
+./install.sh --check
+```
+
+This checks the actual host's OS, CPU architecture, required tools, user namespaces and desktop session. It records graphics drivers, audio-socket presence, SELinux state and Logitech device access. On Wayland it also checks Xwayland authentication, KWin and the input-control portal. Blockers stop the check with an explanation; warnings identify remaining verification needs. A successful readiness check is followed by installation checks and hands-on device testing.
+
+## Additional details
 
 <details>
 <summary><strong>Publication gates</strong></summary>
@@ -209,11 +210,16 @@ The **43 recorded installer declaration groups** are now classified by the clean
 
 The [preparation script](tools/packaging/prepare_clean_prefix.py) builds a **new** Wine prefix from the verified depot stage and reconstructed Windows DLLs. It generates depot metadata, public-key records, update settings, installation inventory, eight WinRT registrations and the `lghubapp` URL handler. It registers `LGHUBUpdaterService` through Wine's service manager with its correct command, deliberately **stopped and demand-start** pending full qualification. This differs from the existing Desktop installation's automatic service startup.
 
-Use `--runtime` with the complete private bundle described below. It supplies Wine and the seven supplementary DLLs. The older `--compatibility-root` development path is retained for comparison and still requires the lab layout and host Wine 10.20. Neither path copies a donor registry, application settings, vendor application files or Windows fonts. The color-picker archive and two tray resources are transformed locally; all three resulting hashes match the working setup.
+The preparation tool accepts either source of Wine components:
+
+- `--runtime /path/to/private-work/wine-10.20-penguin` — use the complete private bundle, including the seven supplementary DLLs.
+- `--compatibility-root /path/to/lab` — legacy comparison path requiring the lab layout and host Wine 10.20.
+
+Neither path copies a donor registry, application settings, vendor application files or Windows fonts. The color-picker archive and two tray resources are transformed locally; all three resulting hashes match the working setup.
 
 ### Development prerequisites:
 
-Python 3.12+, `bwrap` with working user namespaces, MinGW `x86_64-w64-mingw32-g++` for the validation helper, and the bundle's Unix-library dependencies. The backend probe additionally needs Xvfb and Node with built-in WebSocket support. No packages are installed by these commands. With `--runtime`, neither system Wine nor sudo-based Wine overlays are used. The legacy `--compatibility-root` path still requires host Wine 10.20 and noninteractive sudo. This does not remove the overall project's host-device setup requirements.
+Python 3.12+, `bwrap` with working user namespaces, MinGW `x86_64-w64-mingw32-g++` for the validation helper, and the bundle's Unix-library dependencies. The backend probe additionally needs Xvfb and Node with built-in WebSocket support. No packages are installed by these commands. The private-bundle path supplies its own Wine. The legacy lab path still requires host Wine 10.20 and noninteractive sudo. This does not remove the overall project's host-device setup requirements.
 
 ```sh
 python tools/packaging/prepare_clean_prefix.py \
@@ -276,7 +282,9 @@ python tools/packaging/wine_runtime.py restore \
 
 Outputs must be new directories/files. Building and restoring reserve 2 GiB above the existing 20 GiB free-space floor. The measured local archive is **101,488,615 bytes (96.8 MiB)**. A restore verifies its whole-file checksum before extraction, then checks every recorded file/hash/mode/link and all pinned compatibility artifacts. The local receipt is not a replacement for authenticating a downloaded archive against its trusted release checksum.
 
-The fresh installer masks the host's Wine module/data directories and loader/server executables during every packaged-runtime check. Its processes select the private loader and server explicitly. The agent probe records actual mapped runtime images; both the normal-path and relocated-path runs passed all five API routes. Relocation used a path containing spaces with the original runtime path absent. For an existing candidate after relocation, supply `probe_clean_agent.py --runtime /new/runtime/path`; it must have the same manifest hash as the candidate's recorded runtime.
+The fresh installer masks the host's Wine module/data directories and loader/server executables during every packaged-runtime check. Its processes select the private loader and server explicitly. The agent probe records actual mapped runtime images; both the normal-path and relocated-path runs passed all five API routes. Relocation used a path containing spaces with the original runtime path absent. For an existing candidate after relocation, supply the runtime option on the agent probe:
+
+- `--runtime /new/runtime/path` — the runtime must have the same manifest hash as the candidate's recorded runtime.
 
 ### Base Wine bundle:
 
@@ -357,7 +365,7 @@ A dedicated `/opt/penguin-lghub` runtime package is another option, with user da
 | Complete private Wine runner + generated prefix | Recommended first integration target; avoids the user's Wine version and package file conflicts. | Enumerate dynamically loaded Unix libraries, eliminate absolute developer paths, select portable build flags, test host graphics/USB integration. Copying the current partial builds is not sufficient. |
 | Pinned OCI build container (Podman/Docker) | Recommended for reproducible builds. [Proton itself documents containerized builds](https://raw.githubusercontent.com/ValveSoftware/Proton/proton_10.0/README.md). | Reconstruct the working patch/build configuration and pin image digests, source, toolchain and library versions; retain rebuildable source and licenses. This does not require running the GUI inside Docker. |
 | Desktop-oriented runtime container, such as pressure-vessel | Promising second step for stable Unix dependencies across distributions. [Valve's runtime](https://github.com/ValveSoftware/steam-runtime) uses Linux namespaces for that purpose. | Prove USB/HID enumeration and hotplug, desktop/session connections and host graphics-driver integration. Do not assume an unmodified game container meets a peripheral-control application's needs. |
-| Docker/Podman as the application runtime | Technically possible, but not the preferred first public delivery form. | Explicit X11 authorization, session audio and tray integration, GPU userspace/driver compatibility, device permissions/hotplug, local WebSocket reachability and persistent user-owned state. No blanket `--privileged` or whole-host mount as the proposed solution. |
+| Docker/Podman as the application runtime | Technically possible, but not the preferred first public delivery form. | Explicit X11 authorization, session audio and tray integration, GPU userspace/driver compatibility, device permissions/hotplug, local WebSocket reachability and persistent user-owned state. Avoid privileged containers and whole-host mounts. |
 | Flatpak/Bottles | Useful established desktop packaging, but not an already validated deployment of this stack. | [Flatpak documents](https://docs.flatpak.org/en/latest/sandbox-permissions.html) explicit X11, GPU, session and device permissions. Its USB portal requires an application integration; Wine does not automatically gain it by being packaged. Raw USB permission also does not by itself prove access to the required hidraw nodes. |
 
 A container can stabilize much of userspace; it does not carry an interchangeable kernel/GPU-driver pair or make global input work on native Wayland. The current XTEST bridge deliberately reaches native host applications, so the runtime cannot be represented as a fully isolated security sandbox. Keep the application under the real user's UID. Device access and narrowly scoped setup helpers belong on the host; USB identities must be rediscovered on hotplug rather than tied to one `/dev/hidrawN` number.
@@ -393,3 +401,90 @@ Acceptance on each initial target covers: installation/relaunch; device discover
 This is an independent community project, not affiliated with or endorsed by Logitech. Logitech and its product names belong to their respective rights-holders. The [Penguin-LGHUB artwork](assets/penguin-lghub-logo.png) identifies this independent project.
 
 The existing repository [GPLv3 license](LICENSE) covers original project source except where a file or component carries another license. **Wine patches and Wine-derived material retain LGPL-2.1-or-later and upstream notices.** See [NOTICE.md](NOTICE.md) for component boundaries, including the supplied artwork. No proprietary G HUB/Windows binaries, Windows fonts, populated Wine prefixes or decompilation corpus are included. Publishing this implementation does not settle the separate dependency-use questions described above.
+
+## Glossary of terms
+
+| Term | Meaning in this project |
+|---|---|
+| ABI | Application binary interface: the low-level calling and data rules compiled programs must agree on. Wine and helper DLLs must match the interfaces G HUB expects. |
+| ACL | Access control list: permissions granted to particular users. Linux login sessions can grant access to Logitech device nodes this way. |
+| Agent | The background G HUB process that manages devices, profiles and assignments, independently of the main window. |
+| API | Application programming interface: a defined way for programs to communicate. The readiness helper queries the G HUB agent through its local API. |
+| app.asar | The archive holding Electron application resources. Setup applies the frontend fixes to a locally acquired G HUB copy. |
+| Bare metal | Running directly on a physical computer. These tests exercise actual graphics drivers and peripherals. |
+| Baseline | The recorded versions and configuration against which changes are compared. |
+| Branch | A named line of Git development. A normal clone starts on the repository’s default branch. |
+| Bubblewrap / bwrap | A Linux tool for creating isolated process environments. It runs private build tools and supports the runtime setup. |
+| Capsule | An encrypted Logitech resource wrapper. The extractor decodes the supported format and verifies the resulting data. |
+| Checksum / SHA-256 | A fingerprint of file contents. Comparing it with a trusted pinned value detects changed downloads or outputs. |
+| CI | Continuous integration: automated checks run by GitHub Actions when changes are pushed. |
+| Clone | Download a Git repository and its history to create a local working copy. |
+| COM / WinRT | Windows component interfaces and activation mechanisms. Registrations and compatibility implementations let G HUB find the components it needs. |
+| Commit | A recorded set of Git changes, identified by a revision hash. |
+| Compositor / KWin | The desktop component that manages windows and presentation. KWin is KDE Plasma’s compositor and participates in Wayland input authorization. |
+| Container | A process environment with a selected filesystem and resource view, sharing the Linux kernel. The private runtime uses this to control libraries. |
+| D-Bus | Linux desktop and system messaging. It connects applications to services such as the desktop portal. |
+| Dependency | Another library, tool or service required by a component. Setup distinguishes private dependencies from host requirements. |
+| Depot | A Logitech application or device-resource archive. The installer downloads the selected depots from pinned official URLs. |
+| Device node / hidraw | A filesystem entry representing hardware access. Linux hidraw nodes expose raw HID reports needed for device communication. |
+| Distrobox | A tool for integrating general-purpose Linux containers with a desktop. It is not part of this installer. |
+| DLL | Dynamic-link library: a Windows code library. This setup uses Wine implementations, project helpers and separately acquired vendor components. |
+| DLL override | A Wine setting that selects whether a library comes from Wine or a Windows-format replacement. |
+| Docker | A container engine. Earlier acquisition experiments used it; the current installer uses bubblewrap or optional Podman for that step. |
+| DragonShard / Ghidra | Development analysis tools used to investigate Windows binaries. Their databases are not required to run G HUB. |
+| Driver | Software connecting applications to hardware. The runtime imports compatible host graphics libraries and uses the host kernel’s device drivers. |
+| E2E / end-to-end test | A check of the complete user journey: installation, launch and real device behavior on the target system. |
+| Electron | The desktop application framework used by G HUB’s main interface; it includes Chromium-based rendering and JavaScript resources. |
+| Fixture / mock | Controlled sample data or a simulated dependency used to test code predictably, including failure cases. |
+| Frontend / backend | The visible interface and the background service behind it. G HUB’s Electron window and device agent fill these roles. |
+| G-Shift | A Logitech assignment layer that gives controls alternate actions while its activating control is held. |
+| glibc | The GNU C library, a core Linux userspace dependency. Private runtime libraries reduce reliance on the host’s version. |
+| Headless / offscreen | Running a check without showing application windows on the live desktop. The installer uses isolated displays and offscreen graphics probes. |
+| HID | Human Interface Device: the USB device class used by keyboards, mice and related controls. |
+| Host / guest | The actual Linux system and an environment running inside it. A VM guest has its own kernel; the runtime container shares the host kernel. |
+| Immutable / image-based OS | An OS that manages its base system as an image. Bazzite uses this model; project payloads live in user-controlled storage. |
+| Input bridge / XTEST / libei | Mechanisms for delivering assignments to Linux applications. The project uses XTEST on X11 and libei with KWin authorization on its Wayland route. |
+| Launcher / .desktop entry | A Linux application shortcut describing the command, icon and actions used to open or manage G HUB. |
+| Linux userspace | Libraries and programs outside the kernel. The pinned private userspace provides a stable environment around the custom Wine runtime. |
+| Lock file | A version record listing exact downloads, hashes and related metadata. It makes the chosen inputs explicit and repeatable. |
+| Log / receipt | A log records command output; a receipt records completed steps and file identities. Both help diagnose failures and check retries. |
+| Manifest | A structured inventory describing files, dependencies or installation actions. |
+| MinGW | A toolchain for compiling Windows-format programs from Linux. Setup supplies the required compilers privately. |
+| Namespace | A Linux mechanism that gives processes their own view of mounts, process IDs or other resources. |
+| NTSYNC / Wine server synchronization | Two mechanisms relevant to Windows synchronization on Linux. The launcher masks NTSYNC for this application to preserve the tested server-based behavior. |
+| OpenGL / Vulkan | Graphics APIs used by applications and drivers. Their working host-driver integration matters independently of library-file presence. |
+| Overlay | A way to substitute selected files in a process’s filesystem view. The legacy runner uses private overlays for compatibility components. |
+| Patch | A recorded source-code change. The project’s Wine patches implement the behavior required by the tested G HUB setup. |
+| PipeWire / PulseAudio | Linux audio services and interfaces. The runtime connects to the active session’s available audio service. |
+| Podman | A container engine that supports running as an ordinary user. It is an optional Windows-resource acquisition engine here. |
+| Portal | A desktop service that mediates application capabilities. The Wayland route checks KDE’s remote-desktop input portal. |
+| Prefix / WINEPREFIX | The directory containing a Wine application’s Windows-style drive, registry and installed state. G HUB gets a dedicated prefix, separate from the Wine executable. |
+| Pressure-vessel | Valve’s desktop runtime container tooling. It combines the pinned userspace with the required host graphics and session connections. |
+| Private mount | A filesystem mount visible within the application’s mount namespace. It can substitute or restrict files without changing the host’s global mount view. |
+| Private runtime / runner | The project’s separately stored Wine executable, server, libraries and helpers. It coexists with system Wine. |
+| Provenance | Recorded evidence of where files came from, how they were built and which configuration was tested. |
+| Read-only mount | A mounted filesystem view that prevents writes. The launcher uses this to protect the pinned application and depot files. |
+| Regression test | An automated check that established behavior still works after a change. The project tests also exercise rejection and failure paths. |
+| Reproducible recipe | Recorded inputs and steps that allow another system to repeat the build. Identical binary output across machines is a separate, stronger claim. |
+| Rootless / sudo | Rootless processes run without administrator identity. Setup uses sudo only for scoped host device-access configuration. |
+| Sandbox | An environment with restricted access. The application still needs desktop, graphics and device connections, so isolation has explicit boundaries. |
+| SDK | Software development kit: tools, headers and libraries used for building. The installer acquires a pinned SDK privately. |
+| SELinux | A Linux security policy system used by Bazzite. Setup preserves enforcement and scopes any necessary container labels to project directories. |
+| Shared library / soname | Linux reusable code and the versioned name programs request when loading it. Runtime audits check both linked and dynamically loaded libraries. |
+| Socket / WebSocket | Communication endpoints. G HUB’s local WebSocket API carries readiness and device/profile queries; desktop services use session sockets. |
+| Software rendering / llvmpipe | Graphics calculated on the CPU instead of a hardware GPU. Useful for isolated tests, with different performance and behavior from real GPUs. |
+| Source build | Compiling program code into executable files. The installer builds the changed Wine components and project helpers from pinned sources. |
+| Steam Linux Runtime | Valve’s packaged Linux userspace. The project uses its pinned runtime and SDK without requiring Steam or a Steam account. |
+| Tray / XEmbed | The panel’s background-application icons and a protocol used to embed legacy tray icons. G HUB retains its original tray process. |
+| udev / uaccess | Linux device-management rules and active-session access handling. The installer adds narrowly scoped Logitech USB/HID access rules. |
+| Unit test | A focused code check using controlled inputs. Passing unit tests provides evidence about the code under test, rather than certifying a whole installation. |
+| USB passthrough | Giving a VM direct access to a physical USB device, allowing real-device tests inside the guest. |
+| Version pinning / update freeze | Keeping selected components at tested versions. The G HUB freeze controls its own update paths, not the Linux system’s package updates. |
+| Virtual machine / VM | A virtual computer running its own OS and kernel. VM desktop tests need separate qualification for physical hardware. |
+| Wayland | A Linux display protocol. This project’s Plasma Wayland route displays the patched Wine X11 application through Xwayland. |
+| Wine | A compatibility layer implementing Windows interfaces on Linux. This project uses a custom Wine 10.20 build rather than a Windows VM for G HUB. |
+| Wineserver | Wine’s coordinating background process for Windows-style objects and synchronization. It must match the selected private runtime. |
+| X11 / Xwayland | X11 is the display protocol used by the patched Wine driver. Xwayland lets those X11 windows appear inside a Wayland session. |
+| XBF / PRI | Compiled Windows UI and resource files. The tray resource transformation adjusts locally acquired copies for compatibility. |
+| XDG | Linux desktop conventions for directories and session information. Setup uses them to locate launchers, logs and active-session services. |
+| Xvfb | An X11 display server backed by memory. Isolated UI checks use it without connecting to the live desktop. |
