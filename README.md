@@ -102,7 +102,7 @@ Run in the target OS's normal KDE desktop terminal, as a regular user:
 
 ```sh
 git clone https://github.com/Cencyte/Penguin-LGHUB.git
-cd Penguin-LGHUB
+cd Penguin-LGHUB-release
 ./install.sh --install
 ```
 
