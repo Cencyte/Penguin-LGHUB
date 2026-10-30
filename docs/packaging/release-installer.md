@@ -107,7 +107,7 @@ were generated separately in a private directory. A complete
 unassisted clone-to-device installation on Bazzite is **still the next user
 acceptance test**, not a result inferred from these checks.
 
-After booting Bazzite, the owner will run the public workflow and test device
+Bazzite acceptance requires running the public workflow and testing device
 discovery/reconnect, key bindings in a native Wayland app, macros, G-Shift,
 profile changes, ordinary lighting, tray actions and relaunch. KDE may request
 input-control authorization when an assignment is used. Setup does not approve

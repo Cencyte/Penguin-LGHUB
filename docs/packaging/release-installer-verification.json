@@ -162,9 +162,9 @@
     "required": 1
   },
   "remaining": [
-    "Owner clone-and-run installation on booted Bazzite",
+    "Unassisted clone-and-run installation on booted Bazzite",
     "SELinux and actual target GPU/session/device acceptance",
-    "Owner decision on full Bazzite X11 provenance requirement",
+    "Decision on full Bazzite X11 provenance requirement",
     "Corresponding-source and notices audit before hosting a compiled runtime release"
   ],
   "end_to_end_qualified": false

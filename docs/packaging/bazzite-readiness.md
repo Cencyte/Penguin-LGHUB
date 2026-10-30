@@ -27,14 +27,14 @@ use, not a measured community-wide success rate.
 [First-person reports and maintainer response](https://universal-blue.discourse.group/t/bazzite-3-0-no-etc-default-desktop-wayland-to-enable-x11/1413).
 
 Plasma 6.8, released October 14, 2026, retires the upstream X11 session while
-retaining Xwayland and X11 application compatibility. Our installed 6.7.5 image
+retaining Xwayland and X11 application compatibility. The installed 6.7.5 image
 predates that change; future image updates make layering the legacy session an
 increasingly poor release prerequisite.
 [KDE Plasma 6.8 announcement](https://kde.org/announcements/plasma/6/6.8.0/).
 
 Recommendation: qualify Bazzite's normal KDE Wayland session and its Xwayland
-application path. The owner has not yet formally removed full X11 from the
-provenance requirement. The installer therefore makes no claim of a second
+application path. A decision on retaining full X11 as a separate
+provenance requirement is pending. The installer therefore makes no claim of a second
 Bazzite X11 result and does not install that session.
 
 ## Installation and host boundaries
@@ -48,7 +48,7 @@ Bazzite X11 result and does not install that session.
 | Devices | Logitech-only USB and hidraw uaccess rules before seat-late; preserve logind ACLs. Inspect actual nodes/access. | Reconnect, receiver enumeration, input bindings and permissions. |
 | Tray/synchronization | Preserve per-application NTSYNC masking and Wine server synchronization from CachyOS. Native tray/XEmbed test passes. | Plasma tray proxy/menu/input in the Bazzite session. |
 | SELinux | Preserve enforcing mode; record namespace errors. Restore device-rule labels; optional Podman labels only private acquisition trees. | Actual process labels and any AVC denials. |
-| Wayland | KDE portal/Xwayland/libei checks, owner-controlled input authorization. | Real bindings in a native Wayland application. |
+| Wayland | KDE portal/Xwayland/libei checks, interactive input authorization. | Real bindings in a native Wayland application. |
 
 Bazzite recommends limiting package layering; the user-data installation avoids
 turning build dependencies into layered system packages.
@@ -60,7 +60,7 @@ and imports host graphics; it cannot replace a kernel driver or prove compositor
 behavior merely by resolving libraries.
 [Valve runtime diagnostics](https://github.com/ValveSoftware/steam-runtime/blob/master/doc/reporting-steamlinuxruntime-bugs.md).
 
-Stock Bazzite already has a Logitech hidraw uaccess rule. Our rule also covers
+Stock Bazzite already has a Logitech hidraw uaccess rule. The project rule also covers
 USB-device nodes, with no world-write permissions or broad input-group change.
 The active local seat matters; reconnect after installation if existing device
 ACLs have not been refreshed. Setup reloads rules without retriggering unrelated
@@ -82,5 +82,5 @@ automatically generate a broad allow policy.
 
 The investigation covers all eight areas in the table (8/8 research coverage).
 Actual Penguin-LGHUB end-to-end acceptance on Bazzite remains 0/1 pending the
-owner's installation test. Local loader/UI/probe success is separate evidence,
+manual installation test. Local loader/UI/probe success is separate evidence,
 not a percentage estimate of Bazzite compatibility.
