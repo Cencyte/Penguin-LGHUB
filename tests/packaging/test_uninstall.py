@@ -51,6 +51,7 @@ class UninstallTests(unittest.TestCase):
         (self.root / 'desktop/prefix/user-documents').symlink_to(outside)
         uninstall.remove(self.root, self.ui)
         self.assertFalse(self.root.exists());self.assertFalse(entry.exists());self.assertFalse(menu.exists())
+        self.assertFalse(menu.parent.exists())
         self.assertEqual((outside / 'save').read_text(), 'keep')
         self.ui.run.assert_not_called()
 
@@ -180,6 +181,17 @@ class UninstallTests(unittest.TestCase):
                 rules.install('b' * 32, remove=True, directory=directory)
             self.assertTrue(second.exists())
             with self.assertRaises(ValueError):rules.install('../escape', directory=directory)
+
+    def test_failed_launcher_or_rule_write_removes_the_partial_file(self):
+        entry=self.base/'Penguin-LGHUB.desktop'
+        with patch.object(desktop_runtime.os,'fsync',side_effect=OSError('fixture disk failure')):
+            with self.assertRaises(OSError):desktop_runtime.write_entry(entry,b'partial',0o755)
+        self.assertFalse(entry.exists())
+        directory=self.base/'rules'
+        with patch.object(rules.os,'geteuid',return_value=0),patch.dict(os.environ,{'SUDO_UID':'1000'}), \
+             patch.object(rules.os,'fsync',side_effect=OSError('fixture disk failure')):
+            with self.assertRaises(OSError):rules.install('a'*32,directory=directory)
+        self.assertEqual(list(directory.iterdir()),[])
 
     def test_package_selection_uses_os_identity_not_command_priority(self):
         for distro, manager in [('manjaro', 'pacman'), ('cachyos', 'pacman'), ('bazzite', 'rpm')]:

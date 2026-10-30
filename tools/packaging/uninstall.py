@@ -1,6 +1,7 @@
 """Remove one receipt-owned installation without probing a desktop or distro."""
 from contextlib import contextmanager
 import fcntl
+import errno
 import hashlib
 import os
 from pathlib import Path
@@ -48,10 +49,19 @@ def launcher_paths(state):
     return paths
 
 
-def remove_payload(root):
+def remove_payload(root, keep_directory=False):
     # Keep the receipt until the bulky/removable contents are gone. If cleanup
     # fails or is interrupted, the same command can still validate and resume.
     control = {'installation.json', '.install.lock', '.uninstalling'}
+    # Extracted SDKs can contain read-only directories. They are private,
+    # receipt-owned contents, so make their directories traversable/removable
+    # without following Wine's links to the user's real folders.
+    for directory, children, _ in os.walk(root, topdown=True, followlinks=False):
+        for path in (Path(directory), *(Path(directory)/name for name in children)):
+            if path.is_symlink():continue
+            info=path.stat()
+            if info.st_uid == os.getuid() and info.st_mode & 0o700 != 0o700:
+                path.chmod(info.st_mode | 0o700)
     for child in root.iterdir():
         if child.name in control:
             continue
@@ -61,7 +71,8 @@ def remove_payload(root):
             child.unlink()
     for name in ('.uninstalling', '.install.lock', 'installation.json'):
         (root / name).unlink(missing_ok=True)
-    root.rmdir()
+    if not keep_directory:
+        root.rmdir()
 
 
 @contextmanager
@@ -103,33 +114,45 @@ def stopped_session(root, ui, timeout=30):
 
 def remove(directory, ui):
     with installation_state.managed_directory(directory) as (root, state):
-        ui.step('Verify', 'Verify installation ownership, launchers and mount boundaries')
-        check_tree(root)
-        launcher_paths(state)
-        marker = root / '.uninstalling'
-        if marker.is_symlink():
-            raise ValueError('Symlinked removal marker')
-        marker.touch(mode=0o600)
-        try:
-            with stopped_session(root, ui):
-                if state['attempts'].get('rules'):
-                    ui.step('System', 'Remove this installation’s Logitech device rule')
-                    ui.run(['sudo', sys.executable, str(ROOT / 'tools/packaging/install_device_rules.py'),
-                            '--installation-id', state['installation_id'], '--remove'])
-                ui.step('Desktop', 'Remove recorded desktop and application-menu launchers')
-                # Recheck after sudo/user interaction before deleting any external file.
-                for path in launcher_paths(state):
-                    path.unlink()
-                ui.step('G HUB', 'Remove the private runtime, settings, downloads and installation logs')
-                check_tree(root)
-                # Linux's fd-based rmtree does not follow Wine's user-folder symlinks.
-                if not shutil.rmtree.avoids_symlink_attacks:
-                    raise RuntimeError('This Python cannot safely remove a tree containing symlinks')
-                remove_payload(root)
-        finally:
-            if marker.exists():
-                marker.unlink()
+        remove_owned(root, state, ui)
     ui.write('Penguin-LGHUB removed. The source checkout and unrelated software are unchanged.')
+
+
+def remove_owned(root, state, ui, *, rollback=False):
+    """Caller holds the installation lock; shared by uninstall and rollback."""
+    ui.step('Verify', 'Verify installation ownership, launchers and mount boundaries')
+    check_tree(root)
+    launcher_paths(state)
+    marker = root / '.uninstalling'
+    if marker.is_symlink():
+        raise ValueError('Symlinked removal marker')
+    marker.touch(mode=0o600)
+    try:
+        with stopped_session(root, ui):
+            if state['attempts'].get('rules'):
+                ui.step('System', 'Remove this installation’s Logitech device rule')
+                ui.run(['sudo', sys.executable, str(ROOT / 'tools/packaging/install_device_rules.py'),
+                        '--installation-id', state['installation_id'], '--remove'])
+            ui.step('Desktop', 'Remove recorded desktop and application-menu launchers')
+            for path in launcher_paths(state):
+                path.unlink()
+            for name in sorted(state.get('created_directories', []),key=lambda p:len(Path(p).parts),reverse=True):
+                path=Path(name)
+                if not path.is_absolute() or path.is_symlink() or path.parent.resolve()!=path.parent:
+                    raise ValueError('Invalid created-directory record: '+name)
+                try:path.rmdir()
+                except FileNotFoundError:pass
+                except OSError as exc:
+                    # Keep any directory that subsequently acquired other files.
+                    if exc.errno!=errno.ENOTEMPTY:raise
+            ui.step('G HUB', 'Remove the private runtime, settings, downloads and installation logs')
+            check_tree(root)
+            if not shutil.rmtree.avoids_symlink_attacks:
+                raise RuntimeError('This Python cannot safely remove a tree containing symlinks')
+            remove_payload(root, keep_directory=rollback and state.get('directory_preexisted', False))
+    finally:
+        if marker.exists():
+            marker.unlink()
 
 
 def run(directory, verbose=False):

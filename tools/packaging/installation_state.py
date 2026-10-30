@@ -15,8 +15,16 @@ def save(root, state):
     temporary = root / 'installation.new'
     if temporary.is_symlink():
         raise ValueError('Symlinked installation receipt')
-    temporary.write_text(json.dumps(state, indent=2) + '\n')
+    with temporary.open('w') as stream:
+        stream.write(json.dumps(state, indent=2) + '\n')
+        stream.flush()
+        os.fsync(stream.fileno())
     temporary.replace(root / 'installation.json')
+    fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
 
 
 def load(root):
@@ -35,6 +43,7 @@ def load(root):
             or not isinstance(state.get('launchers'), dict)):
         raise ValueError('This directory lacks a matching ownership receipt. '
                          'Older lab installations require a separate cleanup review.')
+    state.setdefault('created_directories', [])
     return state
 
 
@@ -53,10 +62,13 @@ def checked_directory(value):
 @contextmanager
 def managed_directory(value, *, create=False, source=None, version=None):
     root = checked_directory(value)
+    preexisted = root.exists()
     if not root.exists():
         if not create:
             raise FileNotFoundError('Installation directory does not exist: ' + str(root))
-        root.mkdir(parents=True, mode=0o700)
+        if not root.parent.is_dir():
+            raise ValueError('Choose an existing parent directory for installation storage')
+        root.mkdir(mode=0o700)
     if not (root / 'installation.json').exists():
         if not create or any(root.iterdir()):
             raise ValueError('Use an empty dedicated directory or an existing managed installation')
@@ -71,13 +83,23 @@ def managed_directory(value, *, create=False, source=None, version=None):
         else:
             state = {'schema': 2, 'managed_by': 'penguin-lghub', 'directory': str(root),
                      'uid': os.getuid(), 'installation_id': uuid.uuid4().hex,
+                     'directory_preexisted': preexisted,
                      'source': source, 'project_version': version, 'completed': [],
                      'attempts': {}, 'launchers': {}}
-            save(root, state)
+            try:
+                save(root, state)
+            except BaseException:
+                # No payload or external registration exists yet. A failed
+                # first journal write must not strand an unrecognized folder.
+                for name in ('installation.new', 'installation.json', '.install.lock'):
+                    (root / name).unlink(missing_ok=True)
+                if not preexisted:
+                    root.rmdir()
+                raise
         yield root, state
 
 
-def record_launchers(config, paths, content):
+def record_launchers(config, paths, content, applications=None):
     """Write intentions before creation, including additional session launchers.
 
     An existing external file is never adopted. Legacy development launchers
@@ -89,6 +111,12 @@ def record_launchers(config, paths, content):
     if (root / '.uninstalling').exists():
         raise RuntimeError('This installation is being removed')
     state = load(root)
+    if applications is not None:
+        directory = applications.resolve()
+        while not directory.exists():
+            if str(directory) not in state['created_directories']:
+                state['created_directories'].append(str(directory))
+            directory = directory.parent
     for path in paths:
         path = path.parent.resolve() / path.name
         if not path.exists() and not path.is_symlink():

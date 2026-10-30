@@ -13,7 +13,7 @@ cd Penguin-LGHUB
 ./install.sh --install
 ```
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.1) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.2) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
 
 The repository currently requires GitHub access while it remains private.
 Run as your regular user. The installer requests sudo for its small Logitech
@@ -31,7 +31,7 @@ add an unsupported full-X11 desktop.
 Initial scope: x86-64 Manjaro, CachyOS and Bazzite KDE. Reserve **80 GiB free**
 for the first build, downloaded media, extracted depots, verification copies and
 20 GiB of retained headroom. This is a working-space requirement, not a download
-size. The build reuses verified downloads on retry. To choose another storage location, add:
+size. A failed installation removes its downloads; a new attempt starts clean after rollback. To choose another storage location, add:
 
 - `--directory /path/to/spacious/local/storage` — store the runtime, prefix and build files here.
 
@@ -56,16 +56,18 @@ Optional installation switches:
 - `--verbose` — display command output beneath each colored step.
 - `--jobs 4` — select 1–16 Wine build jobs; the default is 4.
 
-No arguments prints only usage. Installation output is retained in a mode-0600 log
-under `<installation directory>/logs/`, so removal includes these logs. Standalone
-compatibility checks and project tests use
-`${XDG_STATE_HOME:-~/.local/state}/penguin-lghub/`. Host inventory and step-specific
-probe logs are retained too. Do not publish raw logs without checking them for
+No arguments prints only usage. Mode-0600 command logs and host reports are retained
+under `${XDG_STATE_HOME:-~/.local/state}/penguin-lghub/`, outside the removable
+installation. Failed-transaction receipts are retained there too. This preserves
+the reason for a failure after rollback removes downloaded and generated payloads. Do not publish raw logs without checking them for
 local paths, usernames, device identifiers and application state.
 
 Readiness checking and installation both show separate headers for system,
 desktop, tools, device access, security policy and namespace checks. Wayland
-adds its Xwayland/KWin/portal check. Verbose mode also prints the saved host
+adds its Xwayland/KWin/portal check. Labels, descriptions, ellipses and per-check
+`OK`/`FAIL` results occupy consistent columns; long descriptions wrap within their
+column. An `OK` records no blocking error in that check, not completed hardware
+acceptance. Verbose mode also prints the saved host
 report; ordinary mode keeps the headers, warnings and blockers visible.
 
 The project regression runner and GitHub CI use the same fixed-color headers:
@@ -82,9 +84,11 @@ Complete test output is logged in both modes. Failure details remain visible
 in ordinary mode, and failures produce a nonzero exit status. Direct unittest
 commands remain available with their standard output for contributor tooling.
 
-The logo is pre-rendered by Chafa into verified kitty, sixel and symbol streams.
+The logo is pre-rendered by Chafa into verified Kitty, sixel and symbol streams.
 Thus it is the first installer display without installing Chafa on the host.
-Kitty/sixel artwork is 200×200 pixels; the 20×10-cell symbol fallback approximates
+Konsole 22.04+ uses the RGBA Kitty stream because its sixel canvas fills transparent
+areas with black. Terminals using sixel retain its transparency request; unknown
+terminals use symbols. Kitty/sixel artwork is 200×200 pixels; the 20×10-cell symbol fallback approximates
 that size using the terminal's font metrics. Unknown terminals and multiplexers
 use symbols. Terminal font size controls the normal-weight white version/log
 lines. Category colors are fixed in `packaging/installer.json`.
@@ -160,7 +164,8 @@ Run from the extracted source ZIP or checkout:
 
 **Removal deletes G HUB profiles/settings in the managed prefix. Export or back up
 anything you want to keep first.** The dedicated directory, private runtime, build
-cache, downloads, icon and installation logs are removed. Receipt-recorded Desktop
+cache, downloads, icon and embedded runtime logs are removed. Installer transaction
+diagnostics are retained separately. Receipt-recorded Desktop
 and application-menu launchers are removed only if their content still matches.
 Each installation has a separate udev rule, scoped to its user and installation ID;
 sudo removes only that rule and reloads udev without retriggering unrelated devices.
@@ -178,14 +183,49 @@ shared rules, host packages and other Wine installations remain. KDE input permi
 is user-authorized desktop state, not an installer-created file. Older development
 installations without the new ownership receipt require separate cleanup review.
 
-## Retry and verification boundaries
+## Transactions and recovery
 
-Re-run the same command from the same source revision after a failure. Completed
-steps are recorded, and integrity checks precede application preparation/use.
-Interrupted extraction/preparation directories are renamed `.incomplete-N`
-and preserved before retry; Wine's source compilation resumes incrementally.
-Changed source revisions require a new installation directory. Setup does not
-silently overwrite an existing installation or remove preserved diagnostics.
+Setup has three phases: prepare privately, verify, and commit. The durable
+installation receipt marks the commit only after all required payload checks,
+device-rule registration and launcher creation succeed. Payload filesystems are
+flushed before the durable commit record, so reported writeback errors trigger
+rollback. Managed launchers refuse
+to start an uncommitted installation. The existing installed application is never
+replaced as part of an attempted new installation.
+
+Any caught failure, Ctrl-C, SIGTERM or terminal hangup rolls back the attempt:
+private downloads, SDK, built runtime, prefixes and recorded launchers are removed,
+and its individual udev rule is removed/reloaded if that step was attempted.
+Only diagnostic logs, host reports and a transaction record remain. An empty
+installation directory that existed beforehand is restored to empty. Choose an
+existing parent directory when using custom storage.
+
+A power loss or SIGKILL cannot execute cleanup. The next install run detects its
+incomplete receipt, rolls that transaction back, then starts fresh. This also
+recovers incomplete installations from preview 1, preserving their older logs.
+An already committed installation is left unchanged; explicitly uninstall it
+before replacing it. No automatic package upgrade or rollback of unrelated
+software is performed.
+
+If cleanup itself fails—for example sudo is denied, storage becomes inaccessible,
+a file has been externally changed or an unexpected process still holds the
+prefix—the command reports **rollback incomplete**, retains its journal and exits
+unsuccessfully. It never reports success with a partial installation. Correct the
+reported obstacle and rerun the installer to recover. This is journalled rollback
+across the managed files, not an atomic snapshot of the entire OS or a guarantee
+that cleanup can run while the machine has no power.
+
+### Bazzite first installation failure
+
+The first booted attempt passed host checks and private SDK preparation, then
+stopped while downloading Wine source. GitHub supplied a valid chunked HTTP
+response without `Content-Length`; the previous downloader rejected it.
+The downloader now accepts that response while enforcing the pinned final byte
+count and SHA-256. A fresh download reproduced all **53,765,986 bytes** with hash
+`b53683fb89b891fa1d5e3c7ca8c2f7f023ee0b6e397edc6084fb75519eb047df`.
+This is a general HTTP handling bug that could affect any supported OS.
+
+## Verification boundaries
 
 The build and isolated UI/tray checks passed on the development host; rootless
 Podman and bubblewrap independently reproduced both Windows DLL hashes.

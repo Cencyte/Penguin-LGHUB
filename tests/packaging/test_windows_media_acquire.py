@@ -78,6 +78,28 @@ class MediaTests(unittest.TestCase):
                 m.download_asset(work, self.asset(b'good'), Opener(Response(b'evil')))
             self.assertFalse((work / 'fixture.esd').exists())
 
+    def test_chunked_response_without_length_still_checks_size_and_hash(self):
+        for data, error in ((b'abcdef', None), (b'abc', 'Truncated'),
+                            (b'abcdefg', 'exceeds'), (b'badbad', 'sha256 mismatch')):
+            with self.subTest(data=data), tempfile.TemporaryDirectory() as d, patch.object(m, 'space_check'):
+                response = Response(data);response.headers = {'Transfer-Encoding': 'chunked'}
+                work = Path(d)
+                if error:
+                    with self.assertRaisesRegex(ValueError, error):
+                        m.download_asset(work, self.asset(b'abcdef'), Opener(response))
+                    self.assertFalse((work / 'fixture.esd').exists())
+                else:
+                    m.download_asset(work, self.asset(data), Opener(response))
+                    self.assertEqual((work / 'fixture.esd').read_bytes(), data)
+
+    def test_chunked_resume_still_requires_exact_content_range(self):
+        with tempfile.TemporaryDirectory() as d, patch.object(m, 'space_check'):
+            work = Path(d);(work / 'fixture.esd.partial').write_bytes(b'abc')
+            response = Response(b'def', 206, 'bytes 3-5/6')
+            del response.headers['Content-Length']
+            m.download_asset(work, self.asset(b'abcdef'), Opener(response))
+            self.assertEqual((work / 'fixture.esd').read_bytes(), b'abcdef')
+
     def test_truncated_transfer_never_promoted(self):
         with tempfile.TemporaryDirectory() as d, patch.object(m, 'space_check'):
             work = Path(d)

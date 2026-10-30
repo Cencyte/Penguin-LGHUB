@@ -13,6 +13,7 @@
   "files": {
     "symbols.ansi": "a066e9fb28b382b6f6c58f53f1eddf5d85f2f6fe77b9b416e42816657a84c926",
     "sixels.ansi": "31526ea8b031656971a713cd6b813ce2243120307cf34216e619b6cbc2a65afc",
-    "kitty.ansi": "b1547304647445c723a0e51b5a028b81e3df8a636178ac1141cfd46b12441dbf"
-  }
+    "kitty.ansi": "e1f3ba99acefc71eec3600c5a92153758d5b45e048ba09c6b838d15bd4b1e42b"
+  },
+  "placement": "Kitty stream omits c/r cell scaling to preserve native 200x200 pixels. Konsole uses RGBA because its sixel decoder fills unpainted pixels with opaque black."
 }

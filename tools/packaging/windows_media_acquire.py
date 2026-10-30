@@ -96,8 +96,13 @@ def download_asset(work, asset, opener=None, validate=official_url):
                 raise ValueError('Server did not honor the requested download/range')
             if count and response.headers.get('Content-Range') != f'bytes {count}-{size-1}/{size}':
                 raise ValueError('Unexpected resume Content-Range')
-            if int(response.headers.get('Content-Length', -1)) != size - count:
-                raise ValueError('Unexpected response length')
+            length = response.headers.get('Content-Length')
+            # A chunked HTTP response legitimately omits Content-Length (for
+            # example GitHub's source archives). Bound the decoded stream by
+            # the pinned size below, then verify its full digest before promotion.
+            if length is not None and int(length) != size - count:
+                raise ValueError(f'Unexpected response length for {name}: '
+                                 f'expected {size-count}, received {length}')
             started = last = time.monotonic()
             initial = count
             with partial.open('ab' if count else 'xb') as out:

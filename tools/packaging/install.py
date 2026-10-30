@@ -2,7 +2,6 @@
 """One terminal entry point for the version-pinned Penguin-LGHUB installation."""
 import argparse
 import datetime
-from contextlib import nullcontext
 import hashlib
 import json
 import os
@@ -11,10 +10,14 @@ import shutil
 import subprocess
 import sys
 
+sys.dont_write_bytecode=True
+os.environ["PYTHONDONTWRITEBYTECODE"]="1"
+
 from windows_media_acquire import ROOT, digest_file, space_check
 from installer_ui import Presentation, STYLE
 import host_preflight
 import installation_state
+import install_transaction
 
 HELP='''USAGE
   ./install.sh --install [--verbose] [--directory <path>] [--engine <bwrap|podman>]
@@ -24,6 +27,7 @@ HELP='''USAGE
 SUMMARY
   Prepare a private, pinned G HUB installation from verified downloads and
   public compatibility source. Keep system Wine and existing prefixes intact.
+  Commit after verification; roll back failed attempts and retain diagnostics.
   Run as your normal desktop user; sudo is used only for device-access rules.
 
 FLAGS
@@ -54,15 +58,6 @@ def parser():
     return p
 
 
-def preserve_partial(paths, attempt):
-    for path in paths:
-        if path.exists() or path.is_symlink():
-            destination=path.with_name(path.name+f'.incomplete-{attempt}')
-            if destination.exists() or destination.is_symlink():
-                raise RuntimeError('Preserved partial output already exists: '+str(destination))
-            path.rename(destination)
-
-
 def fingerprint(root=ROOT):
     files=sorted(p for folder in ('tools/packaging','tools/wine','packaging','patches/wine','assets') for p in (root/folder).rglob('*')
                  if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.log') and p.name!='source-publication.json')
@@ -74,13 +69,12 @@ def save(path,data):
 
 
 def pipeline(args,ui,report):
-    with installation_state.managed_directory(args.directory, create=True,
-            source=fingerprint(), version=STYLE['project_version']) as (directory,state):
-        _pipeline(args,ui,report,directory,state)
+    install_transaction.execute(args.directory, fingerprint(), STYLE['project_version'], ui,
+        lambda directory,state: _pipeline(args,ui,report,directory,state))
 
 
 def _pipeline(args,ui,report,directory,state):
-    source_id=fingerprint();receipt_path=directory/'installation.json'
+    source_id=fingerprint()
     if state['source']!=source_id:
         raise ValueError('This installation belongs to another source revision; choose a new --directory to preserve it.')
     work=directory/'work';work.mkdir(exist_ok=True)
@@ -95,32 +89,28 @@ def _pipeline(args,ui,report,directory,state):
         for name in ('LICENSE','NOTICE.md'):shutil.copyfile(ROOT/name,code/name)
     python=sys.executable
     def cmd(script,*argv):return [python,str(code/'tools/packaging'/script),*map(str,argv)]
-    def step(name,category,description,command,check=None,outputs=()):
-        if name in state['completed']:
-            ui.step(category,description+(' (verifying saved step)' if check else ' (already completed)'))
-            if check:ui.run(check)
-            return
+    def step(name,category,description,command,check=None):
         ui.step(category,description)
-        if state['attempts'].get(name):preserve_partial(outputs,state['attempts'][name])
-        state['active']=name;state['attempts'][name]=state['attempts'].get(name,0)+1;save(receipt_path,state)
+        state['active']=name;state['attempts'][name]=1;installation_state.save(directory,state)
         ui.run(command)
-        state['launchers']=installation_state.load(directory)['launchers']
-        state['completed'].append(name);state.pop('active',None);save(receipt_path,state)
+        if check:ui.run(check)
+        saved=installation_state.load(directory)
+        for key in ('launchers','created_directories'):state[key]=saved[key]
+        state['completed'].append(name);state.pop('active',None);installation_state.save(directory,state)
     # Reserve for downloads, SDK, build tree, new prefix and rollback headroom.
     if not state['completed']:space_check(directory,60*1024**3)
     step('tool-fetch','Downloads','Verify private toolchain inputs',cmd('toolchain.py','fetch','--cache',cache))
     sdk=directory/'toolchain'
-    step('tool-prepare','Tools','Assemble private acquisition and build tools',cmd('toolchain.py','prepare','--cache',cache,'--root',sdk),outputs=(sdk,))
+    step('tool-prepare','Tools','Assemble private acquisition and build tools',cmd('toolchain.py','prepare','--cache',cache,'--root',sdk))
     wine=work/'built-wine'
     # Build remains in the reproducible namespace; no target compiler or Wine package needed.
     step('wine','Wine','Build the custom Wine runtime from pinned source',cmd('build_release_runtime.py','--work',work,'--toolchain',sdk,'--jobs',args.jobs),cmd('wine_runtime.py','verify','--runtime',wine))
-    wine=work/'built-wine'
     step('linux-fetch','Downloads','Verify the pinned Linux runtime',cmd('linux_runtime.py','fetch','--cache',cache))
     linux=directory/'linux-runtime'
-    step('linux','Tools','Prepare Linux libraries',cmd('linux_runtime.py','prepare','--cache',cache,'--output',linux),cmd('linux_runtime.py','verify','--linux-runtime',linux),outputs=(linux,))
+    step('linux','Tools','Prepare Linux libraries',cmd('linux_runtime.py','prepare','--cache',cache,'--output',linux),cmd('linux_runtime.py','verify','--linux-runtime',linux))
     step('test-fetch','Downloads','Verify bundled launcher helpers',cmd('linux_probe.py','fetch','--cache',cache))
     helpers=directory/'helpers'
-    step('helpers','Tools','Prepare bundled launcher helpers',cmd('linux_probe.py','prepare','--cache',cache,'--output',helpers),outputs=(helpers,))
+    step('helpers','Tools','Prepare bundled launcher helpers',cmd('linux_probe.py','prepare','--cache',cache,'--output',helpers))
     media=work/'windows-cache'
     step('media','Downloads','Verify official Windows media and decoder source',cmd('windows_media_acquire.py','fetch','--work-dir',media,'--decoder'))
     import toolchain
@@ -132,25 +122,24 @@ def _pipeline(args,ui,report,directory,state):
     worker=toolchain.command(sdk,work,['python3','/project/tools/packaging/windows_media_acquire.py','reconstruct',
         '--work-dir','/work/windows-cache','--output-dir','/work/windows-reconstructed','--control-dir','/work/windows-control'],args.engine)
     step('windows','Windows','Reconstruct and verify the two required DLLs',worker,
-         cmd('windows_media_acquire.py','verify','--directory',work/'windows-reconstructed/dlls'),
-         outputs=(work/'windows-reconstructed',work/'windows-control'))
+         cmd('windows_media_acquire.py','verify','--directory',work/'windows-reconstructed/dlls'))
     depots=work/'logitech-cache';stage=work/'logitech-stage'
     step('depots','Downloads','Verify the pinned Logitech depots',cmd('logitech_depots.py','fetch','--work-dir',depots))
     step('stage','G HUB','Extract the verified application',cmd('logitech_depots.py','stage','--work-dir',depots,'--output-dir',stage),
-         cmd('logitech_depots.py','verify','--output-dir',stage),outputs=(stage,))
+         cmd('logitech_depots.py','verify','--output-dir',stage))
     candidate=work/'candidate'
     step('prefix','G HUB','Generate a fresh prefix and apply compatibility fixes',cmd('prepare_clean_prefix.py',
         '--stage',stage,'--cache',depots,'--output',candidate,'--runtime',wine,
         '--linux-runtime',linux,'--windows-dlls',work/'windows-reconstructed/dlls'),
-        cmd('prepare_clean_prefix.py','--output',candidate,'--verify-only'),outputs=(candidate,))
+        cmd('prepare_clean_prefix.py','--output',candidate,'--verify-only'))
     desktop=directory/'desktop'
     step('desktop','Desktop','Prepare the desktop installation',cmd('desktop_runtime.py','prepare',
-        '--candidate',candidate,'--linux-runtime',linux,'--wine',wine,'--test-tools',helpers,'--output',desktop),outputs=(desktop,))
+        '--candidate',candidate,'--linux-runtime',linux,'--wine',wine,'--test-tools',helpers,'--output',desktop))
     step('loader','Verify','Check the private runtime without desktop or device access',
-        cmd('linux_runtime.py','audit','--linux-runtime',linux,'--wine',wine,'--output',work/'loader-audit'),outputs=(work/'loader-audit',))
+        cmd('linux_runtime.py','audit','--linux-runtime',linux,'--wine',wine,'--output',work/'loader-audit'))
     step('ui','Verify','Test first-run UI and tray registration in an isolated display',
         cmd('linux_ui_probe.py','probe','--candidate',candidate,'--linux-runtime',linux,'--wine',wine,
-            '--test-tools',helpers,'--output',work/'ui-audit'),outputs=(work/'ui-audit',))
+            '--test-tools',helpers,'--output',work/'ui-audit'))
     step('graphics','Verify','Inspect imported graphics and audio without opening an application',
         cmd('session_probe.py','--config',desktop/'desktop.json','--output',work/'session-audit/report.json'))
     # Only this small, reviewable helper runs under sudo. No application runs as root.
@@ -163,8 +152,6 @@ def _pipeline(args,ui,report,directory,state):
     extra=['--experimental-wayland'] if report['session']=='wayland' else []
     step('launcher','Desktop','Install the launcher and project icon',cmd('desktop_runtime.py','install-entry',
         '--config',desktop/'desktop.json','--destination',Path(destination)/name,*extra))
-    state['installed']=True;state['owner_acceptance_pending']=True;save(receipt_path,state)
-    ui.write('Installation complete. Open '+name+' when ready; KDE input permission and physical-device testing remain yours to confirm.')
 
 
 def main(argv=None):
@@ -180,35 +167,34 @@ def main(argv=None):
     if not 1<=args.jobs<=16:raise ValueError('--jobs must be 1–16')
     state=Path(os.environ.get('XDG_STATE_HOME',str(Path.home()/'.local/state')))/'penguin-lghub'
     stamp=datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+str(os.getpid())
-    context = (installation_state.managed_directory(args.directory,create=True,
-               source=fingerprint(),version=STYLE['project_version']) if args.install else nullcontext(None))
-    try:
-        with context as managed:
-            if managed:
-                state=managed[0]/'logs'
-            return present_install(args,state,stamp,managed)
-    except (OSError,ValueError,RuntimeError) as error:
-        print('Setup stopped: '+str(error),file=sys.stderr);return 1
+    return present_install(args,state,stamp)
 
 
-def present_install(args,state,stamp,managed):
+def present_install(args,state,stamp):
     ui=Presentation(state/('install-'+stamp+'.log'),args.verbose)
-    try:
-        ui.header()
-        report=host_preflight.inventory(progress=ui.step);save(state/('host-'+stamp+'.json'),report)
+    def inspect():
+        report=host_preflight.inventory(progress=ui.begin_check,result=ui.finish_check);save(state/('host-'+stamp+'.json'),report)
         ui.output(json.dumps(report,indent=2)+'\n')
         for warning in report['warnings']:ui.write('Note: '+warning)
         if report['errors']:raise RuntimeError('\n'.join(report['errors']))
         if args.engine=='podman' and not shutil.which('podman'):
             raise RuntimeError('Podman is not installed; use the default bubblewrap engine on this host.')
-        if args.check:ui.write('Host checks completed. Actual application/device acceptance remains pending.');return 0
-        _pipeline(args,ui,report,*managed);return 0
+        return report
+    try:
+        ui.header()
+        if args.check:
+            inspect();ui.write('Host checks completed. Actual application/device acceptance remains pending.');return 0
+        install_transaction.execute(args.directory,fingerprint(),STYLE['project_version'],ui,
+            lambda directory,receipt: _pipeline(args,ui,inspect(),directory,receipt))
+        ui.write('Installation committed. Open the Penguin-LGHUB launcher when ready.')
+        return 0
     except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as error:
         import traceback
         traceback.print_exc(file=ui.log);ui.log.flush()
+        ui.fail_check()
         ui.write('Setup stopped: '+str(error));ui.write('Details: '+str(ui.log_path));return 1
     except KeyboardInterrupt:
-        ui.write('Setup interrupted. Completed steps and logs are preserved.');return 130
+        ui.write('Setup interrupted. See the rollback result above. Diagnostics: '+str(ui.log_path));return 130
     finally:ui.close()
 
 if __name__=='__main__':

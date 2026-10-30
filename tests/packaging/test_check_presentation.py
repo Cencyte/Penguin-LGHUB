@@ -1,7 +1,9 @@
 import contextlib
+import base64
 import io
 import json
 import os
+import re
 from pathlib import Path
 import sys
 import tempfile
@@ -45,9 +47,11 @@ class CheckPresentationTests(unittest.TestCase):
                     output = io.StringIO()
                     report = {'errors': ['blocked fixture'] if blocked else [], 'warnings': ['warning fixture'],
                               'diagnostic': 'logged host detail'}
-                    def inventory(progress=None):
+                    def inventory(progress=None,result=None):
                         progress('System', 'Inspect fixture host')
+                        result('System', 'Inspect fixture host', 'OK')
                         progress('Verify', 'Check fixture namespace')
+                        result('Verify', 'Check fixture namespace', 'FAIL' if blocked else 'OK')
                         return report
                     with patch.dict(os.environ, {'XDG_STATE_HOME': tmp}), \
                          patch.object(install.os, 'geteuid', return_value=1000), \
@@ -57,7 +61,9 @@ class CheckPresentationTests(unittest.TestCase):
                     self.assertEqual(code, int(blocked));pipeline.assert_not_called()
                     log = next(Path(tmp).rglob('*.log')).read_text()
                     for heading in ('[System] Inspect fixture host...', '[Verify] Check fixture namespace...'):
-                        self.assertIn(heading, output.getvalue());self.assertIn(heading, log)
+                        import re
+                        compact=lambda text: re.sub(r' +', ' ', text).replace(' ...','...')
+                        self.assertIn(heading, compact(output.getvalue()));self.assertIn(heading, compact(log))
                     self.assertIn('logged host detail', log)
                     self.assertEqual('logged host detail' in output.getvalue(), verbose)
                     if blocked:self.assertIn('blocked fixture', output.getvalue())
@@ -145,6 +151,45 @@ class CheckPresentationTests(unittest.TestCase):
                 finally:ui.close()
                 self.assertEqual('\033[38;5;75m' in stream.getvalue(), not no_color)
                 self.assertNotIn('\033', path.read_text())
+
+    def test_columns_and_results_align_even_when_descriptions_wrap(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stream=io.StringIO();path=Path(tmp)/'log'
+            ui=installer_ui.Presentation(path,stream=stream)
+            ui.description_width=38
+            ui.step('System','Check the OS','OK')
+            ui.step('Downloads','Verify the archive with a description long enough to wrap','FAIL')
+            ui.close()
+            rows=stream.getvalue().splitlines()
+            self.assertEqual(rows[0].index('Check'),rows[1].index('Verify'))
+            complete=[row for row in rows if '...' in row]
+            self.assertEqual(len({row.index('...') for row in complete}),1)
+            self.assertEqual(complete[0].index('OK'),complete[1].index('FAIL'))
+            self.assertLessEqual(max(map(len,rows)),installer_ui.STYLE['category_colors'].__len__()+80)
+
+    def test_status_records_the_actual_failing_check(self):
+        events=[]
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch.object(host_preflight,'os_identity',return_value={'ID':'bazzite'}), \
+             patch.object(host_preflight.shutil,'which',side_effect=lambda n:'/bin/'+n), \
+             patch.object(host_preflight,'capture',return_value={'status':1,'output':'fixture denial'}):
+            report=host_preflight.inventory({'XDG_SESSION_TYPE':'x11'},Path(tmp),result=lambda *row:events.append(row))
+        self.assertEqual(events[-1],('Verify','Test an isolated user namespace','FAIL'))
+        self.assertTrue(all(row[-1]=='OK' for row in events[:-1]))
+        self.assertEqual([row[-1] for row in events],[row['status'] for row in report['checks']])
+
+    def test_konsole_uses_rgba_and_artwork_keeps_native_size_and_transparent_corners(self):
+        self.assertEqual(installer_ui.logo_format({'KONSOLE_VERSION':'260801'}),'kitty')
+        self.assertEqual(installer_ui.logo_format({'TERM':'foot'}),'sixels')
+        self.assertEqual(installer_ui.logo_format({'KONSOLE_VERSION':'260801','TMUX':'yes'}),'symbols')
+        data=(installer_ui.ROOT/'assets/terminal/kitty.ansi').read_bytes()
+        header=data.split(b'\x1b\\',1)[0]
+        self.assertIn(b'f=32,s=200,v=200',header)
+        self.assertNotIn(b',c=',header);self.assertNotIn(b',r=',header)
+        chunks=re.findall(rb'\x1b_G[^;\x1b]*;([^\x1b]*)\x1b\\',data)
+        pixels=b''.join(base64.b64decode(chunk) for chunk in chunks)
+        self.assertEqual(len(pixels),200*200*4)
+        for index in (0,199,199*200,200*200-1):self.assertEqual(pixels[index*4+3],0)
 
 
 if __name__ == '__main__':

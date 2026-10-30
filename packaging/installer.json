@@ -1,6 +1,6 @@
 {
-  "project_version": "0.9.0-preview.1",
-  "installer_version": "0.2.0",
+  "project_version": "0.9.0-preview.2",
+  "installer_version": "0.3.0",
   "category_colors": {
     "System": 214,
     "Downloads": 81,

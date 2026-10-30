@@ -39,7 +39,15 @@ def install(installation_id=None, remove=False, directory=Path('/etc/udev/rules.
         raise RuntimeError('An existing Penguin-LGHUB rule differs; inspect it before replacing it')
     if not target.exists():
         fd=os.open(target,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o644)
-        with os.fdopen(fd,'wb') as out:out.write(RULE)
+        try:
+            with os.fdopen(fd,'wb') as out:
+                out.write(RULE);out.flush();os.fsync(out.fileno())
+            fd=os.open(directory,os.O_RDONLY|os.O_DIRECTORY)
+            try:os.fsync(fd)
+            finally:os.close(fd)
+        except BaseException:
+            target.unlink(missing_ok=True)
+            raise
     if shutil.which('restorecon'):subprocess.run(['restorecon',str(target)],check=True)
     subprocess.run(['udevadm','control','--reload-rules'],check=True)
     # Avoid retriggering unrelated live devices. uaccess takes effect on reconnect

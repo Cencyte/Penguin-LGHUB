@@ -13,6 +13,39 @@
   <a href="https://www.patreon.com/cw/cencyte"><img src="https://img.shields.io/badge/Patreon-Support-FF424D?logo=patreon&amp;logoColor=white" alt="Support on Patreon"></a>
 </p>
 
+## Contents
+
+- [Introduction](#introduction)
+  - [Current status](#current-status)
+- [Diagrams: LGHUB Wine Compatibility System](#diagrams-lghub-wine-compatibility-system)
+- [Warning](#warning)
+- [Distribution setup status](#distribution-setup-status)
+  - [Recorded test environments](#recorded-test-environments)
+- [Installation](#installation)
+- [What the project contains](#what-the-project-contains)
+- [Running project tests](#running-project-tests)
+  - [Checking this computer's compatibility](#checking-this-computers-compatibility)
+- [Additional details](#additional-details)
+  - [Publication gates](#publication-gates)
+  - [Verified Logitech depot extraction](#verified-logitech-depot-extraction)
+  - [Wine prefix development installer](#wine-prefix-development-installer)
+  - [Development prerequisites](#development-prerequisites)
+  - [Current validation](#current-validation)
+  - [Packaged private Wine runtime](#packaged-private-wine-runtime)
+  - [Base Wine bundle](#base-wine-bundle)
+  - [Linux userspace verification, October 26](#linux-userspace-verification-october-26)
+  - [Dependency sourcing findings and the prefix question](#dependency-sourcing-findings)
+  - [Recommended common policy](#recommended-common-policy)
+  - [The prefix is necessary; this populated prefix is not a blanket-cleared artifact](#the-prefix-is-necessary-this-populated-prefix-is-not-a-blanket-cleared-artifact)
+  - [G HUB vendor downloads](#g-hub-vendor-downloads)
+  - [Fonts](#fonts)
+  - [If permission is unavailable, investigate the narrowest substitute](#if-permission-is-unavailable-investigate-the-narrowest-substitute)
+  - [Portable runtime recommendation and container tradeoffs](#portable-runtime-recommendation)
+  - [Recommendation: a complete private runner first; a pinned Linux userspace container as a tested portability layer](#recommendation-a-complete-private-runner-first-a-pinned-linux-userspace-container-as-a-tested-portability-layer)
+  - [Manjaro control and CachyOS investigation matrix](#manjaro-and-cachyos-investigation)
+- [Branding and licenses](#branding-and-licenses)
+- [Glossary of terms](#glossary-of-terms)
+
 ## Introduction
 
 An experimental compatibility layer for running the original **Logitech G HUB** on Linux through a custom Wine runtime. The working setup retains the actual G HUB agent and main interface for device configuration, key bindings, macros, profiles, lighting and G-Shift.
@@ -108,6 +141,8 @@ cd Penguin-LGHUB-release
 
 Allow **80 GiB of free working space** for the initial source build and acquisition. All command output is saved to the log path printed below the logo.
 
+**Installation is transactional:** a new setup commits only after its required steps pass. A failed attempt rolls back its private files, downloads, launchers and device rule, retaining diagnostics. An already installed setup is preserved. Interrupted transactions are recovered before a new attempt; cleanup failures are reported explicitly. See [transaction and recovery details](docs/packaging/release-installer.md#transactions-and-recovery).
+
 Optional switches, added to the installation command:
 
 - `--directory /path/to/spacious/local/storage` — choose where the runtime, prefix and build files are stored.
@@ -115,7 +150,7 @@ Optional switches, added to the installation command:
 - `--jobs 4` — choose 1–16 build jobs; the default is 4.
 - `--engine podman` — use an existing rootless Podman installation for Windows-resource acquisition. The default is bubblewrap.
 
-Alternatively, download **Source code (zip)** from the [first source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.1), extract it, and open a terminal in the extracted folder. Run the same installation command there. No Git checkout is needed for the ZIP workflow.
+Alternatively, download **Source code (zip)** from the [source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.2), extract it, and open a terminal in the extracted folder. Run the same installation command there. No Git checkout is needed for the ZIP workflow.
 
 Standalone commands, run from the project directory:
 
@@ -126,7 +161,7 @@ Standalone commands, run from the project directory:
 
 Back up any G HUB profiles or settings you want to keep before uninstalling. Removal works without a graphical session and requests sudo only for its device rule. The source download, independently generated diagnostic reports and unrelated software remain. Legacy lab installations without an ownership receipt require separate cleanup; they are not removed by guessing paths.
 
-The installer supplies private build tools, Wine, Linux libraries and launcher helpers. The repository requires authorized GitHub access while it remains private. See [installation, retry and validation details](docs/packaging/release-installer.md).
+The installer supplies private build tools, Wine, Linux libraries and launcher helpers. The repository requires authorized GitHub access while it remains private. See [installation, recovery and validation details](docs/packaging/release-installer.md).
 
 ## What the project contains
 
@@ -147,7 +182,7 @@ From the cloned project directory, run:
 python3 tools/packaging/run_project_tests.py --run
 ```
 
-These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. The runner saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The packaging suite contains 158 checks, with five additional device-policy checks.
+These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. The runner saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The packaging suite contains 179 checks, with five additional device-policy checks.
 
 - `--verbose` — show individual test results and captured output beneath the headers.
 - `--log-file /path/to/new-tests.log` — choose a new log file; existing logs are preserved.
@@ -159,7 +194,7 @@ These regression tests exercise the installer and launcher code with controlled 
 | Wine and prefix preparation | File inventories, registry definitions, DLL policy and protection of existing directories. |
 | Container and device policy | Generated isolation commands, scoped device access and per-application synchronization settings. |
 | Desktop behavior | Launcher/startup/shutdown logic, tray-registration handling and frontend resource transformations. |
-| Installer workflow and removal | OS policy, step ordering, retry preservation, help, logs, ownership receipts and safe removal of managed files. |
+| Installer workflow and removal | OS policy, step ordering, transactional rollback, help, logs, ownership receipts and safe removal of managed files. |
 
 ### Checking this computer's compatibility:
 
@@ -171,11 +206,13 @@ Run this from the target KDE desktop terminal:
 
 This checks the actual host's OS, CPU architecture, required tools, user namespaces and desktop session. It records graphics drivers, audio-socket presence, SELinux state and Logitech device access. On Wayland it also checks Xwayland authentication, KWin and the input-control portal. Blockers stop the check with an explanation; warnings identify remaining verification needs. A successful readiness check is followed by installation checks and hands-on device testing.
 
-Readiness checking and installation share the same categorized step headers. The complete host report is always saved with the log.
+Readiness checking and installation share the same categorized step headers. Each completed check shows an aligned `OK` or `FAIL` result. `OK` means that check found no installation blocker; hardware acceptance and warnings remain separately reported. The complete host report is always saved with the log.
 
 - `--verbose` — also display the host report in the terminal.
 
 ## Additional details
+
+<a name="publication-gates"></a>
 
 <details>
 <summary><strong>Publication gates</strong></summary>
@@ -190,6 +227,8 @@ These checkpoints track dependency policy, installation reproducibility and rele
 6. **Keep releases reproducible and reviewable:** This source snapshot preserves GitHub's initial commit and excludes the lab history, captures, vendor payloads and populated prefixes. See the [source publication record](docs/packaging/source-publication.md). Wine notices remain LGPL; a complete corresponding-source/build-sequence audit is still required before publishing the packaged runtime binary.
 
 </details>
+
+<a name="verified-logitech-depot-extraction"></a>
 
 <details>
 <summary><strong>Verified Logitech depot extraction</strong></summary>
@@ -221,6 +260,8 @@ The encrypted resource keys are fetched without authentication from [Logitech's 
 The **43 recorded installer declaration groups** are now classified by the clean-prefix recipe: two configured, one replaced, two frozen, one partial, 35 deferred and two unresolved. The deferred groups include eight extension packages and 17 conditional/external copy rules. Two core copy rules name `trueforce_sdk_x86.dll` and `trueforce_sdk_x64.dll`, which are absent from the core archive; the separate Trueforce manager's installation must be investigated before claiming those rules complete. Counts describe declaration groups of different sizes, not a percentage of installer functionality.
 
 </details>
+
+<a name="wine-prefix-development-installer"></a>
 
 <details>
 <summary><strong>Wine prefix development installer</strong></summary>
@@ -265,6 +306,8 @@ The private output contains `clean-prefix.json`, `verification.json`, `installer
 The release installer integrates private libraries, fonts, original UI/tray checks and launcher generation. Manjaro and CachyOS desktop results are recorded above; Bazzite fresh-install and physical-device acceptance remains pending. Optional vendor installers are not executed or falsely marked installed, and this recipe does not replace the user's working installation.
 
 </details>
+
+<a name="packaged-private-wine-runtime"></a>
 
 <details>
 <summary><strong>Packaged private Wine runtime</strong></summary>
@@ -315,6 +358,8 @@ The same **46/46 + 54/54 + 8/8 + 4/4 + 5/5** checks now pass on both a newer Man
 
 </details>
 
+<a name="dependency-sourcing-findings"></a>
+
 <details>
 <summary><strong>Dependency sourcing findings and the prefix question</strong></summary>
 
@@ -356,6 +401,8 @@ The absence of a located grant is an unresolved sourcing problem, not proof no a
 
 </details>
 
+<a name="portable-runtime-recommendation"></a>
+
 <details>
 <summary><strong>Portable runtime recommendation and container tradeoffs</strong></summary>
 
@@ -392,6 +439,8 @@ For a rootless Podman experiment, group-derived device access needs explicit att
 The current update freeze is local to G HUB: it sets `checkPeriodically` and `downloadAutomatically` false, disables **Logitech's Windows** `lghub_software_manager.exe` in the launch environment and makes the application files read-only in that namespace. `lghub_updater.exe` remains present for service/lifecycle needs. This is not a block on pacman, another Linux software manager, or unrelated applications. Version pinning preserves compatibility but requires a deliberate future security-update and requalification policy.
 
 </details>
+
+<a name="manjaro-and-cachyos-investigation"></a>
 
 <details>
 <summary><strong>Manjaro control and CachyOS investigation matrix</strong></summary>

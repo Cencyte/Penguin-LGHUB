@@ -20,12 +20,25 @@ def capture(args):
         return {'status':-1,'output':str(e)}
 
 
-def inventory(env=None, sysroot=Path('/sys'), progress=None):
+def inventory(env=None, sysroot=Path('/sys'), progress=None, result=None):
     # Optional presentation hook; standalone JSON consumers remain unchanged.
-    progress = progress or (lambda category, description: None)
+    notify = progress or (lambda category, description: None)
+    complete = result or (lambda category, description, status: None)
+    errors=[];warnings=[];checks=[];pending=None
+    def finish():
+        if pending is None:return
+        category,description,offset=pending
+        status='FAIL' if len(errors)>offset else 'OK'
+        checks.append({'category':category,'description':description,'status':status})
+        complete(category,description,status)
+    def progress(category,description):
+        nonlocal pending
+        finish()
+        pending=(category,description,len(errors))
+        notify(category,description)
     env=os.environ if env is None else env
     progress('System', 'Check operating system, CPU and Python requirements')
-    identity=os_identity();errors=[];warnings=[]
+    identity=os_identity()
     distro=identity.get('ID','')
     if distro not in PACKAGE_FAMILY:errors.append('Initial release targets Manjaro, CachyOS and Bazzite.')
     if platform.machine()!='x86_64':errors.append('The pinned runtime requires x86_64.')
@@ -64,7 +77,7 @@ def inventory(env=None, sysroot=Path('/sys'), progress=None):
       'packages':packages,'commands':executables,'graphics':graphics,'logitech_hidraw':nodes,
       'selinux':selinux['output'],'pipewire_socket_present':audio.is_socket(),
       'ntsync_present':Path('/dev/ntsync').exists(),'errors':errors,'warnings':warnings,
-      'physical_input_tested':False,'end_to_end_qualified':False}
+      'physical_input_tested':False,'end_to_end_qualified':False,'checks':checks}
     if session=='wayland':
         progress('Desktop', 'Check Xwayland, KWin and the input-control portal')
         import wayland_session
@@ -74,8 +87,11 @@ def inventory(env=None, sysroot=Path('/sys'), progress=None):
     report['namespace_probe']=capture(['bwrap','--unshare-all','--ro-bind','/usr','/usr',
         '--symlink','usr/lib','/lib','--symlink','usr/lib64','/lib64',
         '--proc','/proc','--dev','/dev','--','/usr/bin/true']) if executables['bwrap'] else None
+    if report['namespace_probe'] is None:
+        errors.append('User namespace test could not run: bwrap is missing.')
     if report['namespace_probe'] and report['namespace_probe']['status']:
         errors.append('User namespace test failed; inspect the logged error and SELinux audit, without disabling policy.')
+    finish()
     return report
 
 

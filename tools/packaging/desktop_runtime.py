@@ -23,7 +23,7 @@ import wayland_session
 import wine_x11_restore
 import wine_desktop_init
 import startup_feedback
-from installation_state import record_launchers
+from installation_state import record_launchers, load as load_installation
 from prepare_clean_prefix import APP, BASELINE, DATA, verify_prepared
 from windows_media_acquire import ROOT, digest_file, space_check, work_lock
 from wine_runtime import runtime_environment
@@ -387,6 +387,9 @@ def launch(config_path, config, root, experimental_wayland=False):
 
 
 def launch_with_feedback(config_path, config, root, feedback, experimental_wayland=False):
+    receipt = root.parent / 'installation.json'
+    if receipt.exists() and not load_installation(root.parent).get('installed'):
+        raise RuntimeError('Installation has not committed successfully; rerun the installer to recover.')
     if (root.parent / '.uninstalling').exists():
         raise RuntimeError('This installation is being removed; run --uninstall again if interrupted.')
     report = session_report(os.environ, experimental_wayland)
@@ -450,12 +453,26 @@ def install_entry(config_path, destination, experimental_wayland=False, applicat
         content += (f'\n[Desktop Action Help]\nName=Wayland test help\nExec={command} help\n'
                     f'\n[Desktop Action Logs]\nName=Open test logs\nExec={command} logs\n')
     paths = [destination] + ([applications / destination.name] if applications is not None else [])
-    record_launchers(config_path, paths, content.encode())
-    with destination.open('x') as stream:
-        stream.write(content)
-    destination.chmod(0o755)
+    record_launchers(config_path, paths, content.encode(), applications)
+    write_entry(destination, content.encode(), 0o755)
     if applications is not None:
         register_entry(destination, applications)
+
+
+def write_entry(path, data, mode):
+    """Remove our incomplete file if writing a new launcher fails."""
+    fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,mode)
+    identity=os.fstat(fd)
+    try:
+        with os.fdopen(fd,'wb') as stream:
+            stream.write(data);stream.flush();os.fsync(stream.fileno())
+        path.chmod(mode)
+    except BaseException:
+        try:
+            current=path.lstat()
+            if (current.st_dev,current.st_ino)==(identity.st_dev,identity.st_ino):path.unlink()
+        except FileNotFoundError:pass
+        raise
 
 
 def register_entry(source, applications):
@@ -469,9 +486,7 @@ def register_entry(source, applications):
         if target.is_symlink() or target.read_bytes() != data:
             raise RuntimeError('An application entry with this name already exists: ' + str(target))
         return
-    with target.open('xb') as stream:
-        stream.write(data)
-    target.chmod(0o644)
+    write_entry(target, data, 0o644)
 
 
 def main():

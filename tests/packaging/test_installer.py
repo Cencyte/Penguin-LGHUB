@@ -57,7 +57,7 @@ class InstallerTests(unittest.TestCase):
                 view.close();saved=log.read_text()
                 for line in ('child stdout','child stderr','[exit 7]'):self.assertIn(line,saved)
                 self.assertEqual('child stdout' in out.getvalue(),verbose)
-                self.assertIn('[Wine] Compile fixture...',out.getvalue())
+                self.assertRegex(out.getvalue(),r'\[Wine\] +Compile fixture +\.\.\.')
                 self.assertEqual(log.stat().st_mode & 0o777,0o600)
 
     def test_sudo_retains_controlling_terminal(self):
@@ -73,16 +73,8 @@ class InstallerTests(unittest.TestCase):
     def test_graphics_fallback_avoids_escape_protocol_in_unknown_terminal(self):
         self.assertEqual(ui.logo_format({'TERM':'xterm-256color'}),'symbols')
         self.assertEqual(ui.logo_format({'TERM':'xterm-kitty'}),'kitty')
-        self.assertEqual(ui.logo_format({'KONSOLE_VERSION':'260801'}),'sixels')
+        self.assertEqual(ui.logo_format({'KONSOLE_VERSION':'260801'}),'kitty')
         self.assertEqual(ui.logo_format({'TERM':'xterm-kitty','TMUX':'yes'}),'symbols')
-
-    def test_retry_preserves_partial_and_refuses_backup_collision(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            item=Path(tmp)/'candidate';item.mkdir();(item/'log').write_text('diagnostic')
-            install.preserve_partial((item,),1)
-            self.assertEqual((Path(tmp)/'candidate.incomplete-1/log').read_text(),'diagnostic')
-            item.mkdir()
-            with self.assertRaises(RuntimeError):install.preserve_partial((item,),1)
 
     def test_acquisition_engines_hide_desktop_network_and_keep_user_identity(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -109,8 +101,9 @@ class InstallerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)/'installation';commands=[]
             args=install.parser().parse_args(['--install','--directory',str(root)])
-            view=MagicMock();view.run.side_effect=lambda command:commands.append(list(map(str,command)))
-            with patch.object(install,'space_check'),patch.object(install.subprocess,'check_output',return_value=str(Path(tmp)/'Desktop')+'\n'):
+            view=ui.Presentation(Path(tmp)/'transaction.log',stream=io.StringIO());self.addCleanup(view.close)
+            view.run=MagicMock();view.run.side_effect=lambda command:commands.append(list(map(str,command)))
+            with patch.object(install,'space_check'),patch.object(install.install_transaction,'synchronize'),patch.object(install.subprocess,'check_output',return_value=str(Path(tmp)/'Desktop')+'\n'):
                 install.pipeline(args,view,{'session':'wayland','selinux':'Enforcing'})
             flattened=[' '.join(c) for c in commands]
             ui_at=next(i for i,c in enumerate(flattened) if 'linux_ui_probe.py' in c)
