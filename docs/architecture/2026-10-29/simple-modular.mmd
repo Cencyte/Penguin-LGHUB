@@ -1,0 +1,33 @@
+%% title: Penguin LGHUB 01 Simple Modular 2026-10-29
+%% system: Penguin-LGHUB · at a glance
+%% summary: Three compact views of setup, runtime and Linux integration. Purple is project compatibility code; turquoise is the original G HUB application. Detailed component maps follow in the repository.
+%% layout: horizontal
+%% sort: sequence
+%% colors: 2 purple turquoise
+%% split: off
+%% theme: dark
+%% crop: yes
+%% fill: #1e1e2e
+
+%% graph: 1 · Install
+flowchart LR
+    A["Verified inputs"] --> B["Build + test"] --> C["Ready to launch"]
+    classDef readable font-size:44px,font-weight:700,font-family:Arial
+    class A,B,C c1
+    class A,B,C readable
+
+%% graph: 2 · Run
+flowchart LR
+    A["Original G HUB"] --> B["Private Wine"] --> C["Linux libraries"]
+    classDef readable font-size:44px,font-weight:700,font-family:Arial
+    class A c2
+    class B,C c1
+    class A,B,C readable
+
+%% graph: 3 · Connect
+flowchart LR
+    A["Linux host"] --> B["X11 / Wayland + tray"]
+    A --> C["Devices + keys"]
+    class A c1
+    classDef readable font-size:44px,font-weight:700,font-family:Arial
+    class A,B,C readable

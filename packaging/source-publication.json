@@ -60,14 +60,86 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "f18bb69528afab42b259c4ef715151c905e7afb43231a3a4acd947e13f385268",
-      "bytes": 44546
+      "sha256": "67c46a4d2e3d6cd3fe092ee0afe3ee3014ad5069b522f8b7854f70c0253f30c3",
+      "bytes": 47016
     },
     {
       "path": "assets/penguin-lghub-logo.png",
       "mode": "100644",
       "sha256": "f76b0520fbcc1c9af17177f38d63b3d878952d4ce3e9c5226c159a3b96636f0c",
       "bytes": 945225
+    },
+    {
+      "path": "docs/architecture/2026-10-29/detailed-connected.md",
+      "mode": "100644",
+      "sha256": "9842d1f3c535b34c0f58f85c5a4827e42e0f13db344abadee9d817371d0702b2",
+      "bytes": 8445
+    },
+    {
+      "path": "docs/architecture/2026-10-29/detailed-connected.mmd",
+      "mode": "100644",
+      "sha256": "ff11325b425cd4ef546b4a3c489d37ad8c0857555a0cb2a21256e49b761a4a3a",
+      "bytes": 8024
+    },
+    {
+      "path": "docs/architecture/2026-10-29/detailed-connected.png",
+      "mode": "100644",
+      "sha256": "e2201dcdbb89dac501bf4086126eaf3e2e6a5bd26f8f055a75ea9d6735aa2e25",
+      "bytes": 1113988
+    },
+    {
+      "path": "docs/architecture/2026-10-29/detailed-modular.md",
+      "mode": "100644",
+      "sha256": "00a59c33a237a31644e88db218fd8d632a2d656843a540db913e8bdc13e30d25",
+      "bytes": 8726
+    },
+    {
+      "path": "docs/architecture/2026-10-29/detailed-modular.mmd",
+      "mode": "100644",
+      "sha256": "23fe8f8efcf6cb7077ca7975402daeb6c9f9d4f4b1586c36ced09a38bf3f53e5",
+      "bytes": 6002
+    },
+    {
+      "path": "docs/architecture/2026-10-29/detailed-modular.png",
+      "mode": "100644",
+      "sha256": "259f0373bc568c8f2bafc31d75e887c8a0bbdd3c54ce9f16ed611e5df91fcf5b",
+      "bytes": 735178
+    },
+    {
+      "path": "docs/architecture/2026-10-29/simple-connected.md",
+      "mode": "100644",
+      "sha256": "19be91415344f59bc36107ab1faee5e8c05487f0d3a653ee72200fe533e6cc50",
+      "bytes": 1453
+    },
+    {
+      "path": "docs/architecture/2026-10-29/simple-connected.mmd",
+      "mode": "100644",
+      "sha256": "cd24c646304844522f70d0ca3d85a3709881a9bc1761dee14abdd9769183bfa3",
+      "bytes": 1013
+    },
+    {
+      "path": "docs/architecture/2026-10-29/simple-connected.png",
+      "mode": "100644",
+      "sha256": "3bc3c40648c68e0e12b16100be9ae09888652b7f43d2f8cbf27ce281fccded81",
+      "bytes": 77193
+    },
+    {
+      "path": "docs/architecture/2026-10-29/simple-modular.md",
+      "mode": "100644",
+      "sha256": "74c06ab789b114bcb4b8fb67db7cb4c212fb0e57e89f9d35d3d20354f7144719",
+      "bytes": 2402
+    },
+    {
+      "path": "docs/architecture/2026-10-29/simple-modular.mmd",
+      "mode": "100644",
+      "sha256": "65eb174c6f1af86233354695e66bee1124d7daff5c3d095987ead592b78b0977",
+      "bytes": 1112
+    },
+    {
+      "path": "docs/architecture/2026-10-29/simple-modular.png",
+      "mode": "100644",
+      "sha256": "c4e1d164ca73cb0ead4bb9dad10ae01a9f718ea2d21356046abd6f0cc084043d",
+      "bytes": 94252
     },
     {
       "path": "docs/architecture/penguin-lghub-detailed-preserved.md",
@@ -316,6 +388,12 @@
       "bytes": 25270
     },
     {
+      "path": "docs/packaging/bazzite-readiness.md",
+      "mode": "100644",
+      "sha256": "c98e535bbfd6a7955d0325701d9fa84b568d041e1357181eb737dd51b4e384aa",
+      "bytes": 6256
+    },
+    {
       "path": "docs/packaging/cachyos-wayland-launcher-verification.json",
       "mode": "100644",
       "sha256": "a47feba9794b869dd2ef8138e48d90a8dfdff829df0a24861f7fe5b0e6a1b2b0",
@@ -350,6 +428,18 @@
       "mode": "100644",
       "sha256": "0a0c5f15fb50432c3189f2fae2dc29702cb60977ad2ed7c447030fa2da008011",
       "bytes": 3428
+    },
+    {
+      "path": "docs/packaging/release-installer-verification.json",
+      "mode": "100644",
+      "sha256": "9bb5a009f58b0fb0e48f12827cc26a3d49ab503bd762cee51284df3d27ddfb32",
+      "bytes": 4855
+    },
+    {
+      "path": "docs/packaging/release-installer.md",
+      "mode": "100644",
+      "sha256": "38ed3c1160ab765b469301006897a854b1863f340809c13735e02abef60bafff",
+      "bytes": 7406
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -2416,5 +2506,8 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Includes later desktop/Wayland fixes and owner acceptance; no vendor payload or populated prefix."
+  "publication_note": "Includes desktop/Wayland fixes, recorded manual acceptance, current architecture diagrams and release-installer documentation; no vendor payload or populated prefix.",
+  "file_count": 413,
+  "total_bytes": 9714909,
+  "publication_branch": "main"
 }

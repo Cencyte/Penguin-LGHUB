@@ -1,0 +1,36 @@
+%% title: Penguin LGHUB 02 Simple Connected 2026-10-29
+%% system: Penguin-LGHUB · connected overview
+%% summary: A compact connected map. Purple is project compatibility, turquoise is G HUB, amber is downloaded inputs and blue is the Linux host. Setup leads to the original application, private runtime and host integration.
+%% layout: horizontal
+%% sort: sequence
+%% colors: 4 purple turquoise amber blue
+%% split: off
+%% theme: dark
+%% crop: yes
+%% fill: #171923
+
+%% graph: System
+flowchart LR
+    subgraph PREP["SETUP"]
+        A["Installer"]
+        B["Official inputs"]
+        B --> A
+    end
+    subgraph RUNTIME["PRIVATE RUNTIME"]
+        C["G HUB + prefix"]
+        D["Wine + helpers"]
+        C --> D
+    end
+    subgraph HOST["LINUX"]
+        E["Desktop + tray"]
+        F["Devices + keys"]
+    end
+    A --> C
+    D --> E
+    D --> F
+    classDef readable font-size:44px,font-weight:700,font-family:Arial
+    class A,D c1
+    class C c2
+    class B c3
+    class E,F c4
+    class A,B,C,D,E,F readable
