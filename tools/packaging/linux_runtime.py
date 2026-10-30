@@ -41,8 +41,8 @@ def support_url(url):
     return url
 
 
-def extract_support(archive, output):
-    """Read a pinned Debian data archive; never execute maintainer scripts."""
+def debian_payload(archive):
+    """Read the bounded ar container without requiring host binutils."""
     data = archive.read_bytes()
     if not data.startswith(b'!<arch>\n') or len(data) > 128 * 1024**2:
         raise ValueError('Invalid support package')
@@ -59,7 +59,12 @@ def extract_support(archive, output):
         offset += 60 + size + size % 2
     if len(payloads) != 1:
         raise ValueError('Expected exactly one Debian data archive')
-    with tarfile.open(fileobj=io.BytesIO(payloads[0]), mode='r:*') as tar:
+    return payloads[0]
+
+
+def extract_support(archive, output):
+    """Read a pinned Debian data archive; never execute maintainer scripts."""
+    with tarfile.open(fileobj=io.BytesIO(debian_payload(archive)), mode='r:*') as tar:
         members, names, total = tar.getmembers(), set(), 0
         for m in members:
             p = PurePosixPath(m.name)

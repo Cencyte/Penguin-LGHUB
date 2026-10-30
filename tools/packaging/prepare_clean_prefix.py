@@ -210,7 +210,7 @@ def sandbox(output, command, hide_host_wine=False, freeze_app=False):
     return args + ['--', *map(str, command)]
 
 
-def run_logged(output, name, command, env, private=None, runtime=None, freeze_app=False):
+def run_logged(output, name, command, env, private=None, runtime=None, freeze_app=False, linux_runtime=None):
     # Flush registry changes and stop this namespace's server before its PID
     # namespace disappears. No cached PID or host-wide process matching is used.
     supervisor = ('import subprocess,sys\n'
@@ -225,6 +225,13 @@ def run_logged(output, name, command, env, private=None, runtime=None, freeze_ap
             raise ValueError('A packaged runtime cannot use host Wine overlays')
         env = runtime_environment(runtime, output / 'prefix', env)
     argv = sandbox(output, [sys.executable, '-c', supervisor, *command], bool(runtime), freeze_app)
+    if linux_runtime:
+        import linux_runtime as linux
+        env['LD_LIBRARY_PATH'] = linux.library_path(linux_runtime, runtime)
+        argv = linux.isolated_command(linux_runtime, output,
+            ['/usr/bin/env', *(f'{k}={v}' for k,v in env.items()),
+             '/usr/bin/python3', '-c', supervisor, *command],
+            freeze_app=freeze_app, read_only_paths=(runtime, linux_runtime))
     if private:
         argv = private + argv
     with (output / (name + '.log')).open('xb') as log:
@@ -274,7 +281,7 @@ def verify_prepared(output):
             'public_installer_ready': False}
 
 
-def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None):
+def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None, linux_runtime=None):
     if os.geteuid() == 0:
         raise ValueError('Run as your normal user; the private runtime runner handles its own sudo')
     if output.exists() or output.is_symlink() or not output.parent.is_dir():
@@ -299,14 +306,16 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None):
     media = json.loads((ROOT / 'packaging/windows-acquisition.lock.json').read_text())
     for name in ('d2d1.dll', 'ninput.dll'):
         check_asset(windows_dlls / name, media['files'][name])
-    required = ['bwrap', 'x86_64-w64-mingw32-g++'] + ([] if runtime else ['wine', 'wineserver', 'sudo'])
+    bundled_probe = runtime / 'tools/clean_prefix_probe.exe' if runtime else None
+    has_probe = bool(bundle and 'tools/clean_prefix_probe.exe' in bundle['files'])
+    required = ['bwrap'] + ([] if has_probe else ['x86_64-w64-mingw32-g++']) + ([] if runtime else ['wine', 'wineserver', 'sudo'])
     for tool in required:
         if not shutil.which(tool):
             raise ValueError(f'Required existing tool missing: {tool}')
     env = environment(output / 'prefix')
     if runtime:
         env = runtime_environment(runtime, output / 'prefix', env)
-    if subprocess.check_output(['wine', '--version'], env=env, text=True).strip() != 'wine-10.20':
+    if not linux_runtime and subprocess.check_output(['wine', '--version'], env=env, text=True).strip() != 'wine-10.20':
         raise ValueError('Recipe requires the pinned Wine 10.20 runtime')
     if not runtime:
         subprocess.run(['sudo', '-n', 'true'], check=True, timeout=15)
@@ -314,12 +323,16 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None):
                     '--tmpfs', '/tmp', '--unshare-net', '--unshare-pid', '--', '/usr/bin/true'], check=True)
     space_check(output.parent, 5 * 1024**3)
     output.mkdir(mode=0o700)
+    (output / 'home').mkdir()
     probe = output / 'clean_prefix_probe.exe'
-    subprocess.run(['x86_64-w64-mingw32-g++', '-O2', '-Wall', '-Wextra', '-Werror', '-static',
-                    str(ROOT / 'tools/packaging/clean_prefix_probe.cpp'), '-o', str(probe),
-                    '-lruntimeobject', '-lole32', '-luuid', '-ladvapi32'], check=True, timeout=120)
+    if has_probe:
+        copy_checked(bundled_probe, probe, bundle['files']['tools/clean_prefix_probe.exe']['sha256'])
+    else:
+        subprocess.run(['x86_64-w64-mingw32-g++', '-O2', '-Wall', '-Wextra', '-Werror', '-static',
+                        str(ROOT / 'tools/packaging/clean_prefix_probe.cpp'), '-o', str(probe),
+                        '-lruntimeobject', '-lole32', '-luuid', '-ladvapi32'], check=True, timeout=120)
     print('Initializing a new headless Wine prefix with no network or physical devices...', flush=True)
-    run_logged(output, 'wineboot', ['wine', 'wineboot', '-i'], env, runtime=runtime)
+    run_logged(output, 'wineboot', ['wine', 'wineboot', '-i'], env, runtime=runtime, linux_runtime=linux_runtime)
     prefix, app, data = output / 'prefix', output / 'prefix' / APP, output / 'prefix' / DATA
     # Fresh Wine creates convenience links to host documents. Replace only those
     # links in the new candidate with empty directories; copy no personal files.
@@ -369,10 +382,10 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None):
     write_json(output / 'installer-actions.json', actions)
     reg = prefix / 'drive_c/penguin-install.reg'
     reg.write_text(registration(baseline, lock['application_version']), encoding='utf-16')
-    run_logged(output, 'registry', ['wine', 'reg', 'import', r'C:\penguin-install.reg'], env, runtime=runtime)
+    run_logged(output, 'registry', ['wine', 'reg', 'import', r'C:\penguin-install.reg'], env, runtime=runtime, linux_runtime=linux_runtime)
     run_logged(output, 'service', ['wine', 'sc', 'create', 'LGHUBUpdaterService', 'binPath=',
                '"' + WIN_APP + r'\lghub_updater.exe" --run-as-service', 'start=', 'demand',
-               'DisplayName=', 'LGHUB Updater Service'], env, runtime=runtime)
+               'DisplayName=', 'LGHUB Updater Service'], env, runtime=runtime, linux_runtime=linux_runtime)
     reg.unlink()
     private = None
     if not runtime:
@@ -385,7 +398,7 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None):
                    'WINEDLLOVERRIDES': baseline['environment']['WINEDLLOVERRIDES'] + ';lghub_software_manager.exe=d'}
     print('Probing all eight WinRT factories and the stopped service in the private runtime...', flush=True)
     run_logged(output, 'activation-probe', ['env', *(f'{k}={v}' for k,v in runtime_env.items()),
-                                          'wine', str(probe)], env, private, runtime=runtime)
+                                          'wine', str(probe)], env, private, runtime=runtime, linux_runtime=linux_runtime)
     probe.unlink()
     installed = {str(p.relative_to(output)): digest_file(p)['sha256'] for folder in (app, data, output / 'frontend', output / 'builds')
                  for p in folder.rglob('*') if p.is_file()}
@@ -422,6 +435,7 @@ def main():
     group.add_argument('--compatibility-root', type=Path)
     group.add_argument('--runtime', type=Path)
     parser.add_argument('--windows-dlls', type=Path)
+    parser.add_argument('--linux-runtime', type=Path)
     parser.add_argument('--verify-only', action='store_true')
     args = parser.parse_args()
     if args.verify_only:
@@ -433,7 +447,8 @@ def main():
     with work_lock(cache):
         prepare(external_path(args.stage), cache, external_path(args.output),
                 args.compatibility_root.resolve(strict=True) if args.compatibility_root else None,
-                args.windows_dlls.resolve(strict=True), args.runtime.resolve(strict=True) if args.runtime else None)
+                args.windows_dlls.resolve(strict=True), args.runtime.resolve(strict=True) if args.runtime else None,
+                args.linux_runtime.resolve(strict=True) if args.linux_runtime else None)
 
 
 if __name__ == '__main__':

@@ -101,6 +101,22 @@ def verify_runtime(root):
     if current != report['files']:
         raise ValueError('Runtime file inventory changed')
     lock = json.loads(LOCK.read_text())
+    if report.get('source_build'):
+        from build_release_runtime import recipe_digest
+        built = report['source_build']
+        if built['recipe_sha256'] != recipe_digest():
+            raise ValueError('Source-built runtime uses a different public recipe')
+        for name, sha in built['files'].items():
+            if current.get(name, {}).get('sha256') != sha:
+                raise ValueError('Source-built runtime artifact changed: ' + name)
+        expected_targets = {v['target'] for v in lock['patches'].values()}
+        expected_targets.update(v['target'] for v in lock['supplements'].values())
+        if not expected_targets.issubset(built['files']):
+            raise ValueError('Incomplete source-built runtime')
+        for spec in report['supplements'].values():
+            if built['files'].get(spec['target']) != spec['sha256']:
+                raise ValueError('Supplement does not match source build')
+        return report
     for category in ('patches', 'markers', 'supplements'):
         for spec in lock[category].values():
             if current.get(spec['target'], {}).get('sha256') != spec['sha256']:

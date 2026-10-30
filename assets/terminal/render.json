@@ -1,0 +1,18 @@
+{
+  "renderer": "Chafa 1.16.2",
+  "source": "assets/penguin-lghub-logo.png",
+  "source_sha256": "f76b0520fbcc1c9af17177f38d63b3d878952d4ce3e9c5226c159a3b96636f0c",
+  "requested_pixels": [
+    200,
+    200
+  ],
+  "cell_fallback": [
+    20,
+    10
+  ],
+  "files": {
+    "symbols.ansi": "a066e9fb28b382b6f6c58f53f1eddf5d85f2f6fe77b9b416e42816657a84c926",
+    "sixels.ansi": "31526ea8b031656971a713cd6b813ce2243120307cf34216e619b6cbc2a65afc",
+    "kitty.ansi": "b1547304647445c723a0e51b5a028b81e3df8a636178ac1141cfd46b12441dbf"
+  }
+}

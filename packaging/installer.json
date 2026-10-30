@@ -1,0 +1,14 @@
+{
+  "project_version": "0.9.0-dev",
+  "installer_version": "0.1.0",
+  "category_colors": {
+    "System": 214,
+    "Downloads": 81,
+    "Tools": 45,
+    "Wine": 171,
+    "Windows": 111,
+    "G HUB": 141,
+    "Desktop": 208,
+    "Verify": 75
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "description": "Private acquisition/build tools; extracted packages only, no host package transactions. SDK and Wine base locks are also required.",
+  "index_sha256": "7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498",
+  "packages": [
+    {
+      "package": "binutils-common",
+      "version": "2.44-3",
+      "url": "https://deb.debian.org/debian/pool/main/b/binutils/binutils-common_2.44-3_amd64.deb",
+      "local_name": "binutils-common_2.44-3_amd64.deb",
+      "size": 2508768,
+      "sha256": "002da5d23f8757dee97a2c0a40e0e1d4d85a43da094488ee2ee7068d4d3691f9",
+      "source_package": "binutils"
+    },
+    {
+      "package": "binutils-mingw-w64-x86-64",
+      "version": "2.44-3+12+b1",
+      "url": "https://deb.debian.org/debian/pool/main/b/binutils-mingw-w64/binutils-mingw-w64-x86-64_2.44-3+12+b1_amd64.deb",
+      "local_name": "binutils-mingw-w64-x86-64_2.44-3+12+b1_amd64.deb",
+      "size": 3473344,
+      "sha256": "b53f4a091b16a0d0952b8e3bd6027931641386258f96b37db1f0c62c787221d3",
+      "source_package": "binutils-mingw-w64 (12)"
+    },
+    {
+      "package": "cabextract",
+      "version": "1.11-2",
+      "url": "https://deb.debian.org/debian/pool/main/c/cabextract/cabextract_1.11-2_amd64.deb",
+      "local_name": "cabextract_1.11-2_amd64.deb",
+      "size": 36064,
+      "sha256": "f66dfa011a39a82c1c601b308ef031ef65b29c856cd13a3d3eb194b947c5326d",
+      "source_package": "cabextract"
+    },
+    {
+      "package": "chafa",
+      "version": "1.14.5-1",
+      "url": "https://deb.debian.org/debian/pool/main/c/chafa/chafa_1.14.5-1_amd64.deb",
+      "local_name": "chafa_1.14.5-1_amd64.deb",
+      "size": 77672,
+      "sha256": "c45269ea1569ea6630df63747ffcd95ee779db6fd91b999165f68a8178a9a325",
+      "source_package": "chafa"
+    },
+    {
+      "package": "libchafa0t64",
+      "version": "1.14.5-1",
+      "url": "https://deb.debian.org/debian/pool/main/c/chafa/libchafa0t64_1.14.5-1_amd64.deb",
+      "local_name": "libchafa0t64_1.14.5-1_amd64.deb",
+      "size": 107420,
+      "sha256": "e6048c599c60ac8816c5ea0553a759744f2efe84a5008eb3c5a37c7a47ac068f",
+      "source_package": "chafa"
+    },
+    {
+      "package": "libfuse3-4",
+      "version": "3.17.2-3",
+      "url": "https://deb.debian.org/debian/pool/main/f/fuse3/libfuse3-4_3.17.2-3_amd64.deb",
+      "local_name": "libfuse3-4_3.17.2-3_amd64.deb",
+      "size": 98748,
+      "sha256": "92e2d521ff872755a13aa69dba7b24025a7dc0f0f5aa708c9a86cd3565f570da",
+      "source_package": "fuse3"
+    },
+    {
+      "package": "g++-mingw-w64-x86-64-posix",
+      "version": "14.2.0-19+27+b1",
+      "url": "https://deb.debian.org/debian/pool/main/g/gcc-mingw-w64/g++-mingw-w64-x86-64-posix_14.2.0-19+27+b1_amd64.deb",
+      "local_name": "g++-mingw-w64-x86-64-posix_14.2.0-19+27+b1_amd64.deb",
+      "size": 15261820,
+      "sha256": "cfa1773c2d0184819050138e587a81606d04a5f92e278b521b72b776d2c256c1",
+      "source_package": "gcc-mingw-w64 (27)"
+    },
+    {
+      "package": "gcc-mingw-w64-base",
+      "version": "14.2.0-19+27+b1",
+      "url": "https://deb.debian.org/debian/pool/main/g/gcc-mingw-w64/gcc-mingw-w64-base_14.2.0-19+27+b1_amd64.deb",
+      "local_name": "gcc-mingw-w64-base_14.2.0-19+27+b1_amd64.deb",
+      "size": 194268,
+      "sha256": "8d2c64b886ab4a435a78ddc4cd3b510f149b65fbd6be8472e8f460627562718a",
+      "source_package": "gcc-mingw-w64 (27)"
+    },
+    {
+      "package": "gcc-mingw-w64-x86-64-posix",
+      "version": "14.2.0-19+27+b1",
+      "url": "https://deb.debian.org/debian/pool/main/g/gcc-mingw-w64/gcc-mingw-w64-x86-64-posix_14.2.0-19+27+b1_amd64.deb",
+      "local_name": "gcc-mingw-w64-x86-64-posix_14.2.0-19+27+b1_amd64.deb",
+      "size": 37567656,
+      "sha256": "e32d24cfd1482394f16d9a84c1d0a9f5aa08ee826a79acc383c70cc8c23c4fe5",
+      "source_package": "gcc-mingw-w64 (27)"
+    },
+    {
+      "package": "gcc-mingw-w64-x86-64-posix-runtime",
+      "version": "14.2.0-19+27+b1",
+      "url": "https://deb.debian.org/debian/pool/main/g/gcc-mingw-w64/gcc-mingw-w64-x86-64-posix-runtime_14.2.0-19+27+b1_amd64.deb",
+      "local_name": "gcc-mingw-w64-x86-64-posix-runtime_14.2.0-19+27+b1_amd64.deb",
+      "size": 13037152,
+      "sha256": "c898d96177574a8a7238564a1e799d8ddfed5a3d2ea005510305f9ad466a6f59",
+      "source_package": "gcc-mingw-w64 (27)"
+    },
+    {
+      "package": "libmspack0t64",
+      "version": "0.11-1.1+b1",
+      "url": "https://deb.debian.org/debian/pool/main/libm/libmspack/libmspack0t64_0.11-1.1+b1_amd64.deb",
+      "local_name": "libmspack0t64_0.11-1.1+b1_amd64.deb",
+      "size": 53004,
+      "sha256": "b6039006e2758fa91a0e02ea1cbeded53ae0a5955298e1b0dddbe5a91784b510",
+      "source_package": "libmspack (0.11-1.1)"
+    },
+    {
+      "package": "mingw-w64-common",
+      "version": "12.0.0-5",
+      "url": "https://deb.debian.org/debian/pool/main/m/mingw-w64/mingw-w64-common_12.0.0-5_all.deb",
+      "local_name": "mingw-w64-common_12.0.0-5_all.deb",
+      "size": 5792084,
+      "sha256": "97dce5d0d8aff1cade4786ad4ef5078345477a598829afcac2e7f2fbc5399990",
+      "source_package": "mingw-w64"
+    },
+    {
+      "package": "mingw-w64-x86-64-dev",
+      "version": "12.0.0-5",
+      "url": "https://deb.debian.org/debian/pool/main/m/mingw-w64/mingw-w64-x86-64-dev_12.0.0-5_all.deb",
+      "local_name": "mingw-w64-x86-64-dev_12.0.0-5_all.deb",
+      "size": 4871860,
+      "sha256": "0bf89cf7454cccb49cd2a46a6f7b33896f6ae3a1a2fe33e02c40be6155bbb385",
+      "source_package": "mingw-w64"
+    },
+    {
+      "package": "libntfs-3g89t64",
+      "version": "1:2022.10.3-5+deb13u2",
+      "url": "https://deb.debian.org/debian/pool/main/n/ntfs-3g/libntfs-3g89t64_2022.10.3-5+deb13u2_amd64.deb",
+      "local_name": "libntfs-3g89t64_2022.10.3-5+deb13u2_amd64.deb",
+      "size": 166788,
+      "sha256": "74641ea68ec67b37781435f0335b49747e300c4fd2ead3fdbb02d7a03569c5a3",
+      "source_package": "ntfs-3g"
+    },
+    {
+      "package": "libwim15t64",
+      "version": "1.14.4-1.1+b3",
+      "url": "https://deb.debian.org/debian/pool/main/w/wimlib/libwim15t64_1.14.4-1.1+b3_amd64.deb",
+      "local_name": "libwim15t64_1.14.4-1.1+b3_amd64.deb",
+      "size": 185472,
+      "sha256": "150f44b9fb4a3b5f0328f300555911824fc2b86c56fe94b00a92867eac0a7da6",
+      "source_package": "wimlib (1.14.4-1.1)"
+    },
+    {
+      "package": "wimtools",
+      "version": "1.14.4-1.1+b3",
+      "url": "https://deb.debian.org/debian/pool/main/w/wimlib/wimtools_1.14.4-1.1+b3_amd64.deb",
+      "local_name": "wimtools_1.14.4-1.1+b3_amd64.deb",
+      "size": 106240,
+      "sha256": "f4d27d4e2b6722ed5b18fa5dfc02d9d55e92e2c3f1d4ae58b972168e8222c23d",
+      "source_package": "wimlib (1.14.4-1.1)"
+    }
+  ]
+}

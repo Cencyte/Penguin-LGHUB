@@ -60,3 +60,19 @@ is private at this publication step; the documentation restricts first-time
 social-preview uploads to public repositories. No account avatar or repository
 visibility is changed by this source upload. The supplied logo remains the
 README's introductory branding image and a reusable asset in the repository.
+
+
+## October 29 release branch
+
+Main was updated first at `9c8ff72` with the committed desktop/Wayland fixes and
+the compact recorded-environment table. The subsequent `release` branch adds
+the source-to-runtime installer, private acquisition tools, Bazzite research,
+terminal presentation and persistent diagnostics. The old development branch
+and its uncommitted files remain untouched.
+
+The publication allowlist now includes the root `install.sh`. Chafa-rendered
+terminal artwork is project artwork, not a vendor payload. Acquisition caches,
+compiled Wine, populated prefixes, raw integration logs and official media stay
+outside Git. The runtime is built locally from pinned downloads; publishing the
+source does not publish Microsoft's/Logitech's binaries or a compiled Wine
+release. See [the release workflow](release-installer.md).

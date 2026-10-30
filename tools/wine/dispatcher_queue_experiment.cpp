@@ -13,6 +13,7 @@
 #include <inspectable.h>
 #include <activation.h>
 #include <roapi.h>
+#include "mingw_agile_compat.h"
 #include <winstring.h>
 #include <asyncinfo.h>
 #include <weakreference.h>

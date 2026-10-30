@@ -11,6 +11,12 @@
 #include <cstdint>
 #include "core_application_private_abi.h"
 
+// MinGW 12 lacks this declaration; the ABI is provided by combase/runtimeobject.
+#if defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR <= 12
+enum AgileReferenceOptions { AGILEREFERENCE_DEFAULT = 0, AGILEREFERENCE_DELAYEDMARSHAL = 1 };
+extern "C" HRESULT WINAPI RoGetAgileReference(AgileReferenceOptions, REFIID, IUnknown *, IAgileReference **);
+#endif
+
 static constexpr wchar_t class_name[] = L"Windows.ApplicationModel.Core.CoreApplication";
 class Factory final : public IActivationFactory, public ICoreApplicationPrivate {
     struct Subscription { UINT64 token; IAgileReference *handler; Subscription *next; };

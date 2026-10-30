@@ -191,6 +191,7 @@ def main():
     sub = parser.add_subparsers(dest='command', required=True)
     fetch = sub.add_parser('fetch', help='Download/verify pinned package and installation ESD')
     fetch.add_argument('--work-dir', required=True)
+    fetch.add_argument('--decoder', action='store_true', help='Also fetch the pinned reconstruction decoder source')
     verify = sub.add_parser('verify', help='Verify both reconstructed DLLs, including PE metadata')
     verify.add_argument('--directory', required=True)
     reconstruct = sub.add_parser('reconstruct', help='Rebuild exact DLLs from verified media in fresh private directories')
@@ -212,6 +213,9 @@ def main():
         else:
             for key in ('package', 'base_media'):
                 download_asset(work, lock[key])
+            if args.decoder:
+                from windows_media_reconstruct import tool_source_url
+                download_asset(work, lock['extraction_tools']['ms_compress'], validate=tool_source_url)
 
 
 if __name__ == '__main__':

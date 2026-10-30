@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "recorded_local_date": "2026-10-29",
+  "kind": "release-installer-integration",
+  "project_version": "0.9.0-dev",
+  "installer_version": "0.1.0",
+  "host": "Manjaro development workstation; Bazzite not booted for this test",
+  "source_build": {
+    "recipe_sha256": "da10bd1bc68bfca885df5c0ae20644adda4832f4fbbfe80bf338c15b90fcc270",
+    "patch_topics": 45,
+    "compiled_or_collected_outputs": 30,
+    "runtime_inventory_entries": 2567,
+    "runtime_manifest_sha256": "ab196454fe83bf786717fb88d5b4f5f4f883802b51e4a411cb692f9f244796c9",
+    "prior_lab_compiled_artifacts_used": false,
+    "host_compilers_required": false,
+    "byte_identical_rebuild_claimed": false
+  },
+  "acquisition": {
+    "bubblewrap_exact_matches": 2,
+    "podman_exact_matches": 2,
+    "required_dlls": 2,
+    "files": [
+      {
+        "name": "d2d1.dll",
+        "size": 6592096,
+        "sha256": "d1425b33d6816a03769f2d635bfee7abb6392c267abbca4f5bd27593841a39fc",
+        "machine": "0x8664",
+        "version": "10.0.26100.8737",
+        "exact_baseline_match": true
+      },
+      {
+        "name": "ninput.dll",
+        "size": 512000,
+        "sha256": "0da856260c5bf440038bd7df9e0b002c55be5e540294635b87f44da0fecab90c",
+        "machine": "0x8664",
+        "version": "10.0.26100.8737",
+        "exact_baseline_match": true
+      }
+    ],
+    "host_wine_required": false,
+    "docker_required": false,
+    "windows_vm_required": false,
+    "selinux_podman_execution_tested": false
+  },
+  "fresh_prefix": {
+    "application_version": "2026.6.974819",
+    "depot_files": 1115,
+    "cached_depots": 30,
+    "application_layout_files": 438,
+    "donor_prefix_cloned": false,
+    "activation_factories_verified": 8,
+    "registry_routes_verified": 4
+  },
+  "loader": {
+    "modules_linked": 46,
+    "modules_total": 46,
+    "dlopen_loadable": 53,
+    "dlopen_total": 53,
+    "pe_command": {
+      "exit_code": 0,
+      "passed": true,
+      "stdout": "PENGUIN_LINUX_RUNTIME_OK",
+      "stderr": "wine: created the configuration directory '@OUTPUT@/prefix'"
+    }
+  },
+  "isolated_ui": {
+    "passed": true,
+    "checks": {
+      "required_files_present": true,
+      "bundled_fonts_loaded": true,
+      "desktop_and_default_profile": true,
+      "first_run_prompt_readable": true,
+      "native_tray_running": true,
+      "xembed_dock_received": true
+    },
+    "tray": {
+      "xembed_dock_requests": 1,
+      "native_process_running": true
+    },
+    "live_desktop_used": false,
+    "physical_devices_exposed": false
+  },
+  "offscreen_session": {
+    "schema": 1,
+    "window_created": false,
+    "input_injected": false,
+    "sound_played": false,
+    "end_to_end_qualified": false,
+    "warnings": [],
+    "graphics": {
+      "contexts": [
+        {
+          "platform": "device",
+          "vendor": "NVIDIA",
+          "version": "1.5",
+          "renderer": "NVIDIA GeForce RTX 3090/PCIe/SSE2",
+          "software": false
+        },
+        {
+          "platform": "device",
+          "vendor": "Mesa Project",
+          "version": "1.5",
+          "renderer": "llvmpipe (LLVM 21.1.6, 256 bits)",
+          "software": true
+        },
+        {
+          "platform": "surfaceless",
+          "vendor": "NVIDIA",
+          "version": "1.5",
+          "renderer": "NVIDIA GeForce RTX 3090/PCIe/SSE2",
+          "software": false
+        }
+      ],
+      "hardware_context": true
+    },
+    "audio": {
+      "pulse_connected": true,
+      "state": 4,
+      "connect_status": 0,
+      "sound_played": false
+    }
+  },
+  "pipeline": {
+    "completed_stages": [
+      "tool-fetch",
+      "tool-prepare",
+      "wine",
+      "linux-fetch",
+      "linux",
+      "test-fetch",
+      "helpers",
+      "media",
+      "windows",
+      "depots",
+      "stage",
+      "prefix",
+      "desktop",
+      "loader",
+      "ui",
+      "graphics"
+    ],
+    "completed_count": 16,
+    "expected_payload_verification_stages": 16,
+    "all_passed": true,
+    "download_cache_preseeded_and_reverified": true,
+    "fresh_sdk_and_runtime_built": true,
+    "boundary": "Stopped immediately before sudo device-rule installation; no live desktop promotion",
+    "host_preflight_separately_executed": true,
+    "both_launcher_variants_generated_in_private_directory": true,
+    "icons_verified_in_private_directory": true
+  },
+  "unit_tests": {
+    "packaging_passed": 135,
+    "device_policy_passed": 5
+  },
+  "bazzite_research_areas": {
+    "covered": 8,
+    "total": 8
+  },
+  "bazzite_unassisted_e2e": {
+    "completed": 0,
+    "required": 1
+  },
+  "remaining": [
+    "Owner clone-and-run installation on booted Bazzite",
+    "SELinux and actual target GPU/session/device acceptance",
+    "Owner decision on full Bazzite X11 provenance requirement",
+    "Corresponding-source and notices audit before hosting a compiled runtime release"
+  ],
+  "end_to_end_qualified": false
+}

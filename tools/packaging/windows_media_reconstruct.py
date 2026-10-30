@@ -32,6 +32,14 @@ def run(command, **kwargs):
 
 
 def container(image, binds, command, stdout=None):
+    if os.environ.get('PENGUIN_TOOLCHAIN') == '1':
+        # The outer private SDK already isolated these tools and files.
+        def translate(value):
+            value = str(value)
+            for source, dest, _ in sorted(binds, key=lambda b: -len(b[1])):
+                value = value.replace(dest, str(source))
+            return value
+        return run([translate(v) for v in command], stdout=stdout)
     args = ['sudo', '-n', 'docker', 'run', '--rm', '--pull', 'never', '--network', 'none',
             '--user', f'{os.getuid()}:{os.getgid()}', '--memory', '2g', '--cpus', '2',
             '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges', '--read-only']
@@ -119,11 +127,12 @@ def reconstruct(work, output, control, lock, wine):
         if not path.parent.is_dir():
             raise ValueError(f'Create the parent directory first: {path.parent}')
         space_check(path.parent, 2 * 1024**3)
-    for executable in (wine, 'x86_64-w64-mingw32-gcc', 'x86_64-w64-mingw32-g++', 'sudo'):
+    for executable in (wine, 'x86_64-w64-mingw32-gcc', 'x86_64-w64-mingw32-g++', *([] if os.environ.get('PENGUIN_TOOLCHAIN') == '1' else ['sudo'])):
         if not shutil.which(executable):
             raise ValueError(f'Required existing tool is missing: {executable}')
     image = lock['extraction_tools']['wimlib_linux_container']
-    run(['sudo', '-n', 'docker', 'image', 'inspect', image], stdout=subprocess.DEVNULL)
+    if os.environ.get('PENGUIN_TOOLCHAIN') != '1':
+        run(['sudo', '-n', 'docker', 'image', 'inspect', image], stdout=subprocess.DEVNULL)
     print('Verifying complete official media before extracting any executable...', flush=True)
     for key in ('package', 'base_media'):
         check_asset(work / lock[key]['local_name'], lock[key])

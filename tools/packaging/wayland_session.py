@@ -96,5 +96,10 @@ def inspect(env):
         _, info = command_result(['pacman', '-Q', 'kwin', 'xorg-xwayland', 'libei',
             'xdg-desktop-portal', 'xdg-desktop-portal-kde', 'pipewire'], env)
         report['host_packages'] = info.strip().splitlines()
+    elif shutil.which('rpm', path=env.get('PATH')):
+        _, info = command_result(['rpm', '-q', 'kwin', 'terra-xorg-x11-server-Xwayland',
+            'xorg-x11-server-Xwayland', 'libei', 'xdg-desktop-portal',
+            'xdg-desktop-portal-kde', 'pipewire'], env)
+        report['host_packages'] = info.strip().splitlines()
     report['warnings'].append('Input permission is checked by KDE when you use an assignment. These capability checks do not grant or prove permission.')
     return report

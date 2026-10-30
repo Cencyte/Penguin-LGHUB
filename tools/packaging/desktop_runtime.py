@@ -241,6 +241,8 @@ def prepare(candidate, linux_root, wine, test_tools, output):
               'candidate_manifest_sha256': digest_file(candidate / 'clean-prefix.json')['sha256'],
               'fixed_files': fixed, 'installation_state': 'frozen-depots-v1',
               'frontend_initialization': frontend, 'end_to_end_qualified': False}
+    if json.loads((wine / 'runtime.json').read_text()).get('source_build'):
+        config['integrated_wine_fixes'] = ['desktop-init', 'x11-restore']
     (output / 'desktop.json').write_text(json.dumps(config, indent=2) + '\n')
     desktop.freeze_updates(output / 'prefix', output / 'logs')
     return output / 'desktop.json'
@@ -265,6 +267,10 @@ def verify(config, root):
     linux.verify(Path(config['linux_runtime']))
     linux_probe.verify(Path(config['test_tools']))
     linux_probe.matching_runtime(config, Path(config['wine']))
+    if config.get('integrated_wine_fixes'):
+        runtime = json.loads((Path(config['wine']) / 'runtime.json').read_text())
+        if not runtime.get('source_build') or config['integrated_wine_fixes'] != ['desktop-init', 'x11-restore']:
+            raise ValueError('Integrated Wine fixes require the verified source build')
 
 
 def verify_installation_inventory(config):
@@ -309,7 +315,7 @@ def worker(config, root, state, experimental_wayland=False):
     wine, linux_root, test_tools = (Path(config[k]) for k in ('wine', 'linux_runtime', 'test_tools'))
     env = runtime_environment(wine, root / 'prefix', os.environ)
     env.update(config['environment'])
-    if config.get('desktop_init_override'):
+    if config.get('desktop_init_override') or 'desktop-init' in config.get('integrated_wine_fixes', []):
         env['WINE_GHUB_DESKTOP_INIT_TIMEOUT'] = '1'
     env['PATH'] = str(wine / 'usr/bin') + ':' + str(test_tools / 'node/node-v22.21.0-linux-x64/bin') + ':/usr/bin:/bin'
     # Keep pressure-vessel's imported driver paths ahead of our supplementary
@@ -322,7 +328,7 @@ def worker(config, root, state, experimental_wayland=False):
         env['PENGUIN_GHUB_REPAINT_ON_RESTORE'] = '1'
         env['PENGUIN_GHUB_FIT_WORKAREA'] = '1'
         env['PENGUIN_GHUB_GRACEFUL_CLOSE'] = '1'
-        if config.get('x11_restore_override'):
+        if config.get('x11_restore_override') or 'x11-restore' in config.get('integrated_wine_fixes', []):
             env['WINE_GHUB_RESTORE_STATE'] = '1'
     os.environ.clear()
     os.environ.update(env)
