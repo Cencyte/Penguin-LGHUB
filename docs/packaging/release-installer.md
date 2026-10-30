@@ -64,11 +64,19 @@ local paths, usernames, device identifiers and application state.
 
 Readiness checking and installation both show separate headers for system,
 desktop, tools, device access, security policy and namespace checks. Wayland
-adds its Xwayland/KWin/portal check. Labels, descriptions, ellipses and per-check
-`OK`/`FAIL` results occupy consistent columns; long descriptions wrap within their
-column. An `OK` records no blocking error in that check, not completed hardware
+adds its Xwayland/KWin/portal check. Labels and descriptions start in consistent
+columns; ellipses immediately follow the description text. Only `--check` adds
+aligned `OK`/`FAIL` results. An `OK` records no blocking error in that check, not completed hardware
 acceptance. Verbose mode also prints the saved host
 report; ordinary mode keeps the headers, warnings and blockers visible.
+
+During installation and removal, an ASCII spinner appears on the line below
+the latest output. It pauses for sudo authorization, is excluded from logs,
+and is omitted for redirected output or terminals without cursor controls.
+The opening version block includes the project, installer and pinned Logitech
+G HUB versions, separated from subsequent output by blank lines. A successful
+operation ends with `🎉 Installation complete! 🎉` or `🎉 Uninstall complete! 🎉`.
+Generated desktop and application-menu entries are named **Penguin-LGHUB**.
 
 The project regression runner and GitHub CI use the same fixed-color headers:
 

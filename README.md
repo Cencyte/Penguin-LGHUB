@@ -13,8 +13,9 @@
   <a href="https://www.patreon.com/cw/cencyte"><img src="https://img.shields.io/badge/Patreon-Support-FF424D?logo=patreon&amp;logoColor=white" alt="Support on Patreon"></a>
 </p>
 
-## Contents
+## Table of contents
 
+- [AI Disclosure](#ai-disclosure)
 - [Introduction](#introduction)
   - [Current status](#current-status)
 - [Diagrams: LGHUB Wine Compatibility System](#diagrams-lghub-wine-compatibility-system)
@@ -26,25 +27,20 @@
 - [Running project tests](#running-project-tests)
   - [Checking this computer's compatibility](#checking-this-computers-compatibility)
 - [Additional details](#additional-details)
-  - [Publication gates](#publication-gates)
-  - [Verified Logitech depot extraction](#verified-logitech-depot-extraction)
-  - [Wine prefix development installer](#wine-prefix-development-installer)
-  - [Development prerequisites](#development-prerequisites)
-  - [Current validation](#current-validation)
-  - [Packaged private Wine runtime](#packaged-private-wine-runtime)
-  - [Base Wine bundle](#base-wine-bundle)
-  - [Linux userspace verification, October 26](#linux-userspace-verification-october-26)
-  - [Dependency sourcing findings and the prefix question](#dependency-sourcing-findings)
-  - [Recommended common policy](#recommended-common-policy)
-  - [The prefix is necessary; this populated prefix is not a blanket-cleared artifact](#the-prefix-is-necessary-this-populated-prefix-is-not-a-blanket-cleared-artifact)
-  - [G HUB vendor downloads](#g-hub-vendor-downloads)
-  - [Fonts](#fonts)
-  - [If permission is unavailable, investigate the narrowest substitute](#if-permission-is-unavailable-investigate-the-narrowest-substitute)
-  - [Portable runtime recommendation and container tradeoffs](#portable-runtime-recommendation)
-  - [Recommendation: a complete private runner first; a pinned Linux userspace container as a tested portability layer](#recommendation-a-complete-private-runner-first-a-pinned-linux-userspace-container-as-a-tested-portability-layer)
-  - [Manjaro control and CachyOS investigation matrix](#manjaro-and-cachyos-investigation)
 - [Branding and licenses](#branding-and-licenses)
 - [Glossary of terms](#glossary-of-terms)
+
+## AI Disclosure
+
+*"Roughly 90% of the text on this Github from below this point originates from the LLM agent's voice. I have revised and edited the text in the page through the agent, but the pen is not my own. I plan to rewrite many sections of text here myself in due time, and I'd also welcome human-authored contributions to this repo's README, if you'd feel that sections should be worded differently for better clarity, completeness, and tone. Thank you."*
+
+### Agent info:
+
+Project execution: Cencyte D.<br>
+AI model(s) used: GPT-6-Astra xhigh<br>
+Agentic harness: codex-cli 0.163.0<br>
+Dalia scale rating: D3 - *"Human & AI Teamwork. The human and AI act as creative partners."*<br>
+Learn more: [Dalia scale](https://daliascale.org)
 
 ## Introduction
 
@@ -182,7 +178,7 @@ From the cloned project directory, run:
 python3 tools/packaging/run_project_tests.py --run
 ```
 
-These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. The runner saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The packaging suite contains 179 checks, with five additional device-policy checks.
+These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. The runner saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The packaging suite contains 184 checks, with five additional device-policy checks.
 
 - `--verbose` — show individual test results and captured output beneath the headers.
 - `--log-file /path/to/new-tests.log` — choose a new log file; existing logs are preserved.
@@ -206,7 +202,7 @@ Run this from the target KDE desktop terminal:
 
 This checks the actual host's OS, CPU architecture, required tools, user namespaces and desktop session. It records graphics drivers, audio-socket presence, SELinux state and Logitech device access. On Wayland it also checks Xwayland authentication, KWin and the input-control portal. Blockers stop the check with an explanation; warnings identify remaining verification needs. A successful readiness check is followed by installation checks and hands-on device testing.
 
-Readiness checking and installation share the same categorized step headers. Each completed check shows an aligned `OK` or `FAIL` result. `OK` means that check found no installation blocker; hardware acceptance and warnings remain separately reported. The complete host report is always saved with the log.
+Readiness checking and installation share the same categorized step headers. In `--check` mode, each completed check shows an aligned `OK` or `FAIL` result. Installation uses descriptions with an activity spinner and no per-check result labels. `OK` means that check found no installation blocker; hardware acceptance and warnings remain separately reported. The complete host report is always saved with the log.
 
 - `--verbose` — also display the host report in the terminal.
 

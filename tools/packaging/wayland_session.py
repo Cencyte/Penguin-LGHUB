@@ -11,16 +11,16 @@ import subprocess
 
 from host_policy import os_identity, package_query
 
-HELP = '''Penguin LGHUB — Wayland test
+HELP = '''Penguin-LGHUB
 
-Log in to Plasma (Wayland), then open the Wayland test launcher. The existing
+Log in to Plasma (Wayland), then open Penguin-LGHUB. The existing
 X11 launcher remains available in a Plasma (X11) session. Quit one G HUB
 session before starting the other.
 
 When you first use a mapped key, KDE may ask to allow input control. Older
 Plasma versions can show an unnamed X11 application requesting keyboard and
 pointer access; newer versions can name lghub_agent.exe. Approve only the
-request triggered by your test. Until you approve, mapped keys may do nothing.
+request triggered by your mapped key. Until you approve, mapped keys may do nothing.
 The launcher never approves that request for you.
 
 Try opening and restoring the main window, the tray menu and each menu entry.
@@ -29,10 +29,9 @@ manual profile switching and ordinary lighting. In a VM, USB passthrough is
 needed for physical devices to appear.
 
 Automatic profile matching for native Wayland apps and screen-sampled lighting
-are still separate work. This launcher is for testing, not a claim that every
-G HUB feature is qualified on Wayland.
+are still separate work. Feature support on Wayland remains under validation.
 
-Right-click this launcher for Check setup, Open test logs, or Quit. You can
+Right-click this launcher for Check setup, Open logs, or Quit. You can
 test at your own pace; there is no deadline and no automatic input recording.
 '''
 

@@ -160,9 +160,20 @@ class UninstallTests(unittest.TestCase):
     def test_uninstall_needs_no_graphical_session_or_host_preflight(self):
         self.create()
         with patch.object(install.host_preflight, 'inventory', side_effect=AssertionError('must not probe')), \
-             patch.object(install.os, 'geteuid', return_value=1000), contextlib.redirect_stdout(io.StringIO()):
+             patch.object(install.os, 'geteuid', return_value=1000), contextlib.redirect_stdout(io.StringIO()) as output:
             self.assertEqual(install.main(['--uninstall', '--directory', str(self.root)]), 0)
             self.assertEqual(install.main(['--uninstall', '--directory', str(self.root)]), 0)
+        self.assertEqual(output.getvalue().count('\n\n🎉 Uninstall complete! 🎉\n'),2)
+
+    def test_failed_uninstall_never_displays_completion(self):
+        self.create()
+        with patch.dict(os.environ,{'XDG_STATE_HOME':str(self.base/'state')}), \
+             patch.object(uninstall,'remove',side_effect=RuntimeError('fixture removal failure')), \
+             contextlib.redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(uninstall.run(self.root),1)
+        self.assertIn('fixture removal failure',output.getvalue())
+        self.assertNotIn('🎉',output.getvalue())
+        self.assertTrue(self.root.exists())
 
     def test_rules_are_scoped_and_changed_rules_are_preserved(self):
         directory = self.base / 'rules'

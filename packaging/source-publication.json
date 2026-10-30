@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "a07fa4edf2fd34b3d14942a6f2d1c828ba856f6bfd2b2a464f938aed537d15c2",
-      "bytes": 64050
+      "sha256": "a43e243231a5aab044dac24d474ed328ad3212126c6fcddc0c341e7a51b73800",
+      "bytes": 63486
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -464,8 +464,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "e68686f6e9f66f548ecb85e4c10076b6f9093b6a66d0ec116c4d755fb2c0929c",
-      "bytes": 14852
+      "sha256": "9aed3c15cf80ebfad9ed271b699286fca7a2dc74b27d36daf890f858c81f2b9d",
+      "bytes": 15419
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -578,7 +578,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "158c23271a55faba98415474d570d80ada5065bb7fc58a82b64cfadd99c0a2f5",
+      "sha256": "b8a8d0e393ea797aac459ec6eaa2ca82a8813ba9d8c44e18bbdc62415c296fbb",
       "bytes": 252
     },
     {
@@ -980,8 +980,8 @@
     {
       "path": "tests/packaging/test_check_presentation.py",
       "mode": "100644",
-      "sha256": "adc9925c1a1c3ee7ef94a642536019f4d1f470a0a2bfccb07a539e22171de38a",
-      "bytes": 11769
+      "sha256": "172ae62517c6401d4cf48820d101fbe8116922b57cc4978a45ee2f7f9430ec28",
+      "bytes": 16645
     },
     {
       "path": "tests/packaging/test_clean_prefix.py",
@@ -992,8 +992,8 @@
     {
       "path": "tests/packaging/test_desktop_runtime.py",
       "mode": "100644",
-      "sha256": "1afaf9d4eb598f96292cda1b825bd4c66dc7b7a26e8dbb96329554750af43616",
-      "bytes": 16987
+      "sha256": "f268f6a8f96d9b5fe6f0995cb085f93834667ee252d3d8e4c8ebe1ec5dbccfbe",
+      "bytes": 17263
     },
     {
       "path": "tests/packaging/test_desktop_shutdown.py",
@@ -1028,8 +1028,8 @@
     {
       "path": "tests/packaging/test_installer.py",
       "mode": "100644",
-      "sha256": "4f427a25116cd60a93a2e739273fa48777d56b25b22044cf7ad05d1e65c191c2",
-      "bytes": 7091
+      "sha256": "a651e7fd593e9307199eb3d326cb47d5513c9faa1dc2513f322347da9bd08be2",
+      "bytes": 7411
     },
     {
       "path": "tests/packaging/test_linux_runtime.py",
@@ -1064,8 +1064,8 @@
     {
       "path": "tests/packaging/test_uninstall.py",
       "mode": "100644",
-      "sha256": "62c763a316abe02064bf2d654d09ba57650f7d3ace3fab46ca717609154cf08f",
-      "bytes": 11048
+      "sha256": "0742e817ce930ade38e260e32ff92fbb48d915e25962df48341d0a40a2a66777",
+      "bytes": 11702
     },
     {
       "path": "tests/packaging/test_windows_media_acquire.py",
@@ -1610,8 +1610,8 @@
     {
       "path": "tools/packaging/desktop_runtime.py",
       "mode": "100644",
-      "sha256": "136038faf81915b6a0ada80fed1f554088865f82819ab7d9bf9211bab0ff8fb5",
-      "bytes": 30915
+      "sha256": "51013cb1b6e940165b400ef8477a2a74ebb4d9a34de6dbfa26f8753756472c70",
+      "bytes": 30674
     },
     {
       "path": "tools/packaging/dockur_acquire.py",
@@ -1640,8 +1640,8 @@
     {
       "path": "tools/packaging/install.py",
       "mode": "100644",
-      "sha256": "49729c39b5277ce848455bcfdbd736ff4fa1876e5887f3b33181408df16c1b18",
-      "bytes": 11919
+      "sha256": "4294647a79e0d79832c12d0e947d790a79c2021346fc6daa522521516f2d7469",
+      "bytes": 11962
     },
     {
       "path": "tools/packaging/install_device_rules.py",
@@ -1664,8 +1664,8 @@
     {
       "path": "tools/packaging/installer_ui.py",
       "mode": "100644",
-      "sha256": "936686c88018552e11a52dfeb8041e3a4e24234f86d7b2e2dba7f7cdcd0465b8",
-      "bytes": 5964
+      "sha256": "c7322c32ac8c46359af10c5011826269c83a1de00de6a06aa36c8889da5fcd9f",
+      "bytes": 8816
     },
     {
       "path": "tools/packaging/linux_probe.py",
@@ -1778,8 +1778,8 @@
     {
       "path": "tools/packaging/uninstall.py",
       "mode": "100644",
-      "sha256": "1c043758159b16e5c5bfd5c65149d937a4a818334b9354d8964138522f363858",
-      "bytes": 8460
+      "sha256": "93ad1a358a449350d30a7c1423b67969e168a3a95217f9fc70b041de78b4bc34",
+      "bytes": 8513
     },
     {
       "path": "tools/packaging/wayland_input_probe.py",
@@ -1808,8 +1808,8 @@
     {
       "path": "tools/packaging/wayland_session.py",
       "mode": "100644",
-      "sha256": "50bb8e42f69a10d27a7f88a409c0443cb69e70bd64800b6bbd59849c8baf6fa4",
-      "bytes": 5256
+      "sha256": "bd32c52ad7d3ce14e575fd1a8348895f54e89f3c54d07cbb31996cbced312b51",
+      "bytes": 5189
     },
     {
       "path": "tools/packaging/wayland_wine_probe.py",
@@ -2402,8 +2402,8 @@
     {
       "path": "tools/wine/prepare_tested_desktop.py",
       "mode": "100644",
-      "sha256": "c946bcb7693a122eba2b65bdd74d7b0b61a958d1bca436f48568518713cb050d",
-      "bytes": 12270
+      "sha256": "20c7bb700bdaa9e5faa9702b4b9a147e083d645c3dda9ba0228c9f0a263fc2e4",
+      "bytes": 12224
     },
     {
       "path": "tools/wine/prepare_tray_background.py",
@@ -2664,8 +2664,8 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Source preview 2: transactional installation and recovery, chunked Wine-source download fix, aligned check results, transparent Konsole artwork and README navigation. No vendor payload or populated prefix.",
+  "publication_note": "Installer 0.3.1 presentation update: ASCII activity spinner, check-only result labels, attached ellipses, neutral launcher names, version spacing and completion messages; exact user-supplied AI disclosure and shortened table of contents. Input-lag investigation remains pending. No vendor payload or populated prefix.",
   "publication_branch": "release",
   "file_count": 439,
-  "total_bytes": 10144268
+  "total_bytes": 10153079
 }

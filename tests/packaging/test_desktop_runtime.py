@@ -205,6 +205,8 @@ class DesktopRuntimeTests(unittest.TestCase):
             root = Path(tmp) / 'test space'; root.mkdir()
             m.install_entry(root / '%config.json', dest)
             text = dest.read_text()
+            self.assertIn('\nName=Penguin-LGHUB\n', text)
+            self.assertNotIn('test','\n'.join(line for line in text.splitlines() if line.startswith(('Name=','Comment='))).lower())
             self.assertIn('/test space/%%config.json" launch', text)
             self.assertIn('Icon=' + str(root / 'penguin-lghub.png'), text)
             self.assertEqual((root / 'penguin-lghub.png').read_bytes(), m.ICON.read_bytes())
@@ -218,7 +220,9 @@ class DesktopRuntimeTests(unittest.TestCase):
             root = Path(tmp); entry = root / 'Wayland test.desktop'
             m.install_entry(root / 'desktop.json', entry, True)
             text = entry.read_text()
-            self.assertIn('Name=Penguin LGHUB — Wayland test', text)
+            self.assertIn('Name=Penguin-LGHUB\n', text)
+            self.assertNotIn('Wayland test',text)
+            self.assertIn('Name=Open logs\n',text)
             for action in ('launch', 'check --dialog', 'stop', 'help', 'logs'):
                 self.assertIn('--experimental-wayland ' + action, text)
             self.assertEqual((root / 'penguin-lghub.png').read_bytes(), m.ICON.read_bytes())

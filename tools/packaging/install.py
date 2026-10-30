@@ -148,7 +148,7 @@ def _pipeline(args,ui,report,directory,state):
           '--installation-id',state['installation_id']])
     destination=subprocess.check_output(['xdg-user-dir','DESKTOP'],text=True).strip()
     if not Path(destination).is_absolute():raise ValueError('Cannot resolve the Desktop directory')
-    name='Penguin-LGHUB Wayland.desktop' if report['session']=='wayland' else 'Penguin-LGHUB.desktop'
+    name='Penguin-LGHUB.desktop'
     extra=['--experimental-wayland'] if report['session']=='wayland' else []
     step('launcher','Desktop','Install the launcher and project icon',cmd('desktop_runtime.py','install-entry',
         '--config',desktop/'desktop.json','--destination',Path(destination)/name,*extra))
@@ -172,6 +172,7 @@ def main(argv=None):
 
 def present_install(args,state,stamp):
     ui=Presentation(state/('install-'+stamp+'.log'),args.verbose)
+    ui.check_results=args.check
     def inspect():
         report=host_preflight.inventory(progress=ui.begin_check,result=ui.finish_check);save(state/('host-'+stamp+'.json'),report)
         ui.output(json.dumps(report,indent=2)+'\n')
@@ -182,11 +183,13 @@ def present_install(args,state,stamp):
         return report
     try:
         ui.header()
-        if args.check:
-            inspect();ui.write('Host checks completed. Actual application/device acceptance remains pending.');return 0
-        install_transaction.execute(args.directory,fingerprint(),STYLE['project_version'],ui,
-            lambda directory,receipt: _pipeline(args,ui,inspect(),directory,receipt))
+        with ui.activity():
+            if args.check:
+                inspect();ui.write('Host checks completed. Actual application/device acceptance remains pending.');return 0
+            install_transaction.execute(args.directory,fingerprint(),STYLE['project_version'],ui,
+                lambda directory,receipt: _pipeline(args,ui,inspect(),directory,receipt))
         ui.write('Installation committed. Open the Penguin-LGHUB launcher when ready.')
+        ui.complete('Installation')
         return 0
     except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as error:
         import traceback

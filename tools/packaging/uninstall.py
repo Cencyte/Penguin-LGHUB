@@ -167,8 +167,9 @@ def run(directory, verbose=False):
             if not root.exists():
                 ui.step('Verify', 'Check installation location')
                 ui.write('No installation exists at ' + str(root))
-                return 0
-            remove(root, ui)
+            else:
+                with ui.activity():remove(root, ui)
+            ui.complete('Uninstall')
             return 0
         except (OSError, ValueError, RuntimeError, subprocess.SubprocessError, KeyboardInterrupt) as error:
             traceback.print_exc(file=ui.log);ui.log.flush()

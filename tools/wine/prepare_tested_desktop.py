@@ -64,14 +64,14 @@ def install_entry(root):
 
     script = root / 'runner/tested_desktop_launch.py'
     command = '/usr/bin/python3 ' + quote(script) + ' --config ' + quote(root / 'launch.json')
-    entry = desktop / 'G HUB (Tested Wine).desktop'
+    entry = desktop / 'Penguin-LGHUB.desktop'
     if entry.exists():
         raise RuntimeError(f'Desktop entry already exists: {entry}')
     entry.write_text(f'''[Desktop Entry]
 Type=Application
 Version=1.0
-Name=G HUB (Tested Wine)
-Comment=Test Logitech G HUB with the verified Wine composition and device support
+Name=Penguin-LGHUB
+Comment=Logitech G HUB with the private Wine runtime
 Exec={command} app
 TryExec=/usr/bin/python3
 Icon={root / 'icon.png'}
@@ -90,7 +90,7 @@ Name=Save device and profile snapshot
 Exec={command} snapshot
 
 [Desktop Action Logs]
-Name=Open test logs
+Name=Open logs
 Exec={command} logs
 
 [Desktop Action Performance]

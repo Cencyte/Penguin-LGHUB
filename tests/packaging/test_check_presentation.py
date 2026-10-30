@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 import sys
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 
@@ -163,9 +164,89 @@ class CheckPresentationTests(unittest.TestCase):
             rows=stream.getvalue().splitlines()
             self.assertEqual(rows[0].index('Check'),rows[1].index('Verify'))
             complete=[row for row in rows if '...' in row]
-            self.assertEqual(len({row.index('...') for row in complete}),1)
+            self.assertTrue(all(row[row.index('...')-1]!=' ' for row in complete))
             self.assertEqual(complete[0].index('OK'),complete[1].index('FAIL'))
             self.assertLessEqual(max(map(len,rows)),installer_ui.STYLE['category_colors'].__len__()+80)
+
+    def test_spinner_preserves_verbose_lines_and_pauses_for_authorization(self):
+        class Terminal(io.StringIO):
+            def __init__(self):
+                super().__init__();self.frame=threading.Event()
+            def isatty(self):return True
+            def write(self,text):
+                result=super().write(text)
+                if text in ['\r\033[2K'+c for c in '|/-\\']:self.frame.set()
+                return result
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ,{'TERM':'xterm-256color','NO_COLOR':'1'}):
+            stream=Terminal();path=Path(tmp)/'log'
+            ui=installer_ui.Presentation(path,True,stream)
+            try:
+                with self.assertRaisesRegex(RuntimeError,'fixture failure'),ui.activity():
+                    ui.step('Wine','Build fixture')
+                    self.assertTrue(stream.frame.wait(2),'quiet command did not animate')
+                    self.assertIn('Build fixture...\n\r\033[2K',stream.getvalue())
+                    with ui.suspend_activity():
+                        stream.frame.clear();before=stream.getvalue()
+                        self.assertFalse(stream.frame.wait(.3),'spinner overwrote authorization prompt')
+                        self.assertEqual(stream.getvalue(),before)
+                    ui.output('partial output')
+                    stream.frame.clear()
+                    self.assertFalse(stream.frame.wait(.3),'spinner overwrote an unfinished verbose line')
+                    ui.output(' completed\n')
+                    self.assertTrue(stream.frame.wait(2))
+                    raise RuntimeError('fixture failure')
+                self.assertIsNone(ui._activity_thread)
+                self.assertTrue(stream.getvalue().endswith('\r\033[2K'))
+            finally:ui.close()
+            self.assertIn('partial output completed\n',path.read_text())
+            self.assertNotIn('\033',path.read_text())
+
+    def test_spinner_uses_plain_output_for_redirected_and_dumb_terminals(self):
+        class Terminal(io.StringIO):
+            def isatty(self):return True
+        for stream,term in ((io.StringIO(),'xterm-256color'),(Terminal(),'dumb')):
+            with tempfile.TemporaryDirectory() as tmp,patch.dict(os.environ,{'TERM':term,'NO_COLOR':'1'}):
+                ui=installer_ui.Presentation(Path(tmp)/'log',stream=stream)
+                try:
+                    with ui.activity():
+                        ui.step('Wine','Build fixture')
+                        self.assertIsNone(ui._activity_thread)
+                finally:ui.close()
+                self.assertNotIn('\033',stream.getvalue())
+
+    def test_version_block_separates_all_three_versions_from_the_log(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stream=io.StringIO();ui=installer_ui.Presentation(Path(tmp)/'log',stream=stream)
+            try:ui.header()
+            finally:ui.close()
+            rows=stream.getvalue().splitlines()
+            self.assertEqual(rows[:3],[f"Penguin-LGHUB v{installer_ui.STYLE['project_version']}",
+                f"Installer version v{installer_ui.STYLE['installer_version']}.",
+                f'Logitech G HUB v{installer_ui.GHUB_VERSION}'])
+            self.assertEqual(rows[3],'');self.assertTrue(rows[4].startswith('Log file: '))
+            self.assertEqual(rows[5],'')
+
+    def test_install_omits_check_result_labels_and_celebrates_only_success(self):
+        for fail in (False,True):
+            with self.subTest(fail=fail),tempfile.TemporaryDirectory() as tmp:
+                stream=io.StringIO();args=install.parser().parse_args(['--install','--directory',str(Path(tmp)/'payload')])
+                def inventory(progress=None,result=None):
+                    progress('System','Inspect fixture host');result('System','Inspect fixture host','OK')
+                    return {'errors':[],'warnings':[]}
+                def execute(directory,source,version,ui,operation):
+                    operation(directory,{})
+                    if fail:raise RuntimeError('fixture commit failure')
+                with patch.object(install.host_preflight,'inventory',side_effect=inventory), \
+                     patch.object(install,'fingerprint',return_value='fixture'), \
+                     patch.object(install,'_pipeline'), \
+                     patch.object(install.install_transaction,'execute',side_effect=execute), \
+                     contextlib.redirect_stdout(stream):
+                    code=install.present_install(args,Path(tmp),'fixture')
+                self.assertEqual(code,int(fail))
+                self.assertIn('Inspect fixture host...',stream.getvalue())
+                self.assertNotIn('OK',stream.getvalue())
+                celebration='\n\n🎉 Installation complete! 🎉\n'
+                self.assertEqual(celebration in stream.getvalue(),not fail)
 
     def test_status_records_the_actual_failing_check(self):
         events=[]

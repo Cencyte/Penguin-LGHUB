@@ -57,17 +57,21 @@ class InstallerTests(unittest.TestCase):
                 view.close();saved=log.read_text()
                 for line in ('child stdout','child stderr','[exit 7]'):self.assertIn(line,saved)
                 self.assertEqual('child stdout' in out.getvalue(),verbose)
-                self.assertRegex(out.getvalue(),r'\[Wine\] +Compile fixture +\.\.\.')
+                self.assertRegex(out.getvalue(),r'\[Wine\] +Compile fixture\.\.\.')
                 self.assertEqual(log.stat().st_mode & 0o777,0o600)
 
     def test_sudo_retains_controlling_terminal(self):
         with tempfile.TemporaryDirectory() as tmp:
             view=ui.Presentation(Path(tmp)/'log',stream=io.StringIO())
             child=MagicMock();child.stdout=io.StringIO('authorized\n');child.wait.return_value=0
-            with patch.object(ui.subprocess,'Popen',return_value=child) as popen:
+            def start(*args,**kwargs):
+                self.assertEqual(view._spinner_suspended,1)
+                return child
+            with patch.object(ui.subprocess,'Popen',side_effect=start) as popen:
                 view.run(['sudo','python3','scoped-helper'])
                 self.assertFalse(popen.call_args.kwargs['start_new_session'])
                 self.assertNotIn('stdin',popen.call_args.kwargs)
+                self.assertEqual(view._spinner_suspended,0)
             view.close()
 
     def test_graphics_fallback_avoids_escape_protocol_in_unknown_terminal(self):
@@ -111,6 +115,7 @@ class InstallerTests(unittest.TestCase):
             launcher_at=next(i for i,c in enumerate(flattened) if 'install-entry' in c)
             self.assertLess(ui_at,sudo_at);self.assertLess(sudo_at,launcher_at)
             self.assertIn('--experimental-wayland',commands[launcher_at])
+            self.assertEqual(Path(commands[launcher_at][commands[launcher_at].index('--destination')+1]).name,'Penguin-LGHUB.desktop')
             self.assertTrue(any('windows_media_acquire.py fetch' in c and '--decoder' in c for c in flattened))
             self.assertTrue((root/'source/LICENSE').is_file())
             state=json.loads((root/'installation.json').read_text())

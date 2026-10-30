@@ -58,13 +58,13 @@ def session_errors(env, experimental_wayland=False):
     errors = []
     if experimental_wayland:
         if env.get('XDG_SESSION_TYPE') != 'wayland':
-            errors.append('This test launcher needs Plasma (Wayland). Log out and select that session, or use the existing X11 launcher.')
+            errors.append('This launcher is configured for Plasma (Wayland). Log out and select that session, or use the launcher configured for X11.')
         if 'KDE' not in env.get('XDG_CURRENT_DESKTOP', '').upper().split(':'):
-            errors.append('The opt-in Wayland test currently requires KDE Plasma.')
+            errors.append('Wayland support currently requires KDE Plasma.')
         if not env.get('WAYLAND_DISPLAY'):
             errors.append('The Wayland display is missing. Launch from your Plasma desktop.')
     elif env.get('XDG_SESSION_TYPE') != 'x11':
-        errors.append('Use the opt-in Wayland test launcher for Plasma (Wayland), or select a Plasma (X11) session for this launcher.')
+        errors.append('This launcher is configured for X11. Select Plasma (X11), or use a Penguin-LGHUB launcher configured for Wayland.')
     if not re.fullmatch(r':\d+(?:\.\d+)?', env.get('DISPLAY', '')):
         errors.append('A local X11/Xwayland display is required. Launch from the desktop, not an SSH-forwarded display.')
     return errors
@@ -440,9 +440,8 @@ def install_entry(config_path, destination, experimental_wayland=False, applicat
         shutil.copyfile(ICON, temporary)
         temporary.replace(icon)
     icon_value = str(icon).replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r')
-    name = 'Penguin LGHUB — Wayland test' if experimental_wayland else 'Penguin LGHUB — Container test'
-    comment = ('Opt-in KDE Plasma Wayland test using the private Wine runtime' if experimental_wayland
-               else 'Private Wine and Linux runtime; select an X11 session first')
+    name = 'Penguin-LGHUB'
+    comment = 'Logitech G HUB with the private Wine runtime'
     actions = 'Check;Help;Logs;Stop;' if experimental_wayland else 'Check;Stop;'
     content = (f'[Desktop Entry]\nType=Application\nName={name}\nComment={comment}\n'
                f'Exec={command} launch\nTerminal=false\nIcon={icon_value}\n'
@@ -450,8 +449,8 @@ def install_entry(config_path, destination, experimental_wayland=False, applicat
                f'[Desktop Action Check]\nName=Check setup\nExec={command} check --dialog\n\n'
                f'[Desktop Action Stop]\nName=Quit this G HUB session\nExec={command} stop\n')
     if experimental_wayland:
-        content += (f'\n[Desktop Action Help]\nName=Wayland test help\nExec={command} help\n'
-                    f'\n[Desktop Action Logs]\nName=Open test logs\nExec={command} logs\n')
+        content += (f'\n[Desktop Action Help]\nName=Help\nExec={command} help\n'
+                    f'\n[Desktop Action Logs]\nName=Open logs\nExec={command} logs\n')
     paths = [destination] + ([applications / destination.name] if applications is not None else [])
     record_launchers(config_path, paths, content.encode(), applications)
     write_entry(destination, content.encode(), 0o755)
@@ -498,7 +497,7 @@ def main():
     p.add_argument('--x11-restore-module', type=Path, help='Verified optional Wine 10.20 restore driver')
     p.add_argument('--desktop-init-module', type=Path, help='Verified optional Wine desktop initialization guard')
     p.add_argument('--experimental-wayland', action='store_true',
-                   help='Opt in to the KDE Plasma/Xwayland test launcher; never grants input permissions')
+                   help='Enable the KDE Plasma/Xwayland launcher; never grants input permissions')
     a = p.parse_args()
     if os.geteuid() == 0:
         raise ValueError('Run this launcher as the desktop user, never root')
@@ -546,7 +545,7 @@ def main():
         return int(bool(report['session_errors']))
     if a.action == 'help':
         print(wayland_session.HELP)
-        show_message('Penguin LGHUB — Wayland test', wayland_session.HELP)
+        show_message('Penguin-LGHUB', wayland_session.HELP)
         return 0
     if a.action == 'logs':
         subprocess.run(['xdg-open', str(root / 'logs')], check=True)
