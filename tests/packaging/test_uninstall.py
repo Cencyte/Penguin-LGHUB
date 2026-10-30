@@ -163,7 +163,22 @@ class UninstallTests(unittest.TestCase):
              patch.object(install.os, 'geteuid', return_value=1000), contextlib.redirect_stdout(io.StringIO()) as output:
             self.assertEqual(install.main(['--uninstall', '--directory', str(self.root)]), 0)
             self.assertEqual(install.main(['--uninstall', '--directory', str(self.root)]), 0)
-        self.assertEqual(output.getvalue().count('\n\n🎉 Uninstall complete! 🎉\n'),2)
+        self.assertEqual(output.getvalue().count('\n\n🎉 Uninstall complete! 🎉\n'),1)
+        self.assertIn('Nothing was removed.',output.getvalue())
+
+    def test_absent_target_preserves_other_installations_without_success_banner(self):
+        legacy = self.base / 'older-lab';legacy.mkdir()
+        settings = legacy / 'settings.db';settings.write_bytes(b'personal settings')
+        with patch.object(uninstall,'remove',side_effect=AssertionError('must not remove')), \
+             contextlib.redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(uninstall.run(self.root),0)
+        self.assertIn('No managed installation exists at '+str(self.root),output.getvalue())
+        self.assertIn('Nothing was removed.',output.getvalue())
+        self.assertIn('older lab setups are unchanged',output.getvalue())
+        self.assertNotIn('Uninstall complete',output.getvalue())
+        self.assertNotIn('🎉',output.getvalue())
+        self.assertEqual(settings.read_bytes(),b'personal settings')
+        self.assertFalse(self.root.exists())
 
     def test_failed_uninstall_never_displays_completion(self):
         self.create()

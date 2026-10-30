@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "9c07f3010a9fe67e9035bcacb96acfa1f1c8a565d2bc950ef566a7f5e7219bdd",
-      "bytes": 63882
+      "sha256": "4f37e034cacf7491043d97e673a588c6b13262c6b25618d3490e95f8b1bff6a4",
+      "bytes": 64838
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -584,7 +584,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "ff64976e36565da7ded7600cae170e7ccbb52a3a11071020f280c7085bb81fdc",
+      "sha256": "b4ba3b0f49617fc553b7c944f6a63216b20dab53ad058998663ea21fba7440de",
       "bytes": 252
     },
     {
@@ -1082,8 +1082,8 @@
     {
       "path": "tests/packaging/test_uninstall.py",
       "mode": "100644",
-      "sha256": "0742e817ce930ade38e260e32ff92fbb48d915e25962df48341d0a40a2a66777",
-      "bytes": 11702
+      "sha256": "842643c076c66c4c67d34711a3dffb25070ef3ac619d0681a017d6d69e107362",
+      "bytes": 12674
     },
     {
       "path": "tests/packaging/test_windows_media_acquire.py",
@@ -1808,8 +1808,8 @@
     {
       "path": "tools/packaging/uninstall.py",
       "mode": "100644",
-      "sha256": "93ad1a358a449350d30a7c1423b67969e168a3a95217f9fc70b041de78b4bc34",
-      "bytes": 8513
+      "sha256": "1d8555fcdace131c04412a870cc40471720c66102126484a40fc7a31cc213fb1",
+      "bytes": 8638
     },
     {
       "path": "tools/packaging/wayland_input_probe.py",

@@ -23,6 +23,7 @@
 - [Distribution setup status](#distribution-setup-status)
   - [Recorded test environments](#recorded-test-environments)
 - [Installation](#installation)
+  - [Installation requirements](#installation-requirements)
 - [What the project contains](#what-the-project-contains)
 - [Running project tests](#running-project-tests)
   - [Checking this computer's compatibility](#checking-this-computers-compatibility)
@@ -72,6 +73,12 @@ Setup requests sudo for scoped Logitech device-access rules. It checks host prer
 
 </details>
 
+<details>
+<summary><strong>⚠️ Installation requires 80 GiB of free working space</strong></summary>
+
+Allow **80 GiB free on the filesystem containing the installation directory** (about 86 GB in decimal units). The current source installer reserves space for downloads, build tools, extracted resources, verification copies and 20 GiB of headroom. This is free working space, not the download size or the final application's size. Use `--directory` to choose another local filesystem with enough room.
+
+</details>
 
 ## Distribution setup status
 
@@ -127,6 +134,10 @@ session is the current installation target.
 
 ## Installation:
 
+### Installation requirements:
+
+Use a supported x86-64 KDE desktop, a regular user with sudo access, and **80 GiB free on the installation filesystem**. The installer checks required host tools before acquisition; see the [full prerequisites](docs/packaging/release-installer.md).
+
 Run in the target OS's normal KDE desktop terminal, as a regular user:
 
 ```sh
@@ -157,7 +168,7 @@ Standalone commands, run from the project directory:
 - `./install.sh --uninstall` — remove this managed installation, including G HUB settings, private Wine, downloaded inputs, launchers, icon and its device-access rule. Installer diagnostics are retained separately.
 - `./install.sh --uninstall --directory /path/to/installation` — remove an installation stored at a custom location.
 
-Back up any G HUB profiles or settings you want to keep before uninstalling. Removal works without a graphical session and requests sudo only for its device rule. The source download, independently generated diagnostic reports and unrelated software remain. Legacy lab installations without an ownership receipt require separate cleanup; they are not removed by guessing paths.
+Back up any G HUB profiles or settings you want to keep before uninstalling. Removal works without a graphical session and requests sudo only for its device rule. The source download, independently generated diagnostic reports and unrelated software remain. Legacy lab installations without an ownership receipt require separate cleanup; they are not removed by guessing paths. If the selected installation directory is absent, the command reports that nothing was removed.
 
 The installer supplies private build tools, Wine, Linux libraries and launcher helpers. The repository requires authorized GitHub access while it remains private. See [installation, recovery and validation details](docs/packaging/release-installer.md).
 

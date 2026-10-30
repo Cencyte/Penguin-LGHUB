@@ -166,9 +166,10 @@ def run(directory, verbose=False):
             root = installation_state.checked_directory(directory)
             if not root.exists():
                 ui.step('Verify', 'Check installation location')
-                ui.write('No installation exists at ' + str(root))
-            else:
-                with ui.activity():remove(root, ui)
+                ui.write('No managed installation exists at ' + str(root))
+                ui.write('Nothing was removed. Installations at other paths and older lab setups are unchanged.')
+                return 0
+            with ui.activity():remove(root, ui)
             ui.complete('Uninstall')
             return 0
         except (OSError, ValueError, RuntimeError, subprocess.SubprocessError, KeyboardInterrupt) as error:
