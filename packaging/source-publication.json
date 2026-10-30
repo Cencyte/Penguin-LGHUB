@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "202a528b3ed60dc248a1f759fc84001ef192bf02bfe5f06086fcad851a6d62c8",
-      "bytes": 63992
+      "sha256": "a07fa4edf2fd34b3d14942a6f2d1c828ba856f6bfd2b2a464f938aed537d15c2",
+      "bytes": 64050
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -464,8 +464,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "8aa4883d6bd397e9adf5fb32cc203e4e06003752b084e89d50afbaaa707c24ce",
-      "bytes": 14822
+      "sha256": "e68686f6e9f66f548ecb85e4c10076b6f9093b6a66d0ec116c4d755fb2c0929c",
+      "bytes": 14852
     },
     {
       "path": "docs/packaging/source-publication.md",

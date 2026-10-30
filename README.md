@@ -134,7 +134,7 @@ session is the current installation target.
 Run in the target OS's normal KDE desktop terminal, as a regular user:
 
 ```sh
-git clone https://github.com/Cencyte/Penguin-LGHUB.git
+git clone https://github.com/Cencyte/Penguin-LGHUB.git Penguin-LGHUB-release
 cd Penguin-LGHUB-release
 ./install.sh --install
 ```
@@ -156,7 +156,7 @@ Standalone commands, run from the project directory:
 
 - `./install.sh --help` — show usage, switches and examples.
 - `./install.sh --check` — check the current host's installation prerequisites and save a report.
-- `./install.sh --uninstall` — remove this managed installation, including G HUB settings, private Wine, downloaded inputs, launchers, icon, installation logs and its device-access rule.
+- `./install.sh --uninstall` — remove this managed installation, including G HUB settings, private Wine, downloaded inputs, launchers, icon and its device-access rule. Installer diagnostics are retained separately.
 - `./install.sh --uninstall --directory /path/to/installation` — remove an installation stored at a custom location.
 
 Back up any G HUB profiles or settings you want to keep before uninstalling. Removal works without a graphical session and requests sudo only for its device rule. The source download, independently generated diagnostic reports and unrelated software remain. Legacy lab installations without an ownership receipt require separate cleanup; they are not removed by guessing paths.

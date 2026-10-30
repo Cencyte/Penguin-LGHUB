@@ -8,8 +8,8 @@ Docker daemon or host MinGW compiler is an input to this workflow.
 Boot the target OS and run these commands in its normal KDE desktop terminal:
 
 ```sh
-git clone https://github.com/Cencyte/Penguin-LGHUB.git
-cd Penguin-LGHUB
+git clone https://github.com/Cencyte/Penguin-LGHUB.git Penguin-LGHUB-release
+cd Penguin-LGHUB-release
 ./install.sh --install
 ```
 
