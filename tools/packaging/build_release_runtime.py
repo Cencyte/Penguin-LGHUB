@@ -53,7 +53,8 @@ def worker(work, jobs):
     source=buildwork/'source/wine-wine-10.20'
     sys.path.insert(0,str(ROOT/'tools/wine'))
     from apply_patch_series import apply_series
-    apply_series(source,sorted((ROOT/'patches/wine').glob('00*.patch')))
+    patches=sorted((ROOT/'patches/wine').glob('00*.patch'))
+    apply_series(source,patches)
     run(['./tools/make_requests'],source);run(['./tools/make_specfiles'],source)
     build=buildwork/'build';build.mkdir(exist_ok=True)
     run([source/'configure','--prefix=/usr','--libdir=/usr/lib','--enable-win64',
@@ -69,7 +70,7 @@ def worker(work, jobs):
     elif not (output/'provenance/source-build-incomplete').is_file():
         raise ValueError('Existing build output has no resumable build marker')
     # The untouched Arch package is only the base. Every changed file below is
-    # built from the public 45-patch tree, including the two restore/start guards.
+    # built from the public patch series, including the restore/start guards.
     files={}
     for name,spec in lock['patches'].items():
         relative=name.split('/',2)[2];dst=output/spec['target']
@@ -111,7 +112,7 @@ def worker(work, jobs):
     (output/'licenses').mkdir(exist_ok=True)
     shutil.copyfile(ROOT/'packaging/licenses/Wine-LGPL-2.1.txt',output/'licenses/Wine-LGPL-2.1.txt')
     (output/'provenance').mkdir(exist_ok=True)
-    receipt={'recipe_sha256':recipe_digest(),'sources':recipe(),'files':files,'patch_count':45,
+    receipt={'recipe_sha256':recipe_digest(),'sources':recipe(),'files':files,'patch_count':len(patches),
              'headless_acquisition_only':False,'runtime_acceptance_pending':True}
     (output/'provenance/source-build.json').write_text(json.dumps(receipt,indent=2)+'\n')
     audit=wine_runtime.audit_unix(output)

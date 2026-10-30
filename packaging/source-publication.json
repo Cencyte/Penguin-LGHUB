@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "a43e243231a5aab044dac24d474ed328ad3212126c6fcddc0c341e7a51b73800",
-      "bytes": 63486
+      "sha256": "9c07f3010a9fe67e9035bcacb96acfa1f1c8a565d2bc950ef566a7f5e7219bdd",
+      "bytes": 63882
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -398,8 +398,8 @@
     {
       "path": "docs/packaging/2026-10-27-wayland-packaged-wine.md",
       "mode": "100644",
-      "sha256": "086cdead8bd2a601821452ed583c3f0b9c0383e0551959787d90fcd872c4b528",
-      "bytes": 8059
+      "sha256": "040d18196436238a513084143d7b6b39651eb04ff18c5119618eaa26eecc6750",
+      "bytes": 9663
     },
     {
       "path": "docs/packaging/2026-10-27-wayland-research.md",
@@ -430,6 +430,12 @@
       "mode": "100644",
       "sha256": "aa5bf625230f407c33f3a2b43cfa056f0d9eda0a9039ddff08a4c601f99c608b",
       "bytes": 16824
+    },
+    {
+      "path": "docs/packaging/host-keyboard-threads-verification.json",
+      "mode": "100644",
+      "sha256": "d9544d6bb969c42b5d04740427a574534272df1180138f49cd821eab8664797a",
+      "bytes": 24615
     },
     {
       "path": "docs/packaging/linux-backend-verification.json",
@@ -464,8 +470,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "9aed3c15cf80ebfad9ed271b699286fca7a2dc74b27d36daf890f858c81f2b9d",
-      "bytes": 15419
+      "sha256": "3c624fe57131ca441866dd5f036035fcdc0d718bb534d6ce0a10cf0b0d4ecec5",
+      "bytes": 16369
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -578,7 +584,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "b8a8d0e393ea797aac459ec6eaa2ca82a8813ba9d8c44e18bbdc62415c296fbb",
+      "sha256": "ff64976e36565da7ded7600cae170e7ccbb52a3a11071020f280c7085bb81fdc",
       "bytes": 252
     },
     {
@@ -954,6 +960,12 @@
       "bytes": 1009
     },
     {
+      "path": "patches/wine/0046-ghub-shared-host-keyboard-connection.patch",
+      "mode": "100644",
+      "sha256": "e277415046f37906ed7c9d9f68c8907b21e4cd2c3425da41ac09684216b35cb5",
+      "bytes": 2216
+    },
+    {
       "path": "patches/wine/experiments/composition-mouse-pointer.patch",
       "mode": "100644",
       "sha256": "c46954a9a2e640ab6dabd2e4434a5e036e73158badcaf262f770ea4b278e0d88",
@@ -1018,6 +1030,12 @@
       "mode": "100644",
       "sha256": "4d6d437e54c012dbea10ed9435a9683153fd376358a10e37fc0b78c8a684c9ee",
       "bytes": 10866
+    },
+    {
+      "path": "tests/packaging/test_host_keyboard_threads.py",
+      "mode": "100644",
+      "sha256": "c8ac3c0f617b4d945649005f0fb5048cc29111c62c36f1e781c385cf75cbb1be",
+      "bytes": 2818
     },
     {
       "path": "tests/packaging/test_install_transaction.py",
@@ -1592,8 +1610,8 @@
     {
       "path": "tools/packaging/build_release_runtime.py",
       "mode": "100644",
-      "sha256": "d58eda76eb3de096e1cb6f5e8503c436e572c6295a474e6362edc2adcd7fbccc",
-      "bytes": 8432
+      "sha256": "735c0e687ddb10a47e8bf468ec7c958134c82ca88240c0d1be4a3646f6d9ba7d",
+      "bytes": 8457
     },
     {
       "path": "tools/packaging/clean_prefix_probe.cpp",
@@ -1624,6 +1642,18 @@
       "mode": "100644",
       "sha256": "6a855811199cef4b70bfb7e337c32a79fe08dc5508dbfab5eb2a2b46325630a8",
       "bytes": 4895
+    },
+    {
+      "path": "tools/packaging/host_keyboard_threads.c",
+      "mode": "100644",
+      "sha256": "77f37a3a26deaf0540a32309eb83bab2433e079928391a0f9f4219847c9651dd",
+      "bytes": 3876
+    },
+    {
+      "path": "tools/packaging/host_keyboard_threads.py",
+      "mode": "100644",
+      "sha256": "70af73c712d42a972d204caa62dd71614de93d00944c51adf345870e2cc69d67",
+      "bytes": 10887
     },
     {
       "path": "tools/packaging/host_policy.py",
@@ -1742,8 +1772,8 @@
     {
       "path": "tools/packaging/run_project_tests.py",
       "mode": "100644",
-      "sha256": "08417740406616a49b53f0c83481830c66487b5ce87784ef843214b77c4b004c",
-      "bytes": 7342
+      "sha256": "f8bf038426327bf24d74a3ac31a48dcccdc8fad71d3390f419ff54214f26b56b",
+      "bytes": 7429
     },
     {
       "path": "tools/packaging/server_sync.py",
@@ -1790,8 +1820,8 @@
     {
       "path": "tools/packaging/wayland_input_receiver.cpp",
       "mode": "100644",
-      "sha256": "1c628bf76cca8a58c08f21b7c28596af527e63e6b60b4d155009526c63c26c66",
-      "bytes": 1317
+      "sha256": "b4c8be48e75589c6400ed794fbd97ff2d9a7e33ea1090b579ed1a5acddd98e94",
+      "bytes": 2013
     },
     {
       "path": "tools/packaging/wayland_launcher_probe.py",

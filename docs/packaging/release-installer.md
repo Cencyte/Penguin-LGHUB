@@ -13,7 +13,7 @@ cd Penguin-LGHUB-release
 ./install.sh --install
 ```
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.2) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.3) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
 
 The repository currently requires GitHub access while it remains private.
 Run as your regular user. The installer requests sudo for its small Logitech
@@ -106,7 +106,7 @@ lines. Category colors are fixed in `packaging/installer.json`.
 1. Inspect OS/session, namespaces, portals, drivers, device ACLs and SELinux.
 2. Download and verify the private Steam Runtime SDK, compiler packages and
    stock Wine base. Extract them privately without package-maintainer scripts.
-3. Apply all 45 Wine patch topics to Wine 10.20 source. Build every changed
+3. Apply all 46 Wine patch topics to Wine 10.20 source. Build every changed
    module, the supplementary DLL implementations and the activation probe.
 4. Prepare the pinned Linux userspace and bundled Node/display-test helpers.
 5. Obtain official Microsoft media and reconstruct the two pinned DLLs in an
@@ -242,8 +242,23 @@ The assembled top-level workflow passed all 16 payload/verification stages in a
 fresh private directory, using reverified download caches. Host-rule installation
 and live desktop promotion were deliberately excluded; both launcher variants
 were generated separately in a private directory. A complete
-unassisted clone-to-device installation on Bazzite is **still the next user
-acceptance test**, not a result inferred from these checks.
+installation on Bazzite has now been reported successful, including an
+uninstall/reinstall cycle. Physical key-binding acceptance remains open after
+the reported delayed/stuck-key failure.
+
+Preview 3 / installer 0.3.2 adds patch 0046. Wine now uses one serialized,
+process-wide XTEST output connection for G HUB, retaining it across worker
+thread exits. On Xwayland, separate connections represent separate emulated
+keyboards; a release on a different connection can leave the original key
+held. The [regression receipt](host-keyboard-threads-verification.json) records
+before/after tests. This fix is built by the normal installer, with no manual
+DLL copying or new host dependency. Existing installations are preserved by
+the installer; installing the new preview into an occupied directory requires
+the documented backup/uninstall workflow first.
+
+The observed one-time Bazzite permission prompt was KWin input authorization.
+Its per-application approval for `lghub_agent.exe` survived uninstalling G HUB,
+as intended. Setup neither clears that approval nor enables a global bypass.
 
 Bazzite acceptance requires running the public workflow and testing device
 discovery/reconnect, key bindings in a native Wayland app, macros, G-Shift,

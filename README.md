@@ -146,7 +146,9 @@ Optional switches, added to the installation command:
 - `--jobs 4` — choose 1–16 build jobs; the default is 4.
 - `--engine podman` — use an existing rootless Podman installation for Windows-resource acquisition. The default is bubblewrap.
 
-Alternatively, download **Source code (zip)** from the [source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.2), extract it, and open a terminal in the extracted folder. Run the same installation command there. No Git checkout is needed for the ZIP workflow.
+Alternatively, download **Source code (zip)** from the [source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.3), extract it, and open a terminal in the extracted folder. Run the same installation command there. No Git checkout is needed for the ZIP workflow.
+
+Preview 3 includes a Wine input fix for keys that remained held when G HUB worker threads sent the press and release through different Xwayland connections. The installer builds this fix automatically. [Isolated regression results](docs/packaging/host-keyboard-threads-verification.json) cover native Wayland and Xwayland destinations; physical-device confirmation on Bazzite remains pending.
 
 Standalone commands, run from the project directory:
 
@@ -163,7 +165,7 @@ The installer supplies private build tools, Wine, Linux libraries and launcher h
 
 | Resource | Source or configuration | Role |
 |---|---|---|
-| Custom Wine build | [45 patch topics](patches/wine/), [build/run tools](tools/wine/), [private runtime packager](tools/packaging/wine_runtime.py) | Windows API, composition, input, graphics, device and native X11 key-output compatibility. The [source builder](tools/packaging/build_release_runtime.py) applies all 45 topics and compiles every changed module and helper inside the pinned SDK. A corresponding-source audit remains before hosting a binary runtime release. |
+| Custom Wine build | [46 patch topics](patches/wine/), [build/run tools](tools/wine/), [private runtime packager](tools/packaging/wine_runtime.py) | Windows API, composition, input, graphics, device and native key-output compatibility. The [source builder](tools/packaging/build_release_runtime.py) applies the complete series and compiles every changed module and helper inside the pinned SDK. A corresponding-source audit remains before hosting a binary runtime release. |
 | Supplementary DLL implementations | [DirectComposition](tools/wine/dcomp_experiment.cpp), [CoreMessaging adapter](tools/wine/coremessaging_xp_adapter.c), [DispatcherQueue](tools/wine/dispatcher_queue_experiment.cpp), [CoreApplication](tools/wine/core_application_experiment.cpp), [ApiInformation proxy](tools/wine/api_information_proxy.cpp), [sensor fallback](tools/wine/sensor_monitor_unavailable.c) | Separate app-local helpers. Some implement only the contracts the observed application needs; they are not complete replacements for their Windows subsystems. |
 | Local vendor-resource transformations | [Color preview](tools/wine/prepare_color_picker_fix.py), [tray background](tools/wine/prepare_tray_background.py) | Generate local modified assets from the acquired application. Do not treat generated `app.asar`, XBF or PRI files as project-owned source. |
 | Prefix and launch definition | [Observed runtime baseline](packaging/runtime-baseline.json), [runtime registration helper](tools/wine/configure_runtime.py), [snapshot preparation](tools/wine/prepare_tested_desktop.py), [legacy launcher](tools/wine/tested_desktop_launch.py), [container launcher](tools/packaging/desktop_runtime.py) | Preserve the working configuration: 48 recorded file hashes, environment flags, DLL load policy and eight recorded WinRT activation classes. The baseline records evidence; the fresh-prefix generator and top-level installer turn it into the installed configuration. |

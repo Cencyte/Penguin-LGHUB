@@ -1,5 +1,34 @@
 # Packaged Wine keyboard output reaches native Wayland
 
+**October 30 follow-up:** the single-thread fixture below missed a cross-thread
+key-release defect. Patch 0046 now keeps G HUB's host output on one connection.
+The [threaded regression receipt](host-keyboard-threads-verification.json)
+records before/after delivery, repeats, modifiers, worker exit and hold checks.
+The historical results below remain scoped to their original fixture.
+
+The threaded follow-up can be reproduced with existing developer tools:
+
+```sh
+g++ -fPIC tools/packaging/wayland_input_receiver.cpp -o /path/to/receiver \
+  $(pkg-config --cflags --libs Qt6Widgets)
+x86_64-w64-mingw32-gcc -O2 -static tools/packaging/host_keyboard_threads.c \
+  -o /path/to/thread-probe.exe
+python3 tools/packaging/host_keyboard_threads.py \
+  --output /path/to/new-disposable-output --wine /path/to/private-wine \
+  --receiver /path/to/receiver --sender /path/to/thread-probe.exe \
+  --permission test-app
+```
+
+Use `test-direct` for the older KWin 6.5 test compositor. `--target xcb` selects
+an Xwayland receiver; the default is native Wayland. `--os-root` can use an
+offline Linux deployment's userspace, read-only. `--module` tests a replacement
+`winex11.so` through a read-only namespace mount without modifying the runtime.
+The seven scenarios check 74 non-repeat transitions, with a 150 ms delivery
+deadline, plus permitted repeats during an intentional hold. Wine and the
+receiver use the same boot-time clock, including suspend time. Cold-start
+authorization, real USB input, G HUB macros and the complete launcher are
+outside this fixture. No application or input is sent to the live desktop.
+
 October 27, 2026. Follow-up to the [Wayland investigation](2026-10-27-wayland-research.md).
 The next implementation experiment succeeds on **Manjaro first, then CachyOS**:
 our existing patched Wine 10.20, inside the pinned Linux runtime, delivers the

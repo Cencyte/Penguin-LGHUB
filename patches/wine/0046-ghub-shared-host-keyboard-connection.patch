@@ -1,0 +1,55 @@
+From: Cencyte D <antiultra2007@gmail.com>
+Subject: [PATCH] Keep G HUB host key transitions on one XTEST connection.
+
+--- a/dlls/winex11.drv/keyboard.c
++++ b/dlls/winex11.drv/keyboard.c
+@@ -40,6 +40,7 @@
+ #include <stdarg.h>
+ #include <string.h>
+ #include <dlfcn.h>
++#include <fcntl.h>
+
+ #include "x11drv.h"
+
+@@ -74,6 +75,7 @@
+ INT X11DRV_GhubHostKeyboard( const KEYBDINPUT *input )
+ {
+     static void *library;
++    static Display *output_display;
+     static int (*fake_key)( Display *, unsigned int, Bool, unsigned long );
+     static Bool (*query)( Display *, int *, int *, int *, int * );
+     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+@@ -123,10 +125,29 @@
+         fake_key = dlsym( library, "XTestFakeKeyEvent" );
+         query = dlsym( library, "XTestQueryExtension" );
+     }
+-    if (fake_key && query && query( display, &a, &b, &c, &d ))
+-    {
+-        ret = !!fake_key( display, keycode, !(input->dwFlags & KEYEVENTF_KEYUP), CurrentTime );
+-        XFlush( display );
++    /* Xwayland assigns an emulated keyboard to each X client connection.
++     * G HUB may release a key on a different worker thread from its press.
++     * Thread-local displays would then release a different keyboard, leaving
++     * the first one held. Keep one process-wide connection, serialized above,
++     * and retain it for the agent lifetime instead of the worker lifetime.
++     * This also avoids doing a synchronous extension query for every event. */
++    if (fake_key && query && !output_display)
++    {
++        output_display = XOpenDisplay( NULL );
++        if (output_display)
++        {
++            fcntl( ConnectionNumber( output_display ), F_SETFD, FD_CLOEXEC );
++            if (!query( output_display, &a, &b, &c, &d ))
++            {
++                XCloseDisplay( output_display );
++                output_display = NULL;
++            }
++        }
++    }
++    if (output_display)
++    {
++        ret = !!fake_key( output_display, keycode, !(input->dwFlags & KEYEVENTF_KEYUP), CurrentTime );
++        XFlush( output_display );
+         TRACE( "G HUB host key vk=%x scan=%x flags=%x keycode=%u sent=%d\n",
+                input->wVk, input->wScan, input->dwFlags, keycode, ret );
+     }

@@ -1,0 +1,850 @@
+{
+  "schema": 1,
+  "date": "2026-10-30",
+  "scope": "Synthetic SendInput thread patterns through the Wine host-keyboard bridge into private KWin receivers",
+  "fault": "Per-thread X connections create separate Xwayland emulated keyboards; releasing on another connection does not release the original key.",
+  "fix": "One serialized process-wide output connection, retained across worker exit, extension queried once per connection, close-on-exec FD.",
+  "permission_finding": "Mounted Bazzite kwinrc retained XwaylandEisNoPromptApps=lghub_agent.exe after uninstall. A repeat authorization prompt was therefore not expected. No global permission bypass installed.",
+  "prior_test_blind_spot": "The earlier 22-transition routing fixture used one sending thread and did not test cross-thread releases or worker lifetime.",
+  "sources": {
+    "patches/wine/0046-ghub-shared-host-keyboard-connection.patch": "e277415046f37906ed7c9d9f68c8907b21e4cd2c3425da41ac09684216b35cb5",
+    "tools/packaging/host_keyboard_threads.py": "70af73c712d42a972d204caa62dd71614de93d00944c51adf345870e2cc69d67",
+    "tools/packaging/host_keyboard_threads.c": "77f37a3a26deaf0540a32309eb83bab2433e079928391a0f9f4219847c9651dd",
+    "tools/packaging/wayland_input_receiver.cpp": "b4c8be48e75589c6400ed794fbd97ff2d9a7e33ea1090b579ed1a5acddd98e94"
+  },
+  "environments": {
+    "bazzite": {
+      "os": "44.20261012.0",
+      "kwin": "6.7.5",
+      "xwayland": "26.0.99.903",
+      "libei": "1.6.0",
+      "method": "Read-only mounted Bazzite userspace, isolated software KWin, running Manjaro kernel"
+    },
+    "manjaro": {
+      "kwin": "6.5.4-3",
+      "xwayland": "24.1.9-1",
+      "libei": "1.5.0-1",
+      "method": "Private software KWin on workstation; no live session interaction"
+    },
+    "cachyos": {
+      "kwin": "6.7.5-1.1",
+      "xwayland": "24.1.13-1.1",
+      "libei": "1.6.0-1",
+      "method": "Private software KWin over SSH on the physical CachyOS host; existing Wine unchanged"
+    }
+  },
+  "measurement": {
+    "clock": "CLOCK_BOOTTIME / Wine 10.20 GetTickCount64",
+    "tolerance_ms": 150,
+    "cold_start_timed": false,
+    "ordinary_hold_ms": 80,
+    "intentional_hold_ms": 850,
+    "rapid_taps": 24,
+    "baseline_cleanup_delay_ms": 700,
+    "note": "The old bridge ignores the cross-thread release; the fixture explicitly releases on the original connection after 700 ms to recover. That delay is a test recovery interval, not a measured cap on the production bug."
+  },
+  "coverage": {
+    "fixed_transport_cases_passed": 28,
+    "fixed_transport_cases_total": 28,
+    "fixed_nonrepeat_transitions": 296,
+    "project_tests_passed": 194,
+    "project_tests_total": 194,
+    "pristine_patch_series_count": 46,
+    "pristine_patch_apply": true,
+    "idempotent_patch_reapply": true,
+    "compiled_driver_matches_patch_series": true,
+    "physical_bazzite_retest_completed": false,
+    "complete_installer_rerun_this_revision": false
+  },
+  "limits": [
+    "Actual G HUB thread scheduling and USB report timing were not captured because the Bazzite payload had been uninstalled.",
+    "This confirms and fixes a transport defect consistent with the report, not every possible source of input lag.",
+    "Physical mouse, macro playback, GPU drivers, SELinux policy, consent UI, suspend/resume and revoked permission require separate acceptance.",
+    "Xwayland target is not a full X11 desktop session. Existing X11 routing remains in place.",
+    "No live input, real device nodes, active display sockets or host permission changes were used."
+  ],
+  "upstream_sources": [
+    "https://www.x.org/releases/individual/xserver/xwayland-26.0.99.903.tar.xz",
+    "https://www.x.org/releases/individual/xserver/xwayland-24.1.13.tar.xz"
+  ],
+  "runs": {
+    "bazzite-final-before": {
+      "passed": false,
+      "target": "wayland",
+      "kernel": "6.12.74-1-rt16-MANJARO",
+      "permission_policy": "test-app",
+      "wine_manifest_sha256": "5bf95e519f026d7c5e971f08702761b266ebdc9336475f5f219a8f7fd30ab9f0",
+      "driver_sha256": "7321f7dc1f24fde971c77299eab9a70d0e027631ad433446a7ecc7a426129581",
+      "sender_sha256": "05f134b0748abf8083157863c0896077de60c2e84a250974ed446eb6e9076ffd",
+      "receiver_sha256": "74bda3275e9d8ae964b972c37bdbc44fffb6d00f56daa9bb7a218354e40ca0d4",
+      "cases": {
+        "same-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.614,
+            0.695,
+            1.057,
+            1.181,
+            0.478,
+            0.561
+          ]
+        },
+        "cross-thread": {
+          "passed": false,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 30,
+          "delivery_ms": [
+            0.847,
+            701.276,
+            0.449,
+            700.936,
+            1.133,
+            700.504
+          ]
+        },
+        "reverse-thread": {
+          "passed": false,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 28,
+          "delivery_ms": [
+            0.73,
+            701.14,
+            0.297,
+            700.752,
+            0.963,
+            701.429
+          ]
+        },
+        "rapid-taps": {
+          "passed": false,
+          "expected_transitions": 48,
+          "received_transitions": 2,
+          "repeat_events": 42,
+          "delivery_ms": []
+        },
+        "modifier-chord": {
+          "passed": false,
+          "expected_transitions": 4,
+          "received_transitions": 4,
+          "repeat_events": 8,
+          "delivery_ms": [
+            1.252,
+            0.325,
+            700.84,
+            700.998
+          ]
+        },
+        "worker-exit": {
+          "passed": false,
+          "expected_transitions": 2,
+          "received_transitions": 1,
+          "repeat_events": 10,
+          "delivery_ms": []
+        },
+        "intentional-hold": {
+          "passed": false,
+          "expected_transitions": 2,
+          "received_transitions": 1,
+          "repeat_events": 78,
+          "delivery_ms": []
+        }
+      },
+      "evidence_sha256": {
+        "result.json": "5d110d48e337ca96d459f4b2e6a4fc7eb325cdb106876488f1d00ee7e02b0486",
+        "sender.log": "cbafe0b0ac791abab7698e0c222a7b10b22d86c6289558b410f15aa7ad45bcb9",
+        "receiver.log": "4c3c66b89926bc2ed9b43a01d78f3248501913eb738373bc035d849b70e7b3e4",
+        "provenance.json": "6f57838dd748173f9cba8958b2d43260b78dc3dbab35ea241b386332c3b4ce80"
+      }
+    },
+    "bazzite-final-after": {
+      "passed": true,
+      "target": "wayland",
+      "kernel": "6.12.74-1-rt16-MANJARO",
+      "permission_policy": "test-app",
+      "wine_manifest_sha256": "5bf95e519f026d7c5e971f08702761b266ebdc9336475f5f219a8f7fd30ab9f0",
+      "driver_sha256": "c4a1a81dd52ba193a1bb039a827b13095afbedfbb2baa5e0f7a9461fefabf8c9",
+      "sender_sha256": "05f134b0748abf8083157863c0896077de60c2e84a250974ed446eb6e9076ffd",
+      "receiver_sha256": "74bda3275e9d8ae964b972c37bdbc44fffb6d00f56daa9bb7a218354e40ca0d4",
+      "cases": {
+        "same-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.065,
+            1.139,
+            0.506,
+            0.651,
+            0.871,
+            0.883
+          ]
+        },
+        "cross-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.236,
+            0.271,
+            0.703,
+            0.803,
+            1.266,
+            0.393
+          ]
+        },
+        "reverse-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.803,
+            0.95,
+            0.411,
+            0.565,
+            0.889,
+            1.058
+          ]
+        },
+        "rapid-taps": {
+          "passed": true,
+          "expected_transitions": 48,
+          "received_transitions": 48,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.457,
+            0.519,
+            0.667,
+            0.793,
+            0.899,
+            1.06,
+            1.174,
+            0.314,
+            0.453,
+            0.581,
+            0.698,
+            0.813,
+            0.945,
+            1.092,
+            0.216,
+            0.345,
+            0.465,
+            0.589,
+            0.721,
+            0.841,
+            0.989,
+            1.111,
+            0.242,
+            0.355,
+            0.522,
+            0.634,
+            0.806,
+            0.99,
+            1.082,
+            0.252,
+            0.355,
+            0.518,
+            0.618,
+            0.792,
+            0.875,
+            1.016,
+            1.147,
+            0.263,
+            0.385,
+            0.506,
+            0.626,
+            0.758,
+            0.867,
+            0.985,
+            1.151,
+            0.267,
+            0.376,
+            0.497
+          ]
+        },
+        "modifier-chord": {
+          "passed": true,
+          "expected_transitions": 4,
+          "received_transitions": 4,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.92,
+            0.939,
+            1.071,
+            1.105
+          ]
+        },
+        "worker-exit": {
+          "passed": true,
+          "expected_transitions": 2,
+          "received_transitions": 2,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.619,
+            0.25
+          ]
+        },
+        "intentional-hold": {
+          "passed": true,
+          "expected_transitions": 2,
+          "received_transitions": 2,
+          "repeat_events": 14,
+          "delivery_ms": [
+            12.569,
+            0.612
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "result.json": "60fe46859d6d8f5ffdc98476fe9aa3ea2969471a804441834dea9ff0bf14969c",
+        "sender.log": "9cdcf687cb49bef29d8b6c5e1cd6ef36f815d536b3b0ab0bde3b696c6fdbede4",
+        "receiver.log": "95f1355c25ab929b61dbe86cee280681064f62f9883d9f2ef5cbbac65d54298b",
+        "provenance.json": "7d62874dcba6845d233db8464a405065e19923c342c6b144007c3eb4fc7b07d0"
+      }
+    },
+    "bazzite-xwayland-final-after": {
+      "passed": true,
+      "target": "xcb",
+      "kernel": "6.12.74-1-rt16-MANJARO",
+      "permission_policy": "test-app",
+      "wine_manifest_sha256": "5bf95e519f026d7c5e971f08702761b266ebdc9336475f5f219a8f7fd30ab9f0",
+      "driver_sha256": "c4a1a81dd52ba193a1bb039a827b13095afbedfbb2baa5e0f7a9461fefabf8c9",
+      "sender_sha256": "05f134b0748abf8083157863c0896077de60c2e84a250974ed446eb6e9076ffd",
+      "receiver_sha256": "74bda3275e9d8ae964b972c37bdbc44fffb6d00f56daa9bb7a218354e40ca0d4",
+      "cases": {
+        "same-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.165,
+            1.2,
+            0.561,
+            0.607,
+            0.966,
+            0.966
+          ]
+        },
+        "cross-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.406,
+            0.459,
+            0.92,
+            0.973,
+            0.456,
+            0.473
+          ]
+        },
+        "reverse-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.964,
+            0.963,
+            0.475,
+            0.556,
+            0.939,
+            0.989
+          ]
+        },
+        "rapid-taps": {
+          "passed": true,
+          "expected_transitions": 48,
+          "received_transitions": 48,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.512,
+            0.487,
+            0.618,
+            0.728,
+            0.895,
+            1.019,
+            1.146,
+            0.292,
+            0.455,
+            0.615,
+            0.73,
+            0.849,
+            0.976,
+            1.175,
+            0.283,
+            0.396,
+            0.521,
+            0.635,
+            0.775,
+            0.894,
+            1.053,
+            1.173,
+            0.321,
+            0.438,
+            0.59,
+            0.694,
+            0.832,
+            0.939,
+            1.138,
+            1.192,
+            0.342,
+            0.449,
+            0.586,
+            0.69,
+            0.838,
+            0.989,
+            1.159,
+            0.269,
+            0.398,
+            0.497,
+            0.639,
+            0.78,
+            0.911,
+            1.051,
+            1.167,
+            0.272,
+            0.437,
+            0.537
+          ]
+        },
+        "modifier-chord": {
+          "passed": true,
+          "expected_transitions": 4,
+          "received_transitions": 4,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.083,
+            1.106,
+            1.076,
+            1.153
+          ]
+        },
+        "worker-exit": {
+          "passed": true,
+          "expected_transitions": 2,
+          "received_transitions": 2,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.676,
+            1.252
+          ]
+        },
+        "intentional-hold": {
+          "passed": true,
+          "expected_transitions": 2,
+          "received_transitions": 2,
+          "repeat_events": 14,
+          "delivery_ms": [
+            12.495,
+            0.558
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "result.json": "13297321489accb8f04aa8aa0e64f6ca563a3b1b54a0e2fb8f6e1f4ce3d4c084",
+        "sender.log": "9c108d0c5147b6f8e6a93079e60f76b624b32767193465d8dd93b4bb598d5f1e",
+        "receiver.log": "87b087cc1491ee2551c7381005fbfcc3a641f80bc22a8fa3c16a9966de6ab646",
+        "provenance.json": "85915a4507e5d5bafa4829dc6b6f31a56f9782e449fee213592d41546b48dcf4"
+      }
+    },
+    "manjaro-final-after": {
+      "passed": true,
+      "target": "wayland",
+      "kernel": "6.12.74-1-rt16-MANJARO",
+      "permission_policy": "test-direct",
+      "wine_manifest_sha256": "5bf95e519f026d7c5e971f08702761b266ebdc9336475f5f219a8f7fd30ab9f0",
+      "driver_sha256": "c4a1a81dd52ba193a1bb039a827b13095afbedfbb2baa5e0f7a9461fefabf8c9",
+      "sender_sha256": "05f134b0748abf8083157863c0896077de60c2e84a250974ed446eb6e9076ffd",
+      "receiver_sha256": "74bda3275e9d8ae964b972c37bdbc44fffb6d00f56daa9bb7a218354e40ca0d4",
+      "cases": {
+        "same-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.846,
+            1.062,
+            1.254,
+            0.349,
+            0.614,
+            0.726
+          ]
+        },
+        "cross-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.999,
+            1.172,
+            0.51,
+            0.619,
+            1.035,
+            1.12
+          ]
+        },
+        "reverse-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.508,
+            0.647,
+            1.043,
+            1.11,
+            0.54,
+            0.596
+          ]
+        },
+        "rapid-taps": {
+          "passed": true,
+          "expected_transitions": 48,
+          "received_transitions": 48,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.042,
+            1.087,
+            1.197,
+            0.348,
+            0.497,
+            0.593,
+            0.722,
+            0.847,
+            0.992,
+            1.112,
+            0.253,
+            0.383,
+            0.485,
+            0.628,
+            0.762,
+            0.872,
+            1.049,
+            1.147,
+            0.321,
+            0.513,
+            0.598,
+            0.719,
+            0.869,
+            1.072,
+            0.202,
+            0.352,
+            0.448,
+            0.571,
+            0.834,
+            1.042,
+            1.162,
+            0.287,
+            0.452,
+            0.558,
+            0.706,
+            0.798,
+            1.035,
+            1.17,
+            0.314,
+            0.406,
+            0.532,
+            0.646,
+            0.789,
+            0.956,
+            1.089,
+            0.224,
+            0.351,
+            0.461
+          ]
+        },
+        "modifier-chord": {
+          "passed": true,
+          "expected_transitions": 4,
+          "received_transitions": 4,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.932,
+            0.965,
+            1.174,
+            0.256
+          ]
+        },
+        "worker-exit": {
+          "passed": true,
+          "expected_transitions": 2,
+          "received_transitions": 2,
+          "repeat_events": 0,
+          "delivery_ms": [
+            0.752,
+            0.719
+          ]
+        },
+        "intentional-hold": {
+          "passed": true,
+          "expected_transitions": 2,
+          "received_transitions": 2,
+          "repeat_events": 12,
+          "delivery_ms": [
+            13.032,
+            1.166
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "result.json": "565f1f8334344cebf0a18c5e6251c664ea21f75c527c47983ba83fd72ae85583",
+        "sender.log": "ad62e1aaad76203d50c2ffd730ce68605853ce6673e1722c812a2e7dca5fe258",
+        "receiver.log": "93e11c1d53236cb01709101982fbd4b9857052386fe26189d48556a8edc7c297",
+        "provenance.json": "d1fd981a2d641106ec4d9bcd0127078209ef8a0e64191755d63da856c1a0e0cf"
+      }
+    },
+    "cachyos-before": {
+      "passed": false,
+      "target": "wayland",
+      "kernel": "7.2.9-1-cachyos",
+      "permission_policy": "test-app",
+      "wine_manifest_sha256": "ace131662cc0a41d55fe7fab2ae86b97c628d3d2a20d2d8c1deb6827782d0560",
+      "driver_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+      "sender_sha256": "05f134b0748abf8083157863c0896077de60c2e84a250974ed446eb6e9076ffd",
+      "receiver_sha256": "74bda3275e9d8ae964b972c37bdbc44fffb6d00f56daa9bb7a218354e40ca0d4",
+      "cases": {
+        "same-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.412,
+            1.584,
+            1.58,
+            1.764,
+            1.767,
+            1.842
+          ]
+        },
+        "cross-thread": {
+          "passed": false,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 28,
+          "delivery_ms": [
+            1.941,
+            703.118,
+            1.272,
+            702.456,
+            1.534,
+            702.737
+          ]
+        },
+        "reverse-thread": {
+          "passed": false,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 30,
+          "delivery_ms": [
+            1.688,
+            702.541,
+            1.687,
+            703.048,
+            2.173,
+            702.651
+          ]
+        },
+        "rapid-taps": {
+          "passed": false,
+          "expected_transitions": 48,
+          "received_transitions": 2,
+          "repeat_events": 46,
+          "delivery_ms": []
+        },
+        "modifier-chord": {
+          "passed": false,
+          "expected_transitions": 4,
+          "received_transitions": 4,
+          "repeat_events": 12,
+          "delivery_ms": [
+            1.858,
+            0.895,
+            702.956,
+            703.648
+          ]
+        },
+        "worker-exit": {
+          "passed": false,
+          "expected_transitions": 2,
+          "received_transitions": 1,
+          "repeat_events": 8,
+          "delivery_ms": []
+        },
+        "intentional-hold": {
+          "passed": false,
+          "expected_transitions": 2,
+          "received_transitions": 1,
+          "repeat_events": 80,
+          "delivery_ms": []
+        }
+      },
+      "evidence_sha256": {
+        "result.json": "108d81507cb592a0773c3ffab97bf74a2435d06506df5dc38b502ac5e22692c8",
+        "sender.log": "3f1c35159b8e23d6214723b0de9e6a9ec38f1353583d0db16cbc4eb97ba59fd5",
+        "receiver.log": "c737b525aa55af9c2c2f0dcb39e9b98e47f511d1ac57979e3406542599c9990d",
+        "provenance.json": "6ce8135d72e3a93d9e279d62eefa86721e4516c1be987c3e37c88d85370963a7"
+      }
+    },
+    "cachyos-after": {
+      "passed": true,
+      "target": "wayland",
+      "kernel": "7.2.9-1-cachyos",
+      "permission_policy": "test-app",
+      "wine_manifest_sha256": "ace131662cc0a41d55fe7fab2ae86b97c628d3d2a20d2d8c1deb6827782d0560",
+      "driver_sha256": "c4a1a81dd52ba193a1bb039a827b13095afbedfbb2baa5e0f7a9461fefabf8c9",
+      "sender_sha256": "05f134b0748abf8083157863c0896077de60c2e84a250974ed446eb6e9076ffd",
+      "receiver_sha256": "74bda3275e9d8ae964b972c37bdbc44fffb6d00f56daa9bb7a218354e40ca0d4",
+      "cases": {
+        "same-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            2.081,
+            1.896,
+            1.93,
+            1.589,
+            1.376,
+            1.293
+          ]
+        },
+        "cross-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.227,
+            1.139,
+            1.963,
+            1.896,
+            1.371,
+            1.409
+          ]
+        },
+        "reverse-thread": {
+          "passed": true,
+          "expected_transitions": 6,
+          "received_transitions": 6,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.171,
+            1.168,
+            1.986,
+            1.943,
+            1.667,
+            1.535
+          ]
+        },
+        "rapid-taps": {
+          "passed": true,
+          "expected_transitions": 48,
+          "received_transitions": 48,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.281,
+            1.389,
+            1.281,
+            1.184,
+            1.89,
+            1.902,
+            1.435,
+            1.105,
+            1.664,
+            1.417,
+            1.084,
+            1.627,
+            1.798,
+            1.811,
+            1.859,
+            1.762,
+            1.645,
+            1.473,
+            1.723,
+            1.759,
+            1.705,
+            1.634,
+            1.724,
+            1.583,
+            1.393,
+            1.191,
+            1.096,
+            1.909,
+            1.954,
+            1.454,
+            1.568,
+            1.68,
+            1.63,
+            1.392,
+            1.275,
+            1.092,
+            1.397,
+            1.189,
+            1.226,
+            0.947,
+            1.757,
+            1.524,
+            1.473,
+            1.434,
+            1.176,
+            1.938,
+            1.097,
+            1.224
+          ]
+        },
+        "modifier-chord": {
+          "passed": true,
+          "expected_transitions": 4,
+          "received_transitions": 4,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.007,
+            1.52,
+            1.673,
+            1.151
+          ]
+        },
+        "worker-exit": {
+          "passed": true,
+          "expected_transitions": 2,
+          "received_transitions": 2,
+          "repeat_events": 0,
+          "delivery_ms": [
+            1.302,
+            2.054
+          ]
+        },
+        "intentional-hold": {
+          "passed": true,
+          "expected_transitions": 2,
+          "received_transitions": 2,
+          "repeat_events": 16,
+          "delivery_ms": [
+            29.623,
+            1.668
+          ]
+        }
+      },
+      "evidence_sha256": {
+        "result.json": "bfeb9172dd773f957c8e49e5d2f37b0c4b33f1f5f696a8e9e23aca4a8ee6ac26",
+        "sender.log": "3f0a873e6ebf3cf4c1507474bd83c7bb4169b9f73dd7d20aabf016d443f13ca2",
+        "receiver.log": "b4003d80bba08bfb4751841b588845da25bdfdceb3a44b05b999c327cbd43cd5",
+        "provenance.json": "d34ec2b072f2c12bb496f11988fef543bb0839ccd7953268666692dc0f66662f"
+      }
+    }
+  }
+}
