@@ -58,6 +58,25 @@ No arguments prints only usage. Output is always retained in a mode-0600 log und
 probe logs are retained too. Do not publish raw logs without checking them for
 local paths, usernames, device identifiers and application state.
 
+Readiness checking and installation both show separate headers for system,
+desktop, tools, device access, security policy and namespace checks. Wayland
+adds its Xwayland/KWin/portal check. Verbose mode also prints the saved host
+report; ordinary mode keeps the headers, warnings and blockers visible.
+
+The project regression runner and GitHub CI use the same fixed-color headers:
+
+```sh
+python3 tools/packaging/run_project_tests.py --run
+```
+
+- `--verbose` — show individual results and captured test output.
+- `--log-file /path/to/new-tests.log` — write a new log at a chosen path.
+- `--help` — show usage and examples.
+
+Complete test output is logged in both modes. Failure details remain visible
+in ordinary mode, and failures produce a nonzero exit status. Direct unittest
+commands remain available with their standard output for contributor tooling.
+
 The logo is pre-rendered by Chafa into verified kitty, sixel and symbol streams.
 Thus it is the first installer display without installing Chafa on the host.
 Kitty/sixel artwork is 200×200 pixels; the 20×10-cell symbol fallback approximates

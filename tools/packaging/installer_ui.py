@@ -33,6 +33,12 @@ class Presentation:
     def write(self,text):
         self.stream.write(text+'\n');self.stream.flush()
 
+    def output(self,text):
+        """Keep complete diagnostic output, showing it only in verbose mode."""
+        self.log.write(text);self.log.flush()
+        if self.verbose:
+            self.stream.write(text);self.stream.flush()
+
     def header(self):
         if self.stream.isatty():
             folder=ROOT/'assets/terminal';meta=json.loads((folder/'render.json').read_text())
@@ -63,8 +69,7 @@ class Presentation:
                               text=True,errors='replace',bufsize=1,start_new_session=separate_session)
         try:
             for line in proc.stdout:
-                self.log.write(line);self.log.flush()
-                if self.verbose:self.stream.write(line);self.stream.flush()
+                self.output(line)
             code=proc.wait()
         except BaseException:
             import signal

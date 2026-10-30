@@ -176,9 +176,9 @@ def main(argv=None):
     stamp=datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+str(os.getpid())
     ui=Presentation(state/('install-'+stamp+'.log'),args.verbose)
     try:
-        ui.header();ui.step('System','Inspect the current desktop, graphics, device access and policy')
-        report=host_preflight.inventory();save(state/('host-'+stamp+'.json'),report)
-        ui.log.write(json.dumps(report,indent=2)+'\n');ui.log.flush()
+        ui.header()
+        report=host_preflight.inventory(progress=ui.step);save(state/('host-'+stamp+'.json'),report)
+        ui.output(json.dumps(report,indent=2)+'\n')
         for warning in report['warnings']:ui.write('Note: '+warning)
         if report['errors']:raise RuntimeError('\n'.join(report['errors']))
         if args.engine=='podman' and not shutil.which('podman'):

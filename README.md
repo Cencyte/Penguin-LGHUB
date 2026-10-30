@@ -134,11 +134,14 @@ The installer supplies private build tools, Wine, Linux libraries and launcher h
 From the cloned project directory, run:
 
 ```sh
-python3 -m unittest discover -s tests/packaging -p 'test_*.py'
-python3 -m unittest discover -s tools/wine -p 'test_desktop_device_policy.py'
+python3 tools/packaging/run_project_tests.py --run
 ```
 
-These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. `OK` means all assertions passed; `FAILED` identifies failed checks or errors. The packaging suite contains 135 checks, with five additional device-policy checks.
+These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. The runner shows the installer's fixed-color step headers, saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The packaging suite contains 143 checks, with five additional device-policy checks.
+
+- `--verbose` — show individual test results and captured output beneath the headers.
+- `--log-file /path/to/new-tests.log` — choose a new log file; existing logs are preserved.
+- `--help` — show usage and examples.
 
 | Test area | What is checked |
 |---|---|
@@ -157,6 +160,10 @@ Run this from the target KDE desktop terminal:
 ```
 
 This checks the actual host's OS, CPU architecture, required tools, user namespaces and desktop session. It records graphics drivers, audio-socket presence, SELinux state and Logitech device access. On Wayland it also checks Xwayland authentication, KWin and the input-control portal. Blockers stop the check with an explanation; warnings identify remaining verification needs. A successful readiness check is followed by installation checks and hands-on device testing.
+
+Readiness checking and installation share the same categorized step headers. The complete host report is always saved with the log.
+
+- `--verbose` — also display the host report in the terminal.
 
 ## Additional details
 

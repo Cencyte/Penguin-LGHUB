@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "prepared_on": "2026-10-29",
+  "prepared_on": "2026-10-30",
   "development_revision": "f30bce750395397ba0d2a7c4fed986c7a9b7ce1d",
   "github_base_commit": "9c8ff7268ff78471fed4639e34e184c4caf475bf",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
@@ -38,8 +38,8 @@
     {
       "path": ".github/workflows/packaging-tests.yml",
       "mode": "100644",
-      "sha256": "75c3852e238ec6735ff9494a1116c4476f0fab250954e157e9db4fadc1ce5c65",
-      "bytes": 700
+      "sha256": "10f9fc58ed6e997e4ff0e6c00c6faabd12696d19aca439abab5a75f009bab307",
+      "bytes": 574
     },
     {
       "path": ".gitignore",
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "91968e1a484db2fd7b15f22a1c72f46ab7a678f546e26eec6f6e5b58cb84fe3f",
-      "bytes": 58941
+      "sha256": "f9bb73ad2e054e58e66eeee0b752b155e652cdd148a534b5d8601707633cf286",
+      "bytes": 59451
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -464,8 +464,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "3c770f35d05d48f1e86bfb6cc3b7d60389bb3acc1888325973455a59a46b084f",
-      "bytes": 7668
+      "sha256": "d7ff5446aaeb43c65b707040bd64aac8a20bf14e5b2251b99ed57217844d1b26",
+      "bytes": 8530
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -578,7 +578,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "e4e9ba2ddf41e8290e1e25fb8673e294826e92eae3fc2495afb00beb8417f399",
+      "sha256": "46e94e2132fab6776ae6ebf6ba16de3704b0c8e3b83760e88eef92628a761fec",
       "bytes": 246
     },
     {
@@ -976,6 +976,12 @@
       "mode": "100644",
       "sha256": "ab89d85e800998abd7a0d95ce22a1b726af9073af349be22cdf7ccb5751fb94d",
       "bytes": 2646
+    },
+    {
+      "path": "tests/packaging/test_check_presentation.py",
+      "mode": "100644",
+      "sha256": "9fe9ee2ba5dc78e1b18e710c3841e364b228fb2246b8ecda26f7c2794c5c895c",
+      "bytes": 8863
     },
     {
       "path": "tests/packaging/test_clean_prefix.py",
@@ -1610,14 +1616,14 @@
     {
       "path": "tools/packaging/host_preflight.py",
       "mode": "100644",
-      "sha256": "7320e52e0ed91316275d73cffb9fc6bbf0de7c365241b88b9c0d6a26af2ca9c6",
-      "bytes": 4855
+      "sha256": "ae687ea713fcaf7c8a64a1f78ac6587acd9bd959e8914262f69114487dbfba4e",
+      "bytes": 5641
     },
     {
       "path": "tools/packaging/install.py",
       "mode": "100644",
-      "sha256": "35516f8942df3ff30ed88934869168492f71e8eae92135002ad389db4e97cb53",
-      "bytes": 12432
+      "sha256": "becbf436cae63433ac310eff397227a953b62a57ba090ea575f6847aca53d2aa",
+      "bytes": 12346
     },
     {
       "path": "tools/packaging/install_device_rules.py",
@@ -1628,8 +1634,8 @@
     {
       "path": "tools/packaging/installer_ui.py",
       "mode": "100644",
-      "sha256": "6a1aa3438a83e53f5847921a4035d2471c4f365283fac804b006c6ec61bd8a30",
-      "bytes": 3812
+      "sha256": "2274a97f744d839d0fac2fd9b55d34f4170f2f3b0dff47cfe7b90ae82a8dced6",
+      "bytes": 3951
     },
     {
       "path": "tools/packaging/linux_probe.py",
@@ -1702,6 +1708,12 @@
       "mode": "100644",
       "sha256": "d20b68337a8650b60eadb7cac4f77d7caad80e6a8e22f349b45d4f8a8e723077",
       "bytes": 1109
+    },
+    {
+      "path": "tools/packaging/run_project_tests.py",
+      "mode": "100644",
+      "sha256": "d54e99e2d17803cd77b1316cbafbefc856ae13f116f73d7a2e5e86c398a67645",
+      "bytes": 7160
     },
     {
       "path": "tools/packaging/server_sync.py",
@@ -2616,8 +2628,8 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Default installer branch with current diagrams, repository-hosted distribution badges, documented tests and glossary; no vendor payload or populated prefix.",
+  "publication_note": "Default installer branch with categorized readiness checks and logged project tests; no vendor payload or populated prefix.",
   "publication_branch": "release",
-  "file_count": 431,
-  "total_bytes": 10059553
+  "file_count": 433,
+  "total_bytes": 10077661
 }
