@@ -23,6 +23,7 @@ import wayland_session
 import wine_x11_restore
 import wine_desktop_init
 import startup_feedback
+from installation_state import record_launchers
 from prepare_clean_prefix import APP, BASELINE, DATA, verify_prepared
 from windows_media_acquire import ROOT, digest_file, space_check, work_lock
 from wine_runtime import runtime_environment
@@ -386,6 +387,8 @@ def launch(config_path, config, root, experimental_wayland=False):
 
 
 def launch_with_feedback(config_path, config, root, feedback, experimental_wayland=False):
+    if (root.parent / '.uninstalling').exists():
+        raise RuntimeError('This installation is being removed; run --uninstall again if interrupted.')
     report = session_report(os.environ, experimental_wayland)
     if report['errors']:
         raise RuntimeError('\n'.join(report['errors']))
@@ -393,6 +396,8 @@ def launch_with_feedback(config_path, config, root, feedback, experimental_wayla
     with (root / 'launch.lock').open('a') as lock:
         if desktop.reopen_or_lock(lock, root, config_path, state, 'app'):
             return 0
+        if (root.parent / '.uninstalling').exists():
+            raise RuntimeError('This installation is being removed.')
         verify(config, root)
         if desktop.prefix_processes(root / 'prefix'):
             raise RuntimeError('This prefix has processes outside its managed session; stop those first.')
@@ -444,6 +449,8 @@ def install_entry(config_path, destination, experimental_wayland=False, applicat
     if experimental_wayland:
         content += (f'\n[Desktop Action Help]\nName=Wayland test help\nExec={command} help\n'
                     f'\n[Desktop Action Logs]\nName=Open test logs\nExec={command} logs\n')
+    paths = [destination] + ([applications / destination.name] if applications is not None else [])
+    record_launchers(config_path, paths, content.encode())
     with destination.open('x') as stream:
         stream.write(content)
     destination.chmod(0o755)

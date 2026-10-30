@@ -2,7 +2,7 @@
 """One terminal entry point for the version-pinned Penguin-LGHUB installation."""
 import argparse
 import datetime
-import fcntl
+from contextlib import nullcontext
 import hashlib
 import json
 import os
@@ -11,13 +11,15 @@ import shutil
 import subprocess
 import sys
 
-from windows_media_acquire import ROOT, digest_file, external_path, space_check
+from windows_media_acquire import ROOT, digest_file, space_check
 from installer_ui import Presentation, STYLE
 import host_preflight
+import installation_state
 
 HELP='''USAGE
   ./install.sh --install [--verbose] [--directory <path>] [--engine <bwrap|podman>]
   ./install.sh --check [--verbose]
+  ./install.sh --uninstall [--directory <path>] [--verbose]
 
 SUMMARY
   Prepare a private, pinned G HUB installation from verified downloads and
@@ -26,7 +28,8 @@ SUMMARY
 
 FLAGS
   --install                Run the complete installation pipeline.
-  --check                  Record host readiness without installing anything.
+  --check                  Record host compatibility without installing anything.
+  --uninstall              Remove a managed installation, including G HUB settings.
   --directory <path>       Installation storage (default: ~/.local/share/penguin-lghub).
   --engine <bwrap|podman>   Private acquisition engine (default: bwrap).
   --jobs <number>          Wine build jobs, 1–16 (default: 4).
@@ -38,12 +41,13 @@ EXAMPLES
   ./install.sh --install --verbose
   ./install.sh --install --directory /path/with/enough/space
   ./install.sh --check
+  ./install.sh --uninstall
 '''
 
 
 def parser():
     p=argparse.ArgumentParser(add_help=False)
-    action=p.add_mutually_exclusive_group();action.add_argument('--install',action='store_true');action.add_argument('--check',action='store_true')
+    action=p.add_mutually_exclusive_group();action.add_argument('--install',action='store_true');action.add_argument('--check',action='store_true');action.add_argument('--uninstall',action='store_true')
     p.add_argument('--help',action='store_true');p.add_argument('--verbose',action='store_true')
     p.add_argument('--directory',type=Path,default=Path(os.environ.get('XDG_DATA_HOME',str(Path.home()/'.local/share')))/'penguin-lghub')
     p.add_argument('--engine',choices=('bwrap','podman'),default='bwrap');p.add_argument('--jobs',type=int,default=4)
@@ -70,17 +74,15 @@ def save(path,data):
 
 
 def pipeline(args,ui,report):
-    directory=external_path(args.directory)
-    directory.mkdir(parents=True,exist_ok=True,mode=0o700)
-    if directory.is_symlink() or directory.stat().st_uid!=os.getuid():raise ValueError('Installation storage must be owned by you.')
-    guard=(directory/'.install.lock').open('a')
-    try:fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    except BlockingIOError:raise RuntimeError('Another installation is using this directory.')
+    with installation_state.managed_directory(args.directory, create=True,
+            source=fingerprint(), version=STYLE['project_version']) as (directory,state):
+        _pipeline(args,ui,report,directory,state)
+
+
+def _pipeline(args,ui,report,directory,state):
     source_id=fingerprint();receipt_path=directory/'installation.json'
-    if receipt_path.exists():
-        state=json.loads(receipt_path.read_text())
-        if state['source']!=source_id:raise ValueError('This installation belongs to another source revision; choose a new --directory to preserve it.')
-    else:state={'schema':1,'source':source_id,'completed':[],'attempts':{},'project_version':STYLE['project_version']}
+    if state['source']!=source_id:
+        raise ValueError('This installation belongs to another source revision; choose a new --directory to preserve it.')
     work=directory/'work';work.mkdir(exist_ok=True)
     cache=work/'cache';cache.mkdir(exist_ok=True)
     code=directory/'source'
@@ -102,6 +104,7 @@ def pipeline(args,ui,report):
         if state['attempts'].get(name):preserve_partial(outputs,state['attempts'][name])
         state['active']=name;state['attempts'][name]=state['attempts'].get(name,0)+1;save(receipt_path,state)
         ui.run(command)
+        state['launchers']=installation_state.load(directory)['launchers']
         state['completed'].append(name);state.pop('active',None);save(receipt_path,state)
     # Reserve for downloads, SDK, build tree, new prefix and rollback headroom.
     if not state['completed']:space_check(directory,60*1024**3)
@@ -152,7 +155,8 @@ def pipeline(args,ui,report):
         cmd('session_probe.py','--config',desktop/'desktop.json','--output',work/'session-audit/report.json'))
     # Only this small, reviewable helper runs under sudo. No application runs as root.
     step('rules','System','Install scoped Logitech device permissions',
-         ['sudo',sys.executable,str(code/'tools/packaging/install_device_rules.py')])
+         ['sudo',sys.executable,str(code/'tools/packaging/install_device_rules.py'),
+          '--installation-id',state['installation_id']])
     destination=subprocess.check_output(['xdg-user-dir','DESKTOP'],text=True).strip()
     if not Path(destination).is_absolute():raise ValueError('Cannot resolve the Desktop directory')
     name='Penguin-LGHUB Wayland.desktop' if report['session']=='wayland' else 'Penguin-LGHUB.desktop'
@@ -161,7 +165,6 @@ def pipeline(args,ui,report):
         '--config',desktop/'desktop.json','--destination',Path(destination)/name,*extra))
     state['installed']=True;state['owner_acceptance_pending']=True;save(receipt_path,state)
     ui.write('Installation complete. Open '+name+' when ready; KDE input permission and physical-device testing remain yours to confirm.')
-    guard.close()
 
 
 def main(argv=None):
@@ -169,11 +172,26 @@ def main(argv=None):
     if not argv:print(HELP.split('\nSUMMARY')[0]);return 0
     args=parser().parse_args(argv)
     if args.help:print(HELP);return 0
-    if not(args.install or args.check):parser().error('Choose --install or --check')
+    if not(args.install or args.check or args.uninstall):parser().error('Choose --install, --check or --uninstall')
     if os.geteuid()==0:raise ValueError('Run as your normal desktop user; setup requests sudo when needed.')
+    if args.uninstall:
+        from uninstall import run
+        return run(args.directory,args.verbose)
     if not 1<=args.jobs<=16:raise ValueError('--jobs must be 1–16')
     state=Path(os.environ.get('XDG_STATE_HOME',str(Path.home()/'.local/state')))/'penguin-lghub'
     stamp=datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+str(os.getpid())
+    context = (installation_state.managed_directory(args.directory,create=True,
+               source=fingerprint(),version=STYLE['project_version']) if args.install else nullcontext(None))
+    try:
+        with context as managed:
+            if managed:
+                state=managed[0]/'logs'
+            return present_install(args,state,stamp,managed)
+    except (OSError,ValueError,RuntimeError) as error:
+        print('Setup stopped: '+str(error),file=sys.stderr);return 1
+
+
+def present_install(args,state,stamp,managed):
     ui=Presentation(state/('install-'+stamp+'.log'),args.verbose)
     try:
         ui.header()
@@ -184,7 +202,7 @@ def main(argv=None):
         if args.engine=='podman' and not shutil.which('podman'):
             raise RuntimeError('Podman is not installed; use the default bubblewrap engine on this host.')
         if args.check:ui.write('Host checks completed. Actual application/device acceptance remains pending.');return 0
-        pipeline(args,ui,report);return 0
+        _pipeline(args,ui,report,*managed);return 0
     except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as error:
         import traceback
         traceback.print_exc(file=ui.log);ui.log.flush()

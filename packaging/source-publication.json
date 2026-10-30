@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "f9bb73ad2e054e58e66eeee0b752b155e652cdd148a534b5d8601707633cf286",
-      "bytes": 59451
+      "sha256": "9e19a0504f7eae426a75ac14c656677cfd689cf3165dec64176ed60d784f1d5b",
+      "bytes": 60911
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -464,8 +464,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "d7ff5446aaeb43c65b707040bd64aac8a20bf14e5b2251b99ed57217844d1b26",
-      "bytes": 8530
+      "sha256": "f201c89219d885d252a2d033659290e28c58cd72019ecad9e143f6ebba5dc391",
+      "bytes": 12293
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -578,8 +578,8 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "46e94e2132fab6776ae6ebf6ba16de3704b0c8e3b83760e88eef92628a761fec",
-      "bytes": 246
+      "sha256": "1afa3c04ec9d32d538a538fe1729fb710cdf327e23e8b959717a05fa1692d3f5",
+      "bytes": 252
     },
     {
       "path": "packaging/licenses/Wine-LGPL-2.1.txt",
@@ -1054,6 +1054,12 @@
       "mode": "100644",
       "sha256": "731a5c191aaea424fc10d6e3f08f980ae8f12a37b18448e6f4df526118d530ad",
       "bytes": 1033
+    },
+    {
+      "path": "tests/packaging/test_uninstall.py",
+      "mode": "100644",
+      "sha256": "f09e692f70130a280119456668779b9d7fceeb15d501ba4112f83fab04a353fb",
+      "bytes": 10268
     },
     {
       "path": "tests/packaging/test_windows_media_acquire.py",
@@ -1598,8 +1604,8 @@
     {
       "path": "tools/packaging/desktop_runtime.py",
       "mode": "100644",
-      "sha256": "a5f9f13af5f658834a4467be4020d8cc7bd05d2cd3b04b6085e14f7ef227def4",
-      "bytes": 29679
+      "sha256": "83f235b3bff3b7051f67cd754c23b0ca031cb0f5bbb75e6a9cf478e272c1270f",
+      "bytes": 30162
     },
     {
       "path": "tools/packaging/dockur_acquire.py",
@@ -1614,22 +1620,34 @@
       "bytes": 4895
     },
     {
+      "path": "tools/packaging/host_policy.py",
+      "mode": "100644",
+      "sha256": "0fb376ee7781d33a9a30a5040b18664183ee07280e63e798f18ed87023d2873b",
+      "bytes": 1248
+    },
+    {
       "path": "tools/packaging/host_preflight.py",
       "mode": "100644",
-      "sha256": "ae687ea713fcaf7c8a64a1f78ac6587acd9bd959e8914262f69114487dbfba4e",
-      "bytes": 5641
+      "sha256": "ddd809bb53ba2264fd04732b5bf21fffd308aff587808f344454d22c26faba13",
+      "bytes": 5016
     },
     {
       "path": "tools/packaging/install.py",
       "mode": "100644",
-      "sha256": "becbf436cae63433ac310eff397227a953b62a57ba090ea575f6847aca53d2aa",
-      "bytes": 12346
+      "sha256": "e3e886263fac1f61d012dc574b8d719914592a05b3cc1af322a3e27feb8d19ec",
+      "bytes": 13033
     },
     {
       "path": "tools/packaging/install_device_rules.py",
       "mode": "100644",
-      "sha256": "8a340f79568efa1b454ee8bb28e771ad26f25d33c1845f9b8f2849e6f2ad9d75",
-      "bytes": 1554
+      "sha256": "6c452151effa826693d32c5d96feb98b3ebfc1302f9069426a8089c0679cce96",
+      "bytes": 2858
+    },
+    {
+      "path": "tools/packaging/installation_state.py",
+      "mode": "100644",
+      "sha256": "323ee96857e573c00833e7a78dca509ce8fb64e9b7023a74a27c778c18facff7",
+      "bytes": 4083
     },
     {
       "path": "tools/packaging/installer_ui.py",
@@ -1712,8 +1730,8 @@
     {
       "path": "tools/packaging/run_project_tests.py",
       "mode": "100644",
-      "sha256": "d54e99e2d17803cd77b1316cbafbefc856ae13f116f73d7a2e5e86c398a67645",
-      "bytes": 7160
+      "sha256": "b51009a8306c54339d18facbcc6170e4979ac03ba54adbb06d66a9f7b20fc289",
+      "bytes": 7247
     },
     {
       "path": "tools/packaging/server_sync.py",
@@ -1746,6 +1764,12 @@
       "bytes": 3870
     },
     {
+      "path": "tools/packaging/uninstall.py",
+      "mode": "100644",
+      "sha256": "002251c608e87ee36f43f0328f6c8aff6cdd39213ebe44bf4f40dc86cd120a31",
+      "bytes": 7257
+    },
+    {
       "path": "tools/packaging/wayland_input_probe.py",
       "mode": "100644",
       "sha256": "2f723a8ee1fdff22b647c6d39b6038a474b19b7184172a7ff08a8ada63538476",
@@ -1772,8 +1796,8 @@
     {
       "path": "tools/packaging/wayland_session.py",
       "mode": "100644",
-      "sha256": "5d7526233db65615c6bfc03a8b18c4821eb8a3f6ae1dd1ce7af6c20a2e709bc4",
-      "bytes": 5598
+      "sha256": "50bb8e42f69a10d27a7f88a409c0443cb69e70bd64800b6bbd59849c8baf6fa4",
+      "bytes": 5256
     },
     {
       "path": "tools/packaging/wayland_wine_probe.py",
@@ -2628,8 +2652,8 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Default installer branch with categorized readiness checks and logged project tests; no vendor payload or populated prefix.",
+  "publication_note": "First source-only preview release; managed installation removal, shared distribution policy, README navigation and source ZIP workflow. No vendor payload or populated prefix.",
   "publication_branch": "release",
-  "file_count": 433,
-  "total_bytes": 10077661
+  "file_count": 437,
+  "total_bytes": 10107340
 }

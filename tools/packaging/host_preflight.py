@@ -9,6 +9,8 @@ import shutil
 import subprocess
 import sys
 
+from host_policy import PACKAGE_FAMILY, os_identity, package_query
+
 
 def capture(args):
     try:
@@ -18,14 +20,6 @@ def capture(args):
         return {'status':-1,'output':str(e)}
 
 
-def os_identity(path=Path('/etc/os-release')):
-    result={}
-    for line in path.read_text().splitlines():
-        if '=' in line and not line.startswith('#'):
-            k,v=line.split('=',1);result[k]=v.strip('"\'')
-    return result
-
-
 def inventory(env=None, sysroot=Path('/sys'), progress=None):
     # Optional presentation hook; standalone JSON consumers remain unchanged.
     progress = progress or (lambda category, description: None)
@@ -33,7 +27,7 @@ def inventory(env=None, sysroot=Path('/sys'), progress=None):
     progress('System', 'Check operating system, CPU and Python requirements')
     identity=os_identity();errors=[];warnings=[]
     distro=identity.get('ID','')
-    if distro not in ('manjaro','cachyos','bazzite'):errors.append('Initial release targets Manjaro, CachyOS and Bazzite.')
+    if distro not in PACKAGE_FAMILY:errors.append('Initial release targets Manjaro, CachyOS and Bazzite.')
     if platform.machine()!='x86_64':errors.append('The pinned runtime requires x86_64.')
     if sys.version_info<(3,12):errors.append('Python 3.12 or newer is required.')
     progress('Desktop', 'Check the active desktop session')
@@ -46,14 +40,8 @@ def inventory(env=None, sysroot=Path('/sys'), progress=None):
     for n in ('bwrap','python3','zstd','udevadm','xdg-user-dir','gdbus','kdialog','sudo'):
         if not executables[n]:errors.append('Missing required host command: '+n)
     progress('Tools', 'Record installed desktop and runtime package versions')
-    packages=[]
-    if shutil.which('rpm'):
-        packages=capture(['rpm','-q','kwin','plasma-workspace','terra-xorg-x11-server-Xwayland',
-            'xorg-x11-server-Xwayland','libei','xdg-desktop-portal','xdg-desktop-portal-kde',
-            'pipewire','bubblewrap','selinux-policy-targeted','podman'])['output'].splitlines()
-    elif shutil.which('pacman'):
-        packages=capture(['pacman','-Q','kwin','xorg-xwayland','libei','xdg-desktop-portal',
-            'xdg-desktop-portal-kde','pipewire','bubblewrap','mesa','nvidia-utils'])['output'].splitlines()
+    query=package_query(identity)
+    packages=capture(query)['output'].splitlines() if query and shutil.which(query[0]) else []
     progress('System', 'Inspect Logitech device access')
     nodes=[]
     for item in sorted((sysroot/'class/hidraw').glob('hidraw*')):

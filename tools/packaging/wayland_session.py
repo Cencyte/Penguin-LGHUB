@@ -9,6 +9,8 @@ import shutil
 import stat
 import subprocess
 
+from host_policy import os_identity, package_query
+
 HELP = '''Penguin LGHUB — Wayland test
 
 Log in to Plasma (Wayland), then open the Wayland test launcher. The existing
@@ -92,14 +94,9 @@ def inspect(env):
         report['remote_desktop_portal'] = status == 0 and 'org.freedesktop.portal.RemoteDesktop' in info and 'ConnectToEIS' in info
         if not report['remote_desktop_portal']:
             report['errors'].append('The Remote Desktop portal with input support is unavailable. Check xdg-desktop-portal, xdg-desktop-portal-kde and the Plasma session services.')
-    if shutil.which('pacman', path=env.get('PATH')):
-        _, info = command_result(['pacman', '-Q', 'kwin', 'xorg-xwayland', 'libei',
-            'xdg-desktop-portal', 'xdg-desktop-portal-kde', 'pipewire'], env)
-        report['host_packages'] = info.strip().splitlines()
-    elif shutil.which('rpm', path=env.get('PATH')):
-        _, info = command_result(['rpm', '-q', 'kwin', 'terra-xorg-x11-server-Xwayland',
-            'xorg-x11-server-Xwayland', 'libei', 'xdg-desktop-portal',
-            'xdg-desktop-portal-kde', 'pipewire'], env)
+    query = package_query(os_identity())
+    if query and shutil.which(query[0], path=env.get('PATH')):
+        _, info = command_result(query, env)
         report['host_packages'] = info.strip().splitlines()
     report['warnings'].append('Input permission is checked by KDE when you use an assignment. These capability checks do not grant or prove permission.')
     return report

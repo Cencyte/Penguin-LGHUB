@@ -51,6 +51,7 @@ STEPS = {
     'test_wine_runtime': ('Wine', 'Test runtime inventories and integrity checks'),
     'test_wine_x11_restore': ('Desktop', 'Test window restore patch coverage'),
     'test_desktop_device_policy': ('System', 'Test scoped desktop device-access policy'),
+    'test_uninstall': ('System', 'Test installation removal and distribution policy'),
     'test_check_presentation': ('Verify', 'Test readiness progress and test-result reporting'),
 }
 

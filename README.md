@@ -5,11 +5,13 @@
 </p>
 <hr>
 
-## Support the project
+<h2 align="center">Support the project</h2>
 
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/cencyte)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/cencyte)
-[![Patreon](https://img.shields.io/badge/Patreon-Support-FF424D?logo=patreon&logoColor=white)](https://www.patreon.com/cw/cencyte)
+<p align="center">
+  <a href="https://ko-fi.com/cencyte"><img src="https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=kofi&amp;logoColor=white" alt="Support on Ko-fi"></a>
+  <a href="https://buymeacoffee.com/cencyte"><img src="https://img.shields.io/badge/Buy_Me_a_Coffee-Support-FFDD00?logo=buymeacoffee&amp;logoColor=black" alt="Buy Me a Coffee"></a>
+  <a href="https://www.patreon.com/cw/cencyte"><img src="https://img.shields.io/badge/Patreon-Support-FF424D?logo=patreon&amp;logoColor=white" alt="Support on Patreon"></a>
+</p>
 
 ## Introduction
 
@@ -21,7 +23,7 @@ The clone-and-run installer builds the custom Wine components from pinned source
 
 ## Diagrams: LGHUB Wine Compatibility System
 
-<p align="center"><a href="docs/architecture/2026-10-29/simple-modular.png?raw=1"><img src="docs/architecture/2026-10-29/simple-modular.png" alt="Simple modular overview of installation, runtime and Linux integration"></a><br><a href="docs/architecture/2026-10-29/detailed-modular.png?raw=1">Expand detail</a><br><a href="docs/architecture/2026-10-29/simple-connected.png?raw=1"><img src="docs/architecture/2026-10-29/simple-connected.png" alt="Simple connected overview from setup through G HUB and Wine to Linux"></a><br><a href="docs/architecture/2026-10-29/detailed-connected.png?raw=1">Expand detail</a></p>
+<p align="center"><a href="https://github.com/Cencyte/Penguin-LGHUB/blob/release/docs/architecture/2026-10-29/simple-modular.png"><img src="docs/architecture/2026-10-29/simple-modular.png" alt="Simple modular overview of installation, runtime and Linux integration"></a><br><a href="https://github.com/Cencyte/Penguin-LGHUB/blob/release/docs/architecture/2026-10-29/detailed-modular.png">Expand detail</a><br><a href="https://github.com/Cencyte/Penguin-LGHUB/blob/release/docs/architecture/2026-10-29/simple-connected.png"><img src="docs/architecture/2026-10-29/simple-connected.png" alt="Simple connected overview from setup through G HUB and Wine to Linux"></a><br><a href="https://github.com/Cencyte/Penguin-LGHUB/blob/release/docs/architecture/2026-10-29/detailed-connected.png">Expand detail</a></p>
 
 ## Warning:
 
@@ -44,6 +46,10 @@ Setup requests sudo for scoped Logitech device-access rules. It checks host prer
 
 ## Distribution setup status
 
+![Manjaro](docs/packaging/status-manjaro.svg)
+![CachyOS](docs/packaging/status-cachyos.svg)
+![Bazzite](https://img.shields.io/badge/Bazzite-validation_pending-yellow)
+
 The first release is being prepared for **Manjaro, CachyOS and Bazzite**.
 Manjaro and CachyOS have X11 and Plasma Wayland evidence; Bazzite qualification
 is pending. Other distributions are outside this initial release.
@@ -54,10 +60,6 @@ setup requires sudo; G HUB itself runs as a regular user. Updates are
 controlled so that a vendor update cannot silently replace the tested setup.
 
 The [installer](docs/packaging/release-installer.md) is available for the next acceptance test. The source recipe and isolated verification are implemented; Bazzite's complete desktop/device result is pending. See the [Bazzite findings](docs/packaging/bazzite-readiness.md) for graphics, audio, device, SELinux and full-X11-session considerations.
-
-![Manjaro](docs/packaging/status-manjaro.svg)
-![CachyOS](docs/packaging/status-cachyos.svg)
-![Bazzite](https://img.shields.io/badge/Bazzite-validation_pending-yellow)
 
 [![Packaging tests](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml/badge.svg)](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml)
 
@@ -76,9 +78,11 @@ and validation boundaries are in the [environment record](packaging/tested-envir
 | Xwayland | 24.1.9 | 24.1.9 | 24.1.13 | 26.0.99.903 |
 | libei | 1.5.0 | 1.5.0 | 1.6.0 | 1.6.0 |
 | Portal / KDE backend | 1.20.3 / 6.5.4 | 1.20.3 / 6.5.6 | 1.22.1 / 6.7.5 | 1.22.1 / 6.7.5 |
-| Evidence | Manual X11 | VM UI tests | Manual X11/Wayland | Inventory only |
+| Session / target | X11 | X11/Wayland | X11/Wayland | X11/Wayland² |
 
 ¹ Original working baseline; the October 29 inventory reports kernel 6.12.74-rt16.
+² Bazzite lists intended session targets; application validation is pending, and
+a full X11 session is not supplied by the installer.
 The VM does not qualify physical Logitech hardware. Manual acceptance and automated
 checks remain separately identified; none establishes an unassisted fresh-clone install.
 Graphics and package revisions are retained in the linked record rather than widening
@@ -111,10 +115,16 @@ Optional switches, added to the installation command:
 - `--jobs 4` — choose 1–16 build jobs; the default is 4.
 - `--engine podman` — use an existing rootless Podman installation for Windows-resource acquisition. The default is bubblewrap.
 
-Standalone commands, run from the cloned project directory:
+Alternatively, download **Source code (zip)** from the [first source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.1), extract it, and open a terminal in the extracted folder. Run the same installation command there. No Git checkout is needed for the ZIP workflow.
+
+Standalone commands, run from the project directory:
 
 - `./install.sh --help` — show usage, switches and examples.
 - `./install.sh --check` — check the current host's installation prerequisites and save a report.
+- `./install.sh --uninstall` — remove this managed installation, including G HUB settings, private Wine, downloaded inputs, launchers, icon, installation logs and its device-access rule.
+- `./install.sh --uninstall --directory /path/to/installation` — remove an installation stored at a custom location.
+
+Back up any G HUB profiles or settings you want to keep before uninstalling. Removal works without a graphical session and requests sudo only for its device rule. The source download, independently generated diagnostic reports and unrelated software remain. Legacy lab installations without an ownership receipt require separate cleanup; they are not removed by guessing paths.
 
 The installer supplies private build tools, Wine, Linux libraries and launcher helpers. The repository requires authorized GitHub access while it remains private. See [installation, retry and validation details](docs/packaging/release-installer.md).
 
@@ -137,7 +147,7 @@ From the cloned project directory, run:
 python3 tools/packaging/run_project_tests.py --run
 ```
 
-These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. The runner shows the installer's fixed-color step headers, saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The packaging suite contains 143 checks, with five additional device-policy checks.
+These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required. The runner saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The packaging suite contains 158 checks, with five additional device-policy checks.
 
 - `--verbose` — show individual test results and captured output beneath the headers.
 - `--log-file /path/to/new-tests.log` — choose a new log file; existing logs are preserved.
@@ -149,9 +159,9 @@ These regression tests exercise the installer and launcher code with controlled 
 | Wine and prefix preparation | File inventories, registry definitions, DLL policy and protection of existing directories. |
 | Container and device policy | Generated isolation commands, scoped device access and per-application synchronization settings. |
 | Desktop behavior | Launcher/startup/shutdown logic, tray-registration handling and frontend resource transformations. |
-| Installer workflow | Step ordering, retry preservation, help, terminal output and persistent logs. |
+| Installer workflow and removal | OS policy, step ordering, retry preservation, help, logs, ownership receipts and safe removal of managed files. |
 
-### Checking this computer's readiness:
+### Checking this computer's compatibility:
 
 Run this from the target KDE desktop terminal:
 

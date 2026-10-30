@@ -13,6 +13,8 @@ cd Penguin-LGHUB
 ./install.sh --install
 ```
 
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.1) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
+
 The repository currently requires GitHub access while it remains private.
 Run as your regular user. The installer requests sudo for its small Logitech
 device-rule helper; it never starts G HUB as root. It installs a launcher for
@@ -47,13 +49,16 @@ Standalone commands:
 
 - `./install.sh --check` — record host readiness and explain blockers.
 - `./install.sh --help` — show usage, switches and examples.
+- `./install.sh --uninstall` — remove the managed installation and its G HUB settings.
 
 Optional installation switches:
 
 - `--verbose` — display command output beneath each colored step.
 - `--jobs 4` — select 1–16 Wine build jobs; the default is 4.
 
-No arguments prints only usage. Output is always retained in a mode-0600 log under
+No arguments prints only usage. Installation output is retained in a mode-0600 log
+under `<installation directory>/logs/`, so removal includes these logs. Standalone
+compatibility checks and project tests use
 `${XDG_STATE_HOME:-~/.local/state}/penguin-lghub/`. Host inventory and step-specific
 probe logs are retained too. Do not publish raw logs without checking them for
 local paths, usernames, device identifiers and application state.
@@ -121,6 +126,57 @@ Podman needs working rootless user-namespace mappings. On SELinux hosts, only
 the dedicated private toolchain/work directories are labelled for container
 access. There is no Docker requirement, privileged container, host-home relabel,
 or SELinux-disable step. **Distrobox is not part of this implementation.**
+
+## How host-specific behavior is selected
+
+`install.sh` delegates to one Python orchestrator. The same ordered pipeline builds
+the private Wine/Linux runtime and prepares G HUB on every supported distribution.
+Each step calls a focused helper and records successful completion for retries.
+
+| Decision | Input | Behavior |
+|---|---|---|
+| Supported OS and package inventory | `/etc/os-release` → shared `host_policy.py` | Manjaro/CachyOS use pacman inventory; Bazzite uses RPM inventory. Installing a second package manager does not change the choice. No host package transactions. |
+| Desktop/input path | Actual session and capability probes | X11 launcher, or KDE Wayland via Xwayland, authenticated display, KWin and input portal. |
+| Windows-resource acquisition | Explicit engine switch | Bubblewrap by default; existing rootless Podman when requested. |
+| Container labels | SELinux enforcing + Podman selected | Label only private acquisition directories; preserve host policy. |
+| Graphics, sound and devices | Driver/socket/device inspection | Import host graphics/audio through the private runtime and use seat-based Logitech access. |
+| Desktop/menu paths | XDG directory settings | Register launchers and record their exact paths and hashes. |
+
+This separates a small distribution-policy table from capability checks and reusable
+installation steps. The ownership receipt also lets removal operate when the
+original session or host prerequisites are unavailable. Future OS support should
+extend the policy and its tests rather than copy the installation pipeline.
+
+## Removal
+
+Run from the extracted source ZIP or checkout:
+
+```sh
+./install.sh --uninstall
+```
+
+- `--directory /path/to/installation` — select the same custom directory used during setup.
+- `--verbose` — display helper output beneath the removal step headers.
+
+**Removal deletes G HUB profiles/settings in the managed prefix. Export or back up
+anything you want to keep first.** The dedicated directory, private runtime, build
+cache, downloads, icon and installation logs are removed. Receipt-recorded Desktop
+and application-menu launchers are removed only if their content still matches.
+Each installation has a separate udev rule, scoped to its user and installation ID;
+sudo removes only that rule and reloads udev without retriggering unrelated devices.
+The same removal path applies on Manjaro, CachyOS and Bazzite.
+
+Removal signals only a supervisor whose PID, start time, boot ID and command match
+this installation, then waits for its launch lock. Unexpected prefix processes,
+changed launchers or nested mounts stop removal with a specific explanation.
+Incomplete installations can be removed too. If file cleanup fails, the receipt
+is retained for a retry. Successful removal leaves no new uninstall log; failure
+logs are saved in the independent diagnostic directory printed on screen.
+
+The source ZIP/checkout, separately requested compatibility/test reports, pre-existing
+shared rules, host packages and other Wine installations remain. KDE input permission
+is user-authorized desktop state, not an installer-created file. Older development
+installations without the new ownership receipt require separate cleanup review.
 
 ## Retry and verification boundaries
 
