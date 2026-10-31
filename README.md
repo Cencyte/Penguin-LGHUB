@@ -110,6 +110,7 @@ and validation boundaries are in the [environment record](packaging/tested-envir
 |---|---|---|---|---|
 | OS / snapshot | 26.0.0 | rolling, Oct 28 | rolling, Oct 28 | 44.20261026.0 |
 | Kernel | 6.6.128¹ | 6.12.77 | 7.2.9 | 7.2.11 |
+| Graphics | NVIDIA RTX 3090 | VirtIO / Mesa llvmpipe³ | NVIDIA GT 730 | NVIDIA RTX 3090 |
 | KWin | 6.5.4 | 6.5.6 | 6.7.5 | 6.7.5 |
 | Xwayland | 24.1.9 | 24.1.9 | 24.1.13 | 26.0.99.903 |
 | libei | 1.5.0 | 1.5.0 | 1.6.0 | 1.6.0 |
@@ -122,8 +123,10 @@ session is not supplied or qualified. The VM results cover UI/session behavior;
 physical Logitech hardware was tested on bare metal. The Bazzite installation,
 uninstall/reinstall and corrected G502 X Plus binding are manually confirmed.
 Fresh installer 0.3.5 acceptance on CachyOS and the Manjaro VM remains pending.
-Graphics and complete package revisions are retained in the linked record to
-keep this table compact.
+³ The VM has a VirtIO display adapter with 3D acceleration disabled; its isolated
+OpenGL tests use Mesa llvmpipe (CPU software rendering). No physical GPU is
+passed through. Graphics evidence and complete package revisions are retained
+in the linked record to keep this table compact.
 
 Shared application baseline: **G HUB 2026.6.974819**, custom **Wine 10.20**,
 Steam Linux Runtime **4.0.20260928.262390**. The Wayland route uses Wine's patched
@@ -525,6 +528,7 @@ The existing repository [GPLv3 license](LICENSE) covers original project source 
 | Input bridge / XTEST / libei | Mechanisms for delivering assignments to Linux applications. The project uses XTEST on X11 and libei with KWin authorization on its Wayland route. |
 | Launcher / .desktop entry | A Linux application shortcut describing the command, icon and actions used to open or manage G HUB. |
 | Linux userspace | Libraries and programs outside the kernel. The pinned private userspace provides a stable environment around the custom Wine runtime. |
+| LLM | Large language model: an AI model trained to process and generate language, including code. LLM agents assisted this project's development and documentation; see the AI disclosure above. |
 | Lock file | A version record listing exact downloads, hashes and related metadata. It makes the chosen inputs explicit and repeatable. |
 | Log / receipt | A log records command output; a receipt records completed steps and file identities. Both help diagnose failures and check retries. |
 | Manifest | A structured inventory describing files, dependencies or installation actions. |

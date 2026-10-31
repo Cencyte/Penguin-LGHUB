@@ -24,7 +24,12 @@
       "nvidia": "610.43.02-2",
       "bubblewrap": "0.11.0-1",
       "pipewire": "1.4.9-2",
-      "evidence": "Original manual X11 feature acceptance; package inventory 2026-10-29. Existing development installation, not a fresh-clone installer run."
+      "evidence": "Original manual X11 feature acceptance; package inventory 2026-10-29. Existing development installation, not a fresh-clone installer run.",
+      "graphics": "NVIDIA GeForce RTX 3090 (GA102), NVIDIA proprietary driver.",
+      "graphics_evidence": [
+        "docs/packaging/release-installer-verification.json: offscreen_session.graphics records the hardware RTX 3090 context",
+        "Read-only PCI inventory rechecked 2026-10-31: 10de:2204, NVIDIA kernel driver; separate GTX 1050 Ti bound to vfio-pci is not a Penguin-LGHUB test GPU."
+      ]
     },
     "manjaro_vm": {
       "os": "Manjaro rolling",
@@ -35,14 +40,18 @@
       "libei": "1.5.0",
       "portal": "1.20.3",
       "portal_kde": "6.5.6",
-      "graphics": "Virtualized; isolated probes additionally use llvmpipe. No physical GPU qualification.",
+      "graphics": "QEMU VirtIO display adapter, 3D acceleration disabled, no physical GPU passthrough. Isolated OpenGL/KWin tests use Mesa llvmpipe CPU software rendering.",
       "evidence": [
         "packaging/independent-host-verification.json",
         "docs/packaging/manjaro-wayland-launcher-verification.json",
         "docs/packaging/wayland-restore-verification.json"
       ],
       "manual_acceptance": "X11/Wayland GUI; accepted remaining cosmetic restore anomalies; no physical Logitech hardware.",
-      "current_installer_acceptance": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection pending; legacy test setup removed for these tests."
+      "current_installer_acceptance": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection pending; legacy test setup removed for these tests.",
+      "graphics_evidence": [
+        "docs/packaging/2026-10-28-wayland-restore.md: private VM OpenGL/llvmpipe tests",
+        "Libvirt domain video configuration rechecked 2026-10-31 against the pre-cleanup saved domain XML: VirtIO display, no 3D acceleration or GPU passthrough."
+      ]
     },
     "cachyos": {
       "os": "CachyOS rolling",
@@ -62,7 +71,12 @@
         "docs/packaging/cachyos-wayland-launcher-verification.json"
       ],
       "manual_acceptance": "Manually confirmed X11 tray and working Wayland installation; does not retroactively expand isolated automated test scope.",
-      "current_installer_acceptance": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection pending; legacy test setup removed for these tests."
+      "current_installer_acceptance": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection pending; legacy test setup removed for these tests.",
+      "graphics": "NVIDIA GeForce GT 730 (GK208B), NVIDIA 470.256.02 driver.",
+      "graphics_evidence": [
+        "docs/packaging/2026-10-27-cachyos-tray.md: isolated GLX context reports NVIDIA GeForce GT 730, OpenGL 4.6.0",
+        "Read-only remote PCI inventory rechecked 2026-10-31: 10de:1287, NVIDIA kernel driver."
+      ]
     },
     "bazzite": {
       "os": "Bazzite 44.20261026.0 Kinoite NVIDIA Open",

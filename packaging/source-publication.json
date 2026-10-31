@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "60d36252dff974bffbd771ba15e7f702943746e6ff106be9fb4f28977a140a9f",
-      "bytes": 66113
+      "sha256": "e170cdba90f43bb0eff253b5f18bcfbde6c0d4debde7f6942d947811c1bc1c3d",
+      "bytes": 66586
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -650,8 +650,8 @@
     {
       "path": "packaging/tested-environments.json",
       "mode": "100644",
-      "sha256": "939dc7cba531fb82c66d3436e0e0d26da6690a9e2372e1a6b3420764a28fd9a8",
-      "bytes": 4779
+      "sha256": "78939331898a77d802b5a2c7650dcbc4bf010f7ced05aaf9f6f467324c42d04f",
+      "bytes": 5876
     },
     {
       "path": "packaging/toolchain.lock.json",
