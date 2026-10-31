@@ -19,7 +19,7 @@ import time
 HERE = Path(__file__).resolve().parent
 PRIVATE = Path('/tmp/penguin-profile-probe')
 sys.path.insert(0, str(HERE.parent / 'wine'))
-from native_profiles import HEADER, Mailbox, process_identity, wine_path
+from native_profiles import HEADER, Mailbox, ProfileObserver, process_identity, wine_path
 
 
 def container_boundary(pid, output, check, result):
@@ -190,6 +190,29 @@ def inside():
         count = len(records(events))
         time.sleep(1.1)
         check('unloading also stops heartbeat', len(records(events)) == count)
+        if (PRIVATE/'production-observer').exists():
+            observer = ProfileObserver(PRIVATE, wayland=True)
+            try:
+                # Only the source observer is tested here; this simulated ready
+                # reply is explicitly not an agent/profile-selection E2E.
+                observer.mailbox.path.with_suffix('.bin.status').write_text(observer.mailbox.token+' 0 ready\n')
+                observer.start()
+                for binary, platform in [('wayland-one','wayland'),('xwayland-one','xcb')]:
+                    child = spawn(binary, ['--window', 'org.penguin.ProductionProbe'], platform)
+                    end = time.monotonic()+10
+                    expected = wine_path(PRIVATE/binary)
+                    while observer.mailbox.current != expected:
+                        observer.check()
+                        if child.poll() is not None or time.monotonic()>end:
+                            raise RuntimeError('Production observer missed '+binary)
+                        time.sleep(.05)
+                    check('production observer resolves '+platform+' executable', True)
+                plugin = observer.source.plugin
+                observer.close()
+                check('production observer removes its KWin script',
+                      dbus('/Scripting', 'org.kde.kwin.Scripting.isScriptLoaded', plugin) == '(false,)')
+            finally:
+                observer.close(); observer.mailbox.cleanup()
         result['passed'] = True
     except Exception as exc:
         result['error'] = str(exc)
@@ -215,9 +238,11 @@ def inside():
     return 0 if result['passed'] else 1
 
 
-def run(output, linux_runtime=None):
+def run(output, linux_runtime=None, production=False):
     output = output.resolve()
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
+    if production:
+        (output/'production-observer').touch()
     for name in ('home', 'config', 'run'):
         (output/name).mkdir(mode=0o700)
     versions = subprocess.run(['kwin_wayland', '--version'], capture_output=True, text=True)
@@ -276,6 +301,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--linux-runtime', type=Path, help='Also test an existing private Linux runtime')
+    parser.add_argument('--production-observer', action='store_true', help='Also exercise the production focus backend without G HUB')
     parser.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
     if not args.inside and not args.output:
@@ -285,4 +311,4 @@ if __name__ == '__main__':
         # KWin's wrapper retries a nonzero session exit, overwriting evidence.
         # The outer process reads result.json and propagates the actual failure.
         sys.exit(0)
-    sys.exit(run(args.output, args.linux_runtime))
+    sys.exit(run(args.output, args.linux_runtime, args.production_observer))

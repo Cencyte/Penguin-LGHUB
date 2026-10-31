@@ -495,9 +495,9 @@ def main():
         with log_path.open('w') as output:
             output.write('Frozen G HUB test installation; manifest ' + str(config_path) + '\n')
             output.flush()
-            result = subprocess.run(command, stdout=output, stderr=subprocess.STDOUT)
-        if result.returncode:
-            raise RuntimeError(f'G HUB test session exited {result.returncode}. Log: {log_path}')
+            status = native_profiles.run_host_session(config, root, command, output)
+        if status:
+            raise RuntimeError(f'G HUB test session exited {status}. Log: {log_path}')
         return 0
 
 

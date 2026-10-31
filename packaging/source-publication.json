@@ -672,6 +672,12 @@
       "bytes": 19407
     },
     {
+      "path": "packaging/wayland-profiles-verification.json",
+      "mode": "100644",
+      "sha256": "c3c879c27a6f3e006e0089d049e9ce0de76e85e87fdebae2b1c65e8bf2d07185",
+      "bytes": 13996
+    },
+    {
       "path": "packaging/windows-acquisition-GPL-3.0.txt",
       "mode": "100644",
       "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
@@ -1100,8 +1106,14 @@
     {
       "path": "tests/packaging/test_native_profiles.py",
       "mode": "100644",
-      "sha256": "1ef5ee70f40dfa5b7934ac24be0a7bf0897747c10c59bae64fe38980a4a76bbe",
-      "bytes": 5516
+      "sha256": "8b34c67840afc1f53ab5e9ae9de24aefdd966b5f82da3f46429663283eee8eab",
+      "bytes": 8349
+    },
+    {
+      "path": "tests/packaging/test_profile_kwin.py",
+      "mode": "100644",
+      "sha256": "12518ed07762725e8ce2bc99e0d39b078baa781e1ab6ee0a21a2edc6e003a2b6",
+      "bytes": 3122
     },
     {
       "path": "tests/packaging/test_server_sync.py",
@@ -1664,8 +1676,8 @@
     {
       "path": "tools/packaging/desktop_runtime.py",
       "mode": "100644",
-      "sha256": "eb74963712630f96be7b9bb5a647a8372f94891d172a0a0090a7ac0661591aca",
-      "bytes": 31987
+      "sha256": "8340ffd3e84fc40c4e6d1dbb31d695c9a8d055d22e9e0bbc5f3a8b99588c7e16",
+      "bytes": 32278
     },
     {
       "path": "tools/packaging/dockur_acquire.py",
@@ -1880,8 +1892,8 @@
     {
       "path": "tools/packaging/wayland_profile_probe.cpp",
       "mode": "100644",
-      "sha256": "3d654fab819aa16c3867f85186b660939d73650448b10dc5f999228a565705d4",
-      "bytes": 3582
+      "sha256": "3f8ac9e7a85a5bbc2e077946c2a0994724dcb5934ba136ef244963367d4ae110",
+      "bytes": 4470
     },
     {
       "path": "tools/packaging/wayland_profile_probe.js",
@@ -1892,8 +1904,8 @@
     {
       "path": "tools/packaging/wayland_profile_probe.py",
       "mode": "100644",
-      "sha256": "a77d16c6c59b67e4ef565ecafa76e967ef5ebad41d4cea7bae89b7d2484efb0c",
-      "bytes": 15428
+      "sha256": "40b75cf2b16211744aac70e2e861138f5e9591c367044f8548a908f70a7ccbc4",
+      "bytes": 17146
     },
     {
       "path": "tools/packaging/wayland_restore_diagnostic.py",
@@ -2456,8 +2468,8 @@
     {
       "path": "tools/wine/native_profiles.py",
       "mode": "100644",
-      "sha256": "61b6d9d953c74e8d2cfade7c924658290f246c8e7184477f0894ee6d37f3c937",
-      "bytes": 12582
+      "sha256": "7b67f0b1a8fe146bf5230812a75ed200b876dd47a517c1f531feaccdc43304e8",
+      "bytes": 18416
     },
     {
       "path": "tools/wine/ninput_native_probe.cpp",
@@ -2504,8 +2516,8 @@
     {
       "path": "tools/wine/prepare_tested_desktop.py",
       "mode": "100644",
-      "sha256": "68a456db93226d2043d3e82e32afcfa58b1a6942671f15f1e2e4e8b9148eff12",
-      "bytes": 12349
+      "sha256": "826aab4e3c4510324c4f55eaad709004ac11802b41a7b436a46ef61c423c5bdc",
+      "bytes": 12387
     },
     {
       "path": "tools/wine/prepare_tray_background.py",
@@ -2538,6 +2550,12 @@
       "bytes": 674
     },
     {
+      "path": "tools/wine/profile_dbus.py",
+      "mode": "100644",
+      "sha256": "971cd276960b70d19031257ab50274b21635f049c8413ae32fc954604663ea0d",
+      "bytes": 6994
+    },
+    {
       "path": "tools/wine/profile_event_bridge.c",
       "mode": "100644",
       "sha256": "46d239ec9e340287ed0d1e995f1a5ee0ac2a1a533751d197222fc3ec2010f56a",
@@ -2554,6 +2572,12 @@
       "mode": "100644",
       "sha256": "8a23c7f50852528df191bb95c6276b51231edd3e9aa1087c28e104de273b1dc8",
       "bytes": 281
+    },
+    {
+      "path": "tools/wine/profile_kwin.py",
+      "mode": "100644",
+      "sha256": "774fb38a4b1303863f4f1d1be56b773e228f9192d0b1e1329478fc1c9c2cb319",
+      "bytes": 6983
     },
     {
       "path": "tools/wine/run_card_hover_test.py",
@@ -2630,8 +2654,8 @@
     {
       "path": "tools/wine/run_native_profiles_test.py",
       "mode": "100644",
-      "sha256": "1ba6a87637bf593ddf106aafc86ab58794556d4f31529939abe1164d836849cc",
-      "bytes": 12933
+      "sha256": "925f3da2059fc467a39aa96ce2623435edc23b9e865b20c9507270d6c2071e2a",
+      "bytes": 12970
     },
     {
       "path": "tools/wine/run_overlay_trace.py",
@@ -2642,8 +2666,8 @@
     {
       "path": "tools/wine/run_private_build.py",
       "mode": "100644",
-      "sha256": "ec375a7859331b0d039f51c14920e890f6f879fac120e02c53af65c0ce50de6c",
-      "bytes": 16771
+      "sha256": "668b8377ee39b3660cdda7dfb4f2b9aca12da533689f6e8e02ac322173d4e4e3",
+      "bytes": 16895
     },
     {
       "path": "tools/wine/run_private_kernelbase.sh",
@@ -2674,6 +2698,12 @@
       "mode": "100644",
       "sha256": "af98388b1725e7e7b286da81280275ef7605aebeca9ff8d69dd01e8ee327b9c8",
       "bytes": 19436
+    },
+    {
+      "path": "tools/wine/run_wayland_profiles_test.py",
+      "mode": "100644",
+      "sha256": "f9bfa46e31b69984bd6845e56d46f83d0197ee21ef0a1561ca3faf68722aa95d",
+      "bytes": 13583
     },
     {
       "path": "tools/wine/runtime_bridge_test.cpp",
@@ -2708,8 +2738,8 @@
     {
       "path": "tools/wine/tested_desktop_launch.py",
       "mode": "100644",
-      "sha256": "7e234b005ea1c255cd3b892584b8987d90031aff17dda831ba4a945f9beb6ef6",
-      "bytes": 24454
+      "sha256": "a9af113bcd68595afdf86d51b79a995b9c960105de17c72794d8c28dd6681ebd",
+      "bytes": 24431
     },
     {
       "path": "tools/wine/text_reading_direction_test.c",
@@ -2798,8 +2828,8 @@
   ],
   "publication_note": "Installer 0.3.1 presentation update: ASCII activity spinner, check-only result labels, attached ellipses, neutral launcher names, version spacing and completion messages; exact user-supplied AI disclosure and shortened table of contents. Input-lag investigation remains pending. No vendor payload or populated prefix.",
   "publication_branch": "release",
-  "file_count": 461,
-  "total_bytes": 10335924,
+  "file_count": 466,
+  "total_bytes": 10392342,
   "source_release": "v0.9.0-preview.4",
   "release_parent_commit": "f7481c6e10e227c983bd8fa6e1bf82f7a643c5f5"
 }

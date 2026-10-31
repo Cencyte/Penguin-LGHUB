@@ -44,7 +44,8 @@ desktop.SCRIPT = SCRIPT
 def session_environment(source, experimental_wayland=False):
     env = linux.clean_environment()
     for key in ('DISPLAY', 'XAUTHORITY', 'XDG_RUNTIME_DIR', 'XDG_SESSION_TYPE',
-                'DBUS_SESSION_BUS_ADDRESS', 'PULSE_SERVER', 'LANG', 'LC_ALL'):
+                'DBUS_SESSION_BUS_ADDRESS', 'PULSE_SERVER', 'LANG', 'LC_ALL',
+                'PENGUIN_GHUB_HOST_PROFILE_DIR', 'PENGUIN_GHUB_FOCUS_TOKEN', 'PENGUIN_GHUB_FOCUS_FILE'):
         if source.get(key):
             env[key] = source[key]
     if experimental_wayland:
@@ -377,16 +378,19 @@ def configure_fonts(root, env):
 def run_container_session(config_path, config, root, command, stream, feedback, experimental_wayland):
     """Observe readiness while supervising; retry only a pre-window timeout."""
     for attempt in range(2):
-        with subprocess.Popen(container_command(config, root, command),
-                              env=session_environment(os.environ, experimental_wayland),
-                              stdout=stream, stderr=subprocess.STDOUT) as child:
-            while child.poll() is None:
-                if not feedback.completed:
-                    owner = desktop.session_owner(config_path, root / 'session.json')
-                    if owner and desktop.frontend_ready(root, owner.get('startup_token')):
-                        feedback.complete()
-                time.sleep(.2)
-            status = child.returncode
+        with desktop.native_profiles.HostSession(config, root) as profiles:
+            env = session_environment(os.environ, experimental_wayland)
+            env.update(profiles.environment())
+            with subprocess.Popen(container_command(config, root, command), env=env,
+                                  stdout=stream, stderr=subprocess.STDOUT) as child:
+                while child.poll() is None:
+                    profiles.poll()
+                    if not feedback.completed:
+                        owner = desktop.session_owner(config_path, root / 'session.json')
+                        if owner and desktop.frontend_ready(root, owner.get('startup_token')):
+                            feedback.complete()
+                    time.sleep(.2)
+                status = child.returncode
         if status != 75 or attempt:
             return status
         if desktop.prefix_processes(root / 'prefix'):

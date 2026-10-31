@@ -1,0 +1,409 @@
+{
+  "schema": 1,
+  "recorded_on": "2026-10-31",
+  "feature": "Host-side X11 and KDE Wayland automatic application profile observer",
+  "architecture": "Host X11/KWin -> same-user stable process identity -> private token-bound atomic mailbox -> pinned Wine G HUB adapter -> original application matcher and profile policy",
+  "implementation": {
+    "host_identity_resolution": true,
+    "automatic_session_backend_selection": true,
+    "native_Wayland_and_Xwayland_focus": true,
+    "agent_readiness_handshake": true,
+    "private_temporary_KWin_script": true,
+    "sender_epoch_sequence_validation": true,
+    "screen_lock_protocol_pause_and_resume": true,
+    "stale_subscription_reload": true,
+    "observer_crash_script_cleanup": true,
+    "host_failure_detected_by_agent_supervisor": true,
+    "system_dependencies_installed": false,
+    "additional_Wine_patch_required": false,
+    "original_agent_EXE_modified": false
+  },
+  "wayland_integration": {
+    "passed": true,
+    "checks": [
+      {
+        "case": "native Wayland application A",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "native Wayland application B",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "return to native application A",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "Xwayland application B",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "automatic-off preserves selected profile",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "automatic-on resumes native foreground",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "screen-lock protocol pauses profile switching",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "screen-unlock protocol resumes current foreground",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "return after unlock",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "G HUB own window preserves profile",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "unmatched native application uses Desktop",
+        "passed": true,
+        "profile": "420fd454-0c36-499d-bde4-146823b16147"
+      },
+      {
+        "case": "return from unmatched application",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "missing KWin subscription recovers",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "empty foreground returns Desktop",
+        "passed": true,
+        "profile": "420fd454-0c36-499d-bde4-146823b16147"
+      },
+      {
+        "case": "host shutdown and agent acknowledgement",
+        "passed": true
+      },
+      {
+        "case": "observer crash removes temporary KWin script",
+        "passed": true
+      }
+    ],
+    "physical_devices": false,
+    "live_desktop_touched": false,
+    "scope": "Native Wayland/Xwayland focus -> host observer -> child supervisor in separate user namespace -> actual G HUB profile policy",
+    "passed_checks": 16
+  },
+  "x11_integration": {
+    "passed": 15,
+    "total": 15,
+    "checks": [
+      {
+        "case": "wrong executable hash refused",
+        "passed": true
+      },
+      {
+        "case": "automatic native focus 1",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "automatic native focus 2",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "automatic native focus 3",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "automatic native focus 4",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "automatic-off holds profile",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "automatic-on resumes current foreground",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "G HUB window preserves previous application profile",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "unmatched native application returns Desktop",
+        "passed": true,
+        "profile": "420fd454-0c36-499d-bde4-146823b16147"
+      },
+      {
+        "case": "return from unmatched application",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "wrong token rejected",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "stale timestamp rejected",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "valid event after rejected packets",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "empty focus desktop fallback",
+        "passed": true,
+        "profile": "420fd454-0c36-499d-bde4-146823b16147"
+      },
+      {
+        "case": "adapter shutdown acknowledged",
+        "passed": true
+      }
+    ],
+    "environment": "Existing isolated Xvfb/Openbox copied-prefix integration; host-side profile behavior regression"
+  },
+  "cachyos_backend": {
+    "passed": 18,
+    "total": 18,
+    "kwin": "6.7.5",
+    "scope": "Private KWin source/observer with native Wayland and Xwayland fixtures; no running G HUB or physical input",
+    "checks": [
+      {
+        "case": "ephemeral KWin script loaded",
+        "passed": true
+      },
+      {
+        "case": "initial native Wayland foreground snapshot",
+        "passed": true,
+        "event": {
+          "application": "org.penguin.ProbeOne",
+          "desktop": false,
+          "dock": false,
+          "kind": "focus",
+          "pid": 14,
+          "protocol": 1,
+          "reason": "initial",
+          "received_ms": 1793490789882,
+          "resourceClass": "org.penguin.ProbeOne",
+          "sender": ":1.1",
+          "sequence": 1,
+          "window": "{faf0b9b4-7270-4b22-bf9f-2a77198fc996}"
+        }
+      },
+      {
+        "case": "heartbeat without focus changes",
+        "passed": true
+      },
+      {
+        "case": "non-KWin sender rejected",
+        "passed": true
+      },
+      {
+        "case": "wayland-two: compositor PID resolves actual executable",
+        "passed": true,
+        "pid": 34,
+        "executable": "/tmp/penguin-profile-probe/wayland-two",
+        "process_start_time": "3927558",
+        "event": {
+          "application": "org.penguin.ProbeTwo",
+          "desktop": false,
+          "dock": false,
+          "kind": "focus",
+          "pid": 34,
+          "protocol": 1,
+          "reason": "activation",
+          "received_ms": 1793490790492,
+          "resourceClass": "org.penguin.ProbeTwo",
+          "sender": ":1.1",
+          "sequence": 3,
+          "window": "{9b6c7910-f697-43cb-b84b-081b049f90bd}"
+        }
+      },
+      {
+        "case": "wayland-two: compatible with existing authenticated mailbox",
+        "passed": true
+      },
+      {
+        "case": "xwayland-one: compositor PID resolves actual executable",
+        "passed": true,
+        "pid": 38,
+        "executable": "/tmp/penguin-profile-probe/xwayland-one",
+        "process_start_time": "3927570",
+        "event": {
+          "application": "org.penguin.ProbeX11",
+          "desktop": false,
+          "dock": false,
+          "kind": "focus",
+          "pid": 38,
+          "protocol": 1,
+          "reason": "activation",
+          "received_ms": 1793490790718,
+          "resourceClass": "xwayland-one",
+          "sender": ":1.1",
+          "sequence": 4,
+          "window": "{08d87060-ddea-47aa-86ea-0086518bdcf2}"
+        }
+      },
+      {
+        "case": "xwayland-one: compatible with existing authenticated mailbox",
+        "passed": true
+      },
+      {
+        "case": "wayland-two: compositor PID resolves actual executable",
+        "passed": true,
+        "pid": 34,
+        "executable": "/tmp/penguin-profile-probe/wayland-two",
+        "process_start_time": "3927558",
+        "event": {
+          "application": "org.penguin.ProbeTwo",
+          "desktop": false,
+          "dock": false,
+          "kind": "focus",
+          "pid": 34,
+          "protocol": 1,
+          "reason": "activation",
+          "received_ms": 1793490790723,
+          "resourceClass": "org.penguin.ProbeTwo",
+          "sender": ":1.1",
+          "sequence": 5,
+          "window": "{9b6c7910-f697-43cb-b84b-081b049f90bd}"
+        }
+      },
+      {
+        "case": "wayland-two: compatible with existing authenticated mailbox",
+        "passed": true
+      },
+      {
+        "case": "wayland-one: compositor PID resolves actual executable",
+        "passed": true,
+        "pid": 14,
+        "executable": "/tmp/penguin-profile-probe/wayland-one",
+        "process_start_time": "3927479",
+        "event": {
+          "application": "org.penguin.ProbeOne",
+          "desktop": false,
+          "dock": false,
+          "kind": "focus",
+          "pid": 14,
+          "protocol": 1,
+          "reason": "activation",
+          "received_ms": 1793490790757,
+          "resourceClass": "org.penguin.ProbeOne",
+          "sender": ":1.1",
+          "sequence": 6,
+          "window": "{faf0b9b4-7270-4b22-bf9f-2a77198fc996}"
+        }
+      },
+      {
+        "case": "wayland-one: compatible with existing authenticated mailbox",
+        "passed": true
+      },
+      {
+        "case": "no foreground window reported explicitly",
+        "passed": true,
+        "event": {
+          "application": "",
+          "desktop": false,
+          "dock": false,
+          "kind": "focus",
+          "pid": 0,
+          "protocol": 1,
+          "reason": "activation",
+          "received_ms": 1793490790761,
+          "resourceClass": "",
+          "sender": ":1.1",
+          "sequence": 7,
+          "window": ""
+        }
+      },
+      {
+        "case": "ephemeral script unloaded",
+        "passed": true
+      },
+      {
+        "case": "unloading also stops heartbeat",
+        "passed": true
+      },
+      {
+        "case": "production observer resolves wayland executable",
+        "passed": true
+      },
+      {
+        "case": "production observer resolves xcb executable",
+        "passed": true
+      },
+      {
+        "case": "production observer removes its KWin script",
+        "passed": true
+      }
+    ]
+  },
+  "project_tests": {
+    "passed": 223,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "deployment": {
+    "applied_on": "2026-10-31",
+    "files": [
+      "native_profiles.py",
+      "profile_kwin.py",
+      "profile_dbus.py",
+      "tested_desktop_launch.py",
+      "run_private_build.py"
+    ],
+    "pinned_files": 51,
+    "backup": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/desktop-tested-gesture-20261014/logs/wayland-profiles-backup-20261031-195448",
+    "running_prefix_processes_before_update": 0,
+    "settings_modified": false,
+    "GUI_launched": false,
+    "verified": true
+  },
+  "remaining_validation": [
+    "User-operated Wayland profile and physical-binding acceptance on each target desktop.",
+    "Full freshly built packaged runtime / clean installer E2E with this observer. Isolated G HUB test used frozen Wine overlays plus a nested user namespace, not a complete new installer.",
+    "Full G HUB Wayland profile E2E on CachyOS and Bazzite; CachyOS observer source alone is verified.",
+    "Actual compositor process restart and real screen locking/unlocking. Recovery logic has unit coverage; integration exercises subscription deletion and standard screen-lock protocol fixture.",
+    "Flatpak application identity, foreign Wine/Proton prefixes and non-KWin compositors remain unqualified."
+  ],
+  "scope": "Automated passing checks do not claim full cross-distribution hardware qualification.",
+  "source_sha256": {
+    "tools/wine/native_profiles.py": "7b67f0b1a8fe146bf5230812a75ed200b876dd47a517c1f531feaccdc43304e8",
+    "tools/wine/profile_kwin.py": "774fb38a4b1303863f4f1d1be56b773e228f9192d0b1e1329478fc1c9c2cb319",
+    "tools/wine/profile_dbus.py": "971cd276960b70d19031257ab50274b21635f049c8413ae32fc954604663ea0d",
+    "tools/wine/tested_desktop_launch.py": "a9af113bcd68595afdf86d51b79a995b9c960105de17c72794d8c28dd6681ebd",
+    "tools/wine/run_private_build.py": "668b8377ee39b3660cdda7dfb4f2b9aca12da533689f6e8e02ac322173d4e4e3",
+    "tools/wine/prepare_tested_desktop.py": "826aab4e3c4510324c4f55eaad709004ac11802b41a7b436a46ef61c423c5bdc",
+    "tools/wine/run_native_profiles_test.py": "925f3da2059fc467a39aa96ce2623435edc23b9e865b20c9507270d6c2071e2a",
+    "tools/wine/run_wayland_profiles_test.py": "f9bfa46e31b69984bd6845e56d46f83d0197ee21ef0a1561ca3faf68722aa95d",
+    "tools/packaging/desktop_runtime.py": "8340ffd3e84fc40c4e6d1dbb31d695c9a8d055d22e9e0bbc5f3a8b99588c7e16",
+    "tools/packaging/wayland_profile_probe.py": "40b75cf2b16211744aac70e2e861138f5e9591c367044f8548a908f70a7ccbc4",
+    "tools/packaging/wayland_profile_probe.cpp": "3f8ac9e7a85a5bbc2e077946c2a0994724dcb5934ba136ef244963367d4ae110",
+    "tests/packaging/test_native_profiles.py": "8b34c67840afc1f53ab5e9ae9de24aefdd966b5f82da3f46429663283eee8eab",
+    "tests/packaging/test_profile_kwin.py": "12518ed07762725e8ce2bc99e0d39b078baa781e1ab6ee0a21a2edc6e003a2b6"
+  }
+}

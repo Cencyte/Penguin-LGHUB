@@ -33,7 +33,7 @@ def digest(path):
         return hashlib.file_digest(f, 'sha256').hexdigest()
 
 
-def prepare(source, lab):
+def prepare(source, lab, worker_script=None):
     if lab == source or lab.is_relative_to(source) or source.is_relative_to(lab):
         raise ValueError('Keep lab separate from the frozen source')
     marker = lab / '.native-profiles-disposable'
@@ -76,7 +76,7 @@ def prepare(source, lab):
         data['profiles/auto_switching/enabled'] = True
         data['profiles/auto_switching/migrated'] = True
         c.execute('update data set file=?', (json.dumps(data).encode(),))
-    args = sandbox(lab, ['python3', str(Path(__file__).resolve()), '--source', str(source), '--lab', str(lab), '--worker'])
+    args = sandbox(lab, ['python3', str(worker_script or Path(__file__).resolve()), '--source', str(source), '--lab', str(lab), '--worker'])
     mounts = []
     for name, sha in config['sha256'].items():
         if not name.startswith('builds/'):

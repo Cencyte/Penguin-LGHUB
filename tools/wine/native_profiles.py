@@ -1,19 +1,22 @@
-"""Passive X11 foreground identity -> private G HUB typed-event mailbox.
+"""Passive host foreground identity -> private G HUB typed-event mailbox.
 
 No keyboard input, focus changes, public listeners, or settings edits. Run in
 the supervisor's namespace: host /proc is shared by the packaged runtime.
 """
 import ctypes as C
 import hashlib
+import json
 import os
 from pathlib import Path
 import secrets
+import re
 import select
 import shutil
 import struct
 import tempfile
 import threading
 import time
+import subprocess
 
 AGENT_SHA256 = '61772de356096af7cea986e2f9b3f42db69e6f410c4106609998c389fd755fc1'
 EXPORT = b'PenguinProfileBridgeVersion'
@@ -189,7 +192,7 @@ class Mailbox:
 
 
 class ProfileObserver:
-    def __init__(self, logs, host_root=''):
+    def __init__(self, logs, host_root='', wayland=False):
         self.mailbox = Mailbox(logs)
         self.host_root = host_root
         self.stop_event = threading.Event()
@@ -197,20 +200,39 @@ class ProfileObserver:
         self.error = None
         self.thread = None
         self.ack_deadline = None
+        self.wayland = wayland
+        self.closed = False
+        self.source = None
 
     def run(self):
         x = None
         try:
-            x = X11()
+            if self.wayland:
+                from profile_kwin import KWin
+                x = KWin(self.mailbox.directory)
+            else:
+                x = X11()
+            self.source = x
             self.started.set()
             candidate = None; since = 0; last_heartbeat = 0
             while not self.stop_event.is_set():
-                window, pid = x.foreground()
+                foreground = x.foreground()
+                if foreground is None:
+                    candidate = None
+                    x.wait(.1)
+                    continue
+                window, pid = foreground
                 try:
                     identity = process_identity(pid) if pid else (None, None)
                     executable, _ = identity
                     own = executable and Path(executable).name.lower() in OWN
                     path = None if own else (wine_path(executable, self.host_root) if executable else DESKTOP)
+                except PermissionError:
+                    # A sandbox or privileged application is unidentifiable,
+                    # not proof that the user activated Desktop.
+                    candidate = None
+                    x.wait(.1)
+                    continue
                 except (OSError, ValueError):
                     identity = (None, None); path = DESKTOP
                 now = time.monotonic()
@@ -238,7 +260,7 @@ class ProfileObserver:
         self.thread = threading.Thread(target=self.run, name='ghub-native-profile-observer', daemon=True)
         self.thread.start()
         if not self.started.wait(5):
-            raise RuntimeError('X11 profile observer did not start')
+            raise RuntimeError('Native profile observer did not start')
         self.check()
 
     def check(self):
@@ -253,20 +275,20 @@ class ProfileObserver:
             raise RuntimeError('The G HUB profile adapter did not acknowledge startup')
 
     def close(self):
+        if self.closed:
+            return
         self.stop_event.set()
         if self.thread:
             self.thread.join(timeout=3)
             if self.thread.is_alive():
                 raise RuntimeError('Native profile observer did not stop')
         self.mailbox.close()
+        self.closed = True
 
 
-def prepare(config, root):
-    """Opt in only to a verified bridge build, and never mistake Xwayland for X11."""
+def prepare(config, root, *, host=False):
+    """Resolve the backend on the host; child supervisor uses only the mailbox."""
     if config.get('native_profiles') != 1:
-        return None
-    if os.environ.get('WAYLAND_DISPLAY') or os.environ.get('XDG_SESSION_TYPE') == 'wayland':
-        print('Native profile switching: Wayland observer not implemented; X11 adapter disabled.', flush=True)
         return None
     app = root / 'prefix/drive_c/Program Files/LGHUB'
     with (app / 'lghub_agent.exe').open('rb') as f:
@@ -274,5 +296,140 @@ def prepare(config, root):
             raise RuntimeError('Native profiles require the pinned G HUB agent version')
     if not available(app):
         raise RuntimeError('Native profile bridge DLL is missing; rebuild the compatibility runtime')
+    if not host and os.environ.get('PENGUIN_GHUB_HOST_PROFILE_DIR'):
+        return RemoteObserver(root)
+    if not host and config.get('kind') == 'penguin-desktop-runtime':
+        raise RuntimeError('Packaged profile switching requires the host-side observer')
     host_root = '/run/host' if config.get('kind') == 'penguin-desktop-runtime' else ''
-    return ProfileObserver(root / 'logs', host_root)
+    wayland = os.environ.get('XDG_SESSION_TYPE') == 'wayland' or bool(os.environ.get('WAYLAND_DISPLAY'))
+    return ProfileObserver(root / 'logs', host_root, wayland=wayland)
+
+
+def write_control(path, token, **fields):
+    data = dict(fields, token=token, timestamp=time.monotonic())
+    temporary = path.with_suffix('.new')
+    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    try:
+        with os.fdopen(fd, 'w') as stream:
+            json.dump(data, stream)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def read_control(path, token):
+    try:
+        if path.is_symlink() or path.stat().st_size > 8192:
+            return None
+        value = json.loads(path.read_text())
+        if isinstance(value, dict) and value.get('token') == token:
+            return value
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+class MailboxView(Mailbox):
+    """Child has no ownership of the host observer's mailbox lifetime."""
+    def __init__(self, directory, token):
+        self.directory = directory; self.path = directory/'focus.bin'; self.token = token
+
+    def cleanup(self):
+        pass
+
+
+class RemoteObserver:
+    def __init__(self, root):
+        directory = Path(os.environ['PENGUIN_GHUB_HOST_PROFILE_DIR'])
+        token = os.environ.get('PENGUIN_GHUB_FOCUS_TOKEN', '')
+        if (not directory.is_absolute() or directory.is_symlink()
+                or directory.resolve().parent != (root/'logs').resolve()
+                or not directory.name.startswith('profile-session-')
+                or directory.stat().st_uid != os.getuid()
+                or directory.stat().st_mode & 0o077
+                or not re.fullmatch('[0-9a-f]{64}', token)):
+            raise RuntimeError('Invalid host profile observer session')
+        self.mailbox = MailboxView(directory, token)
+        self.started = False
+
+    def request(self, action):
+        write_control(self.mailbox.directory/'request.json', self.mailbox.token, action=action)
+
+    def start(self):
+        self.request('start')
+        self.started = True
+        self.check()
+
+    def check(self):
+        state = read_control(self.mailbox.directory/'host.json', self.mailbox.token)
+        if not state or not 0 <= time.monotonic()-state.get('timestamp', 0) < 10:
+            raise RuntimeError('Host profile observer stopped responding')
+        if state.get('error'):
+            raise RuntimeError('Host profile observer: ' + state['error'])
+        if self.started and state.get('stopped'):
+            raise RuntimeError('Host profile observer stopped unexpectedly')
+
+    def close(self):
+        self.request('stop')
+        end = time.monotonic()+4
+        while time.monotonic() < end:
+            state = read_control(self.mailbox.directory/'host.json', self.mailbox.token)
+            if state and state.get('stopped'):
+                status = self.mailbox.status()
+                if status and status[1] in ('stopped', 'unsupported-agent'):
+                    return
+            time.sleep(.05)
+
+
+class HostSession:
+    """Parent-side observer lifecycle shared by legacy and packaged launchers."""
+    def __init__(self, config, root):
+        self.observer = prepare(config, root, host=True)
+        self.error = None
+        if self.observer:
+            self.poll()
+
+    def environment(self):
+        if not self.observer:
+            return {}
+        return dict(self.observer.mailbox.environment(),
+                    PENGUIN_GHUB_HOST_PROFILE_DIR=str(self.observer.mailbox.directory))
+
+    def poll(self):
+        observer = self.observer
+        if not observer:
+            return
+        box = observer.mailbox
+        request = read_control(box.directory/'request.json', box.token)
+        try:
+            if request and request.get('action') == 'stop':
+                observer.close()
+            elif request and request.get('action') == 'start' and not observer.closed:
+                if observer.thread is None and self.error is None:
+                    observer.start()
+                if self.error is None:
+                    observer.check()
+        except (OSError, ValueError, RuntimeError) as error:
+            self.error = str(error)
+        write_control(box.directory/'host.json', box.token,
+                      error=self.error, stopped=observer.closed)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        if self.observer:
+            try:
+                self.observer.close()
+            finally:
+                self.observer.mailbox.cleanup()
+
+
+def run_host_session(config, root, command, output):
+    with HostSession(config, root) as profiles:
+        env = dict(os.environ, **profiles.environment())
+        with subprocess.Popen(command, env=env, stdout=output, stderr=subprocess.STDOUT) as child:
+            while child.poll() is None:
+                profiles.poll()
+                time.sleep(.2)
+            return child.returncode

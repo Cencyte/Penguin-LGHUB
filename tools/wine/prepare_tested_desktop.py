@@ -231,7 +231,7 @@ def main():
         target = app / name
         config['sha256'][str(target.relative_to(root))] = digest(target)
     source = Path(__file__).resolve().parent
-    for name in ['tested_desktop_launch.py', 'run_private_build.py', 'agent_snapshot.cjs', 'color_picker_monitor.cjs', 'native_profiles.py']:
+    for name in ['tested_desktop_launch.py', 'run_private_build.py', 'agent_snapshot.cjs', 'color_picker_monitor.cjs', 'native_profiles.py', 'profile_kwin.py', 'profile_dbus.py']:
         pin(source / name, root / 'runner' / name)
     copy(app / 'resources/icon.png', root / 'icon.png')
     copy(args.replay / 'inputs.json', root / 'replay-inputs.json')

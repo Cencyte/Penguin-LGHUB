@@ -1,10 +1,12 @@
 import os
+import hashlib
+import json
 from pathlib import Path
 import stat
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools/wine'))
 import native_profiles as m
@@ -85,11 +87,58 @@ class NativeProfilesTests(unittest.TestCase):
             finally:
                 box.cleanup()
 
-    def test_wayland_and_old_runtimes_are_not_silently_enabled(self):
+    def test_wayland_selects_kwin_only_for_verified_adapter_and_host(self):
         with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {'DISPLAY': ':1', 'XDG_SESSION_TYPE': 'wayland'}, clear=True):
-            self.assertIsNone(m.prepare({'native_profiles': 1}, Path(tmp)))
+            root = Path(tmp); (root/'logs').mkdir()
+            app = root/'prefix/drive_c/Program Files/LGHUB'; app.mkdir(parents=True)
+            (app/'lghub_agent.exe').write_bytes(b'fixture')
+            (app/'mfsensorgroup.dll').write_bytes(m.EXPORT)
+            config = {'native_profiles': 1, 'kind': 'penguin-desktop-runtime'}
+            with patch.object(m, 'AGENT_SHA256', hashlib.sha256(b'fixture').hexdigest()):
+                with self.assertRaisesRegex(RuntimeError, 'host-side'):
+                    m.prepare(config, root)
+                observer = m.prepare(config, root, host=True)
+                self.assertTrue(observer.wayland)
+                self.assertEqual(observer.host_root, '/run/host')
+                observer.mailbox.cleanup()
         with patch.dict(os.environ, {'DISPLAY': ':0', 'XDG_SESSION_TYPE': 'x11'}, clear=True):
             self.assertIsNone(m.prepare({}, Path('/nonexistent')))
+
+    def test_host_child_readiness_shutdown_and_mailbox_ownership(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root/'logs').mkdir()
+            observer = MagicMock()
+            observer.mailbox = m.Mailbox(root/'logs')
+            observer.thread = None; observer.closed = False
+            def start(): observer.thread = object()
+            def close():
+                observer.closed = True
+                observer.mailbox.path.with_suffix('.bin.status').write_text(observer.mailbox.token+' 1 stopped\n')
+            observer.start.side_effect = start; observer.close.side_effect = close
+            with patch.object(m, 'prepare', return_value=observer):
+                with m.HostSession({}, root) as host, patch.dict(os.environ, host.environment()):
+                    child = m.RemoteObserver(root)
+                    host.poll(); observer.start.assert_not_called()
+                    child.start(); host.poll(); observer.start.assert_called_once()
+                    child.check()
+                    child.mailbox.cleanup()
+                    self.assertTrue(observer.mailbox.directory.exists())
+                    child.request('stop'); host.poll(); child.close()
+                    self.assertTrue(observer.closed)
+                self.assertFalse(observer.mailbox.directory.exists())
+
+    def test_child_rejects_stale_host_and_unrelated_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root/'logs').mkdir()
+            box = m.Mailbox(root/'logs')
+            with patch.dict(os.environ, dict(box.environment(), PENGUIN_GHUB_HOST_PROFILE_DIR=str(box.directory))):
+                child = m.RemoteObserver(root)
+                (box.directory/'host.json').write_text(json.dumps({'token':box.token,'timestamp':0}))
+                with self.assertRaisesRegex(RuntimeError, 'stopped responding'):
+                    child.check()
+                with self.assertRaisesRegex(RuntimeError, 'Invalid host'):
+                    m.RemoteObserver(root/'unrelated')
+            box.cleanup()
 
     def test_missing_and_unsupported_adapter_fail_explicitly(self):
         with tempfile.TemporaryDirectory() as tmp:

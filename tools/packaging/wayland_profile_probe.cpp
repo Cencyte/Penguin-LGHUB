@@ -63,10 +63,32 @@ class FocusWindow : public QWidget {
     }
 };
 
+// Protocol fixture only: this service exists only on the private test bus.
+class ScreenSaver : public QObject {
+    Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "org.freedesktop.ScreenSaver")
+    bool active = false;
+public slots:
+    bool GetActive() const { return active; }
+    void SetActive(bool value) { active = value; emit ActiveChanged(value); }
+signals:
+    void ActiveChanged(bool active);
+};
+
 int main(int argc, char **argv)
 {
     if (qEnvironmentVariable("PENGUIN_PRIVATE_PROFILE_PROBE") != "1"
         || qEnvironmentVariable("XDG_RUNTIME_DIR") != "/tmp/penguin-profile-probe/run") return 2;
+    if (argc == 2 && QString::fromLocal8Bit(argv[1]) == "--screensaver") {
+        QCoreApplication app(argc, argv);
+        auto bus = QDBusConnection::sessionBus();
+        ScreenSaver saver;
+        if (!bus.registerService("org.freedesktop.ScreenSaver")
+            || !bus.registerObject("/ScreenSaver", &saver,
+                QDBusConnection::ExportAllSlots | QDBusConnection::ExportAllSignals)) return 6;
+        output({{"kind", "ready"}});
+        return app.exec();
+    }
     if (argc == 2 && QString::fromLocal8Bit(argv[1]) == "--receiver") {
         QCoreApplication app(argc, argv);
         auto bus = QDBusConnection::sessionBus();
