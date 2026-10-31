@@ -21,7 +21,7 @@ import install_transaction
 import install_storage
 
 HELP='''USAGE
-  ./install.sh --install [--verbose] [--directory <path>] [--engine <bwrap|podman>]
+  ./install.sh [--install] [--verbose] [--directory <path>] [--engine <bwrap|podman>]
   ./install.sh --check [--verbose]
   ./install.sh --uninstall [--directory <path>] [--verbose]
 
@@ -30,9 +30,10 @@ SUMMARY
   public compatibility source. Keep system Wine and existing prefixes intact.
   Commit after verification; roll back failed attempts and retain diagnostics.
   Run as your normal desktop user; sudo is used only for device-access rules.
+  Installation is the default when no action flag is supplied.
 
 FLAGS
-  --install                Run the complete installation pipeline.
+  --install                Run the complete installation pipeline (default).
   --check                  Record host compatibility without installing anything.
   --uninstall              Remove a managed installation, including G HUB settings.
   --directory <path>       Installation storage (default: ~/.local/share/penguin-lghub).
@@ -42,16 +43,16 @@ FLAGS
   --help                   Show this help and exit.
 
 EXAMPLES
-  ./install.sh --install
-  ./install.sh --install --verbose
-  ./install.sh --install --directory /path/with/enough/space
+  ./install.sh
+  ./install.sh --verbose
+  ./install.sh --directory /path/with/enough/space
   ./install.sh --check
   ./install.sh --uninstall
 '''
 
 
 def parser():
-    p=argparse.ArgumentParser(add_help=False)
+    p=argparse.ArgumentParser(add_help=False,allow_abbrev=False)
     action=p.add_mutually_exclusive_group();action.add_argument('--install',action='store_true');action.add_argument('--check',action='store_true');action.add_argument('--uninstall',action='store_true')
     p.add_argument('--help',action='store_true');p.add_argument('--verbose',action='store_true')
     p.add_argument('--directory',type=Path,default=Path(os.environ.get('XDG_DATA_HOME',str(Path.home()/'.local/share')))/'penguin-lghub')
@@ -163,10 +164,9 @@ def _pipeline(args,ui,report,directory,state):
 
 def main(argv=None):
     argv=sys.argv[1:] if argv is None else argv
-    if not argv:print(HELP.split('\nSUMMARY')[0]);return 0
     args=parser().parse_args(argv)
     if args.help:print(HELP);return 0
-    if not(args.install or args.check or args.uninstall):parser().error('Choose --install, --check or --uninstall')
+    args.install=not(args.check or args.uninstall)
     if os.geteuid()==0:raise ValueError('Run as your normal desktop user; setup requests sudo when needed.')
     if args.uninstall:
         from uninstall import run

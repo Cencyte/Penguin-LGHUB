@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "updated": "2026-10-31",
-  "review_after": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection on CachyOS and the Manjaro VM",
+  "review_after": "Native Wayland automatic application-profile matching investigation and remaining per-feature acceptance",
   "meaning": "Recorded environments, not supported minimum versions; inventory does not imply acceptance.",
   "shared": {
     "wine": "10.20 with project patches",
     "ghub": "2026.6.974819",
     "linux_runtime": "4.0.20260928.262390",
     "source_release": "0.9.0-preview.4",
-    "installer": "0.3.5"
+    "installer": "0.3.6"
   },
   "hosts": {
     "manjaro_desktop": {
@@ -47,11 +47,12 @@
         "docs/packaging/wayland-restore-verification.json"
       ],
       "manual_acceptance": "X11/Wayland GUI; accepted remaining cosmetic restore anomalies; no physical Logitech hardware.",
-      "current_installer_acceptance": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection pending; legacy test setup removed for these tests.",
+      "current_installer_acceptance": "Fresh installation manually confirmed successful on 2026-10-31. This report does not separately confirm removal or switching sessions after installation; installer 0.3.6 default-action change has automated routing tests.",
       "graphics_evidence": [
         "docs/packaging/2026-10-28-wayland-restore.md: private VM OpenGL/llvmpipe tests",
         "Libvirt domain video configuration rechecked 2026-10-31 against the pre-cleanup saved domain XML: VirtIO display, no 3D acceleration or GPU passthrough."
-      ]
+      ],
+      "fresh_installation_confirmed": "2026-10-31"
     },
     "cachyos": {
       "os": "CachyOS rolling",
@@ -68,15 +69,19 @@
       "bubblewrap": "0.13.0-1.1",
       "pipewire": "1.6.9-1",
       "evidence": [
-        "docs/packaging/cachyos-wayland-launcher-verification.json"
+        "docs/packaging/cachyos-wayland-launcher-verification.json",
+        "Read-only installed receipt on 2026-10-31: installer 0.3.5, committed installation, all 18 pipeline steps complete."
       ],
       "manual_acceptance": "Manually confirmed X11 tray and working Wayland installation; does not retroactively expand isolated automated test scope.",
-      "current_installer_acceptance": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection pending; legacy test setup removed for these tests.",
+      "current_installer_acceptance": "Fresh installation manually confirmed successful on 2026-10-31. This report does not separately confirm removal or switching sessions after installation; installer 0.3.6 default-action change has automated routing tests.",
       "graphics": "NVIDIA GeForce GT 730 (GK208B), NVIDIA 470.256.02 driver.",
       "graphics_evidence": [
         "docs/packaging/2026-10-27-cachyos-tray.md: isolated GLX context reports NVIDIA GeForce GT 730, OpenGL 4.6.0",
         "Read-only remote PCI inventory rechecked 2026-10-31: 10de:1287, NVIDIA kernel driver."
-      ]
+      ],
+      "fresh_installation_confirmed": "2026-10-31",
+      "tested_installer": "0.3.5",
+      "tested_source_release": "0.9.0-preview.4"
     },
     "bazzite": {
       "os": "Bazzite 44.20261026.0 Kinoite NVIDIA Open",

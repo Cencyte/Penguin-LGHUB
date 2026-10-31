@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "e170cdba90f43bb0eff253b5f18bcfbde6c0d4debde7f6942d947811c1bc1c3d",
-      "bytes": 66586
+      "sha256": "69db46872a29a8cd99bb321fca86d8bc5d0222622052725c136875a9d5778f90",
+      "bytes": 67388
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -416,8 +416,8 @@
     {
       "path": "docs/packaging/bazzite-readiness.md",
       "mode": "100644",
-      "sha256": "82f64a50328575d223d35c80d068412ccda9c9cf8bf4d061eb05cf98133df71e",
-      "bytes": 7339
+      "sha256": "f53ac38bc4968567723e3e5d6262e0777420b6a5c2446bd1be3ef3a2d0a1d364",
+      "bytes": 7364
     },
     {
       "path": "docs/packaging/cachyos-wayland-launcher-verification.json",
@@ -464,14 +464,14 @@
     {
       "path": "docs/packaging/release-installer-verification.json",
       "mode": "100644",
-      "sha256": "7b4c2192f29f073af8fad9aacdc04966e0ea6e5e02dea97264f438a8790c5f48",
-      "bytes": 6591
+      "sha256": "b5741565dc3bc42a58d2f01349dd037b6e2085cd3be8dfd9a6ab0fc04205fac3",
+      "bytes": 7285
     },
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "33a5bca4ed419b958e11f0c56c77b158eb2a2901e6e8a29baa69ec9e18ee1a6d",
-      "bytes": 19393
+      "sha256": "8cfc1262329ae2fc5e9e2e5b88f507f763bb2af6d3125f383ae12232c939fdfe",
+      "bytes": 21039
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -596,7 +596,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "b94a54ffbd3b28f428263ba79d72c1e4e7ef663fc0de7c38976cfdfbfebd9e59",
+      "sha256": "83a5f08a9dc8a04b451be2881cc3144f26e41392d812b3ff5341e3f89dffd5fa",
       "bytes": 252
     },
     {
@@ -650,8 +650,8 @@
     {
       "path": "packaging/tested-environments.json",
       "mode": "100644",
-      "sha256": "78939331898a77d802b5a2c7650dcbc4bf010f7ced05aaf9f6f467324c42d04f",
-      "bytes": 5876
+      "sha256": "c6c7315f6a355e977bbe58f789a0c8474a1b689f7d2b15ee152c27e0d528d29b",
+      "bytes": 6359
     },
     {
       "path": "packaging/toolchain.lock.json",
@@ -1064,8 +1064,8 @@
     {
       "path": "tests/packaging/test_installer.py",
       "mode": "100644",
-      "sha256": "d73bb11420cadfb7477df40523d3ff88ed2864b286294a5a0657073bdddb1b39",
-      "bytes": 7759
+      "sha256": "17fa32f9994690033b6b230b1aa06b2efe57a6d6262e9c0419308e33bcad0f0f",
+      "bytes": 9832
     },
     {
       "path": "tests/packaging/test_linux_runtime.py",
@@ -1688,8 +1688,8 @@
     {
       "path": "tools/packaging/install.py",
       "mode": "100644",
-      "sha256": "38b2a5725bb79e87216d0ed707ffcba8b51b59c2d5c4020d0e498998fe26560b",
-      "bytes": 12364
+      "sha256": "baf733d4d8322f3aee7dd5c727869fe8b20557088c29be9aa0bc04ee0604bdf6",
+      "bytes": 12304
     },
     {
       "path": "tools/packaging/install_device_rules.py",

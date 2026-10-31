@@ -49,7 +49,7 @@ An experimental compatibility layer for running the original **Logitech G HUB** 
 
 ### Current status:
 
-The clone-and-run installer builds the custom Wine components from pinned source, acquires the required vendor resources, prepares the prefix and installs the desktop launcher. Manjaro and CachyOS have manually verified desktop results, including the Plasma Wayland path through Xwayland. Bazzite has a completed manual installation and uninstall/reinstall cycle, with the G502 X Plus key-binding fix confirmed on its Wayland desktop. Fresh install/uninstall acceptance for installer 0.3.5 on CachyOS and the Manjaro VM is next. There is no hosted binary runtime release yet.
+The clone-and-run installer builds the custom Wine components from pinned source, acquires the required vendor resources, prepares the prefix and installs the desktop launcher. Manjaro and CachyOS have manually verified desktop results, including the Plasma Wayland path through Xwayland. Bazzite has a completed manual installation and uninstall/reinstall cycle, with the G502 X Plus key-binding fix confirmed on its Wayland desktop. Fresh installation is now manually confirmed on CachyOS and the Manjaro VM, completing installation checks on all three target distributions. Native Wayland automatic application-profile matching remains unimplemented. There is no hosted binary runtime release yet.
 
 ## Diagrams: LGHUB Wine Compatibility System
 
@@ -95,7 +95,7 @@ G HUB prefix, alongside any Wine already installed on the system. Device-access
 setup requires sudo; G HUB itself runs as a regular user. Updates are
 controlled so that a vendor update cannot silently replace the tested setup.
 
-The [installer](docs/packaging/release-installer.md) includes the verified input fix, automatic session selection and 31 GiB storage budget. Bazzite installation and uninstall/reinstall succeeded with installer 0.3.2; its delayed/stuck G502 X Plus binding was subsequently confirmed fixed. Installer 0.3.5 still needs fresh install/uninstall acceptance on CachyOS and the Manjaro VM. See the [Bazzite findings](docs/packaging/bazzite-readiness.md) for graphics, audio, device, SELinux and full-X11-session considerations.
+The [installer](docs/packaging/release-installer.md) includes the verified input fix, automatic session selection and 31 GiB storage budget. Bazzite installation and uninstall/reinstall succeeded with installer 0.3.2; its delayed/stuck G502 X Plus binding was subsequently confirmed fixed. Fresh installer runs on CachyOS and the Manjaro VM are now manually confirmed successful; this establishes installation on all three target distributions. See the [Bazzite findings](docs/packaging/bazzite-readiness.md) for graphics, audio, device, SELinux and full-X11-session considerations.
 
 [![Packaging tests](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml/badge.svg)](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml)
 
@@ -122,7 +122,7 @@ and validation boundaries are in the [environment record](packaging/tested-envir
 session is not supplied or qualified. The VM results cover UI/session behavior;
 physical Logitech hardware was tested on bare metal. The Bazzite installation,
 uninstall/reinstall and corrected G502 X Plus binding are manually confirmed.
-Fresh installer 0.3.5 acceptance on CachyOS and the Manjaro VM remains pending.
+Fresh installation on CachyOS and the Manjaro VM was manually confirmed on October 31. This confirmation does not separately establish uninstall, session-switching or native Wayland automatic profile matching.
 ³ The VM has a VirtIO display adapter with 3D acceleration disabled; its isolated
 OpenGL tests use Mesa llvmpipe (CPU software rendering). No physical GPU is
 passed through. Graphics evidence and complete package revisions are retained
@@ -146,8 +146,10 @@ Run in the target OS's normal KDE desktop terminal, as a regular user:
 ```sh
 git clone https://github.com/Cencyte/Penguin-LGHUB.git Penguin-LGHUB-release
 cd Penguin-LGHUB-release
-./install.sh --install
+./install.sh
 ```
+
+With installer **0.3.6 or newer**, installation is the default; the explicit `--install` flag remains supported. `--help`, `--check` and `--uninstall` retain their separate actions.
 
 Allow **31 GiB of free working space** for the initial source build and acquisition. All command output is saved to the log path printed below the logo.
 
@@ -162,9 +164,9 @@ Optional switches, added to the installation command:
 - `--jobs 4` — choose 1–16 build jobs; the default is 4.
 - `--engine podman` — use an existing rootless Podman installation for Windows-resource acquisition. The default is bubblewrap.
 
-Alternatively, download **Source code (zip)** from the [source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.4), extract it, and open a terminal in the extracted folder. Run the same installation command there. No Git checkout is needed for the ZIP workflow.
+Alternatively, download **Source code (zip)** from the [source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.4), extract it, and open a terminal in the extracted folder. Run `./install.sh --install` there: Preview 4 contains installer 0.3.5 and still needs the explicit flag. No Git checkout is needed for the ZIP workflow.
 
-Preview 4 includes installer **0.3.5**: automatic X11/Wayland selection, transactional uninstall/rollback, and the **31 GiB** storage requirement with verified workspace cleanup. The [latest branch source ZIP](https://github.com/Cencyte/Penguin-LGHUB/archive/refs/heads/release.zip) also contains these changes.
+Preview 4 includes installer **0.3.5**: automatic X11/Wayland selection, transactional uninstall/rollback, and the **31 GiB** storage requirement with verified workspace cleanup. The [latest branch source ZIP](https://github.com/Cencyte/Penguin-LGHUB/archive/refs/heads/release.zip) additionally includes installer 0.3.6 and its default installation action.
 
 This release retains the Wine input fix introduced in Preview 3 for keys that remained held when G HUB worker threads sent the press and release through different Xwayland connections. The installer builds this fix automatically. [Isolated regression results](docs/packaging/host-keyboard-threads-verification.json) cover native Wayland and Xwayland destinations; the G502 X Plus fix is also manually confirmed on booted Bazzite.
 
@@ -237,9 +239,9 @@ These checkpoints track dependency policy, installation reproducibility and rele
 
 1. **Resolve the complete dependency acquisition policy:** [Direct-media reconstruction](docs/packaging/dockur-acquisition.md#direct-media-reconstruction-verified-22-exact-matches) now reproduces both exact Windows DLLs from official downloads, without a donor VM. Component-use clearance and font qualification remain pending; see the [third-party notice and concrete permission inquiry route](docs/packaging/third-party-use.md). Manual extraction from a user's Windows installation is not the proposed public workflow.
 2. **Verify the pinned vendor installation:** Clean acquisition and extraction pass for **30/30 selected depots, 1,115/1,115 files**, including the three encrypted resource depots. Every extracted file matches the working installation's depot cache. The manifest-driven application layout contains 438 files. A fresh prefix now passes eight activation-factory checks, four registry checks, updater service configuration and five agent API requests. Optional installer extensions and the remaining per-feature acceptance checks stay separately scoped. See the reproducible commands and exact scope below. Preserve vendor notices and review the applicable installation terms before automating deployment.
-3. **Qualify the packaged runtime for release:** The complete Wine payload, matched server/client replacements and supplementary DLLs are now packaged and tested with host Wine hidden, including after relocation. A separate pinned Linux userspace now resolves all 46 native modules and all 54 recorded dynamic-library candidates without importing host graphics. The source build sequence now runs from the pinned SDK. Complete the corresponding-source binary-release audit and fresh installer 0.3.5 acceptance; the archive is a local development artifact, not yet a published release.
-4. **Finish and qualify the clean prefix:** The development recipe generates registry paths, overrides, factories, URL handler, a stopped updater service and update settings from acquired inputs. It copies no donor registry, personal settings or fonts. Font configuration, device policy, service startup and launcher generation are integrated. The new source build removes the lab-artifact prerequisite. Bazzite installation and corrected mouse input are confirmed; current-installer clean-install acceptance on CachyOS and the Manjaro VM remains.
-5. **Complete current-installer acceptance:** Bazzite installation, uninstall/reinstall and the physical mouse-binding fix are confirmed. Next, run installer 0.3.5 installation/removal and automatic session-selection checks on CachyOS and the Manjaro VM. Preserve the existing per-feature boundaries; the initial release covers these three distributions.
+3. **Qualify the packaged runtime for release:** The complete Wine payload, matched server/client replacements and supplementary DLLs are now packaged and tested with host Wine hidden, including after relocation. A separate pinned Linux userspace now resolves all 46 native modules and all 54 recorded dynamic-library candidates without importing host graphics. The source build sequence now runs from the pinned SDK. Complete the corresponding-source binary-release audit and remaining per-feature qualification; the archive is a local development artifact, not yet a published release.
+4. **Finish and qualify the clean prefix:** The development recipe generates registry paths, overrides, factories, URL handler, a stopped updater service and update settings from acquired inputs. It copies no donor registry, personal settings or fonts. Font configuration, device policy, service startup and launcher generation are integrated. The new source build removes the lab-artifact prerequisite. Bazzite installation and corrected mouse input are confirmed; fresh installation on CachyOS and the Manjaro VM is now also manually confirmed.
+5. **Complete current-installer acceptance:** Bazzite installation, uninstall/reinstall and the physical mouse-binding fix are confirmed. Fresh installation also passed on CachyOS and the Manjaro VM. Native Wayland automatic application-profile matching still needs implementation and testing; additional uninstall/session-switching confirmations remain separately recorded. Preserve the existing per-feature boundaries; the initial release covers these three distributions.
 6. **Keep releases reproducible and reviewable:** This source snapshot preserves GitHub's initial commit and excludes the lab history, captures, vendor payloads and populated prefixes. See the [source publication record](docs/packaging/source-publication.md). Wine notices remain LGPL; a complete corresponding-source/build-sequence audit is still required before publishing the packaged runtime binary.
 
 </details>
@@ -313,13 +315,13 @@ python tools/packaging/probe_clean_agent.py \
 
 Use new output directories outside the repository with existing parents. Preparation reserves 5 GiB above the 2 GiB free-space floor; the probe reserves another 4 GiB for its disposable clone. The candidate is left pristine; the agent test runs in that clone. Both use a read-only host filesystem, a private network and PID namespace, a private temporary directory and no physical device nodes. Wine processes are stopped within their own namespace after each check. The agent probe uses its own Xvfb with GLX disabled; it neither connects to the live desktop nor evaluates graphics performance. Acquisition inputs and host files remain readable inside this test environment: this is operational isolation, not a hardened sandbox for hostile executables.
 
-[Initial validation](packaging/clean-prefix-verification.json) recorded 1,599 managed files with copied private builds. [Packaged-runtime validation](packaging/wine-runtime-verification.json) records 1,574 prefix files plus the separate 2,571-entry runtime inventory. Both pass **8/8 activation factories**, **4/4 registry routes**, **1/1 updater service configuration**, and **5/5 agent API routes**. The API test covers `/devices/list`, `/profiles`, `/profile/active`, `/profiles/auto_switching` and `/input/gshift`, each returning `SUCCESS`. No physical devices are exposed, so an empty device list is expected. These results establish fresh installation and backend startup; they do not establish working mouse bindings or profile switching on real hardware. The current combined packaging and desktop-device policy suite has **205 passing tests** in CI.
+[Initial validation](packaging/clean-prefix-verification.json) recorded 1,599 managed files with copied private builds. [Packaged-runtime validation](packaging/wine-runtime-verification.json) records 1,574 prefix files plus the separate 2,571-entry runtime inventory. Both pass **8/8 activation factories**, **4/4 registry routes**, **1/1 updater service configuration**, and **5/5 agent API routes**. The API test covers `/devices/list`, `/profiles`, `/profile/active`, `/profiles/auto_switching` and `/input/gshift`, each returning `SUCCESS`. No physical devices are exposed, so an empty device list is expected. These results establish fresh installation and backend startup; they do not establish working mouse bindings or profile switching on real hardware. The current combined packaging and desktop-device policy suite has **208 passing tests** in CI.
 
 The private output contains `clean-prefix.json`, `verification.json`, `installer-actions.json` and per-step logs. Verification checks the managed application/depot/artifact trees and four installed Wine fallback modules against its local receipt; it does not authenticate an edited receipt or qualify all stock Wine files and mutable registry state. The probe writes `agent-verification.json`, its API snapshot and logs separately. None of those populated prefixes, vendor files or downloaded keys belongs in Git.
 
 ### Current validation:
 
-The release installer integrates private libraries, fonts, original UI/tray checks and launcher generation. Manjaro/CachyOS desktop results and Bazzite installation, uninstall/reinstall and corrected physical mouse input are recorded above. Fresh installer 0.3.5 acceptance on CachyOS and the Manjaro VM remains next. Optional vendor installers are not executed or falsely marked installed, and this recipe does not replace the user's working installation.
+The release installer integrates private libraries, fonts, original UI/tray checks and launcher generation. Manjaro/CachyOS desktop results and Bazzite installation, uninstall/reinstall and corrected physical mouse input are recorded above. Fresh installation on CachyOS and the Manjaro VM is also manually confirmed; automatic application-profile matching on native Wayland remains unimplemented. Optional vendor installers are not executed or falsely marked installed, and this recipe does not replace the user's working installation.
 
 </details>
 

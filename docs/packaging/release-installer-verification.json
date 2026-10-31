@@ -163,7 +163,7 @@
     "scope": "Manual installer completion and uninstall/reinstall with installer 0.3.2; targeted physical G502 X Plus input fix confirmed. Not exhaustive feature qualification or a fresh 0.3.5 rerun."
   },
   "remaining": [
-    "Fresh installer 0.3.5 installation/removal and automatic session selection on CachyOS and the Manjaro VM",
+    "Remaining uninstall/session-switching confirmations and native Wayland automatic application-profile matching implementation/testing",
     "Remaining per-feature/device/graphics qualification beyond the recorded manual confirmations",
     "Corresponding-source and notices audit before hosting a compiled runtime release"
   ],
@@ -201,5 +201,13 @@
     "current_installer": "0.3.5",
     "remaining": "Fresh current-installer installation/removal on CachyOS and the Manjaro VM; per-feature acceptance remains separately scoped.",
     "historical_records": "Earlier pending fields describe their original capture date, not current status."
+  },
+  "manual_follow_up_2026_10_31": {
+    "manjaro_vm_fresh_installation": "manually confirmed successful",
+    "cachyos_fresh_installation": "manually confirmed successful; installed 0.3.5 receipt verifies all 18 steps complete",
+    "installation_targets_confirmed": 3,
+    "installation_targets_total": 3,
+    "scope": "Manual installation results, not blanket feature qualification; no separate new uninstall or session-switching confirmation inferred.",
+    "installer_0_3_6_default_action": "208 project tests passed, including default install, explicit action isolation, help and invalid-option handling. No live installation run for this CLI-only change."
   }
 }

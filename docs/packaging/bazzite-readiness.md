@@ -12,7 +12,7 @@ also passed. These confirmations supersede the original pending-install status;
 they do not certify every G HUB feature or a full X11 desktop session.
 
 Preview 4 contains installer 0.3.5 and its 31 GiB budget with workspace cleanup.
-Fresh installer acceptance on CachyOS and the Manjaro VM is next. See the
+Fresh installation on CachyOS and the Manjaro VM was subsequently confirmed on October 31. See the
 [current environment record](../../packaging/tested-environments.json) and
 [installation guide](release-installer.md#verification-boundaries).
 

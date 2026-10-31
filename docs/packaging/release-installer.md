@@ -10,15 +10,17 @@ Boot the target OS and run these commands in its normal KDE desktop terminal:
 ```sh
 git clone https://github.com/Cencyte/Penguin-LGHUB.git Penguin-LGHUB-release
 cd Penguin-LGHUB-release
-./install.sh --install
+./install.sh
 ```
+
+Installer 0.3.6 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
 
 A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.4) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
 
 Preview 4 includes installer 0.3.5, automatic X11/Wayland selection and the
 31 GiB storage budget with verified temporary-workspace cleanup. The
 [latest branch source ZIP](https://github.com/Cencyte/Penguin-LGHUB/archive/refs/heads/release.zip)
-also includes these changes.
+also includes installer 0.3.6 and the default installation action. The immutable Preview 4 ZIP still requires `--install`.
 
 The repository currently requires GitHub access while it remains private.
 Run as your regular user. The installer requests sudo for its small Logitech
@@ -311,12 +313,32 @@ as intended. Setup neither clears that approval nor enables a global bypass.
 
 The Bazzite confirmations establish installation/removal and the reported mouse
 binding fix. They do not automatically complete every device/reconnect, macro,
-G-Shift, profile, lighting, tray and relaunch check. Fresh installer 0.3.5
-installation/removal and session-selection acceptance on CachyOS and the Manjaro
-VM remain next. KDE may request
+G-Shift, profile, lighting, tray and relaunch check. Fresh installation on
+CachyOS and the Manjaro VM was also manually confirmed on October 31, completing
+installation checks on all three target distributions. That confirmation does
+not separately certify removal, session switching or automatic native-Wayland
+application profiles. KDE may request
 input-control authorization when an assignment is used. Setup does not approve
 that permission. Automatic profile detection of native Wayland applications and
 screen-sampled lighting remain separately scoped limitations.
+
+### Native application selection and profile tests
+
+The pinned G HUB application picker filters for `*.exe`, so extensionless
+Linux programs such as `kate` are hidden. The private runtime also has its own
+`/usr/bin`; host programs are under `/run/host/usr/bin`. For a manual picker
+check, enter `Z:\run\host\usr\bin\kate` in the **File name** field. This targets
+the host executable without renaming it or copying it into the prefix. File
+selection/application registration and automatic profile matching are separate
+checks; selecting an executable does not establish focus detection.
+
+Manual profile behavior can be checked with two temporary profiles assigning
+different keys to the same spare mouse button, selecting each profile and
+checking its output in an empty editor document. Use the persistent-profile
+setting if necessary to hold the selection during this test, then restore it.
+Automatic native-Wayland matching requires a compositor-aware integration;
+the proposed [KWin activation adapter](2026-10-27-wayland-research.md#six-feature-boundaries-and-what-each-needs)
+is not implemented. Do not treat a failed focus-switch test as a failed installation.
 
 The [Bazzite readiness findings](bazzite-readiness.md) explain the remaining
 host-policy/driver boundaries. Existing [third-party use questions](third-party-use.md)

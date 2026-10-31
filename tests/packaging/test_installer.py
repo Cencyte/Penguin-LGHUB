@@ -36,16 +36,51 @@ class InstallerTests(unittest.TestCase):
                     toolchain.extract_tools(archive,root/'out')
                     self.assertEqual((root/'out/usr/bin/cc').read_bytes(),b'fixture')
 
-    def test_help_and_no_arguments_never_probe_or_install(self):
-        for args in ([],['--help']):
+    def test_help_never_probes_or_installs(self):
+        for args in (['--help'],['--install','--help']):
             out=io.StringIO()
-            with contextlib.redirect_stdout(out),patch.object(install.host_preflight,'inventory') as inventory:
+            with contextlib.redirect_stdout(out),patch.object(install.host_preflight,'inventory') as inventory,\
+                 patch.object(install,'present_install') as present:
                 self.assertEqual(install.main(args),0)
                 inventory.assert_not_called()
+                present.assert_not_called()
             text=out.getvalue();self.assertTrue(text.startswith('USAGE\n'))
-            self.assertEqual('SUMMARY' in text,bool(args))
-            if args:
-                for heading in ('SUMMARY','FLAGS','EXAMPLES'):self.assertIn('\n'+heading+'\n',text)
+            for heading in ('SUMMARY','FLAGS','EXAMPLES'):self.assertIn('\n'+heading+'\n',text)
+
+    def test_default_and_explicit_install_route_to_the_same_pipeline(self):
+        for argv in ([],['--install'],['--verbose','--jobs','2','--directory','/tmp/example']):
+            with self.subTest(argv=argv),patch.object(install.os,'geteuid',return_value=1000),\
+                 patch.object(install,'present_install',return_value=0) as present:
+                self.assertEqual(install.main(argv),0)
+                args=present.call_args.args[0]
+                self.assertTrue(args.install)
+                self.assertFalse(args.check or args.uninstall)
+                if '--verbose' in argv:
+                    self.assertTrue(args.verbose)
+                    self.assertEqual(args.jobs,2)
+                    self.assertEqual(args.directory,Path('/tmp/example'))
+
+    def test_explicit_check_and_uninstall_do_not_default_to_install(self):
+        with patch.object(install.os,'geteuid',return_value=1000),\
+             patch.object(install,'present_install',return_value=0) as present,\
+             patch('uninstall.run',return_value=0) as remove:
+            self.assertEqual(install.main(['--check']),0)
+            args=present.call_args.args[0]
+            self.assertTrue(args.check)
+            self.assertFalse(args.install or args.uninstall)
+            remove.assert_not_called()
+            present.reset_mock()
+            self.assertEqual(install.main(['--uninstall','--directory','/tmp/example']),0)
+            present.assert_not_called()
+            remove.assert_called_once_with(Path('/tmp/example'),False)
+
+    def test_invalid_or_conflicting_options_never_start_installation(self):
+        for argv in (['--instal'],['--install','--check'],['--uninstall','--check']):
+            with self.subTest(argv=argv),contextlib.redirect_stderr(io.StringIO()),\
+                 patch.object(install,'present_install') as present:
+                with self.assertRaises(SystemExit) as error:install.main(argv)
+                self.assertEqual(error.exception.code,2)
+                present.assert_not_called()
 
     def test_quiet_and_verbose_both_keep_stdout_stderr_and_failure(self):
         for verbose in (False,True):
