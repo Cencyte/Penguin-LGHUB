@@ -1,0 +1,478 @@
+{
+  "schema": 1,
+  "recorded_on": "2026-10-31",
+  "feature": "KDE Plasma Wayland automatic application profile switching",
+  "status": "Focus-source and runtime-boundary feasibility demonstrated; production integration not implemented",
+  "recommended_path": [
+    "Temporary per-session KWin script reports foreground PID and window identity over session D-Bus",
+    "Host-side observer authenticates KWin sender and resolves same-user /proc executable with PID-reuse checks",
+    "Host-side observer applies existing debounce, G HUB exclusion and installation-aware Wine path mapping",
+    "Existing private atomic token-bound mailbox crosses into Wine runtime",
+    "Existing pinned agent-local adapter emits original typed application event; G HUB matcher and automatic-profile policy remain authoritative"
+  ],
+  "critical_finding": {
+    "observation": "pressure-vessel --share-pid exposes process IDs, but /proc/<desktop-pid>/exe returns EACCES across its user namespace in the isolated test",
+    "consequence": "Keep executable resolution outside the Wine runtime user namespace for both packaged X11 and Wayland; sharing process IDs alone is insufficient",
+    "current_x11_scope": "Existing workstation X11 installation is manually accepted. Newly packaged runtime profile path has not had full E2E validation and must address this boundary before qualification",
+    "workaround_tested": "The host observer resolves the executable successfully and the container reads the existing mailbox payload correctly",
+    "no_permission_widening": "No CAP_SYS_PTRACE grant, ptrace policy change, EIS allowlist edit or global input permission bypass"
+  },
+  "implementation_constraints": [
+    "Use the actual launch session bus. Verify org.kde.KWin owner and expected session; never assume an inherited SSH/xrdp bus is correct.",
+    "Load a session-unique script from a private path visible to host KWin, outside container-private /tmp; do not persistently enable scripts in kwinrc.",
+    "Run observer in the host user namespace. Reuse process_identity and wine_path; preserve container /run/host path translation when feeding G HUB.",
+    "Production transport should use libdbus or another existing runtime dependency; Qt6 development tools in this research fixture must not become installation prerequisites.",
+    "Supervise host observer with existing agent readiness and shutdown lifecycle, with stale heartbeat detection and bounded cleanup.",
+    "On KWin owner change, discard old events, reset script epoch and reconnect with initial current-focus snapshot. Do not retain objects/PIDs across compositor restart.",
+    "Handle lock/unlock explicitly, suspend switching on session/identity loss, and resample focus on recovery. Preserve current profile during G HUB UI focus.",
+    "Keep per-session token, sequence validation, private directory permissions and atomic writes across the host/container handoff."
+  ],
+  "alternatives": {
+    "x11_observer_only": "Insufficient for native Wayland clients; use compositor focus rather than Xwayland root properties.",
+    "standard_ext_foreign_toplevel_list": "Protocol supplies title/app_id/identifier, but no focus-state or PID event; insufficient by itself for current executable matching.",
+    "new_Wine_Wayland_driver": "No evidence that this is required; focus source can change while retaining tested Wine X11/Xwayland rendering and input."
+  },
+  "validation": {
+    "isolated_checks_passed": 33,
+    "isolated_checks_total": 33,
+    "existing_native_profile_regressions": {
+      "passed": 8,
+      "total": 8
+    },
+    "production_wayland_integration_implemented": false,
+    "full_wayland_profile_switching_E2E_hosts": 0,
+    "target_hosts": 3,
+    "live_desktop_manipulated": false,
+    "hardware_input_injected": false,
+    "packages_installed": false,
+    "Bazzite": "Installed inventory records KWin 6.7.5, matching tested CachyOS API generation; no Bazzite run of this probe or SELinux acceptance yet",
+    "scope_limit": "Checks cover focus identity, transport and mailbox compatibility, not profile changes inside a running G HUB instance under Wayland"
+  },
+  "isolated_results": {
+    "manjaro_kwin_6_5_4": {
+      "passed": true,
+      "live_desktop_touched": false,
+      "scope": "KWin focus -> validated Linux executable -> existing mailbox; no G HUB or hardware",
+      "checks": [
+        {
+          "case": "ephemeral KWin script loaded",
+          "passed": true
+        },
+        {
+          "case": "initial native Wayland foreground snapshot",
+          "passed": true,
+          "event": {
+            "application": "org.penguin.ProbeOne",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 14,
+            "protocol": 1,
+            "reason": "initial",
+            "received_ms": 1793489762628,
+            "resourceClass": "org.penguin.ProbeOne",
+            "sender": ":1.1",
+            "sequence": 1,
+            "window": "{4720dfc6-6893-46d4-bfef-6dfc65aa8627}"
+          }
+        },
+        {
+          "case": "heartbeat without focus changes",
+          "passed": true
+        },
+        {
+          "case": "non-KWin sender rejected",
+          "passed": true
+        },
+        {
+          "case": "packaged runtime connects compositor bus and loads host-readable script",
+          "passed": true,
+          "exit_code": 0
+        },
+        {
+          "case": "runtime reads host-resolved executable from shared mailbox",
+          "passed": true
+        },
+        {
+          "case": "script loaded from container executes in host KWin",
+          "passed": true,
+          "event": {
+            "application": "org.penguin.ProbeOne",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 14,
+            "protocol": 1,
+            "reason": "container-initial",
+            "received_ms": 1793489765682,
+            "resourceClass": "org.penguin.ProbeOne",
+            "sender": ":1.1",
+            "sequence": 1,
+            "window": "{4720dfc6-6893-46d4-bfef-6dfc65aa8627}"
+          }
+        },
+        {
+          "case": "wayland-two: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 123,
+          "executable": "/tmp/penguin-profile-probe/wayland-two",
+          "process_start_time": "9256408",
+          "event": {
+            "application": "org.penguin.ProbeTwo",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 123,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489766410,
+            "resourceClass": "org.penguin.ProbeTwo",
+            "sender": ":1.1",
+            "sequence": 10,
+            "window": "{2cbcdaca-ba8b-4be9-9ca6-409865ea6c25}"
+          }
+        },
+        {
+          "case": "wayland-two: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "xwayland-one: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 192,
+          "executable": "/tmp/penguin-profile-probe/xwayland-one",
+          "process_start_time": "9256423",
+          "event": {
+            "application": "org.penguin.ProbeX11",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 192,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489766694,
+            "resourceClass": "xwayland-one",
+            "sender": ":1.1",
+            "sequence": 12,
+            "window": "{6bce5df0-4d01-4b73-a9b2-64be29db36d8}"
+          }
+        },
+        {
+          "case": "xwayland-one: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "wayland-two: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 123,
+          "executable": "/tmp/penguin-profile-probe/wayland-two",
+          "process_start_time": "9256408",
+          "event": {
+            "application": "org.penguin.ProbeTwo",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 123,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489766715,
+            "resourceClass": "org.penguin.ProbeTwo",
+            "sender": ":1.1",
+            "sequence": 15,
+            "window": "{2cbcdaca-ba8b-4be9-9ca6-409865ea6c25}"
+          }
+        },
+        {
+          "case": "wayland-two: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "wayland-one: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 14,
+          "executable": "/tmp/penguin-profile-probe/wayland-one",
+          "process_start_time": "9256023",
+          "event": {
+            "application": "org.penguin.ProbeOne",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 14,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489766732,
+            "resourceClass": "org.penguin.ProbeOne",
+            "sender": ":1.1",
+            "sequence": 17,
+            "window": "{4720dfc6-6893-46d4-bfef-6dfc65aa8627}"
+          }
+        },
+        {
+          "case": "wayland-one: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "no foreground window reported explicitly",
+          "passed": true,
+          "event": {
+            "application": "",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 0,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489766750,
+            "resourceClass": "",
+            "sender": ":1.1",
+            "sequence": 18,
+            "window": ""
+          }
+        },
+        {
+          "case": "ephemeral script unloaded",
+          "passed": true
+        },
+        {
+          "case": "unloading also stops heartbeat",
+          "passed": true
+        }
+      ],
+      "container_capabilities": {
+        "desktop_process_executable_readable": false,
+        "desktop_process_executable_read_failed": true,
+        "compositor_bus_and_script": true,
+        "identity_resolution_design": "Resolve desktop executables outside the runtime user namespace"
+      },
+      "passed_checks": 18
+    },
+    "cachyos_kwin_6_7_5": {
+      "passed": true,
+      "live_desktop_touched": false,
+      "scope": "KWin focus -> validated Linux executable -> existing mailbox; no G HUB or hardware",
+      "checks": [
+        {
+          "case": "ephemeral KWin script loaded",
+          "passed": true
+        },
+        {
+          "case": "initial native Wayland foreground snapshot",
+          "passed": true,
+          "event": {
+            "application": "org.penguin.ProbeOne",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 14,
+            "protocol": 1,
+            "reason": "initial",
+            "received_ms": 1793489848170,
+            "resourceClass": "org.penguin.ProbeOne",
+            "sender": ":1.1",
+            "sequence": 1,
+            "window": "{1eaa6a52-02c6-4af2-b45a-f5121e323b81}"
+          }
+        },
+        {
+          "case": "heartbeat without focus changes",
+          "passed": true
+        },
+        {
+          "case": "non-KWin sender rejected",
+          "passed": true
+        },
+        {
+          "case": "wayland-two: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 34,
+          "executable": "/tmp/penguin-profile-probe/wayland-two",
+          "process_start_time": "3833393",
+          "event": {
+            "application": "org.penguin.ProbeTwo",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 34,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489848835,
+            "resourceClass": "org.penguin.ProbeTwo",
+            "sender": ":1.1",
+            "sequence": 3,
+            "window": "{a83426ed-1f95-40a9-99bc-cf1e9679172b}"
+          }
+        },
+        {
+          "case": "wayland-two: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "xwayland-one: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 38,
+          "executable": "/tmp/penguin-profile-probe/xwayland-one",
+          "process_start_time": "3833405",
+          "event": {
+            "application": "org.penguin.ProbeX11",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 38,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489849105,
+            "resourceClass": "xwayland-one",
+            "sender": ":1.1",
+            "sequence": 4,
+            "window": "{b7235605-ca3f-4dcd-8bd6-278e5fa499d4}"
+          }
+        },
+        {
+          "case": "xwayland-one: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "wayland-two: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 34,
+          "executable": "/tmp/penguin-profile-probe/wayland-two",
+          "process_start_time": "3833393",
+          "event": {
+            "application": "org.penguin.ProbeTwo",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 34,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489849135,
+            "resourceClass": "org.penguin.ProbeTwo",
+            "sender": ":1.1",
+            "sequence": 5,
+            "window": "{a83426ed-1f95-40a9-99bc-cf1e9679172b}"
+          }
+        },
+        {
+          "case": "wayland-two: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "wayland-one: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 14,
+          "executable": "/tmp/penguin-profile-probe/wayland-one",
+          "process_start_time": "3833319",
+          "event": {
+            "application": "org.penguin.ProbeOne",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 14,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489849167,
+            "resourceClass": "org.penguin.ProbeOne",
+            "sender": ":1.1",
+            "sequence": 6,
+            "window": "{1eaa6a52-02c6-4af2-b45a-f5121e323b81}"
+          }
+        },
+        {
+          "case": "wayland-one: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "no foreground window reported explicitly",
+          "passed": true,
+          "event": {
+            "application": "",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 0,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793489849207,
+            "resourceClass": "",
+            "sender": ":1.1",
+            "sequence": 8,
+            "window": ""
+          }
+        },
+        {
+          "case": "ephemeral script unloaded",
+          "passed": true
+        },
+        {
+          "case": "unloading also stops heartbeat",
+          "passed": true
+        }
+      ],
+      "passed_checks": 15
+    }
+  },
+  "remaining_acceptance": [
+    "Implement and package host-side observer supervision for both launcher families; current source deliberately keeps Wayland profile observer disabled.",
+    "Complete Wayland G HUB E2E with distinct native app profiles, automatic on/off, unmatched-app Desktop fallback, own-window exclusion and real mapped keys.",
+    "Test lock/unlock, rapid focus changes, observer failure, compositor restart and orderly shutdown.",
+    "Run packaged path on Manjaro and CachyOS; then Bazzite with SELinux enforcing.",
+    "Flatpak identities, foreign Wine/Proton prefixes and non-KWin compositors remain unqualified."
+  ],
+  "experiment_notes": [
+    "Initial local probe hit NVIDIA EGL loading in a GPU-less namespace. Final probe pins Mesa/llvmpipe only inside that disposable environment; no host driver setting changed.",
+    "KWin wrapper restarts a failed session. Harness now records result then exits inner session successfully, and propagates failure from the outer harness to preserve evidence.",
+    "Disposable materialized Linux runtime is removed after boundary probe; source runtime is read-only except a private overlay of its empty reference lock."
+  ],
+  "sources": [
+    {
+      "url": "https://develop.kde.org/docs/plasma/kwin/api/",
+      "supports": "KWin scripting API overview; source tags and live probes verify deployed versions"
+    },
+    {
+      "url": "https://github.com/KDE/kwin/blob/v6.5.4/src/scripting/workspace_wrapper.h",
+      "supports": "activeWindow and windowActivated"
+    },
+    {
+      "url": "https://github.com/KDE/kwin/blob/v6.7.5/src/scripting/workspace_wrapper.h",
+      "supports": "Same focus API in newer tested compositor generation"
+    },
+    {
+      "url": "https://github.com/KDE/kwin/blob/v6.5.4/src/window.h",
+      "supports": "Window PID, desktopFileName, internalId, desktop/dock flags"
+    },
+    {
+      "url": "https://github.com/KDE/kwin/blob/v6.5.4/src/waylandwindow.cpp",
+      "supports": "Native Wayland window PID from client connection"
+    },
+    {
+      "url": "https://github.com/KDE/kwin/blob/v6.7.5/src/waylandwindow.cpp",
+      "supports": "Newer compositor caches PID from client connection"
+    },
+    {
+      "url": "https://github.com/KDE/kwin/blob/v6.5.4/src/wayland/clientconnection.cpp",
+      "supports": "Client PID from Wayland connection credentials"
+    },
+    {
+      "url": "https://github.com/KDE/kwin/blob/v6.5.4/src/scripting/scripting.cpp",
+      "supports": "callDBus, QTimer, script load/run/unload"
+    },
+    {
+      "url": "https://github.com/KDE/kwin/blob/v6.7.5/src/scripting/scripting.cpp",
+      "supports": "Same transport and lifecycle API in newer tested version"
+    },
+    {
+      "url": "https://github.com/wayland-mirror/wayland-protocols/blob/main/staging/ext-foreign-toplevel-list/ext-foreign-toplevel-list-v1.xml",
+      "supports": "Standard toplevel-list protocol lacks PID and focus-state events"
+    },
+    {
+      "url": "https://man7.org/linux/man-pages/man2/ptrace.2.html",
+      "supports": "Proc access checks and commoncap user-namespace restrictions explain observed EACCES"
+    }
+  ],
+  "probe_sources_sha256": {
+    "tools/packaging/wayland_profile_probe.py": "a77d16c6c59b67e4ef565ecafa76e967ef5ebad41d4cea7bae89b7d2484efb0c",
+    "tools/packaging/wayland_profile_probe.cpp": "3d654fab819aa16c3867f85186b660939d73650448b10dc5f999228a565705d4",
+    "tools/packaging/wayland_profile_probe.js": "46ae8e15ead0d6be3372892a2c6a872dce3aaa9fc4374385664345592c21ad29",
+    "tools/packaging/wayland_profile_bus_probe.c": "15284b8bc1b81cc9469a27c8686cbd18182c7c94ac7c9cbe1a6452cbe940d2a5"
+  }
+}

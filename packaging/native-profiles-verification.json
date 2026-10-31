@@ -108,9 +108,15 @@
     "fresh_install_E2E": false
   },
   "limitations": [
-    "Physical X11 profile/keybinding acceptance is pending",
     "Native Wayland foreground observer is not implemented",
-    "Foreign Wine/Proton prefixes, Flatpak app identity, and other window managers have not been qualified"
+    "Foreign Wine/Proton prefixes, Flatpak app identity, and other window managers have not been qualified",
+    "Packaged observer process-path lookup across runtime user namespace needs host-side resolution; see wayland-profiles-investigation.json"
   ],
-  "regression_found": "Early profile endpoint availability alone is insufficient for focus event delivery. Tests and launcher wait for the complete agent readiness endpoint set, including applications."
+  "regression_found": "Early profile endpoint availability alone is insufficient for focus event delivery. Tests and launcher wait for the complete agent readiness endpoint set, including applications.",
+  "manual_acceptance": {
+    "recorded_on": "2026-10-31",
+    "environment": "Existing Manjaro X11 workstation installation",
+    "result": "User confirms automatic profile switching works",
+    "scope": "Acceptance of preceding X11 fix; does not extend to newly packaged runtime or Wayland"
+  }
 }

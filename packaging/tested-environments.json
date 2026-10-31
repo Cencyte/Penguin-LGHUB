@@ -29,7 +29,8 @@
       "graphics_evidence": [
         "docs/packaging/release-installer-verification.json: offscreen_session.graphics records the hardware RTX 3090 context",
         "Read-only PCI inventory rechecked 2026-10-31: 10de:2204, NVIDIA kernel driver; separate GTX 1050 Ti bound to vfio-pci is not a Penguin-LGHUB test GPU."
-      ]
+      ],
+      "native_x11_profile_switching": "Confirmed working by user on 2026-10-31 with the existing workstation launcher; packaged-runtime and Wayland profile paths are not covered by that acceptance."
     },
     "manjaro_vm": {
       "os": "Manjaro rolling",

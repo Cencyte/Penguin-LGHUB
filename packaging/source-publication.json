@@ -638,8 +638,8 @@
     {
       "path": "packaging/native-profiles-verification.json",
       "mode": "100644",
-      "sha256": "d60f6bf120f5441e325345f47e402a1dea85cf86403d73c49d66e25fc57f56b4",
-      "bytes": 4055
+      "sha256": "6f1045fa7b87926efdc9ecfdef9f0b8840b96342f2e211e466e1a410fc75e391",
+      "bytes": 4434
     },
     {
       "path": "packaging/runtime-baseline.json",
@@ -656,14 +656,20 @@
     {
       "path": "packaging/tested-environments.json",
       "mode": "100644",
-      "sha256": "c6c7315f6a355e977bbe58f789a0c8474a1b689f7d2b15ee152c27e0d528d29b",
-      "bytes": 6359
+      "sha256": "15ac4b864230d580884ef4aa03d8fd57e4ec34731a0a50619c00add9119c1c38",
+      "bytes": 6559
     },
     {
       "path": "packaging/toolchain.lock.json",
       "mode": "100644",
       "sha256": "7d29ad276cbadf743e17772d607c1ca82a8c5e6cebfb1ea018872ffafbc2fac2",
       "bytes": 6674
+    },
+    {
+      "path": "packaging/wayland-profiles-investigation.json",
+      "mode": "100644",
+      "sha256": "77912e1aa312a8d789b8863cef15c3cd77fbec0f39217cf26899b7919b49428b",
+      "bytes": 19407
     },
     {
       "path": "packaging/windows-acquisition-GPL-3.0.txt",
@@ -1866,6 +1872,30 @@
       "bytes": 12198
     },
     {
+      "path": "tools/packaging/wayland_profile_bus_probe.c",
+      "mode": "100644",
+      "sha256": "15284b8bc1b81cc9469a27c8686cbd18182c7c94ac7c9cbe1a6452cbe940d2a5",
+      "bytes": 3238
+    },
+    {
+      "path": "tools/packaging/wayland_profile_probe.cpp",
+      "mode": "100644",
+      "sha256": "3d654fab819aa16c3867f85186b660939d73650448b10dc5f999228a565705d4",
+      "bytes": 3582
+    },
+    {
+      "path": "tools/packaging/wayland_profile_probe.js",
+      "mode": "100644",
+      "sha256": "46ae8e15ead0d6be3372892a2c6a872dce3aaa9fc4374385664345592c21ad29",
+      "bytes": 1062
+    },
+    {
+      "path": "tools/packaging/wayland_profile_probe.py",
+      "mode": "100644",
+      "sha256": "a77d16c6c59b67e4ef565ecafa76e967ef5ebad41d4cea7bae89b7d2484efb0c",
+      "bytes": 15428
+    },
+    {
       "path": "tools/packaging/wayland_restore_diagnostic.py",
       "mode": "100644",
       "sha256": "4799b03c8d1a30f763e7304d642fe49d941d7b79becc893b31b9bc39b436967c",
@@ -2768,8 +2798,8 @@
   ],
   "publication_note": "Installer 0.3.1 presentation update: ASCII activity spinner, check-only result labels, attached ellipses, neutral launcher names, version spacing and completion messages; exact user-supplied AI disclosure and shortened table of contents. Input-lag investigation remains pending. No vendor payload or populated prefix.",
   "publication_branch": "release",
-  "file_count": 456,
-  "total_bytes": 10292628,
+  "file_count": 461,
+  "total_bytes": 10335924,
   "source_release": "v0.9.0-preview.4",
   "release_parent_commit": "f7481c6e10e227c983bd8fa6e1bf82f7a643c5f5"
 }
