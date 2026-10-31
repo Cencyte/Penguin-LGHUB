@@ -148,6 +148,8 @@ cd Penguin-LGHUB-release
 
 Allow **80 GiB of free working space** for the initial source build and acquisition. All command output is saved to the log path printed below the logo.
 
+One **Penguin-LGHUB** launcher automatically selects X11 or KDE Plasma Wayland at each launch. Both paths share the same Wine runtime, prefix and G HUB settings. Quit G HUB before logging out to change sessions; no reinstallation is needed. Wayland input still requires KDE's permission when prompted.
+
 **Installation is transactional:** a new setup commits only after its required steps pass. A failed attempt rolls back its private files, downloads, launchers and device rule, retaining diagnostics. An already installed setup is preserved. Interrupted transactions are recovered before a new attempt; cleanup failures are reported explicitly. See [transaction and recovery details](docs/packaging/release-installer.md#transactions-and-recovery).
 
 Optional switches, added to the installation command:
@@ -158,6 +160,8 @@ Optional switches, added to the installation command:
 - `--engine podman` — use an existing rootless Podman installation for Windows-resource acquisition. The default is bubblewrap.
 
 Alternatively, download **Source code (zip)** from the [source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.3), extract it, and open a terminal in the extracted folder. Run the same installation command there. No Git checkout is needed for the ZIP workflow.
+
+Automatic session selection requires installer **0.3.4 or newer**. Preview 3 predates it; use the current clone or [download the latest branch source ZIP](https://github.com/Cencyte/Penguin-LGHUB/archive/refs/heads/release.zip) for this behavior.
 
 Preview 3 includes a Wine input fix for keys that remained held when G HUB worker threads sent the press and release through different Xwayland connections. The installer builds this fix automatically. [Isolated regression results](docs/packaging/host-keyboard-threads-verification.json) cover native Wayland and Xwayland destinations; physical-device confirmation on Bazzite remains pending.
 

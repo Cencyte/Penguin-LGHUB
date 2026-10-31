@@ -1,4 +1,4 @@
-"""Host-side checks and guidance for the opt-in KDE/Xwayland launcher.
+"""Host-side checks and guidance for the KDE/Xwayland launcher path.
 
 Only reads host capabilities. Never grants input permissions or changes KWin.
 """
@@ -13,11 +13,12 @@ from host_policy import os_identity, package_query
 
 HELP = '''Penguin-LGHUB
 
-Log in to Plasma (Wayland), then open Penguin-LGHUB. The existing
-X11 launcher remains available in a Plasma (X11) session. Quit one G HUB
-session before starting the other.
+Open Penguin-LGHUB from your desktop. The standard launcher automatically
+selects X11 or Plasma Wayland at each launch, sharing one installation and
+your G HUB settings. Quit G HUB before logging out to switch sessions.
+Switching sessions does not require reinstalling Penguin-LGHUB.
 
-When you first use a mapped key, KDE may ask to allow input control. Older
+On Wayland, when you first use a mapped key, KDE may ask to allow input control. Older
 Plasma versions can show an unnamed X11 application requesting keyboard and
 pointer access; newer versions can name lghub_agent.exe. Approve only the
 request triggered by your mapped key. Until you approve, mapped keys may do nothing.

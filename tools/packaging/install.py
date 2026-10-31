@@ -149,9 +149,8 @@ def _pipeline(args,ui,report,directory,state):
     destination=subprocess.check_output(['xdg-user-dir','DESKTOP'],text=True).strip()
     if not Path(destination).is_absolute():raise ValueError('Cannot resolve the Desktop directory')
     name='Penguin-LGHUB.desktop'
-    extra=['--experimental-wayland'] if report['session']=='wayland' else []
     step('launcher','Desktop','Install the launcher and project icon',cmd('desktop_runtime.py','install-entry',
-        '--config',desktop/'desktop.json','--destination',Path(destination)/name,*extra))
+        '--config',desktop/'desktop.json','--destination',Path(destination)/name,'--session','auto'))
 
 
 def main(argv=None):

@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "4f37e034cacf7491043d97e673a588c6b13262c6b25618d3490e95f8b1bff6a4",
-      "bytes": 64838
+      "sha256": "5bf1b9d82ad1d9430e99d270692cb21f417a1993cccc688a0856db97e73cafa3",
+      "bytes": 65389
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -470,8 +470,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "3c624fe57131ca441866dd5f036035fcdc0d718bb534d6ce0a10cf0b0d4ecec5",
-      "bytes": 16369
+      "sha256": "0ad970c0a52261faeed072d515d3a3586bec57de82e45cc4851ae77a846591fa",
+      "bytes": 17135
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -584,7 +584,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "b4ba3b0f49617fc553b7c944f6a63216b20dab53ad058998663ea21fba7440de",
+      "sha256": "e91f443f75ea214928882184a550f1af78c85dcd2a3233a16da83a2333606df5",
       "bytes": 252
     },
     {
@@ -1004,8 +1004,8 @@
     {
       "path": "tests/packaging/test_desktop_runtime.py",
       "mode": "100644",
-      "sha256": "f268f6a8f96d9b5fe6f0995cb085f93834667ee252d3d8e4c8ebe1ec5dbccfbe",
-      "bytes": 17263
+      "sha256": "bb62d33e090e6dc8d9de30609cd8034bc38ba5aea74e681add2b694e55794dba",
+      "bytes": 24257
     },
     {
       "path": "tests/packaging/test_desktop_shutdown.py",
@@ -1046,8 +1046,8 @@
     {
       "path": "tests/packaging/test_installer.py",
       "mode": "100644",
-      "sha256": "a651e7fd593e9307199eb3d326cb47d5513c9faa1dc2513f322347da9bd08be2",
-      "bytes": 7411
+      "sha256": "d73bb11420cadfb7477df40523d3ff88ed2864b286294a5a0657073bdddb1b39",
+      "bytes": 7759
     },
     {
       "path": "tests/packaging/test_linux_runtime.py",
@@ -1628,8 +1628,8 @@
     {
       "path": "tools/packaging/desktop_runtime.py",
       "mode": "100644",
-      "sha256": "51013cb1b6e940165b400ef8477a2a74ebb4d9a34de6dbfa26f8753756472c70",
-      "bytes": 30674
+      "sha256": "2c35db77f6392120325032979dc9b37bde3c9664c7bb3fd69c6c2f2ff392f7d4",
+      "bytes": 31882
     },
     {
       "path": "tools/packaging/dockur_acquire.py",
@@ -1670,8 +1670,8 @@
     {
       "path": "tools/packaging/install.py",
       "mode": "100644",
-      "sha256": "4294647a79e0d79832c12d0e947d790a79c2021346fc6daa522521516f2d7469",
-      "bytes": 11962
+      "sha256": "8b3b4b9a030b8c1feac2ecd44f5c31a10d036c15ca1004c2b1d55d9c1ae88eab",
+      "bytes": 11897
     },
     {
       "path": "tools/packaging/install_device_rules.py",
@@ -1838,8 +1838,8 @@
     {
       "path": "tools/packaging/wayland_session.py",
       "mode": "100644",
-      "sha256": "bd32c52ad7d3ce14e575fd1a8348895f54e89f3c54d07cbb31996cbced312b51",
-      "bytes": 5189
+      "sha256": "9420db2d41243ad553b673fa2c9e2569d41956a951f48e7def06afcd0bbca572",
+      "bytes": 5309
     },
     {
       "path": "tools/packaging/wayland_wine_probe.py",

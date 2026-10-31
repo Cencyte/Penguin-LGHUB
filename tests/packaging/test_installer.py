@@ -102,23 +102,27 @@ class InstallerTests(unittest.TestCase):
         self.assertFalse(result['end_to_end_qualified']);self.assertGreaterEqual(len(result['warnings']),2)
 
     def test_pipeline_orders_verification_before_privileged_and_launcher_steps(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp)/'installation';commands=[]
-            args=install.parser().parse_args(['--install','--directory',str(root)])
-            view=ui.Presentation(Path(tmp)/'transaction.log',stream=io.StringIO());self.addCleanup(view.close)
-            view.run=MagicMock();view.run.side_effect=lambda command:commands.append(list(map(str,command)))
-            with patch.object(install,'space_check'),patch.object(install.install_transaction,'synchronize'),patch.object(install.subprocess,'check_output',return_value=str(Path(tmp)/'Desktop')+'\n'):
-                install.pipeline(args,view,{'session':'wayland','selinux':'Enforcing'})
-            flattened=[' '.join(c) for c in commands]
-            ui_at=next(i for i,c in enumerate(flattened) if 'linux_ui_probe.py' in c)
-            sudo_at=next(i for i,c in enumerate(commands) if c[0]=='sudo')
-            launcher_at=next(i for i,c in enumerate(flattened) if 'install-entry' in c)
-            self.assertLess(ui_at,sudo_at);self.assertLess(sudo_at,launcher_at)
-            self.assertIn('--experimental-wayland',commands[launcher_at])
-            self.assertEqual(Path(commands[launcher_at][commands[launcher_at].index('--destination')+1]).name,'Penguin-LGHUB.desktop')
-            self.assertTrue(any('windows_media_acquire.py fetch' in c and '--decoder' in c for c in flattened))
-            self.assertTrue((root/'source/LICENSE').is_file())
-            state=json.loads((root/'installation.json').read_text())
-            self.assertTrue(state['installed']);self.assertTrue(state['owner_acceptance_pending'])
+        for session in ('x11', 'wayland'):
+            with self.subTest(session=session):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root=Path(tmp)/'installation';commands=[]
+                    args=install.parser().parse_args(['--install','--directory',str(root)])
+                    view=ui.Presentation(Path(tmp)/'transaction.log',stream=io.StringIO());self.addCleanup(view.close)
+                    view.run=MagicMock();view.run.side_effect=lambda command:commands.append(list(map(str,command)))
+                    with patch.object(install,'space_check'),patch.object(install.install_transaction,'synchronize'),patch.object(install.subprocess,'check_output',return_value=str(Path(tmp)/'Desktop')+'\n'):
+                        install.pipeline(args,view,{'session':session,'selinux':'Enforcing'})
+                    flattened=[' '.join(c) for c in commands]
+                    ui_at=next(i for i,c in enumerate(flattened) if 'linux_ui_probe.py' in c)
+                    sudo_at=next(i for i,c in enumerate(commands) if c[0]=='sudo')
+                    launcher_at=next(i for i,c in enumerate(flattened) if 'install-entry' in c)
+                    self.assertLess(ui_at,sudo_at);self.assertLess(sudo_at,launcher_at)
+                    self.assertNotIn('--experimental-wayland',commands[launcher_at])
+                    self.assertEqual(commands[launcher_at][commands[launcher_at].index('--session')+1],'auto')
+                    self.assertEqual(Path(commands[launcher_at][commands[launcher_at].index('--destination')+1]).name,'Penguin-LGHUB.desktop')
+                    self.assertTrue(any('windows_media_acquire.py fetch' in c and '--decoder' in c for c in flattened))
+                    self.assertTrue((root/'source/LICENSE').is_file())
+                    state=json.loads((root/'installation.json').read_text())
+                    self.assertTrue(state['installed']);self.assertTrue(state['owner_acceptance_pending'])
+
 
 if __name__=='__main__':unittest.main()

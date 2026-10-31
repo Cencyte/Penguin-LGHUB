@@ -1,10 +1,14 @@
 import json
+import contextlib
+import io
+import itertools
 import os
 from pathlib import Path
 import sys
 import tempfile
 import unittest
 import socket
+import shlex
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools/packaging'))
@@ -83,7 +87,7 @@ class DesktopRuntimeTests(unittest.TestCase):
         self.assertFalse(m.session_errors({'XDG_SESSION_TYPE': 'x11', 'DISPLAY': ':12.0'}))
         self.assertTrue(m.session_errors({'XDG_SESSION_TYPE': 'x11', 'DISPLAY': 'localhost:10.0'}))
 
-    def test_wayland_requires_explicit_opt_in_and_local_plasma(self):
+    def test_explicit_wayland_mode_requires_matching_local_plasma(self):
         env = {'XDG_SESSION_TYPE': 'wayland', 'DISPLAY': ':1',
                'WAYLAND_DISPLAY': 'wayland-0', 'XDG_CURRENT_DESKTOP': 'KDE'}
         self.assertTrue(m.session_errors(env))
@@ -91,6 +95,26 @@ class DesktopRuntimeTests(unittest.TestCase):
         for update in ({'DISPLAY': 'localhost:10.0'}, {'XDG_CURRENT_DESKTOP': 'GNOME'},
                        {'WAYLAND_DISPLAY': ''}, {'XDG_SESSION_TYPE': 'x11'}):
             self.assertTrue(m.session_errors(dict(env, **update), True))
+
+    def test_automatic_selection_requires_a_known_login_session(self):
+        for session in ('', 'tty', 'unspecified'):
+            with self.subTest(session=session):
+                env = {'XDG_SESSION_TYPE': session, 'DISPLAY': ':0', 'WAYLAND_DISPLAY': 'wayland-0'}
+                self.assertTrue(m.session_report(env)['errors'])
+                with self.assertRaisesRegex(ValueError, 'Cannot determine'):
+                    m.resolve_wayland(env)
+        self.assertFalse(m.resolve_wayland({'XDG_SESSION_TYPE': 'x11', 'WAYLAND_DISPLAY': 'stale'}))
+        self.assertTrue(m.resolve_wayland({'XDG_SESSION_TYPE': 'wayland', 'DISPLAY': ':0'}))
+
+    def test_automatic_wayland_keeps_capability_checks_and_never_falls_back(self):
+        env = {'XDG_SESSION_TYPE': 'wayland', 'DISPLAY': ':1',
+               'WAYLAND_DISPLAY': 'wayland-0', 'XDG_CURRENT_DESKTOP': 'KDE'}
+        with patch.object(wayland_session, 'inspect', return_value={'errors': ['portal missing']}) as inspect:
+            self.assertEqual(m.session_report(env)['errors'], ['portal missing'])
+            inspect.assert_called_once()
+        with patch.object(wayland_session, 'inspect') as inspect:
+            self.assertTrue(m.session_report(dict(env, XDG_CURRENT_DESKTOP='GNOME'))['errors'])
+            inspect.assert_not_called()
 
     def test_wayland_socket_must_be_real_and_inside_owned_runtime(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -207,7 +231,7 @@ class DesktopRuntimeTests(unittest.TestCase):
             text = dest.read_text()
             self.assertIn('\nName=Penguin-LGHUB\n', text)
             self.assertNotIn('test','\n'.join(line for line in text.splitlines() if line.startswith(('Name=','Comment='))).lower())
-            self.assertIn('/test space/%%config.json" launch', text)
+            self.assertIn('/test space/%%config.json" --session auto launch', text)
             self.assertIn('Icon=' + str(root / 'penguin-lghub.png'), text)
             self.assertEqual((root / 'penguin-lghub.png').read_bytes(), m.ICON.read_bytes())
             self.assertIn('[Desktop Action Stop]', text)
@@ -215,7 +239,7 @@ class DesktopRuntimeTests(unittest.TestCase):
             with self.assertRaises(FileExistsError):
                 m.install_entry(Path('/elsewhere'), dest)
 
-    def test_wayland_entry_is_opt_in_for_launch_and_check_and_keeps_quit(self):
+    def test_explicit_wayland_entry_pins_launch_and_check_and_keeps_quit(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); entry = root / 'Wayland test.desktop'
             m.install_entry(root / 'desktop.json', entry, True)
@@ -224,8 +248,82 @@ class DesktopRuntimeTests(unittest.TestCase):
             self.assertNotIn('Wayland test',text)
             self.assertIn('Name=Open logs\n',text)
             for action in ('launch', 'check --dialog', 'stop', 'help', 'logs'):
-                self.assertIn('--experimental-wayland ' + action, text)
+                self.assertIn('--session wayland ' + action, text)
             self.assertEqual((root / 'penguin-lghub.png').read_bytes(), m.ICON.read_bytes())
+
+    def test_same_entry_switches_x11_wayland_and_back_with_one_prefix(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'desktop';root.mkdir();(root / 'logs').mkdir()
+            config_path = root / 'desktop.json'
+            config_path.write_text(json.dumps({'linux_runtime': str(root / 'linux')}))
+            settings = root / 'settings';settings.write_bytes(b'keep my settings')
+            entry = root / 'Penguin-LGHUB.desktop'
+            m.install_entry(config_path, entry)
+            saved_entry = entry.read_bytes();saved_config = config_path.read_bytes()
+            command = shlex.split(next(line[5:] for line in entry.read_text().splitlines() if line.startswith('Exec=')))
+            for action in ('launch', 'check --dialog', 'help', 'logs', 'stop'):
+                self.assertIn('--session auto ' + action, entry.read_text())
+            calls = []
+            def run(config_path, config, output, worker, stream, feedback, wayland):
+                calls.append((output, worker, wayland, m.session_environment(os.environ, wayland)))
+                return 0
+            clock = itertools.count()
+            with patch.object(m, 'verify'), patch.object(m.startup_feedback, 'Feedback'), \
+                 patch.object(m.desktop, 'reopen_or_lock', return_value=False), \
+                 patch.object(m.desktop, 'prefix_processes', return_value=[]), \
+                 patch.object(m.desktop, 'freeze_updates'), \
+                 patch.object(m.socket, 'socket') as sock, \
+                 patch.object(m, 'work_lock', side_effect=lambda *a, **kw: contextlib.nullcontext()), \
+                 patch.object(m.time, 'strftime', side_effect=lambda fmt: 'launch-'+str(next(clock))), \
+                 patch.object(m, 'run_container_session', side_effect=run), \
+                 patch.object(wayland_session, 'inspect', return_value={'mode':'experimental-kde-xwayland', 'errors':[]}), \
+                 patch.object(m.os, 'geteuid', return_value=1000):
+                sock.return_value.__enter__.return_value.connect_ex.return_value = 1
+                for session in ('x11', 'wayland', 'x11'):
+                    env = {'XDG_SESSION_TYPE': session, 'DISPLAY': ':1', 'WAYLAND_DISPLAY': 'wayland-0',
+                           'XDG_CURRENT_DESKTOP': 'KDE'}
+                    with self.subTest(session=session), patch.dict(os.environ, env, clear=True), \
+                         patch.object(sys, 'argv', command[1:]):
+                        self.assertEqual(m.main(), 0)
+                        output, worker, wayland, cleaned = calls[-1]
+                        self.assertEqual(output, root)
+                        self.assertEqual(wayland, session == 'wayland')
+                        self.assertEqual(worker[worker.index('--session')+1], session)
+                        self.assertEqual('WAYLAND_DISPLAY' in cleaned, session == 'wayland')
+                        # Check setup uses the same automatic route as launch.
+                        check_command = command[1:-1] + ['check']
+                        with patch.object(sys, 'argv', check_command), contextlib.redirect_stdout(io.StringIO()) as report:
+                            self.assertEqual(m.main(), 0)
+                        expected = 'experimental-kde-xwayland' if wayland else 'x11'
+                        self.assertEqual(json.loads(report.getvalue())['session']['mode'], expected)
+                        # The container receives an explicit, already-resolved mode.
+                        with patch.object(sys, 'argv', worker[1:]), patch.object(m, 'worker', return_value=0) as child:
+                            self.assertEqual(m.main(), 0)
+                            self.assertEqual(child.call_args.args[-1], wayland)
+                        self.assertEqual(entry.read_bytes(), saved_entry)
+                        self.assertEqual(config_path.read_bytes(), saved_config)
+                        self.assertEqual(settings.read_bytes(), b'keep my settings')
+            self.assertEqual([call[2] for call in calls], [False, True, False])
+
+    def test_nonlaunch_actions_do_not_require_an_active_display_session(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config = Path(tmp) / 'desktop.json';config.write_text('{}')
+            with patch.dict(os.environ, {}, clear=True), patch.object(m.os, 'geteuid', return_value=1000), \
+                 patch.object(m.desktop, 'stop') as stop, patch.object(m.subprocess, 'run') as run, \
+                 patch.object(m, 'show_message'), patch.object(m, 'resolve_wayland', side_effect=AssertionError('must not probe')):
+                for action in ('stop', 'logs', 'help'):
+                    with patch.object(sys, 'argv', ['desktop_runtime.py', '--config', str(config), action]), \
+                         contextlib.redirect_stdout(io.StringIO()):
+                        self.assertEqual(m.main(), 0)
+                stop.assert_called_once();run.assert_called_once_with(['xdg-open', str(config.parent / 'logs')], check=True)
+
+    def test_legacy_wayland_flag_remains_compatible_and_overrides_auto(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config = Path(tmp) / 'desktop.json';config.write_text('{}')
+            with patch.object(sys, 'argv', ['desktop_runtime.py', '--config', str(config), '--experimental-wayland', 'launch']), \
+                 patch.object(m.os, 'geteuid', return_value=1000), patch.object(m, 'launch', return_value=0) as launch:
+                self.assertEqual(m.main(), 0)
+                self.assertIs(launch.call_args.args[-1], True)
 
     def test_registration_makes_shortcut_discoverable_without_overwriting_other_apps(self):
         with tempfile.TemporaryDirectory() as tmp:

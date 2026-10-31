@@ -15,15 +15,29 @@ cd Penguin-LGHUB-release
 
 A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.3) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
 
+Automatic X11/Wayland session selection requires installer 0.3.4 or newer.
+Preview 3 predates it; use the current clone or the
+[latest branch source ZIP](https://github.com/Cencyte/Penguin-LGHUB/archive/refs/heads/release.zip)
+to install this behavior.
+
 The repository currently requires GitHub access while it remains private.
 Run as your regular user. The installer requests sudo for its small Logitech
-device-rule helper; it never starts G HUB as root. It installs a launcher for
-the current session in the resolved Desktop and application-menu directories,
-with the project icon and Quit/check/log actions. For the other session on an
-OS that offers both, use `desktop_runtime.py install-entry` with the installed
-`desktop/desktop.json` configuration. For a Wayland launcher, add:
+device-rule helper; it never starts G HUB as root. It installs one
+**Penguin-LGHUB** Desktop launcher and an application-menu copy, with the
+project icon and Quit/check/log actions. Both launch paths share the same Wine
+runtime, prefix and G HUB settings. Each launch selects X11 or KDE Plasma Wayland
+from the current login session; logging out and changing sessions does not
+require another installation. Quit G HUB before switching sessions.
 
-- `--experimental-wayland` — enable the Plasma/Xwayland launcher path.
+Check setup inspects the current session. Wayland keeps its Xwayland, KWin,
+portal and user-consent requirements; automatic selection does not grant input
+permission or fall back to X11 when a Wayland capability is missing.
+
+For diagnostics, `desktop_runtime.py` accepts:
+
+- `--session auto` — select the login session on each launch (the default).
+- `--session x11` or `--session wayland` — require the selected session explicitly.
+- `--experimental-wayland` — retained as a legacy alias for `--session wayland`.
 
 Bazzite's intended test is its default Plasma Wayland session; setup does not
 add an unsupported full-X11 desktop.

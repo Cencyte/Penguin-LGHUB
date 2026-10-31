@@ -70,7 +70,21 @@ def session_errors(env, experimental_wayland=False):
     return errors
 
 
-def session_report(env, experimental_wayland=False):
+def resolve_wayland(env, override=None):
+    """Resolve each invocation from the login session, never DISPLAY alone."""
+    if override is not None:
+        return override
+    session = env.get('XDG_SESSION_TYPE')
+    if session not in ('x11', 'wayland'):
+        raise ValueError('Cannot determine the desktop session. Open Penguin-LGHUB from a local X11 or Plasma (Wayland) login.')
+    return session == 'wayland'
+
+
+def session_report(env, experimental_wayland=None):
+    try:
+        experimental_wayland = resolve_wayland(env, experimental_wayland)
+    except ValueError as error:
+        return {'mode': 'unknown', 'errors': [str(error)]}
     report = {'mode': 'experimental-kde-xwayland' if experimental_wayland else 'x11',
               'errors': session_errors(env, experimental_wayland)}
     if experimental_wayland and not report['errors']:
@@ -379,19 +393,20 @@ def run_container_session(config_path, config, root, command, stream, feedback, 
         stream.flush()
 
 
-def launch(config_path, config, root, experimental_wayland=False):
+def launch(config_path, config, root, experimental_wayland=None):
     # Complete X11 startup feedback when the real window is ready or startup
     # fails. Plasma manages its separate Wayland activation feedback itself.
     with startup_feedback.Feedback(os.environ) as feedback:
         return launch_with_feedback(config_path, config, root, feedback, experimental_wayland)
 
 
-def launch_with_feedback(config_path, config, root, feedback, experimental_wayland=False):
+def launch_with_feedback(config_path, config, root, feedback, experimental_wayland=None):
     receipt = root.parent / 'installation.json'
     if receipt.exists() and not load_installation(root.parent).get('installed'):
         raise RuntimeError('Installation has not committed successfully; rerun the installer to recover.')
     if (root.parent / '.uninstalling').exists():
         raise RuntimeError('This installation is being removed; run --uninstall again if interrupted.')
+    experimental_wayland = resolve_wayland(os.environ, experimental_wayland)
     report = session_report(os.environ, experimental_wayland)
     if report['errors']:
         raise RuntimeError('\n'.join(report['errors']))
@@ -408,15 +423,17 @@ def launch_with_feedback(config_path, config, root, feedback, experimental_wayla
             if probe.connect_ex(('127.0.0.1', 9010)) == 0:
                 raise RuntimeError('Another G HUB agent owns port 9010. Quit that session before launching this one.')
         desktop.freeze_updates(root / 'prefix', root / 'logs')
-        command = ['/usr/bin/python3', str(SCRIPT), '--config', str(config_path), '_session']
+        mode = 'wayland' if experimental_wayland else 'x11'
+        command = ['/usr/bin/python3', str(SCRIPT), '--config', str(config_path), '--session', mode, '_session']
         if experimental_wayland:
-            command.append('--experimental-wayland')
             (root / 'logs/wayland-preflight.json').write_text(json.dumps(report, indent=2) + '\n')
         log = root / 'logs' / (time.strftime('%Y%m%d-%H%M%S') + f'-{os.getpid()}-desktop.log')
         busy = ('The shared Penguin LGHUB runtime is still in use by another launch or setup operation. '
                 'Use that launcher\'s “Quit this G HUB session” action and let it finish before retrying. '
                 f'Runtime: {config["linux_runtime"]}')
         with work_lock(Path(config['linux_runtime']), busy_message=busy), log.open('x') as stream:
+            stream.write(f'Desktop session mode: {mode}\n')
+            stream.flush()
             status = run_container_session(config_path, config, root, command, stream, feedback, experimental_wayland)
         if status:
             if status == 75:
@@ -426,12 +443,12 @@ def launch_with_feedback(config_path, config, root, feedback, experimental_wayla
         return 0
 
 
-def install_entry(config_path, destination, experimental_wayland=False, applications=None):
+def install_entry(config_path, destination, experimental_wayland=None, applications=None):
     def quote(s):
         return '"' + str(s).replace('\\', '\\\\').replace('"', '\\"').replace('`', '\\`').replace('$', '\\$').replace('%', '%%') + '"'
     command = ' '.join(map(quote, (sys.executable, SCRIPT, '--config', config_path)))
-    if experimental_wayland:
-        command += ' --experimental-wayland'
+    mode = 'auto' if experimental_wayland is None else ('wayland' if experimental_wayland else 'x11')
+    command += ' --session ' + mode
     # Keep the icon with this installation, independent of the source checkout
     # and of the host's icon theme. Upgrading a launcher does not touch Wine.
     icon = config_path.parent / 'penguin-lghub.png'
@@ -442,15 +459,14 @@ def install_entry(config_path, destination, experimental_wayland=False, applicat
     icon_value = str(icon).replace('\\', '\\\\').replace('\n', '\\n').replace('\r', '\\r')
     name = 'Penguin-LGHUB'
     comment = 'Logitech G HUB with the private Wine runtime'
-    actions = 'Check;Help;Logs;Stop;' if experimental_wayland else 'Check;Stop;'
+    actions = 'Check;Help;Logs;Stop;'
     content = (f'[Desktop Entry]\nType=Application\nName={name}\nComment={comment}\n'
                f'Exec={command} launch\nTerminal=false\nIcon={icon_value}\n'
                f'StartupNotify=true\nStartupWMClass=lghub.exe\nActions={actions}\n\n'
                f'[Desktop Action Check]\nName=Check setup\nExec={command} check --dialog\n\n'
                f'[Desktop Action Stop]\nName=Quit this G HUB session\nExec={command} stop\n')
-    if experimental_wayland:
-        content += (f'\n[Desktop Action Help]\nName=Help\nExec={command} help\n'
-                    f'\n[Desktop Action Logs]\nName=Open logs\nExec={command} logs\n')
+    content += (f'\n[Desktop Action Help]\nName=Help\nExec={command} help\n'
+                f'\n[Desktop Action Logs]\nName=Open logs\nExec={command} logs\n')
     paths = [destination] + ([applications / destination.name] if applications is not None else [])
     record_launchers(config_path, paths, content.encode(), applications)
     write_entry(destination, content.encode(), 0o755)
@@ -496,9 +512,13 @@ def main():
     p.add_argument('--dialog', action='store_true')
     p.add_argument('--x11-restore-module', type=Path, help='Verified optional Wine 10.20 restore driver')
     p.add_argument('--desktop-init-module', type=Path, help='Verified optional Wine desktop initialization guard')
-    p.add_argument('--experimental-wayland', action='store_true',
-                   help='Enable the KDE Plasma/Xwayland launcher; never grants input permissions')
+    session_options = p.add_mutually_exclusive_group()
+    session_options.add_argument('--session', choices=('auto', 'x11', 'wayland'), default='auto',
+                                 help='Select the current login session automatically (default), or require a specific session')
+    session_options.add_argument('--experimental-wayland', dest='session', action='store_const', const='wayland',
+                                 help='Legacy alias for --session wayland; never grants input permissions')
     a = p.parse_args()
+    experimental_wayland = {'auto': None, 'x11': False, 'wayland': True}[a.session]
     if os.geteuid() == 0:
         raise ValueError('Run this launcher as the desktop user, never root')
     if a.action == 'prepare':
@@ -536,7 +556,7 @@ def main():
         return 0
     if a.action == 'check':
         verify(config, root)
-        session = session_report(os.environ, a.experimental_wayland)
+        session = session_report(os.environ, experimental_wayland)
         report = {'runtime_integrity': 'passed', 'session_errors': session['errors'], 'session': session,
                   'logitech_hidraw': device_status(), 'end_to_end_qualified': False}
         print(json.dumps(report, indent=2))
@@ -558,12 +578,12 @@ def main():
             p.error('--destination is required')
         verify(config, root)
         applications = Path(os.environ.get('XDG_DATA_HOME', str(Path.home() / '.local/share'))) / 'applications'
-        install_entry(config_path, a.destination.expanduser().resolve(), a.experimental_wayland, applications)
+        install_entry(config_path, a.destination.expanduser().resolve(), experimental_wayland, applications)
         return 0
     if a.action == '_session':
-        return worker(config, root, root / 'session.json', a.experimental_wayland)
+        return worker(config, root, root / 'session.json', resolve_wayland(os.environ, experimental_wayland))
     try:
-        return launch(config_path, config, root, a.experimental_wayland)
+        return launch(config_path, config, root, experimental_wayland)
     except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
         # Desktop-entry stderr may disappear. Preserve the call site so a
         # future EAGAIN can be distinguished from unrelated socket/fork errors.
