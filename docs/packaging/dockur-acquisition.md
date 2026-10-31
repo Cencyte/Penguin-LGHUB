@@ -138,7 +138,7 @@ python tools/packaging/windows_media_acquire.py verify \
   --directory /mnt/Captures/penguin-lghub-acquisition/windows-26100.8737/reproduction-002/dlls
 ```
 
-The successful recorded run used `reproduction-001`; do not overwrite it. Final DLLs and `verification.json` remain in the output directory. Extraction intermediates and the helper prefix remain available for inspection. Downloads reserve remaining bytes plus a 20 GiB free-space floor; reconstruction requires another 2 GiB of headroom above that floor on each workspace filesystem and checks between bounded stages. This is not a quota against unrelated disk writers. There is no automatic cleanup or copying into a runtime prefix.
+The successful recorded run used `reproduction-001`; do not overwrite it. Final DLLs and `verification.json` remain in the output directory. Extraction intermediates and the helper prefix remain available for inspection. Downloads reserve remaining bytes plus a 2 GiB free-space floor; reconstruction requires another 2 GiB of headroom above that floor on each workspace filesystem and checks between bounded stages. This is not a quota against unrelated disk writers. There is no automatic cleanup or copying into a runtime prefix.
 
 Validation: **24 packaging tests passed**, including download integrity/resumption, concurrent-writer exclusion, existing-prefix rejection, resource bounds, CIX architecture/hash/range selection, unsafe archive entries, and the earlier VM controller checks. The fresh-directory reconstruction itself passed all four delta applications and both final comparisons.
 

@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "basis": "Offline lifetime analysis of pinned source installer; completed Bazzite files rounded to 4 KiB, with every hardlink/reflink copy counted separately. Component budgets include compilation/replacement scratch; no compression or link savings assumed. Planning budget, not a measured live peak or filesystem quota.",
+  "recipe_locks": {
+    "packaging/toolchain.lock.json": "7d29ad276cbadf743e17772d607c1ca82a8c5e6cebfb1ea018872ffafbc2fac2",
+    "packaging/linux-sdk.lock.json": "d337f2016b24d8d8da022fa4d5fde867a9ef0323dc2d974b1d726e7ed782dcba",
+    "packaging/wine-runtime.lock.json": "e6240889c5f1eb5532cfe815a447c9a553a133aa7b23c4cda6a77085964efe24",
+    "packaging/linux-runtime.lock.json": "2176527a287d94b7490683d8c09f1f99be36aa747825f5df2c5720960de16a79",
+    "packaging/linux-test-tools.lock.json": "8615825689dbf0ef10d123fb058787eb8a50c249ef2be60b47ad0ffd1972b88e",
+    "packaging/windows-acquisition.lock.json": "a427e2350a75ae3112def6da0ac861b721da4219194449b70993536de984a41b",
+    "packaging/logitech-depots.lock.json": "8a0128c8cf4456355828a8bfadc4e1aa3df272f2c250c5c66ec4a85adb4e7d66"
+  },
+  "filesystem_allowance_bytes": 2147483648,
+  "free_space_floor_bytes": 2147483648,
+  "components": {
+    "source": {
+      "path": "source",
+      "budget_bytes": 134217728,
+      "observed_4k_bytes": 5959680,
+      "observed_files": 372
+    },
+    "cache": {
+      "path": "work/cache",
+      "budget_bytes": 2147483648,
+      "observed_4k_bytes": 1595617280,
+      "observed_files": 247
+    },
+    "toolchain": {
+      "path": "toolchain",
+      "budget_bytes": 6442450944,
+      "observed_4k_bytes": 4857479168,
+      "observed_files": 64225
+    },
+    "build": {
+      "path": "work/source-build",
+      "budget_bytes": 2147483648,
+      "observed_4k_bytes": 753696768,
+      "observed_files": 13794
+    },
+    "wine": {
+      "path": "work/built-wine",
+      "budget_bytes": 1073741824,
+      "observed_4k_bytes": 553492480,
+      "observed_files": 2568
+    },
+    "linux": {
+      "path": "linux-runtime",
+      "budget_bytes": 7516192768,
+      "observed_4k_bytes": 6289174528,
+      "observed_files": 70968
+    },
+    "helpers": {
+      "path": "helpers",
+      "budget_bytes": 536870912,
+      "observed_4k_bytes": 232210432,
+      "observed_files": 5433
+    },
+    "media": {
+      "path": "work/windows-cache",
+      "budget_bytes": 10737418240,
+      "observed_4k_bytes": 9833664512,
+      "observed_files": 7
+    },
+    "reconstruction": {
+      "path": "work/windows-reconstructed",
+      "budget_bytes": 536870912,
+      "observed_4k_bytes": 229642240,
+      "observed_files": 15
+    },
+    "decoder": {
+      "path": "work/windows-control",
+      "budget_bytes": 1610612736,
+      "observed_4k_bytes": 368750592,
+      "observed_files": 1845
+    },
+    "depots": {
+      "path": "work/logitech-cache",
+      "budget_bytes": 1073741824,
+      "observed_4k_bytes": 910553088,
+      "observed_files": 62
+    },
+    "stage": {
+      "path": "work/logitech-stage",
+      "budget_bytes": 2147483648,
+      "observed_4k_bytes": 1542664192,
+      "observed_files": 1555
+    },
+    "candidate": {
+      "path": "work/candidate",
+      "budget_bytes": 5368709120,
+      "observed_4k_bytes": 2918998016,
+      "observed_files": 3421
+    },
+    "desktop": {
+      "path": "desktop",
+      "budget_bytes": 5368709120,
+      "observed_4k_bytes": 3063349248,
+      "observed_files": 3664
+    },
+    "loader": {
+      "path": "work/loader-audit",
+      "budget_bytes": 2147483648,
+      "observed_4k_bytes": 426725376,
+      "observed_files": 1816
+    },
+    "ui": {
+      "path": "work/ui-audit",
+      "budget_bytes": 5368709120,
+      "observed_4k_bytes": 3051458560,
+      "observed_files": 3668
+    }
+  },
+  "phases": [
+    {
+      "name": "tool-prepare",
+      "components": [
+        "source",
+        "cache",
+        "toolchain"
+      ]
+    },
+    {
+      "name": "wine",
+      "components": [
+        "source",
+        "cache",
+        "toolchain",
+        "build",
+        "wine"
+      ]
+    },
+    {
+      "name": "helpers",
+      "components": [
+        "source",
+        "cache",
+        "toolchain",
+        "wine",
+        "linux",
+        "helpers"
+      ]
+    },
+    {
+      "name": "windows",
+      "components": [
+        "source",
+        "toolchain",
+        "wine",
+        "linux",
+        "helpers",
+        "media",
+        "reconstruction",
+        "decoder"
+      ]
+    },
+    {
+      "name": "prefix",
+      "components": [
+        "source",
+        "wine",
+        "linux",
+        "helpers",
+        "reconstruction",
+        "depots",
+        "stage",
+        "candidate"
+      ]
+    },
+    {
+      "name": "loader",
+      "components": [
+        "source",
+        "wine",
+        "linux",
+        "helpers",
+        "candidate",
+        "desktop",
+        "loader"
+      ]
+    },
+    {
+      "name": "ui",
+      "components": [
+        "source",
+        "wine",
+        "linux",
+        "helpers",
+        "candidate",
+        "desktop",
+        "ui"
+      ]
+    },
+    {
+      "name": "installed",
+      "components": [
+        "source",
+        "wine",
+        "linux",
+        "helpers",
+        "desktop"
+      ]
+    }
+  ]
+}

@@ -41,6 +41,7 @@ STEPS = {
     'test_dockur_acquire': ('Windows', 'Test acquisition configuration and boundaries'),
     'test_frontend_startup': ('G HUB', 'Test frontend resource transformations'),
     'test_install_transaction': ('System', 'Test installation commit, rollback and recovery'),
+    'test_install_storage': ('Tools', 'Test storage budgets and verified workspace cleanup'),
     'test_installer': ('Verify', 'Test installer steps, logging and retry behavior'),
     'test_linux_runtime': ('Tools', 'Test private Linux libraries and archive handling'),
     'test_linux_sdk': ('Tools', 'Test private SDK preparation'),

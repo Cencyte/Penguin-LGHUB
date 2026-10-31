@@ -16,10 +16,11 @@ import struct
 import time
 import urllib.parse
 import urllib.request
+from install_storage import FREE_SPACE_FLOOR
 
 ROOT = Path(__file__).resolve().parents[2]
 LOCK_PATH = ROOT / 'packaging/windows-acquisition.lock.json'
-FLOOR = 20 * 1024**3
+FLOOR = FREE_SPACE_FLOOR
 
 
 def official_url(url):
@@ -52,7 +53,7 @@ def digest_file(path, algorithms=('sha256',)):
 
 def space_check(path, remaining=0):
     if shutil.disk_usage(path).free < FLOOR + remaining:
-        raise RuntimeError('Insufficient space: reserve unfinished download plus 20 GiB')
+        raise RuntimeError('Insufficient space: reserve pending output plus 2 GiB of free headroom')
 
 
 def check_asset(path, asset):

@@ -85,7 +85,7 @@ The complete custom Wine build recipe remains separate release work; the SDK
 command below rebuilds **two upstream Unix modules only**.
 
 Use new output directories outside the checkout. These commands preserve a
-20 GiB free-space floor. SDK preparation reserves 7 GiB beyond that floor;
+2 GiB free-space floor. SDK preparation reserves 7 GiB beyond that floor;
 limit build concurrency with `--jobs` (1–16, default 4).
 
 ```sh

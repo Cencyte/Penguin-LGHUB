@@ -24,7 +24,7 @@ def mounted_paths():
 
 
 def check_tree(root):
-    for name in ('desktop', 'work', 'source', 'logs', 'toolchain', 'linux-runtime', 'helpers'):
+    for name in ('desktop', 'work', 'source', 'logs', 'toolchain', 'linux-runtime', 'helpers', 'provenance'):
         if (root / name).is_symlink():
             raise RuntimeError('Managed top-level directory is now a symlink: ' + str(root / name))
     for mount in mounted_paths():

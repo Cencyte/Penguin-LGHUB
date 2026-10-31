@@ -167,5 +167,28 @@
     "Decision on full Bazzite X11 provenance requirement",
     "Corresponding-source and notices audit before hosting a compiled runtime release"
   ],
-  "end_to_end_qualified": false
+  "end_to_end_qualified": false,
+  "storage_revision_0_3_5": {
+    "required_initial_free_gib": 31,
+    "lower_level_free_floor_gib": 2,
+    "offline_largest_stage_budget_gib": 26.625,
+    "filesystem_allowance_gib": 2,
+    "analysis": "Pinned component lifetimes with complete Bazzite artifacts rounded to 4 KiB; every hardlink/reflink counted separately. Conservative offline planning budget, not a live measurement.",
+    "budget": "packaging/install-storage.json",
+    "project_tests": {
+      "passed": 205,
+      "failed": 0
+    },
+    "rollback_command_boundaries_passed": 23,
+    "cleanup_error_rollback_passed": true,
+    "read_only_production_inventory": {
+      "disposable_directories_hidden": 11,
+      "passed": true,
+      "app_launched": false,
+      "existing_files_modified": false
+    },
+    "live_peak_measured": false,
+    "fresh_full_install_after_change": false,
+    "existing_installations_pruned": false
+  }
 }

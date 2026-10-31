@@ -18,6 +18,7 @@ from installer_ui import Presentation, STYLE
 import host_preflight
 import installation_state
 import install_transaction
+import install_storage
 
 HELP='''USAGE
   ./install.sh --install [--verbose] [--directory <path>] [--engine <bwrap|podman>]
@@ -77,6 +78,13 @@ def _pipeline(args,ui,report,directory,state):
     source_id=fingerprint()
     if state['source']!=source_id:
         raise ValueError('This installation belongs to another source revision; choose a new --directory to preserve it.')
+    capacity=install_storage.capacity_plan(ROOT)
+    ui.step('System','Check installation working space')
+    ui.output(f"Offline capacity budget: {capacity['required_free_bytes']/1024**3:.0f} GiB free, "
+              'including filesystem allowance and 2 GiB headroom\n')
+    space_check(directory,capacity['required_free_bytes']-install_storage.FREE_SPACE_FLOOR)
+    (directory/'provenance').mkdir(exist_ok=True)
+    save(directory/'provenance/storage-budget.json',capacity)
     work=directory/'work';work.mkdir(exist_ok=True)
     cache=work/'cache';cache.mkdir(exist_ok=True)
     code=directory/'source'
@@ -97,8 +105,8 @@ def _pipeline(args,ui,report,directory,state):
         saved=installation_state.load(directory)
         for key in ('launchers','created_directories'):state[key]=saved[key]
         state['completed'].append(name);state.pop('active',None);installation_state.save(directory,state)
-    # Reserve for downloads, SDK, build tree, new prefix and rollback headroom.
-    if not state['completed']:space_check(directory,60*1024**3)
+        if name in install_storage.PRUNE_AFTER:
+            install_storage.prune_verified(directory,name,ui)
     step('tool-fetch','Downloads','Verify private toolchain inputs',cmd('toolchain.py','fetch','--cache',cache))
     sdk=directory/'toolchain'
     step('tool-prepare','Tools','Assemble private acquisition and build tools',cmd('toolchain.py','prepare','--cache',cache,'--root',sdk))

@@ -42,14 +42,49 @@ For diagnostics, `desktop_runtime.py` accepts:
 Bazzite's intended test is its default Plasma Wayland session; setup does not
 add an unsupported full-X11 desktop.
 
-Initial scope: x86-64 Manjaro, CachyOS and Bazzite KDE. Reserve **80 GiB free**
-for the first build, downloaded media, extracted depots, verification copies and
-20 GiB of retained headroom. This is a working-space requirement, not a download
-size. A failed installation removes its downloads; a new attempt starts clean after rollback. To choose another storage location, add:
+Initial scope: x86-64 Manjaro, CachyOS and Bazzite KDE. Reserve **31 GiB free**
+for the pinned source installer. This is an offline capacity budget, including
+filesystem overhead and 2 GiB of free headroom. Verified downloads, build tools
+and test copies are removed after their final use. This is working space, not
+the download size or final application size. A failed installation rolls back;
+a new attempt starts clean. To choose another storage location, add:
 
 - `--directory /path/to/spacious/local/storage` — store the runtime, prefix and build files here.
 
 Keep that directory after installation: it contains the actual runtime and desktop prefix.
+
+The capacity calculation is recorded in
+[`packaging/install-storage.json`](../../packaging/install-storage.json) and bound
+to the seven acquisition/runtime lock files. Changed pins require a budget review.
+It uses the pinned operations and completed Bazzite artifacts, with files rounded
+to 4 KiB and every hardlinked/reflinked copy counted separately. Component budgets
+allow for compilation scratch, temporary replacements and prefix growth. The
+largest planned stage is DLL reconstruction: **26.625 GiB**, including the SDK,
+Linux libraries, Wine, helpers, both media downloads and reconstruction work.
+Adding **2 GiB for filesystem overhead** and **2 GiB left free**, then rounding
+up, gives **31 GiB**. This is a conservative offline planning bound, not a measured
+live peak or a filesystem quota; concurrent unrelated writes can still exhaust
+space. Lower-level output/download checks retain the same 2 GiB floor.
+
+| Stage | Budget for simultaneously present files |
+|---|---:|
+| Toolchain extraction | 8.125 GiB |
+| Wine compilation | 11.125 GiB |
+| Linux libraries and helpers | 16.625 GiB |
+| Windows DLL reconstruction | 26.625 GiB |
+| G HUB prefix preparation | 17.125 GiB |
+| Loader verification | 20.625 GiB |
+| UI/tray verification | 23.625 GiB |
+
+The earlier completed installation contained 28.8 GiB of files, including retained
+build/test material; that observation was not a live peak measurement. Its active
+runtime, prefix, helpers and implementation source contained approximately 4.4 GiB
+with hardlinks counted once. Successful installation now removes disposable work,
+while retaining small reports under `provenance/`, central logs, `work/built-wine`,
+and G HUB's required depot cache inside the active prefix. Cleanup is part of the
+transaction: an error still rolls back the new installation. Existing committed
+installations are never automatically pruned. Standalone development helpers keep
+their outputs for inspection; automatic disposal belongs to `install.sh --install`.
 
 Host prerequisites are Python 3.12+, bubblewrap, zstd, sudo, udev, XDG user
 directories, gdbus and kdialog, with authenticated local X11/Xwayland access;

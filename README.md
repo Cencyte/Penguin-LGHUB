@@ -74,9 +74,9 @@ Setup requests sudo for scoped Logitech device-access rules. It checks host prer
 </details>
 
 <details>
-<summary><strong>⚠️ Installation requires 80 GiB of free working space</strong></summary>
+<summary><strong>⚠️ Installation requires 31 GiB of free working space</strong></summary>
 
-Allow **80 GiB free on the filesystem containing the installation directory** (about 86 GB in decimal units). The current source installer reserves space for downloads, build tools, extracted resources, verification copies and 20 GiB of headroom. This is free working space, not the download size or the final application's size. Use `--directory` to choose another local filesystem with enough room.
+Allow **31 GiB free on the filesystem containing the installation directory** (about 33 GB in decimal units). The pinned recipe uses an offline stage budget, including filesystem overhead and 2 GiB of free headroom. Verified temporary inputs and test copies are removed as installation progresses. This is free working space, not the download size or the final application's size. Use `--directory` to choose another local filesystem with enough room.
 
 </details>
 
@@ -136,7 +136,7 @@ session is the current installation target.
 
 ### Installation requirements:
 
-Use a supported x86-64 KDE desktop, a regular user with sudo access, and **80 GiB free on the installation filesystem**. The installer checks required host tools before acquisition; see the [full prerequisites](docs/packaging/release-installer.md).
+Use a supported x86-64 KDE desktop, a regular user with sudo access, and **31 GiB free on the installation filesystem**. The installer checks required host tools before acquisition; see the [full prerequisites](docs/packaging/release-installer.md).
 
 Run in the target OS's normal KDE desktop terminal, as a regular user:
 
@@ -146,7 +146,7 @@ cd Penguin-LGHUB-release
 ./install.sh --install
 ```
 
-Allow **80 GiB of free working space** for the initial source build and acquisition. All command output is saved to the log path printed below the logo.
+Allow **31 GiB of free working space** for the initial source build and acquisition. All command output is saved to the log path printed below the logo.
 
 One **Penguin-LGHUB** launcher automatically selects X11 or KDE Plasma Wayland at each launch. Both paths share the same Wine runtime, prefix and G HUB settings. Quit G HUB before logging out to change sessions; no reinstallation is needed. Wayland input still requires KDE's permission when prompted.
 
@@ -264,7 +264,7 @@ python tools/packaging/logitech_depots.py verify \
   --output-dir /path/to/private-cache/logitech-2026.6.974819/stage-001
 ```
 
-The default selection downloads **910,350,368 bytes (868 MiB)**. Staging conservatively reserves twice the extracted payload size, in addition to a 20 GiB free-space floor; it never overwrites an existing stage. Downloads support checked resumption. Vendor downloads, keys, manifests, extracted files and full local receipts stay outside Git. The staged directories are `depots/<name>/` and `application/LGHUB/`; `extraction.json` records file hashes, layout origins and pending installer declarations. `verification.json` records the verified counts. Verification detects changes against that local receipt; it is not an independent signature on an editable receipt.
+The default selection downloads **910,350,368 bytes (868 MiB)**. Staging conservatively reserves twice the extracted payload size, in addition to a 2 GiB free-space floor; it never overwrites an existing stage. Downloads support checked resumption. Vendor downloads, keys, manifests, extracted files and full local receipts stay outside Git. The staged directories are `depots/<name>/` and `application/LGHUB/`; `extraction.json` records file hashes, layout origins and pending installer declarations. `verification.json` records the verified counts. Verification detects changes against that local receipt; it is not an independent signature on an editable receipt.
 
 The encrypted resource keys are fetched without authentication from [Logitech's public access-group endpoint](https://updates.ghub.logitechg.com/pipeline/v2/access/20d0dda2-4c0c-4f5a-98d0-f9cf0819544b/content.json). Only the required key fingerprints are pinned, so adding unrelated keys upstream does not invalidate this recipe. A missing or changed required key fails closed. The observed capsule format uses AES-128-GCM's stream with PBKDF2-HMAC-SHA512-derived IVs, but stores no GCM tag; integrity is checked using the pinned depot hash and the vendor header/member hashes. Six mouse images are nested capsules: their decoded contents are verified while their installed encoding is preserved.
 
@@ -308,7 +308,7 @@ python tools/packaging/probe_clean_agent.py \
   --output /path/to/private-work/clean-agent-001
 ```
 
-Use new output directories outside the repository with existing parents. Preparation reserves 5 GiB above the 20 GiB free-space floor; the probe reserves another 4 GiB for its disposable clone. The candidate is left pristine; the agent test runs in that clone. Both use a read-only host filesystem, a private network and PID namespace, a private temporary directory and no physical device nodes. Wine processes are stopped within their own namespace after each check. The agent probe uses its own Xvfb with GLX disabled; it neither connects to the live desktop nor evaluates graphics performance. Acquisition inputs and host files remain readable inside this test environment: this is operational isolation, not a hardened sandbox for hostile executables.
+Use new output directories outside the repository with existing parents. Preparation reserves 5 GiB above the 2 GiB free-space floor; the probe reserves another 4 GiB for its disposable clone. The candidate is left pristine; the agent test runs in that clone. Both use a read-only host filesystem, a private network and PID namespace, a private temporary directory and no physical device nodes. Wine processes are stopped within their own namespace after each check. The agent probe uses its own Xvfb with GLX disabled; it neither connects to the live desktop nor evaluates graphics performance. Acquisition inputs and host files remain readable inside this test environment: this is operational isolation, not a hardened sandbox for hostile executables.
 
 [Initial validation](packaging/clean-prefix-verification.json) recorded 1,599 managed files with copied private builds. [Packaged-runtime validation](packaging/wine-runtime-verification.json) records 1,574 prefix files plus the separate 2,571-entry runtime inventory. Both pass **8/8 activation factories**, **4/4 registry routes**, **1/1 updater service configuration**, and **5/5 agent API routes**. The API test covers `/devices/list`, `/profiles`, `/profile/active`, `/profiles/auto_switching` and `/input/gshift`, each returning `SUCCESS`. No physical devices are exposed, so an empty device list is expected. These results establish fresh installation and backend startup; they do not establish working mouse bindings or profile switching on real hardware. The packaging suite now has **78 passing tests**, plus five desktop-device policy checks in CI.
 
@@ -353,7 +353,7 @@ python tools/packaging/wine_runtime.py restore \
   --output /path/to/private-work/restored-runtime
 ```
 
-Outputs must be new directories/files. Building and restoring reserve 2 GiB above the existing 20 GiB free-space floor. The measured local archive is **101,488,615 bytes (96.8 MiB)**. A restore verifies its whole-file checksum before extraction, then checks every recorded file/hash/mode/link and all pinned compatibility artifacts. The local receipt is not a replacement for authenticating a downloaded archive against its trusted release checksum.
+Outputs must be new directories/files. Building and restoring reserve 2 GiB above the existing 2 GiB free-space floor. The measured local archive is **101,488,615 bytes (96.8 MiB)**. A restore verifies its whole-file checksum before extraction, then checks every recorded file/hash/mode/link and all pinned compatibility artifacts. The local receipt is not a replacement for authenticating a downloaded archive against its trusted release checksum.
 
 The fresh installer masks the host's Wine module/data directories and loader/server executables during every packaged-runtime check. Its processes select the private loader and server explicitly. The agent probe records actual mapped runtime images; both the normal-path and relocated-path runs passed all five API routes. Relocation used a path containing spaces with the original runtime path absent. For an existing candidate after relocation, supply the runtime option on the agent probe:
 
