@@ -256,6 +256,8 @@ def prepare(candidate, linux_root, wine, test_tools, output):
               'candidate_manifest_sha256': digest_file(candidate / 'clean-prefix.json')['sha256'],
               'fixed_files': fixed, 'installation_state': 'frozen-depots-v1',
               'frontend_initialization': frontend, 'end_to_end_qualified': False}
+    if desktop.native_profiles.available(output / 'prefix' / APP):
+        config['native_profiles'] = 1
     if json.loads((wine / 'runtime.json').read_text()).get('source_build'):
         config['integrated_wine_fixes'] = ['desktop-init', 'x11-restore']
     (output / 'desktop.json').write_text(json.dumps(config, indent=2) + '\n')

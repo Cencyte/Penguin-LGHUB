@@ -636,6 +636,12 @@
       "bytes": 68468
     },
     {
+      "path": "packaging/native-profiles-verification.json",
+      "mode": "100644",
+      "sha256": "d60f6bf120f5441e325345f47e402a1dea85cf86403d73c49d66e25fc57f56b4",
+      "bytes": 4055
+    },
+    {
       "path": "packaging/runtime-baseline.json",
       "mode": "100644",
       "sha256": "4087869f8d10b45dc1f30a13ef262eebe3c8bbe471143a1bef70d7effd6c1866",
@@ -1084,6 +1090,12 @@
       "mode": "100644",
       "sha256": "fa8a915e50c4900de02ebf12acf62b89f492f0b0533a222e572b40ffd9e9a408",
       "bytes": 10209
+    },
+    {
+      "path": "tests/packaging/test_native_profiles.py",
+      "mode": "100644",
+      "sha256": "1ef5ee70f40dfa5b7934ac24be0a7bf0897747c10c59bae64fe38980a4a76bbe",
+      "bytes": 5516
     },
     {
       "path": "tests/packaging/test_server_sync.py",
@@ -1628,8 +1640,8 @@
     {
       "path": "tools/packaging/build_release_runtime.py",
       "mode": "100644",
-      "sha256": "735c0e687ddb10a47e8bf468ec7c958134c82ca88240c0d1be4a3646f6d9ba7d",
-      "bytes": 8457
+      "sha256": "7ec528bca7ead219a7eb7e7d9b62625165aae685af9caab42390a3c6026306a6",
+      "bytes": 8497
     },
     {
       "path": "tools/packaging/clean_prefix_probe.cpp",
@@ -1646,8 +1658,8 @@
     {
       "path": "tools/packaging/desktop_runtime.py",
       "mode": "100644",
-      "sha256": "2c35db77f6392120325032979dc9b37bde3c9664c7bb3fd69c6c2f2ff392f7d4",
-      "bytes": 31882
+      "sha256": "eb74963712630f96be7b9bb5a647a8372f94891d172a0a0090a7ac0661591aca",
+      "bytes": 31987
     },
     {
       "path": "tools/packaging/dockur_acquire.py",
@@ -1922,8 +1934,8 @@
     {
       "path": "tools/wine/agent_snapshot.cjs",
       "mode": "100644",
-      "sha256": "c84d5f0bbc629cc1609e9c2ad18b9ec8f6db54c00b98adb658c9f639173f82ad",
-      "bytes": 2353
+      "sha256": "c92738496fe7a4e012643423b661141b860d8572f8049c663b1c00b3e223adab",
+      "bytes": 2370
     },
     {
       "path": "tools/wine/alpc_message_test.c",
@@ -2054,8 +2066,8 @@
     {
       "path": "tools/wine/build_runtime_bridges.sh",
       "mode": "100644",
-      "sha256": "7362d7c399bb1b766b4d9c4f4de1fdb5ea4268072999c379688f715cdb142f3d",
-      "bytes": 752
+      "sha256": "813652813353bdf896ba11b312219a4acd8e0e11f51f03237d9f066346538f86",
+      "bytes": 791
     },
     {
       "path": "tools/wine/card_hover_fixture/index.html",
@@ -2412,6 +2424,12 @@
       "bytes": 391
     },
     {
+      "path": "tools/wine/native_profiles.py",
+      "mode": "100644",
+      "sha256": "61b6d9d953c74e8d2cfade7c924658290f246c8e7184477f0894ee6d37f3c937",
+      "bytes": 12582
+    },
+    {
       "path": "tools/wine/ninput_native_probe.cpp",
       "mode": "100644",
       "sha256": "7e835283b133acf8e3b445d0debebae7fbe2dc26c89d578ba4228b99ada054b7",
@@ -2456,8 +2474,8 @@
     {
       "path": "tools/wine/prepare_tested_desktop.py",
       "mode": "100644",
-      "sha256": "20c7bb700bdaa9e5faa9702b4b9a147e083d645c3dda9ba0228c9f0a263fc2e4",
-      "bytes": 12224
+      "sha256": "68a456db93226d2043d3e82e32afcfa58b1a6942671f15f1e2e4e8b9148eff12",
+      "bytes": 12349
     },
     {
       "path": "tools/wine/prepare_tray_background.py",
@@ -2482,6 +2500,30 @@
       "mode": "100644",
       "sha256": "16a5fd8a24af23ccbc90e86571fd1890733aefcef315c4259f767904ce1c1e9f",
       "bytes": 971
+    },
+    {
+      "path": "tools/wine/profile_api_probe.cjs",
+      "mode": "100644",
+      "sha256": "61edafa3e67beaf8bf4244626d94acbbcf8ffeefe12cf3317c172c12c8345513",
+      "bytes": 674
+    },
+    {
+      "path": "tools/wine/profile_event_bridge.c",
+      "mode": "100644",
+      "sha256": "46d239ec9e340287ed0d1e995f1a5ee0ac2a1a533751d197222fc3ec2010f56a",
+      "bytes": 6735
+    },
+    {
+      "path": "tools/wine/profile_focus_fixture.c",
+      "mode": "100644",
+      "sha256": "5ec14432cf40e445289172d3f22c5db0d8e3de5214a2bfbf4f997633d6c9b81f",
+      "bytes": 649
+    },
+    {
+      "path": "tools/wine/profile_guard_fixture.c",
+      "mode": "100644",
+      "sha256": "8a23c7f50852528df191bb95c6276b51231edd3e9aa1087c28e104de273b1dc8",
+      "bytes": 281
     },
     {
       "path": "tools/wine/run_card_hover_test.py",
@@ -2556,6 +2598,12 @@
       "bytes": 3507
     },
     {
+      "path": "tools/wine/run_native_profiles_test.py",
+      "mode": "100644",
+      "sha256": "1ba6a87637bf593ddf106aafc86ab58794556d4f31529939abe1164d836849cc",
+      "bytes": 12933
+    },
+    {
       "path": "tools/wine/run_overlay_trace.py",
       "mode": "100644",
       "sha256": "80f9c8ff82d3e302c0e221896e871c990a661e96565b4e442472783ba7d1a657",
@@ -2564,8 +2612,8 @@
     {
       "path": "tools/wine/run_private_build.py",
       "mode": "100644",
-      "sha256": "0002ec23c3da95a9cdd93a9113c9dd2f19f50c582532610d1eab8c61ae009c7f",
-      "bytes": 16751
+      "sha256": "ec375a7859331b0d039f51c14920e890f6f879fac120e02c53af65c0ce50de6c",
+      "bytes": 16771
     },
     {
       "path": "tools/wine/run_private_kernelbase.sh",
@@ -2630,8 +2678,8 @@
     {
       "path": "tools/wine/tested_desktop_launch.py",
       "mode": "100644",
-      "sha256": "d774db0d2d6ffb5d93ab2138371b0a91cad45045540a3219ff33b0857f364ff4",
-      "bytes": 23778
+      "sha256": "7e234b005ea1c255cd3b892584b8987d90031aff17dda831ba4a945f9beb6ef6",
+      "bytes": 24454
     },
     {
       "path": "tools/wine/text_reading_direction_test.c",
@@ -2720,8 +2768,8 @@
   ],
   "publication_note": "Installer 0.3.1 presentation update: ASCII activity spinner, check-only result labels, attached ellipses, neutral launcher names, version spacing and completion messages; exact user-supplied AI disclosure and shortened table of contents. Input-lag investigation remains pending. No vendor payload or populated prefix.",
   "publication_branch": "release",
-  "file_count": 439,
-  "total_bytes": 10153079,
+  "file_count": 456,
+  "total_bytes": 10292628,
   "source_release": "v0.9.0-preview.4",
   "release_parent_commit": "f7481c6e10e227c983bd8fa6e1bf82f7a643c5f5"
 }

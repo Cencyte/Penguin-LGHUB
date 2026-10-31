@@ -94,7 +94,7 @@ def worker(work, jobs):
     commands=[
       [cxx,*common,src/'api_information_proxy.cpp','-o',out/'api_information_proxy.dll','-lruntimeobject','-lole32','-luuid'],
       [cxx,*common,src/'core_application_experiment.cpp',agile_lib,'-o',out/'core_application_experiment.dll','-lruntimeobject','-lole32','-luuid'],
-      [cc,'-shared','-O2',src/'sensor_monitor_unavailable.c','-o',out/'mfsensorgroup.dll'],
+      [cc,'-shared','-O2',src/'sensor_monitor_unavailable.c',src/'profile_event_bridge.c','-o',out/'mfsensorgroup.dll','-lbcrypt'],
       [cxx,*common,'-std=c++17',src/'dcomp_experiment.cpp',src/'dcomp_clock.cpp',src/'dcomp_experiment.def','-o',out/'system_tray/dcomp.dll','-lole32','-lgdi32','-luser32','-ld3d11','-ldxguid','-luuid','-lntdll'],
       [cxx,*common,'-std=c++17',src/'dispatcher_queue_experiment.cpp',src/'tray_popup_anchor.cpp',src/'dispatcher_queue_experiment.def',agile_lib,'-o',out/'system_tray/ghub_dispatcher_queue.dll','-lruntimeobject','-lole32','-luuid','-luser32','-lcomctl32']]
     adapter=buildwork/'coremessaging.def'

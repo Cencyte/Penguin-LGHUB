@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "recorded_on": "2026-10-31",
+  "feature": "Native X11 automatic application profile switching",
+  "agent_sha256": "61772de356096af7cea986e2f9b3f42db69e6f410c4106609998c389fd755fc1",
+  "architecture": "X11 foreground identity -> private token-bound atomic mailbox -> pinned agent-local typed application event -> original G HUB matcher and profile policy",
+  "implementation_sources_sha256": {
+    "tools/wine/native_profiles.py": "61b6d9d953c74e8d2cfade7c924658290f246c8e7184477f0894ee6d37f3c937",
+    "tools/wine/profile_event_bridge.c": "46d239ec9e340287ed0d1e995f1a5ee0ac2a1a533751d197222fc3ec2010f56a",
+    "tools/wine/tested_desktop_launch.py": "7e234b005ea1c255cd3b892584b8987d90031aff17dda831ba4a945f9beb6ef6",
+    "tools/wine/agent_snapshot.cjs": "c92738496fe7a4e012643423b661141b860d8572f8049c663b1c00b3e223adab"
+  },
+  "isolated_integration": {
+    "environment": "Wine 10.20 project overlay, Xvfb/Openbox, copied prefix, private PID/network, no physical input devices",
+    "checks": [
+      {
+        "case": "wrong executable hash refused",
+        "passed": true
+      },
+      {
+        "case": "automatic native focus 1",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "automatic native focus 2",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "automatic native focus 3",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "automatic native focus 4",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "automatic-off holds profile",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "automatic-on resumes current foreground",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "G HUB window preserves previous application profile",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "unmatched native application returns Desktop",
+        "passed": true,
+        "profile": "420fd454-0c36-499d-bde4-146823b16147"
+      },
+      {
+        "case": "return from unmatched application",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "wrong token rejected",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "stale timestamp rejected",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000001"
+      },
+      {
+        "case": "valid event after rejected packets",
+        "passed": true,
+        "profile": "c0ffee00-0000-4000-8000-000000000002"
+      },
+      {
+        "case": "empty focus desktop fallback",
+        "passed": true,
+        "profile": "420fd454-0c36-499d-bde4-146823b16147"
+      },
+      {
+        "case": "adapter shutdown acknowledged",
+        "passed": true
+      }
+    ],
+    "passed": 15,
+    "total": 15
+  },
+  "regression_tests": {
+    "passed": 216,
+    "failed": 0,
+    "skipped": 0
+  },
+  "legacy_deployment": {
+    "manifest_check_passed": true,
+    "pinned_files": 49,
+    "live_desktop_launched": false,
+    "settings_modified": false,
+    "rollback_backup_saved": true
+  },
+  "packaged_runtime": {
+    "build_recipe_integrated": true,
+    "new_full_runtime_build_tested": false,
+    "fresh_install_E2E": false
+  },
+  "limitations": [
+    "Physical X11 profile/keybinding acceptance is pending",
+    "Native Wayland foreground observer is not implemented",
+    "Foreign Wine/Proton prefixes, Flatpak app identity, and other window managers have not been qualified"
+  ],
+  "regression_found": "Early profile endpoint availability alone is insufficient for focus event delivery. Tests and launcher wait for the complete agent readiness endpoint set, including applications."
+}

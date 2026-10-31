@@ -231,13 +231,16 @@ def main():
         target = app / name
         config['sha256'][str(target.relative_to(root))] = digest(target)
     source = Path(__file__).resolve().parent
-    for name in ['tested_desktop_launch.py', 'run_private_build.py', 'agent_snapshot.cjs', 'color_picker_monitor.cjs']:
+    for name in ['tested_desktop_launch.py', 'run_private_build.py', 'agent_snapshot.cjs', 'color_picker_monitor.cjs', 'native_profiles.py']:
         pin(source / name, root / 'runner' / name)
     copy(app / 'resources/icon.png', root / 'icon.png')
     copy(args.replay / 'inputs.json', root / 'replay-inputs.json')
     copy(args.command, root / 'replay-command.json')
     if args.native_tray_input:
         prepare_native_input(root, config, args.native_tray_input)
+    from native_profiles import available
+    if available(app):
+        config['native_profiles'] = 1
     config['freeze_updates'] = True
     (root / 'launch.json').write_text(json.dumps(config, indent=2) + '\n')
     check(config, root)

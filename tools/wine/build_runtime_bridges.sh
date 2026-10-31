@@ -9,6 +9,6 @@ common=(-O2 -Wall -Wextra -Werror -Wno-cast-function-type -static)
 x86_64-w64-mingw32-g++ "${common[@]}" -shared "$src/api_information_proxy.cpp" \
     -o "$out/api_information_proxy.dll" -lruntimeobject -lole32 -luuid
 x86_64-w64-mingw32-gcc -shared -O2 -Wall -Wextra -Werror \
-    "$src/sensor_monitor_unavailable.c" -o "$out/mfsensorgroup.dll"
+    "$src/sensor_monitor_unavailable.c" "$src/profile_event_bridge.c" -o "$out/mfsensorgroup.dll" -lbcrypt
 x86_64-w64-mingw32-g++ "${common[@]}" "$src/runtime_bridge_test.cpp" \
     -o "$out/runtime_bridge_test.exe" -lruntimeobject -lole32 -luuid

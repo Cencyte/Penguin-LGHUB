@@ -4,7 +4,7 @@
 const { randomUUID } = require('node:crypto');
 const { writeFileSync } = require('node:fs');
 const routes = ['/devices/list', '/profiles', '/profile/active',
-  '/profiles/auto_switching', '/input/gshift'];
+  '/profiles/auto_switching', '/input/gshift', '/applications'];
 const args = process.argv.slice(2);
 if (args.length > 1 || args[0] === '--help') {
   console.log('Usage: node agent_snapshot.cjs [output.json]\nRead-only G HUB agent snapshot from ws://127.0.0.1:9010.');

@@ -254,7 +254,7 @@ exec setpriv --reuid "$uid" --regid "$gid" --init-groups env "$@"
     # Resolve desktop session values at launch time, including after a reboot.
     names = ['DISPLAY', 'XAUTHORITY', 'WAYLAND_DISPLAY', 'XDG_RUNTIME_DIR',
              'DBUS_SESSION_BUS_ADDRESS', 'PULSE_SERVER', 'LANG', 'LC_ALL', 'PATH',
-             'USER', 'LOGNAME']
+             'USER', 'LOGNAME', 'XDG_SESSION_TYPE']
     environment = [f'{name}={os.environ[name]}' for name in names if name in os.environ]
     environment += [f'HOME={Path.home()}', f'WINEPREFIX={prefix}',
                     'WINEDLLOVERRIDES=winemenubuilder.exe=d;mfsensorgroup=n',

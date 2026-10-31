@@ -13,6 +13,7 @@ import subprocess
 import sys
 import time
 import uuid
+import native_profiles
 
 SCRIPT = Path(__file__).resolve()
 
@@ -356,6 +357,9 @@ def session(config, root, state_path, performance=False):
                 pass  # A closed requester must not terminate the session.
 
     try:
+        profiles = native_profiles.prepare(config, root)
+        if profiles:
+            os.environ.update(profiles.mailbox.environment())
         register_frontend_protocol()
         agent = subprocess.Popen(['wine', str(app / 'lghub_agent.exe')], cwd=app)
         # The native frontend launches its own tray, which can restart an agent
@@ -375,11 +379,15 @@ def session(config, root, state_path, performance=False):
             time.sleep(1)
         if stopping:
             return 0
+        if profiles:
+            profiles.start()
         open_gui(performance)
         starting = watch_startup
         frontend_deadline = time.monotonic() + 60
         while not stopping:
             service_control()
+            if profiles:
+                profiles.check()
             if starting:
                 starting = frontend_startup_pending(root, state['startup_token'], frontend_deadline, time.monotonic())
                 if not starting:
@@ -395,6 +403,11 @@ def session(config, root, state_path, performance=False):
         return 0
     finally:
         control.close()
+        if 'profiles' in locals() and profiles:
+            try:
+                profiles.close()
+            except (OSError, RuntimeError) as error:
+                print('Profile observer cleanup:', error, flush=True)
         stop_frontend(prefix, app)
         if monitor and monitor.poll() is None:
             monitor.terminate()
@@ -405,6 +418,10 @@ def session(config, root, state_path, performance=False):
                 monitor.wait(timeout=5)
         subprocess.run(['wineserver', '-k'], timeout=20, check=False)
         subprocess.run(['wineserver', '-w'], timeout=20, check=False)
+        if 'profiles' in locals() and profiles:
+            profiles.mailbox.cleanup()
+            for key in profiles.mailbox.environment():
+                os.environ.pop(key, None)
         state_path.unlink(missing_ok=True)
 
 
