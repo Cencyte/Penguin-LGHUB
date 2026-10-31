@@ -470,8 +470,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "8cfc1262329ae2fc5e9e2e5b88f507f763bb2af6d3125f383ae12232c939fdfe",
-      "bytes": 21039
+      "sha256": "2842a0823fc7931ef89129ce682372d182c521fbdc9ff9909664cd3a8998f9a0",
+      "bytes": 21588
     },
     {
       "path": "docs/packaging/source-publication.md",

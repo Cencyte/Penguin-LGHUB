@@ -325,12 +325,22 @@ screen-sampled lighting remain separately scoped limitations.
 ### Native application selection and profile tests
 
 The pinned G HUB application picker filters for `*.exe`, so extensionless
-Linux programs such as `kate` are hidden. The private runtime also has its own
-`/usr/bin`; host programs are under `/run/host/usr/bin`. For a manual picker
-check, enter `Z:\run\host\usr\bin\kate` in the **File name** field. This targets
-the host executable without renaming it or copying it into the prefix. File
-selection/application registration and automatic profile matching are separate
-checks; selecting an executable does not establish focus detection.
+Linux programs such as `kate` are hidden. The correct path depends on the launcher:
+
+| Launcher | Host Kate path in Wine's file picker |
+|---|---|
+| Installed **Penguin-LGHUB**, using the packaged runtime | `Z:\run\host\usr\bin\kate` |
+| Legacy **G HUB (Tested Wine)**, using host libraries | `Z:\usr\bin\kate` |
+
+The packaged runtime has its own `/usr/bin` and exposes the host's under
+`/run/host/usr/bin`. The legacy launcher exposes the host root directly; it
+does not create `/run/host`. Enter the complete path in the **File name** field
+from a small folder instead of browsing into `/usr/bin`. An isolated Wine 10.20
+dialog accepted the extensionless Kate path this way, while directory browsing
+stalled during shell filtering and repeated `desktop.ini` lookups. This is a
+workaround, not a repaired browser. No renaming or copying of Kate is needed.
+File selection/application registration and automatic profile matching are
+separate checks; selecting an executable does not establish focus detection.
 
 Manual profile behavior can be checked with two temporary profiles assigning
 different keys to the same spare mouse button, selecting each profile and
