@@ -1,5 +1,23 @@
 # Bazzite readiness investigation — 2026-10-29
 
+## October 31 follow-up
+
+The initial inventory below is historical. The completed booted installer run
+on October 30 recorded **Bazzite 44.20261026.0**, kernel **7.2.11**, KWin **6.7.5**,
+Terra Xwayland **26.0.99.903**, libei **1.6.0**, PipeWire **1.6.10**, Podman **5.8.9**
+and SELinux **Enforcing**. Installation and uninstall/reinstall were manually
+completed, and the reported delayed/stuck G502 X Plus assignment was confirmed
+fixed after patch 0046. Offscreen hardware EGL and PulseAudio connection probes
+also passed. These confirmations supersede the original pending-install status;
+they do not certify every G HUB feature or a full X11 desktop session.
+
+Preview 4 contains installer 0.3.5 and its 31 GiB budget with workspace cleanup.
+Fresh installer acceptance on CachyOS and the Manjaro VM is next. See the
+[current environment record](../../packaging/tested-environments.json) and
+[installation guide](release-installer.md#verification-boundaries).
+
+## Original investigation
+
 Target inventory: Bazzite 44.20261012.0 KDE NVIDIA Open, Fedora 44, KWin 6.7.5,
 kernel 7.2.9, NVIDIA 615.78.08, Terra Xwayland 26.0.99.903, libei 1.6.0,
 Podman 5.8.7 and SELinux enforcing/targeted. These came from the installed image;
@@ -81,6 +99,7 @@ considering a narrowly scoped policy change. Do not switch enforcing off or
 automatically generate a broad allow policy.
 
 The investigation covers all eight areas in the table (8/8 research coverage).
-Actual Penguin-LGHUB end-to-end acceptance on Bazzite remains 0/1 pending the
-manual installation test. Local loader/UI/probe success is separate evidence,
+At the time of this investigation, the booted installation test was pending.
+The October 31 follow-up above records the subsequent successful installation
+and targeted physical-input confirmation. Local loader/UI/probe success is separate evidence,
 not a percentage estimate of Bazzite compatibility.

@@ -13,12 +13,12 @@ cd Penguin-LGHUB-release
 ./install.sh --install
 ```
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.3) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.4) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
 
-Automatic X11/Wayland session selection requires installer 0.3.4 or newer.
-Preview 3 predates it; use the current clone or the
+Preview 4 includes installer 0.3.5, automatic X11/Wayland selection and the
+31 GiB storage budget with verified temporary-workspace cleanup. The
 [latest branch source ZIP](https://github.com/Cencyte/Penguin-LGHUB/archive/refs/heads/release.zip)
-to install this behavior.
+also includes these changes.
 
 The repository currently requires GitHub access while it remains private.
 Run as your regular user. The installer requests sudo for its small Logitech
@@ -292,8 +292,8 @@ fresh private directory, using reverified download caches. Host-rule installatio
 and live desktop promotion were deliberately excluded; both launcher variants
 were generated separately in a private directory. A complete
 installation on Bazzite has now been reported successful, including an
-uninstall/reinstall cycle. Physical key-binding acceptance remains open after
-the reported delayed/stuck-key failure.
+uninstall/reinstall cycle. The delayed/stuck G502 X Plus key-binding defect was
+subsequently confirmed fixed on booted Bazzite after patch 0046.
 
 Preview 3 / installer 0.3.2 adds patch 0046. Wine now uses one serialized,
 process-wide XTEST output connection for G HUB, retaining it across worker
@@ -309,9 +309,11 @@ The observed one-time Bazzite permission prompt was KWin input authorization.
 Its per-application approval for `lghub_agent.exe` survived uninstalling G HUB,
 as intended. Setup neither clears that approval nor enables a global bypass.
 
-Bazzite acceptance requires running the public workflow and testing device
-discovery/reconnect, key bindings in a native Wayland app, macros, G-Shift,
-profile changes, ordinary lighting, tray actions and relaunch. KDE may request
+The Bazzite confirmations establish installation/removal and the reported mouse
+binding fix. They do not automatically complete every device/reconnect, macro,
+G-Shift, profile, lighting, tray and relaunch check. Fresh installer 0.3.5
+installation/removal and session-selection acceptance on CachyOS and the Manjaro
+VM remain next. KDE may request
 input-control authorization when an assignment is used. Setup does not approve
 that permission. Automatic profile detection of native Wayland applications and
 screen-sampled lighting remain separately scoped limitations.

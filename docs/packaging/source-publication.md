@@ -76,3 +76,31 @@ compiled Wine, populated prefixes, raw integration logs and official media stay
 outside Git. The runtime is built locally from pinned downloads; publishing the
 source does not publish Microsoft's/Logitech's binaries or a compiled Wine
 release. See [the release workflow](release-installer.md).
+
+
+## October 31 source preview consolidation
+
+Preview 4 packages installer 0.3.5, including the 31 GiB offline storage budget,
+verified workspace cleanup, automatic X11/Wayland session selection and clear
+no-op uninstall reporting. It retains the threaded-input fix confirmed on
+Bazzite. The recorded environment table now uses the October 30 booted Bazzite
+report and distinguishes those confirmations from pending current-installer
+acceptance on CachyOS and the Manjaro VM.
+
+The release ZIP is created from its exact Git commit with `git archive`, without
+`.git`, local caches or untracked files. `SHA256SUMS.txt` checks the release
+asset's integrity against its recorded digest; it is not a substitute for trusting the
+publisher. The per-file publication manifest is regenerated for the release tree.
+Existing tags and their older source archives remain unchanged.
+
+A pattern/payload review of all history reachable from the five published
+branches/tags scanned 585 distinct blobs before this consolidation and found no
+matches for the checked credential patterns, Windows/ELF executables, populated
+prefix databases or installation-media payloads. The separate local development
+history was not included. This is a scoped review, not a universal secret detector
+or clearance of separately downloaded third-party components.
+
+Repository visibility remains private at this consolidation step. Publishing a
+release there does not make its assets anonymously downloadable. Visibility can
+be changed separately after an explicit publication decision; it exposes both
+published repository history and release assets.

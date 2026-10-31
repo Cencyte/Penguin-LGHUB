@@ -1,12 +1,14 @@
 {
   "schema": 1,
-  "updated": "2026-10-29",
-  "review_after": "Bazzite end-to-end installation and owner acceptance",
+  "updated": "2026-10-31",
+  "review_after": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection on CachyOS and the Manjaro VM",
   "meaning": "Recorded environments, not supported minimum versions; inventory does not imply acceptance.",
   "shared": {
     "wine": "10.20 with project patches",
     "ghub": "2026.6.974819",
-    "linux_runtime": "4.0.20260928.262390"
+    "linux_runtime": "4.0.20260928.262390",
+    "source_release": "0.9.0-preview.4",
+    "installer": "0.3.5"
   },
   "hosts": {
     "manjaro_desktop": {
@@ -22,7 +24,7 @@
       "nvidia": "610.43.02-2",
       "bubblewrap": "0.11.0-1",
       "pipewire": "1.4.9-2",
-      "evidence": "Owner original X11 acceptance; package inventory 2026-10-29. Not a fresh-clone install."
+      "evidence": "Original manual X11 feature acceptance; package inventory 2026-10-29. Existing development installation, not a fresh-clone installer run."
     },
     "manjaro_vm": {
       "os": "Manjaro rolling",
@@ -39,7 +41,8 @@
         "docs/packaging/manjaro-wayland-launcher-verification.json",
         "docs/packaging/wayland-restore-verification.json"
       ],
-      "owner_acceptance": "X11/Wayland GUI; accepted remaining cosmetic restore anomalies; no physical Logitech hardware."
+      "manual_acceptance": "X11/Wayland GUI; accepted remaining cosmetic restore anomalies; no physical Logitech hardware.",
+      "current_installer_acceptance": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection pending; legacy test setup removed for these tests."
     },
     "cachyos": {
       "os": "CachyOS rolling",
@@ -58,12 +61,13 @@
       "evidence": [
         "docs/packaging/cachyos-wayland-launcher-verification.json"
       ],
-      "owner_acceptance": "Owner confirmed X11 tray and working Wayland installation; does not retroactively expand isolated automated test scope."
+      "manual_acceptance": "Manually confirmed X11 tray and working Wayland installation; does not retroactively expand isolated automated test scope.",
+      "current_installer_acceptance": "Installer 0.3.5 fresh installation/uninstallation and automatic session selection pending; legacy test setup removed for these tests."
     },
     "bazzite": {
-      "os": "Bazzite 44.20261012.0 Kinoite NVIDIA Open",
+      "os": "Bazzite 44.20261026.0 Kinoite NVIDIA Open",
       "fedora": "44",
-      "kernel": "7.2.9-ogc3.1.fc44.x86_64",
+      "kernel": "7.2.11-ogc4.1.fc44.x86_64",
       "kwin": "6.7.5-1.fc44",
       "xwayland": "terra-xorg-x11-server-Xwayland 26.0.99.903-1.fc44",
       "libei": "1.6.0-2.fc44",
@@ -71,9 +75,25 @@
       "portal_kde": "6.7.5-1.fc44",
       "nvidia": "615.78.08-1.fc44",
       "bubblewrap": "0.12.0-1.fc44",
-      "pipewire": "1.6.9-1.fc44",
-      "selinux": "enforcing/targeted configured",
-      "evidence": "Read-only installed-system RPM/configuration inventory on 2026-10-29; owner verified OS boots. Penguin-LGHUB not installed/tested."
+      "pipewire": "1.6.10-1.fc44",
+      "selinux": "Enforcing during booted installer preflight",
+      "evidence": {
+        "booted_host_report": "host-20261030-071032-6847.json (private installer diagnostics)",
+        "booted_host_report_sha256": "7a646aa664c8e005b1fcec815f81e2cc4f73bc21297efc2f710bb17e51b16295",
+        "installation_receipt": "Committed schema-2 receipt with all 18 pipeline steps complete",
+        "input_transport": "docs/packaging/host-keyboard-threads-verification.json",
+        "manual_confirmation": "Direct testing report, 2026-10-30; no expanded automated or per-feature qualification inferred"
+      },
+      "recorded": "2026-10-30",
+      "podman": "5.8.9-1.fc44",
+      "session": "Plasma Wayland with Xwayland",
+      "tested_installer": "0.3.2",
+      "tested_source_release": "0.9.0-preview.3",
+      "manual_acceptance": "Installation and uninstall/reinstall completed; delayed/stuck G502 X Plus key binding confirmed fixed after patch 0046.",
+      "current_installer_acceptance": "Installer 0.3.5 storage cleanup has offline tests and runtime-inventory validation; no complete booted install/removal rerun claimed.",
+      "graphics": "Offscreen EGL acquired a hardware NVIDIA GeForce RTX 3090 context; PulseAudio connection passed without playing sound.",
+      "nvidia_inventory_date": "2026-10-29; package version not re-recorded by October 30 host preflight",
+      "full_x11_session_tested": false
     }
   }
 }

@@ -158,13 +158,13 @@
     "total": 8
   },
   "bazzite_unassisted_e2e": {
-    "completed": 0,
-    "required": 1
+    "completed": 1,
+    "required": 1,
+    "scope": "Manual installer completion and uninstall/reinstall with installer 0.3.2; targeted physical G502 X Plus input fix confirmed. Not exhaustive feature qualification or a fresh 0.3.5 rerun."
   },
   "remaining": [
-    "Unassisted clone-and-run installation on booted Bazzite",
-    "SELinux and actual target GPU/session/device acceptance",
-    "Decision on full Bazzite X11 provenance requirement",
+    "Fresh installer 0.3.5 installation/removal and automatic session selection on CachyOS and the Manjaro VM",
+    "Remaining per-feature/device/graphics qualification beyond the recorded manual confirmations",
     "Corresponding-source and notices audit before hosting a compiled runtime release"
   ],
   "end_to_end_qualified": false,
@@ -190,5 +190,16 @@
     "live_peak_measured": false,
     "fresh_full_install_after_change": false,
     "existing_installations_pruned": false
+  },
+  "manual_follow_up_2026_10_30": {
+    "bazzite_installation": "completed",
+    "bazzite_uninstall_reinstall": "completed",
+    "bazzite_input_anomaly": "confirmed fixed after patch 0046",
+    "tested_installer": "0.3.2",
+    "tested_source_release": "0.9.0-preview.3",
+    "current_release": "0.9.0-preview.4",
+    "current_installer": "0.3.5",
+    "remaining": "Fresh current-installer installation/removal on CachyOS and the Manjaro VM; per-feature acceptance remains separately scoped.",
+    "historical_records": "Earlier pending fields describe their original capture date, not current status."
   }
 }

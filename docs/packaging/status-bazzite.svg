@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="156" height="20" role="img" aria-label="Bazzite: Wayland tested">
+<title>Bazzite: Wayland tested</title>
+<linearGradient id="shade" x2="0" y2="100%"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
+<clipPath id="round"><rect width="156" height="20" rx="3"/></clipPath>
+<g clip-path="url(#round)"><path fill="#555" d="M0 0h52v20H0z"/><path fill="#4c1" d="M52 0h104v20H52z"/><path fill="url(#shade)" d="M0 0h156v20H0z"/></g>
+<g fill="#fff" text-anchor="middle" font-family="Verdana,DejaVu Sans,sans-serif" font-size="11">
+<text x="26" y="15" fill="#010101" fill-opacity=".3">Bazzite</text><text x="26" y="14">Bazzite</text>
+<text x="104" y="15" fill="#010101" fill-opacity=".3">Wayland tested</text><text x="104" y="14">Wayland tested</text>
+</g></svg>

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "prepared_on": "2026-10-30",
+  "prepared_on": "2026-10-31",
   "development_revision": "f30bce750395397ba0d2a7c4fed986c7a9b7ce1d",
   "github_base_commit": "9c8ff7268ff78471fed4639e34e184c4caf475bf",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "5bf1b9d82ad1d9430e99d270692cb21f417a1993cccc688a0856db97e73cafa3",
-      "bytes": 65389
+      "sha256": "60d36252dff974bffbd771ba15e7f702943746e6ff106be9fb4f28977a140a9f",
+      "bytes": 66113
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -416,8 +416,8 @@
     {
       "path": "docs/packaging/bazzite-readiness.md",
       "mode": "100644",
-      "sha256": "c98e535bbfd6a7955d0325701d9fa84b568d041e1357181eb737dd51b4e384aa",
-      "bytes": 6256
+      "sha256": "82f64a50328575d223d35c80d068412ccda9c9cf8bf4d061eb05cf98133df71e",
+      "bytes": 7339
     },
     {
       "path": "docs/packaging/cachyos-wayland-launcher-verification.json",
@@ -428,14 +428,14 @@
     {
       "path": "docs/packaging/dockur-acquisition.md",
       "mode": "100644",
-      "sha256": "aa5bf625230f407c33f3a2b43cfa056f0d9eda0a9039ddff08a4c601f99c608b",
-      "bytes": 16824
+      "sha256": "47f5729f075dabe74d2870bd2775a43bb3a077fd77c7cef26db42ea5dc6b2555",
+      "bytes": 16823
     },
     {
       "path": "docs/packaging/host-keyboard-threads-verification.json",
       "mode": "100644",
-      "sha256": "d9544d6bb969c42b5d04740427a574534272df1180138f49cd821eab8664797a",
-      "bytes": 24615
+      "sha256": "7a0e102ed2d9567e60f87c7323e0107dde9fa14a55173fa0f35bc8b1031b6e66",
+      "bytes": 25128
     },
     {
       "path": "docs/packaging/linux-backend-verification.json",
@@ -452,8 +452,8 @@
     {
       "path": "docs/packaging/linux-runtime.md",
       "mode": "100644",
-      "sha256": "80b98335456a5ec07bdf055667e1a11e83bc9c969bc7975f45d3a70177846e05",
-      "bytes": 23474
+      "sha256": "187a3ea47b335640fc8c9a8589422091e404667ffc7cbd71c7f9d65bc0a1e0b1",
+      "bytes": 23473
     },
     {
       "path": "docs/packaging/manjaro-wayland-launcher-verification.json",
@@ -464,20 +464,26 @@
     {
       "path": "docs/packaging/release-installer-verification.json",
       "mode": "100644",
-      "sha256": "9bb5a009f58b0fb0e48f12827cc26a3d49ab503bd762cee51284df3d27ddfb32",
-      "bytes": 4855
+      "sha256": "7b4c2192f29f073af8fad9aacdc04966e0ea6e5e02dea97264f438a8790c5f48",
+      "bytes": 6591
     },
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "0ad970c0a52261faeed072d515d3a3586bec57de82e45cc4851ae77a846591fa",
-      "bytes": 17135
+      "sha256": "33a5bca4ed419b958e11f0c56c77b158eb2a2901e6e8a29baa69ec9e18ee1a6d",
+      "bytes": 19393
     },
     {
       "path": "docs/packaging/source-publication.md",
       "mode": "100644",
-      "sha256": "4ef9cd11d2cae2b6bd899ba6bd3864b37927d1f7fa2e57b89e7274b85942ca39",
-      "bytes": 4590
+      "sha256": "3e9cd8ca24ecc13445ba6d6de36cb319a070a321ee70f41f7418511dcba98188",
+      "bytes": 6205
+    },
+    {
+      "path": "docs/packaging/status-bazzite.svg",
+      "mode": "100644",
+      "sha256": "58275f868c65faa1e9b809d56314ba92ddf58677a995c2fd239080f077dc42a8",
+      "bytes": 857
     },
     {
       "path": "docs/packaging/status-cachyos.svg",
@@ -582,9 +588,15 @@
       "bytes": 5426
     },
     {
+      "path": "packaging/install-storage.json",
+      "mode": "100644",
+      "sha256": "5f318e512939567ca96e308a85fb74bc7f6ea02ee2b9272e2ebec38b1702ab25",
+      "bytes": 5194
+    },
+    {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "e91f443f75ea214928882184a550f1af78c85dcd2a3233a16da83a2333606df5",
+      "sha256": "b94a54ffbd3b28f428263ba79d72c1e4e7ef663fc0de7c38976cfdfbfebd9e59",
       "bytes": 252
     },
     {
@@ -638,8 +650,8 @@
     {
       "path": "packaging/tested-environments.json",
       "mode": "100644",
-      "sha256": "70d196efc5780745490169bb8def74cd9ea69f416e0e9406c0336fd50d7e3052",
-      "bytes": 3033
+      "sha256": "939dc7cba531fb82c66d3436e0e0d26da6690a9e2372e1a6b3420764a28fd9a8",
+      "bytes": 4779
     },
     {
       "path": "packaging/toolchain.lock.json",
@@ -1036,6 +1048,12 @@
       "mode": "100644",
       "sha256": "c8ac3c0f617b4d945649005f0fb5048cc29111c62c36f1e781c385cf75cbb1be",
       "bytes": 2818
+    },
+    {
+      "path": "tests/packaging/test_install_storage.py",
+      "mode": "100644",
+      "sha256": "2670f592b5f80e8a474349970283d3ea245595b9428c332685d3c5cb0b834e6c",
+      "bytes": 6173
     },
     {
       "path": "tests/packaging/test_install_transaction.py",
@@ -1670,14 +1688,20 @@
     {
       "path": "tools/packaging/install.py",
       "mode": "100644",
-      "sha256": "8b3b4b9a030b8c1feac2ecd44f5c31a10d036c15ca1004c2b1d55d9c1ae88eab",
-      "bytes": 11897
+      "sha256": "38b2a5725bb79e87216d0ed707ffcba8b51b59c2d5c4020d0e498998fe26560b",
+      "bytes": 12364
     },
     {
       "path": "tools/packaging/install_device_rules.py",
       "mode": "100644",
       "sha256": "3fd14a69702814e6800be531590a240a27b57ac430c119aa76478332af4865af",
       "bytes": 3141
+    },
+    {
+      "path": "tools/packaging/install_storage.py",
+      "mode": "100644",
+      "sha256": "786b1ba1fd4ae66a11aec089a2ffd96d37907c03e3e76797ad07bb7428d3ed0c",
+      "bytes": 4643
     },
     {
       "path": "tools/packaging/install_transaction.py",
@@ -1772,8 +1796,8 @@
     {
       "path": "tools/packaging/run_project_tests.py",
       "mode": "100644",
-      "sha256": "f8bf038426327bf24d74a3ac31a48dcccdc8fad71d3390f419ff54214f26b56b",
-      "bytes": 7429
+      "sha256": "69ec1326e1d80abb607a2581a62b996a7626a6cf837d6cc61878cd14c9a24d40",
+      "bytes": 7523
     },
     {
       "path": "tools/packaging/server_sync.py",
@@ -1808,8 +1832,8 @@
     {
       "path": "tools/packaging/uninstall.py",
       "mode": "100644",
-      "sha256": "1d8555fcdace131c04412a870cc40471720c66102126484a40fc7a31cc213fb1",
-      "bytes": 8638
+      "sha256": "fa16e687451a157f36dd023d0e1144c4ed7470a8fb485a77bc78fa2f881f348f",
+      "bytes": 8652
     },
     {
       "path": "tools/packaging/wayland_input_probe.py",
@@ -1856,8 +1880,8 @@
     {
       "path": "tools/packaging/windows_media_acquire.py",
       "mode": "100644",
-      "sha256": "f03547bd99d4bc4cd90f4659f226c14dba305f5c65db9bfda60da1decb4b5d8f",
-      "bytes": 10468
+      "sha256": "c8994be3b6f086a012b898c014bbb1e671d66a237472b3da1f87f66da890bb47",
+      "bytes": 10528
     },
     {
       "path": "tools/packaging/windows_media_reconstruct.py",
@@ -2697,5 +2721,7 @@
   "publication_note": "Installer 0.3.1 presentation update: ASCII activity spinner, check-only result labels, attached ellipses, neutral launcher names, version spacing and completion messages; exact user-supplied AI disclosure and shortened table of contents. Input-lag investigation remains pending. No vendor payload or populated prefix.",
   "publication_branch": "release",
   "file_count": 439,
-  "total_bytes": 10153079
+  "total_bytes": 10153079,
+  "source_release": "v0.9.0-preview.4",
+  "release_parent_commit": "f7481c6e10e227c983bd8fa6e1bf82f7a643c5f5"
 }

@@ -53,8 +53,9 @@
     "pristine_patch_apply": true,
     "idempotent_patch_reapply": true,
     "compiled_driver_matches_patch_series": true,
-    "physical_bazzite_retest_completed": false,
-    "complete_installer_rerun_this_revision": false
+    "physical_bazzite_retest_completed": true,
+    "complete_installer_rerun_this_revision": false,
+    "physical_bazzite_retest_evidence": "Manual follow-up recorded below; independent of synthetic transport measurements."
   },
   "limits": [
     "Actual G HUB thread scheduling and USB report timing were not captured because the Bazzite payload had been uninstalled.",
@@ -846,5 +847,12 @@
         "provenance.json": "d34ec2b072f2c12bb496f11988fef543bb0839ccd7953268666692dc0f66662f"
       }
     }
+  },
+  "manual_follow_up": {
+    "recorded": "2026-10-30",
+    "physical_bazzite_retest_completed": true,
+    "hardware": "G502 X Plus",
+    "result": "The reported delayed/stuck mouse key-binding anomaly was confirmed fixed on booted Bazzite.",
+    "scope": "Manual confirmation of this defect only; historical isolated test boundaries and transport measurements above remain unchanged."
   }
 }
