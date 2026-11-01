@@ -96,6 +96,37 @@ class DesktopRuntimeTests(unittest.TestCase):
                        {'WAYLAND_DISPLAY': ''}, {'XDG_SESSION_TYPE': 'x11'}):
             self.assertTrue(m.session_errors(dict(env, **update), True))
 
+    def test_worker_activates_restore_corrections_in_both_desktop_sessions(self):
+        """Exercise the actual worker boundary, not just a flag dictionary."""
+        build = json.loads(m.linux.LOCK.read_text())['build_id']
+        for wayland, implementation in itertools.product((False, True), ('integrated', 'overlay', 'none')):
+            with self.subTest(wayland=wayland, implementation=implementation), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp); (root / 'logs').mkdir()
+                config = {'wine': '/wine', 'linux_runtime': '/linux', 'test_tools': '/tools', 'environment': {}}
+                if implementation == 'integrated':
+                    config['integrated_wine_fixes'] = ['desktop-init', 'x11-restore']
+                elif implementation == 'overlay':
+                    config['x11_restore_override'] = {'test': True}
+                def read(path, *args, **kwargs):
+                    return json.dumps({'build_id': build}) if path == m.linux.LOCK else f'BUILD_ID="{build}"'
+                observed = {}
+                def session(*args):
+                    observed.update(os.environ)
+                    return 0
+                with patch.dict(os.environ, {'WAYLAND_DISPLAY': 'wayland-private'}, clear=True), \
+                        patch.object(Path, 'read_text', read), patch.object(m, 'verify_server_sync'), \
+                        patch.object(m, 'runtime_environment', return_value={'WAYLAND_DISPLAY': 'wayland-private'}), \
+                        patch.object(m.linux, 'library_path', return_value='/libs'), \
+                        patch.object(m, 'configure_fonts'), patch.object(m.subprocess, 'run') as run, \
+                        patch.object(m.desktop, 'session', side_effect=session):
+                    self.assertEqual(m.worker(config, root, root / 'session.json', wayland), 0)
+                for name in ('PENGUIN_GHUB_REPAINT_ON_RESTORE', 'PENGUIN_GHUB_FIT_WORKAREA'):
+                    self.assertEqual(observed[name], '1')
+                self.assertEqual(observed.get('WINE_GHUB_RESTORE_STATE'), '1' if implementation != 'none' else None)
+                self.assertEqual('WAYLAND_DISPLAY' not in observed, wayland)
+                self.assertEqual(observed.get('PENGUIN_GHUB_GRACEFUL_CLOSE'), '1' if wayland else None)
+                self.assertEqual(run.call_count, int(wayland))
+
     def test_automatic_selection_requires_a_known_login_session(self):
         for session in ('', 'tty', 'unspecified'):
             with self.subTest(session=session):

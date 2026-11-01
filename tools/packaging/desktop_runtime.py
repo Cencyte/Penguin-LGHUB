@@ -339,15 +339,19 @@ def worker(config, root, state, experimental_wayland=False):
     # Keep pressure-vessel's imported driver paths ahead of our supplementary
     # non-graphics libraries. Never import the caller's arbitrary LD_* values.
     env['LD_LIBRARY_PATH'] = ':'.join(filter(None, (os.environ.get('LD_LIBRARY_PATH'), linux.library_path(linux_root, wine))))
+    # Both desktop modes use winex11.drv. Application-initiated minimization
+    # can leave Wine iconic after KWin restores the X window, especially when
+    # the work area is shorter than Chromium's minimum. These are X11-driver
+    # corrections, not Wayland-only features. Keep the bounded repaint and
+    # work-area fit paired with the verified restore-state implementation.
+    env['PENGUIN_GHUB_REPAINT_ON_RESTORE'] = '1'
+    env['PENGUIN_GHUB_FIT_WORKAREA'] = '1'
+    if config.get('x11_restore_override') or 'x11-restore' in config.get('integrated_wine_fixes', []):
+        env['WINE_GHUB_RESTORE_STATE'] = '1'
     if experimental_wayland:
-        # The patched X11 driver supplies our tested input/composition behavior.
         # Keep native Wayland for host services; Wine uses authenticated Xwayland.
         env.pop('WAYLAND_DISPLAY', None)
-        env['PENGUIN_GHUB_REPAINT_ON_RESTORE'] = '1'
-        env['PENGUIN_GHUB_FIT_WORKAREA'] = '1'
         env['PENGUIN_GHUB_GRACEFUL_CLOSE'] = '1'
-        if config.get('x11_restore_override') or 'x11-restore' in config.get('integrated_wine_fixes', []):
-            env['WINE_GHUB_RESTORE_STATE'] = '1'
     os.environ.clear()
     os.environ.update(env)
     if experimental_wayland:

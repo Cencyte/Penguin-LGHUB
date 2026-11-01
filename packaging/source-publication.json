@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "471133a8012863f3368365c44fb544aeb9088732",
+  "github_base_commit": "9b5b3040e99aa7954c05df75e8392bfb3b6ce5b2",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "b3372828d7c7ee52d28cc82921967c2448cda26b4d3ae9155c62d6430b028dfa",
-      "bytes": 76016
+      "sha256": "13172f666659556904feb8a9e2c8584c1db3aeec79bb02060b098ed2ead15b37",
+      "bytes": 76279
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -728,14 +728,14 @@
     {
       "path": "docs/packaging/release-installer-verification.json",
       "mode": "100644",
-      "sha256": "28c02ebd758f82e1f46645e8dc33de3e0d8279508d586fcc9d6e4e6a614a9850",
-      "bytes": 11993
+      "sha256": "f6b4567ed473c4a74beac5dbf8b8aa1daf737be4021ea01613628ded33606662",
+      "bytes": 17957
     },
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "f62c2cdcfe769ed43b1a6ef3a6fc6aae1836c63e581d02c4022caeb595c66b72",
-      "bytes": 24114
+      "sha256": "11395b9065ee4c244779f0cc284bff7d33f05e09374105d3f77b69e847ea67a8",
+      "bytes": 24435
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -860,7 +860,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "820257496440f4fd46db2b7a90e7767fca71454aaff05b96ad880370f29ee324",
+      "sha256": "8eb85669d1c039378b3e81888555fe5441f8477b7380622a71acfe2fcc360d35",
       "bytes": 252
     },
     {
@@ -908,8 +908,8 @@
     {
       "path": "packaging/release-review.json",
       "mode": "100644",
-      "sha256": "7cff720d937c334d6473537f6872d4d5569cdf0b8ca21db442230b42535332af",
-      "bytes": 14189
+      "sha256": "400fb280afdc02b1b9014cb1310f9a298ae24adc2ef4d2840f79b67720301a61",
+      "bytes": 15157
     },
     {
       "path": "packaging/runtime-baseline.json",
@@ -1304,8 +1304,8 @@
     {
       "path": "tests/packaging/test_desktop_runtime.py",
       "mode": "100644",
-      "sha256": "2008b7a86f1f651f86c6a69c9a3a5028ac9a993663c975c2b785fd79993d60b0",
-      "bytes": 24377
+      "sha256": "2f70af259a5c0a95b7d782a43bf5268af83624b91abeccbba926ab98482cb3bf",
+      "bytes": 26760
     },
     {
       "path": "tests/packaging/test_desktop_shutdown.py",
@@ -1964,8 +1964,8 @@
     {
       "path": "tools/packaging/desktop_runtime.py",
       "mode": "100644",
-      "sha256": "b00925580e27e558abb172680e8d6de48c0c2b291ca6cde02e735b96abb2aa23",
-      "bytes": 32294
+      "sha256": "b6f23338304043f6e716aa5993b7ba908d50015edc4b721037d4ba23e1baf2e4",
+      "bytes": 32579
     },
     {
       "path": "tools/packaging/dockur_acquire.py",

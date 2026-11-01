@@ -13,11 +13,11 @@ cd Penguin-LGHUB-release
 ./install.sh
 ```
 
-Installer 0.3.8 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
+Installer 0.3.9 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.6) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.7) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
 
-Preview 6 includes installer 0.3.8, automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal. It adds an untimed pause before sudo authentication and checks the actual Xwayland binary and native-input route.
+Preview 7 includes installer 0.3.9, automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal. It retains the untimed pause before sudo authentication and the Xwayland native-input route check. The window restore corrections now run in X11 as well as Wayland, fixing the session-specific omission exposed by the Manjaro VM. This changes the private launcher environment; it requires no host Wine, graphics-driver, or compositor changes. Reinstall acceptance and Bazzite/CachyOS regression checks for this revision remain pending.
 
 The release-consolidation run rebuilt the current Wine patches and supplements in the pinned SDK, then prepared a new prefix with host Wine hidden. All 8 activation checks, 4 registry checks and 6 isolated UI/tray checks passed; the combined project suite passed 239 tests. The profile payload gate also verified the adapter, pinned agent and both observer backends. These automated checks complement the recorded manual confirmations; they do not establish fresh packaged-profile acceptance on CachyOS or Bazzite. [Validation record](release-installer-verification.json).
 
@@ -30,7 +30,7 @@ runtime, prefix and G HUB settings. Each launch selects X11 or KDE Plasma Waylan
 from the current login session; logging out and changing sessions does not
 require another installation. Quit G HUB before switching sessions.
 
-Installer 0.3.8 pauses without a countdown when its device-rule step needs a
+Installer 0.3.9 pauses without a countdown when its device-rule step needs a
 password. Press Enter when ready; sudo then shows its normal password prompt.
 The pause also applies to removal when authorization is needed. Cached or
 passwordless sudo needs no pause. Passwords are handled by sudo, and system

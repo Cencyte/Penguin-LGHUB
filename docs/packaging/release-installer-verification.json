@@ -322,5 +322,143 @@
       "patched_files_verified": 10,
       "live_desktop_touched": false
     }
+  },
+  "x11_restore_activation_2026_11_01": {
+    "installer_version": "0.3.9",
+    "reported_trigger": "Manjaro VM Plasma X11: G HUB titlebar minimize followed by restore loses UI; panel minimize does not. CachyOS same-release comparison did not show the failure.",
+    "installed_version_inspected": {
+      "project": "0.9.0-preview.6",
+      "installer": "0.3.8"
+    },
+    "live_read_only_evidence": {
+      "display": [
+        1280,
+        800
+      ],
+      "work_area": [
+        1280,
+        756
+      ],
+      "compositor": "KWin X11 6.5.5",
+      "mesa": "26.0.2-arch1.1",
+      "renderer": "llvmpipe (LLVM 22.1.1, 256 bits)",
+      "x11_state": "Normal, focused and viewable",
+      "x11_window_size": [
+        1024,
+        504
+      ],
+      "win32_style": "0x34c70000",
+      "win32_minimized": true,
+      "win32_rect": [
+        -32000,
+        -32000,
+        -31840,
+        -31969
+      ],
+      "driver_desired_pending_current_wm_states": [
+        1,
+        1,
+        1
+      ],
+      "driver_desired_and_pending_rect": [
+        161,
+        53,
+        1185,
+        821
+      ],
+      "driver_current_rect": [
+        161,
+        53,
+        1185,
+        557
+      ],
+      "configure_serial": 10573,
+      "other_restore_blocking_serials": {
+        "wm_state": 0,
+        "net_wm_state": 0,
+        "mwm_hints": 0
+      },
+      "restore_repaint_workarea_gates_present": false,
+      "method": "Read-only X properties and targeted /proc memory reads using matched Wine structures; no debugger attachment, live input or live screenshot."
+    },
+    "diagnosis": "The runtime includes patch0044, but desktop_runtime.worker only enabled its restore-state gate and the paired frontend work-area/repaint gates for Wayland. The live X11 window is stuck behind an unanswered geometry request despite confirmed NormalState.",
+    "change": "Enable existing restore-state correction, bounded repaint and work-area fit for both X11-driver session types. Leave the separate Wayland shutdown/driver-selection behavior unchanged.",
+    "distribution_scope": "Shared launcher change; no Manjaro-specific package substitution or host compositor/driver modification.",
+    "uninstall_scope": "No new files outside the existing receipt-owned source/private installation and no persistent host settings. Existing source/payload removal covers this change.",
+    "regressions": {
+      "project_tests_passed": 263,
+      "new_worker_regression_session_artifact_combinations": 6
+    },
+    "isolated_validation": {
+      "environment": "Disposable reflinked prefixes, private PID/network/device/D-Bus namespaces and Xvfb with the VM KWin X11/llvmpipe compositor. No host desktop or physical device access.",
+      "candidate_restore_cycles_passed": 48,
+      "candidate_runs": [
+        {
+          "case": "button-candidate",
+          "passed": true,
+          "restores": 12,
+          "drawable_and_composed_pixels_pass": true,
+          "height": 756,
+          "win32_probes": true,
+          "launcher_exit": 0,
+          "remaining_prefix_processes": 0,
+          "installation_intact_after_exit": true
+        },
+        {
+          "case": "panel-candidate",
+          "passed": true,
+          "restores": 12,
+          "drawable_and_composed_pixels_pass": true,
+          "height": 756,
+          "win32_probes": true,
+          "launcher_exit": 0,
+          "remaining_prefix_processes": 0,
+          "installation_intact_after_exit": true
+        },
+        {
+          "case": "button-unprobed-candidate",
+          "passed": true,
+          "restores": 12,
+          "drawable_and_composed_pixels_pass": true,
+          "height": 504,
+          "win32_probes": false,
+          "launcher_exit": 0,
+          "remaining_prefix_processes": 0,
+          "installation_intact_after_exit": true
+        },
+        {
+          "case": "panel-unprobed-candidate",
+          "passed": true,
+          "restores": 12,
+          "drawable_and_composed_pixels_pass": true,
+          "height": 756,
+          "win32_probes": false,
+          "launcher_exit": 0,
+          "remaining_prefix_processes": 0,
+          "installation_intact_after_exit": true
+        }
+      ],
+      "baseline_restore_cycles_passed": 36,
+      "baseline_limit": "All three private baseline runs also passed. The isolated comparisons verify operation and geometry handling but do not reproduce or prove removal of the live failure.",
+      "pixel_checks": "Both the application drawable and KWin-composed output match a settled Devices-page reference after every restore.",
+      "perturbation_control": "Two candidate runs (24 restores) omit Wine probe processes, WINEDEBUG trace and CDP; includes the 504-pixel constrained work area.",
+      "excluded_fixture_runs": [
+        "Initial baseline onboarding run covered by a private tray crash dialog",
+        "Baseline with an unsettled loading-screen reference",
+        "Short candidate run whose unscaled pointer target missed the scaled minimize button"
+      ],
+      "fixture_limit": "Private runtime user identity creates a disposable Wine user alongside the source user; this is not an exact replay of the live desktop settings."
+    },
+    "manual_acceptance": {
+      "manjaro_vm_after_reinstall": "pending",
+      "bazzite_regression": "pending",
+      "cachyos_regression": "pending"
+    },
+    "limits": "Isolated passing cycles are not a population reliability percentage. Baseline private button cycles can pass despite the independently observed live failure. Reinstallation acceptance remains user-driven.",
+    "primary_sources": [
+      "https://raw.githubusercontent.com/electron/electron/v39.1.2/shell/browser/native_window_views.cc",
+      "https://raw.githubusercontent.com/chromium/chromium/142.0.7444.134/ui/views/win/hwnd_message_handler.cc"
+    ],
+    "retained_private_evidence": "~/.local/state/penguin-x11-restore-20261101 on the Manjaro VM; matching local diagnostic-source archive."
   }
 }

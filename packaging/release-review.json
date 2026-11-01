@@ -296,5 +296,23 @@
       "fresh_installer_retry": "pending user acceptance"
     },
     "earlier_review": "Other entries retain their Preview5 review context."
+  },
+  "preview_7_followup": {
+    "source_release": "v0.9.0-preview.7",
+    "installer": "0.3.9",
+    "changes": [
+      "Activate the existing Wine restore-state correction and frontend work-area/repaint gates in both X11-driver desktop modes.",
+      "Preserve Wayland-only shutdown and graphics-selection behavior; no new persistent host artifact."
+    ],
+    "validation": {
+      "local_regressions_passed": 263,
+      "worker_session_artifact_combinations": 6,
+      "isolated_candidate_restores_passed": 48,
+      "baseline_limit": "36 private baseline restores also passed; diagnosis uses independently observed live X11/Win32 state mismatch.",
+      "fresh_manjaro_reinstall": "pending manual acceptance",
+      "bazzite_cachyos_regressions": "pending manual acceptance"
+    },
+    "evidence": "docs/packaging/release-installer-verification.json#x11_restore_activation_2026_11_01",
+    "earlier_review": "Earlier entries retain their dated release context."
   }
 }
