@@ -25,6 +25,9 @@ class UninstallTests(unittest.TestCase):
         self.base = Path(self.temp.name).resolve()
         self.root = self.base / 'installation'
         self.ui = MagicMock()
+        self.rule = self.base / 'rule'
+        rule_path = patch.object(uninstall, 'owned_rule_path', return_value=self.rule)
+        rule_path.start();self.addCleanup(rule_path.stop)
 
     def create(self, desktop=False):
         with ownership.managed_directory(self.root, create=True, source='fixture', version='test') as (_, state):
@@ -57,6 +60,7 @@ class UninstallTests(unittest.TestCase):
 
     def test_partial_install_removes_only_its_rule(self):
         self.create()
+        self.rule.write_bytes(rules.RULE)
         self.state['attempts']['rules'] = 1
         ownership.save(self.root, self.state)
         uninstall.remove(self.root, self.ui)
@@ -148,11 +152,29 @@ class UninstallTests(unittest.TestCase):
 
     def test_denied_sudo_leaves_payload_and_launcher_intact(self):
         entry, _ = self.entry()
+        self.rule.write_bytes(rules.RULE)
         state = ownership.load(self.root);state['attempts']['rules'] = 1;ownership.save(self.root, state)
         self.ui.run.side_effect = RuntimeError('sudo refused')
         with self.assertRaisesRegex(RuntimeError, 'sudo refused'):
             uninstall.remove(self.root, self.ui)
         self.assertTrue(entry.exists());self.assertTrue(self.root.exists())
+
+    def test_never_created_rule_needs_no_sudo_during_rollback(self):
+        self.create()
+        self.state['attempts']['rules'] = 1
+        ownership.save(self.root, self.state)
+        uninstall.remove(self.root, self.ui)
+        self.ui.run.assert_not_called()
+        self.assertFalse(self.root.exists())
+
+    def test_dangling_rule_symlink_is_not_treated_as_absent(self):
+        self.rule.symlink_to(self.base / 'missing')
+        self.assertTrue(uninstall.device_rule_present({'installation_id': 'a' * 32}))
+
+    def test_rule_lookup_permission_error_is_not_treated_as_absent(self):
+        with patch.object(Path, 'lstat', side_effect=PermissionError('fixture denied')):
+            with self.assertRaises(PermissionError):
+                uninstall.device_rule_present({'installation_id': 'a' * 32})
 
     def test_interrupted_payload_removal_keeps_receipt_for_retry(self):
         self.create()

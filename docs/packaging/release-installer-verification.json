@@ -284,5 +284,43 @@
       "input_injected": false,
       "windows_created": false
     }
+  },
+  "authorization_timeout_repair_2026_11_01": {
+    "installer_version": "0.3.8",
+    "diagnosis": "Manjaro VM installer0.3.7 reached device-rule authorization after runtime, isolated UI/tray and graphics/audio checks. sudo timed out reading password before the helper started.",
+    "root_cause_scope": "Generic late interactive sudo prompt; not specific to Manjaro or Wine.",
+    "rollback_verified": {
+      "private_installation_absent": true,
+      "desktop_launcher_absent": true,
+      "application_menu_launcher_absent": true,
+      "scoped_rule_absent": true,
+      "diagnostics_retained": true
+    },
+    "repair": [
+      "Untimed Enter pause before password authentication; cached authorization bypasses the pause.",
+      "Password remains handled by sudo with existing system policy.",
+      "Rule cleanup skips sudo only after lstat confirms the exact installation-specific path is absent."
+    ],
+    "local_regressions": {
+      "passed": 262,
+      "failures": 0,
+      "errors": 0,
+      "new_tests": 9
+    },
+    "fresh_install_after_repair": "Pending manual acceptance; no installer rerun initiated.",
+    "cachyos_user_report": "User reports testing basically everything except attaching LogitechG peripherals. Physical Logitech-device acceptance on CachyOS remains outstanding.",
+    "vm_validation": {
+      "focused_tests_passed": 55,
+      "failures": 0,
+      "errors": 0,
+      "full_developer_suite": {
+        "total": 248,
+        "passed": 240,
+        "errors": 8,
+        "cause": "Host node executable absent for eight frontend JavaScript fixture tests; no package changes made."
+      },
+      "patched_files_verified": 10,
+      "live_desktop_touched": false
+    }
   }
 }

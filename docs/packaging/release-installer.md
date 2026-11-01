@@ -30,6 +30,13 @@ runtime, prefix and G HUB settings. Each launch selects X11 or KDE Plasma Waylan
 from the current login session; logging out and changing sessions does not
 require another installation. Quit G HUB before switching sessions.
 
+Installer 0.3.8 pauses without a countdown when its device-rule step needs a
+password. Press Enter when ready; sudo then shows its normal password prompt.
+The pause also applies to removal when authorization is needed. Cached or
+passwordless sudo needs no pause. Passwords are handled by sudo, and system
+authentication policy is unchanged. If authorization never starts the rule
+helper, rollback confirms the rule is absent and skips unnecessary sudo cleanup.
+
 Check setup inspects the current session. Wayland keeps its Xwayland, KWin,
 portal and user-consent requirements; automatic selection does not grant input
 permission or fall back to X11 when a Wayland capability is missing.

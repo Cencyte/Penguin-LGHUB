@@ -102,8 +102,10 @@ class InstallerTests(unittest.TestCase):
             def start(*args,**kwargs):
                 self.assertEqual(view._spinner_suspended,1)
                 return child
-            with patch.object(ui.subprocess,'Popen',side_effect=start) as popen:
+            with patch.object(ui.subprocess,'Popen',side_effect=start) as popen, \
+                 patch.object(view,'wait_for_sudo') as authorize:
                 view.run(['sudo','python3','scoped-helper'])
+                authorize.assert_called_once_with(None)
                 self.assertFalse(popen.call_args.kwargs['start_new_session'])
                 self.assertNotIn('stdin',popen.call_args.kwargs)
                 self.assertEqual(view._spinner_suspended,0)

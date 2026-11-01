@@ -728,14 +728,14 @@
     {
       "path": "docs/packaging/release-installer-verification.json",
       "mode": "100644",
-      "sha256": "58049ea1f9d3bf8f3dfc1086515e3af09d43680a8caf078dbe55df440bb4b5a2",
-      "bytes": 10287
+      "sha256": "28c02ebd758f82e1f46645e8dc33de3e0d8279508d586fcc9d6e4e6a614a9850",
+      "bytes": 11993
     },
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "96acea84a1f93ae479dd8468c42f511a4dfaf5ffa71f14496b3cd531578bad19",
-      "bytes": 23538
+      "sha256": "212ab20a8f12a7b4f0c13f24605d96760183221d5747608c64c0689bf4ce3d50",
+      "bytes": 24000
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -860,7 +860,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "6bb83fd347f89f4ffb516a5bcccd2057041ce5a409737a3fbd634aabf0309db2",
+      "sha256": "f34a1541bf38b5627b568d49b6ba87073a49a936c35564d353c3b3ec04953f62",
       "bytes": 252
     },
     {
@@ -1346,14 +1346,14 @@
     {
       "path": "tests/packaging/test_install_transaction.py",
       "mode": "100644",
-      "sha256": "ef91558b5599e7cbba338495e2be2fe75f923f1b8318d099ede2798c1f820ca8",
-      "bytes": 13030
+      "sha256": "f276c4a2db9519d839bf58e2f762020e066f6807725b9ffcf7e85da576d67395",
+      "bytes": 13109
     },
     {
       "path": "tests/packaging/test_installer.py",
       "mode": "100644",
-      "sha256": "8f7e727fef347296da640d0f961930b513c0254af84fa0834583f12719b3a460",
-      "bytes": 9988
+      "sha256": "735c3d5ebf21d458147e947804a0bab63ce5f0730363e4f841066286c82949ea",
+      "bytes": 10112
     },
     {
       "path": "tests/packaging/test_linux_runtime.py",
@@ -1398,6 +1398,12 @@
       "bytes": 3626
     },
     {
+      "path": "tests/packaging/test_sudo_authorization.py",
+      "mode": "100644",
+      "sha256": "85783d8848df0330a491c335da37c70f4ce184a19382988e7a9262901b6ae310",
+      "bytes": 5705
+    },
+    {
       "path": "tests/packaging/test_tray_registration.py",
       "mode": "100644",
       "sha256": "731a5c191aaea424fc10d6e3f08f980ae8f12a37b18448e6f4df526118d530ad",
@@ -1406,8 +1412,8 @@
     {
       "path": "tests/packaging/test_uninstall.py",
       "mode": "100644",
-      "sha256": "6359e356d0f9400df23785295cb9252c77395ef0f3b7354f697eec09f54c7184",
-      "bytes": 13777
+      "sha256": "74170c34904ce1981a0866ce42700c131dce5bb1a7da8927afed0b8ceea895f4",
+      "bytes": 14857
     },
     {
       "path": "tests/packaging/test_windows_media_acquire.py",
@@ -2006,8 +2012,8 @@
     {
       "path": "tools/packaging/install_device_rules.py",
       "mode": "100644",
-      "sha256": "3fd14a69702814e6800be531590a240a27b57ac430c119aa76478332af4865af",
-      "bytes": 3141
+      "sha256": "1d7720430804cb3c3343bcac6a9cc4a459f695d05ba3e6f7677662e4cfcd6063",
+      "bytes": 3274
     },
     {
       "path": "tools/packaging/install_storage.py",
@@ -2030,8 +2036,8 @@
     {
       "path": "tools/packaging/installer_ui.py",
       "mode": "100644",
-      "sha256": "c7322c32ac8c46359af10c5011826269c83a1de00de6a06aa36c8889da5fcd9f",
-      "bytes": 8816
+      "sha256": "5318916c003cd6855b64fd691b297dc00664bbfc8e5f23da0aa38f8be6638f44",
+      "bytes": 10394
     },
     {
       "path": "tools/packaging/linux_probe.py",
@@ -2114,8 +2120,8 @@
     {
       "path": "tools/packaging/run_project_tests.py",
       "mode": "100644",
-      "sha256": "58f772ae70b22cadbf44e67893f89b83042ee7cb73a9b53ef77e3583e8bd9a82",
-      "bytes": 7900
+      "sha256": "dd9a304c52d47746bd9ba2b60e8e5bec40193b4e7fdc92041e6cdd629e6a3cfb",
+      "bytes": 8001
     },
     {
       "path": "tools/packaging/server_sync.py",
@@ -2150,8 +2156,8 @@
     {
       "path": "tools/packaging/uninstall.py",
       "mode": "100644",
-      "sha256": "fa16e687451a157f36dd023d0e1144c4ed7470a8fb485a77bc78fa2f881f348f",
-      "bytes": 8652
+      "sha256": "44379046734bbb7d5d2d21ef966951bda635d766474df2642cd3e703f4e53c5a",
+      "bytes": 9167
     },
     {
       "path": "tools/packaging/wayland_input_probe.py",
@@ -3126,10 +3132,10 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Post-Preview5 source: adds read-only Xwayland libei bridge and portal/private-EIS route inspection to compatibility checks and launch preflight. 253 passing regressions. Source only; no vendor payload, compiled Wine runtime or populated prefix. README includes twenty centered social sharing links with locally stored badges.",
+  "publication_note": "Post-Preview5 source: adds read-only Xwayland libei bridge and portal/private-EIS route inspection to compatibility checks and launch preflight. 253 passing regressions. Source only; no vendor payload, compiled Wine runtime or populated prefix. README includes twenty centered social sharing links with locally stored badges. Installer0.3.8 adds an untimed authorization pause and skips privileged rollback when its rule was never created. 262 local regressions and 55 focused Manjaro VM regressions pass; full fresh-install retry remains manual.",
   "publication_branch": "release",
-  "file_count": 516,
-  "total_bytes": 13563983,
+  "file_count": 517,
+  "total_bytes": 13575466,
   "source_release": "unreleased",
   "release_parent_commit": "4b889eb1cd9e603ef5d593a89c7382532deabc82"
 }

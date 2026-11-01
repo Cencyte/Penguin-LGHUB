@@ -14,6 +14,7 @@ import time
 import traceback
 
 import installation_state
+from install_device_rules import owned_rule_path
 from installer_ui import Presentation, ROOT
 
 
@@ -118,6 +119,18 @@ def remove(directory, ui):
     ui.write('Penguin-LGHUB removed. The source checkout and unrelated software are unchanged.')
 
 
+def device_rule_present(state):
+    # A denied/timed-out sudo invocation may never have started the helper.
+    # Only confirmed absence skips removal; permissions and symlinks must not
+    # masquerade as absence. The privileged helper validates any existing file.
+    target = owned_rule_path(state['installation_id'], os.getuid())
+    try:
+        target.lstat()
+    except FileNotFoundError:
+        return False
+    return True
+
+
 def remove_owned(root, state, ui, *, rollback=False):
     """Caller holds the installation lock; shared by uninstall and rollback."""
     ui.step('Verify', 'Verify installation ownership, launchers and mount boundaries')
@@ -129,7 +142,7 @@ def remove_owned(root, state, ui, *, rollback=False):
     marker.touch(mode=0o600)
     try:
         with stopped_session(root, ui):
-            if state['attempts'].get('rules'):
+            if state['attempts'].get('rules') and device_rule_present(state):
                 ui.step('System', 'Remove this installation’s Logitech device rule')
                 ui.run(['sudo', sys.executable, str(ROOT / 'tools/packaging/install_device_rules.py'),
                         '--installation-id', state['installation_id'], '--remove'])

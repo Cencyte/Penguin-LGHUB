@@ -226,6 +226,7 @@ finally:ui.close()
             if len(commands) == fail_at:raise subprocess.CalledProcessError(1, command)
         self.ui.run = run
         with patch.object(install, 'space_check'), \
+             patch.object(uninstall, 'owned_rule_path', return_value=rules), \
              patch.object(install.subprocess, 'check_output', return_value=str(desktop) + '\n'):
             install.pipeline(args, self.ui, {'session':'x11','selinux':'Disabled'})
             total = len(commands)

@@ -10,13 +10,16 @@ import subprocess
 RULE=b'SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", TAG+="uaccess"\nSUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="046d", TAG+="uaccess"\n'
 
 
-def scoped_target(installation_id, directory):
+def owned_rule_path(installation_id, uid, directory=Path('/etc/udev/rules.d')):
     if not re.fullmatch('[a-f0-9]{32}', installation_id):
         raise ValueError('Invalid installation ID')
-    uid = os.environ.get('SUDO_UID', '')
-    if not uid.isdecimal() or int(uid) == 0:
+    if not str(uid).isdecimal() or int(uid) == 0:
         raise ValueError('Run this helper through sudo as the installing desktop user')
     return directory / f'70-penguin-lghub-{int(uid)}-{installation_id}.rules'
+
+
+def scoped_target(installation_id, directory):
+    return owned_rule_path(installation_id, os.environ.get('SUDO_UID', ''), directory)
 
 
 def install(installation_id=None, remove=False, directory=Path('/etc/udev/rules.d')):

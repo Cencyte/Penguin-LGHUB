@@ -174,7 +174,33 @@ class Presentation:
     def run(self,argv,env=None):
         argv=list(map(str,argv))
         with self.suspend_activity() if Path(argv[0]).name=='sudo' else nullcontext():
+            if Path(argv[0]).name=='sudo':self.wait_for_sudo(env)
             self._run(argv,env)
+
+    def wait_for_sudo(self,env=None):
+        """Wait for the person, then let sudo own its normal password prompt.
+
+        A long build must not start sudo's password countdown while unattended.
+        No password is read here, no policy is changed, and there is no timer
+        on the Enter prompt. Cached/passwordless authorization needs no pause.
+        """
+        check=subprocess.run(['sudo','-n','-v'],env=env,stdin=subprocess.DEVNULL,
+                             stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+                             text=True,errors='replace',timeout=15)
+        self.output('[sudo authorization check: exit '+str(check.returncode)+']\n'+check.stdout)
+        if check.returncode==0:return
+        try:
+            terminal=open('/dev/tty','r')
+        except OSError as error:
+            raise RuntimeError('Administrator authorization needs a terminal. Run the installer '
+                               'from your desktop terminal so sudo can request your password.') from error
+        with terminal:
+            self.write('')
+            self.write('Setup is paused for administrator authorization; there is no countdown.')
+            self.write('Press Enter when ready for the sudo password prompt, or Ctrl+C to cancel.')
+            self.log.write('Waiting for Enter before starting sudo authentication.\n');self.log.flush()
+            if not terminal.readline():
+                raise RuntimeError('The authorization terminal closed before sudo could start.')
 
     def _run(self,argv,env=None):
         argv=list(map(str,argv));self.log.write('$ '+shlex.join(argv)+'\n');self.log.flush()
