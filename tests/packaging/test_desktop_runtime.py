@@ -140,6 +140,7 @@ class DesktopRuntimeTests(unittest.TestCase):
             return 0, ''
         with patch.object(wayland_session, 'socket_error', return_value=None), \
                 patch.object(wayland_session.shutil, 'which', return_value='/usr/bin/tool'), \
+                patch.object(wayland_session.xwayland_input, 'inspect', return_value={'errors': [], 'warnings': []}), \
                 patch.object(wayland_session, 'command_result', side_effect=respond):
             report = wayland_session.inspect({'PATH': '/usr/bin'})
             self.assertFalse(report['errors'])

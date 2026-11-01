@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "695a98ee3316b3e97cf9d0640a3ca919d8913092",
+  "github_base_commit": "471133a8012863f3368365c44fb544aeb9088732",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "d643632978ad6c1b8a92e0b271a327add673ff31ffd96d88d6d7585e249591bf",
-      "bytes": 75505
+      "sha256": "a78de97fd665a59cf0e9b99bbaea89cafe8ec3c74549e011ce5c5feabc839b0e",
+      "bytes": 75679
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -1292,8 +1292,8 @@
     {
       "path": "tests/packaging/test_check_presentation.py",
       "mode": "100644",
-      "sha256": "2549b10f0ad6e6c6c466fa74c4a51b5c82d3cb29fe45634cba38af2966b15772",
-      "bytes": 16950
+      "sha256": "7b5ac78a0855be3e9dd8ca2a96e8e254091c0dc58de316c4183ebad756102bbb",
+      "bytes": 17086
     },
     {
       "path": "tests/packaging/test_clean_prefix.py",
@@ -1304,8 +1304,8 @@
     {
       "path": "tests/packaging/test_desktop_runtime.py",
       "mode": "100644",
-      "sha256": "bb62d33e090e6dc8d9de30609cd8034bc38ba5aea74e681add2b694e55794dba",
-      "bytes": 24257
+      "sha256": "2008b7a86f1f651f86c6a69c9a3a5028ac9a993663c975c2b785fd79993d60b0",
+      "bytes": 24377
     },
     {
       "path": "tests/packaging/test_desktop_shutdown.py",
@@ -1432,6 +1432,12 @@
       "mode": "100644",
       "sha256": "2a1a5e3f07e46cb2ef9bf884b4c094fa86ccc8bd2b773368528bf38026deeeb1",
       "bytes": 4288
+    },
+    {
+      "path": "tests/packaging/test_xwayland_input.py",
+      "mode": "100644",
+      "sha256": "93a94e2c57f7a6bfac29f0d46f588dd8b2e073d7ed891f490e354457f9d656da",
+      "bytes": 9171
     },
     {
       "path": "tools/dragonshard-2/SKILL.md",
@@ -1988,8 +1994,8 @@
     {
       "path": "tools/packaging/host_preflight.py",
       "mode": "100644",
-      "sha256": "4647b6440eb221a98c68ae0aad061f9600bcb5b8f6dd8f3d2a7653e820271475",
-      "bytes": 5930
+      "sha256": "c7a80a8bdf42a64dcf4703ab9c1bfb34612ca9c2ed0dec999e4b324f5a6f4a8c",
+      "bytes": 5992
     },
     {
       "path": "tools/packaging/install.py",
@@ -2108,8 +2114,8 @@
     {
       "path": "tools/packaging/run_project_tests.py",
       "mode": "100644",
-      "sha256": "e8a3753f09c521cb18f4d19f2cea3d317870598e7cd6973703666f5ad048eddd",
-      "bytes": 7813
+      "sha256": "58f772ae70b22cadbf44e67893f89b83042ee7cb73a9b53ef77e3583e8bd9a82",
+      "bytes": 7900
     },
     {
       "path": "tools/packaging/server_sync.py",
@@ -2204,8 +2210,8 @@
     {
       "path": "tools/packaging/wayland_session.py",
       "mode": "100644",
-      "sha256": "bd53fd03dd71f390fa361937d1019677858341b0c62491b6b8e50107e118cd1e",
-      "bytes": 5542
+      "sha256": "66ade5923ae3ce2b5f3d516a16115751db0d11dc077e701398ffb886af1a7f52",
+      "bytes": 5827
     },
     {
       "path": "tools/packaging/wayland_wine_probe.py",
@@ -2254,6 +2260,12 @@
       "mode": "100644",
       "sha256": "3fe5c1e7ea4e1e31688618c904cce25a5295f1cbc4181e2fc655fe24c76b65a4",
       "bytes": 4368
+    },
+    {
+      "path": "tools/packaging/xwayland_input.py",
+      "mode": "100644",
+      "sha256": "d3341a612c3aedc530be9cd836503c0e2f635b5058067b6eaebd1dbaf706a778",
+      "bytes": 9150
     },
     {
       "path": "tools/wine/activation_config_test.cpp",
@@ -3114,10 +3126,10 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Installer 0.3.7 consolidates automatic X11/KDE Wayland profiles, shared keyboard output, profile prerequisites and payload verification, filesystem capability checks and receipt-scoped removal. Four current diagrams and 239 passing regressions. Source only; no vendor payload, compiled Wine runtime or populated prefix. README adds twenty centered social sharing and bookmarking links with locally stored badge artwork.",
+  "publication_note": "Post-Preview5 source: adds read-only Xwayland libei bridge and portal/private-EIS route inspection to compatibility checks and launch preflight. 253 passing regressions. Source only; no vendor payload, compiled Wine runtime or populated prefix. README includes twenty centered social sharing links with locally stored badges.",
   "publication_branch": "release",
-  "file_count": 514,
-  "total_bytes": 13544798,
+  "file_count": 516,
+  "total_bytes": 13563983,
   "source_release": "unreleased",
   "release_parent_commit": "4b889eb1cd9e603ef5d593a89c7382532deabc82"
 }

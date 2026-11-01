@@ -10,6 +10,7 @@ import stat
 import subprocess
 
 from host_policy import os_identity, package_query
+import xwayland_input
 
 HELP = '''Penguin-LGHUB
 
@@ -83,6 +84,10 @@ def inspect(env):
             report[extension.lower()] = status == 0 and bool(re.search(r'^\s+' + extension + r'\b', info, re.M))
         if not all(report.get(k) for k in ('x11_authenticated', 'xwayland', 'xtest')):
             report['errors'].append('Cannot authenticate to local Xwayland with XTEST support. Launch from the Wayland desktop; do not use xhost to bypass authentication.')
+        elif report['xwayland']:
+            report['native_input_bridge'] = xwayland_input.inspect(env)
+            report['errors'].extend(report['native_input_bridge']['errors'])
+            report['warnings'].extend(report['native_input_bridge']['warnings'])
     if not shutil.which('gdbus', path=env.get('PATH')):
         report['errors'].append('gdbus is required to check KDE and its desktop portal (glib2).')
     else:

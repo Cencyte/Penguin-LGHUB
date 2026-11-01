@@ -34,6 +34,7 @@ EXAMPLES
 # Use the installer's existing palette; discovery still includes newly added
 # test modules even before a friendly label is assigned here.
 STEPS = {
+    'test_xwayland_input': ('Desktop', 'Test Xwayland native-input bridge detection'),
     'test_profile_support': ('Desktop', 'Test automatic-profile prerequisites and packaged components'),
     'test_native_profiles': ('Desktop', 'Test host application identity and observer lifecycle'),
     'test_profile_kwin': ('Desktop', 'Test Wayland focus authentication and cleanup'),

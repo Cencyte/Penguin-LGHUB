@@ -33,12 +33,13 @@ class CheckPresentationTests(unittest.TestCase):
                      patch.object(host_preflight.shutil, 'which', side_effect=lambda n: '/usr/bin/' + n), \
                      patch.object(host_preflight, 'capture', side_effect=command), \
                      patch.object(profile_support, 'inspect', return_value={'errors': []}), \
-                     patch.object(wayland_session, 'inspect', return_value={'errors': ['portal fixture']}):
+                     patch.object(wayland_session, 'inspect', return_value={'errors': ['portal fixture'], 'warnings': ['bridge unverified']}):
                     plain = host_preflight.inventory(env, Path(tmp))
                     presented = host_preflight.inventory(env, Path(tmp), lambda *e: events.append(e))
                 self.assertEqual(plain, presented)
                 self.assertTrue(any('namespace test failed' in e for e in presented['errors']))
                 self.assertEqual(any('portal fixture' == e for e in presented['errors']), session == 'wayland')
+                self.assertEqual('bridge unverified' in presented['warnings'], session == 'wayland')
                 self.assertEqual(len(events), 10 if session == 'wayland' else 9)
                 self.assertIn(('Desktop', 'Check native application-profile observer support'), events)
                 self.assertEqual(events[-1], ('Verify', 'Test an isolated user namespace'))

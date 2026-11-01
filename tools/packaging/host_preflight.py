@@ -79,10 +79,11 @@ def inventory(env=None, sysroot=Path('/sys'), progress=None, result=None):
       'ntsync_present':Path('/dev/ntsync').exists(),'errors':errors,'warnings':warnings,
       'physical_input_tested':False,'end_to_end_qualified':False,'checks':checks}
     if session=='wayland':
-        progress('Desktop', 'Check Xwayland, KWin and the input-control portal')
+        progress('Desktop', 'Check Xwayland native input, KWin and the portal')
         import wayland_session
         report['wayland']=wayland_session.inspect(env)
         errors.extend(report['wayland']['errors'])
+        warnings.extend(report['wayland'].get('warnings', []))
     progress('Desktop', 'Check native application-profile observer support')
     import profile_support
     report['profiles']=profile_support.inspect(env)
