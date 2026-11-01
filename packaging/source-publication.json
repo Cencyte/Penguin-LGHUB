@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "b1bf7141fd8460dd66a9cd7574071cc2d2de4e21",
+  "github_base_commit": "1858195ae05a130e07fc53bad60f17df57ebfde3",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -62,14 +62,134 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "60b42cb4344b8b21b152e7b255dd180c43f0d9eddf9275855603f0a7dfc801db",
-      "bytes": 70657
+      "sha256": "0ddca66a3c1dac4f2d0bc6172a43cf4151ac857ffe5b669cee918c9280812775",
+      "bytes": 75488
     },
     {
       "path": "assets/penguin-lghub-logo.png",
       "mode": "100644",
       "sha256": "f76b0520fbcc1c9af17177f38d63b3d878952d4ce3e9c5226c159a3b96636f0c",
       "bytes": 945225
+    },
+    {
+      "path": "assets/share/bluesky.svg",
+      "mode": "100644",
+      "sha256": "4f940044e75621c775a362fdc4f0fb6d6c7773285123d947e83b503a6ba8f3f0",
+      "bytes": 1304
+    },
+    {
+      "path": "assets/share/email.svg",
+      "mode": "100644",
+      "sha256": "0a907ec3ef350ce3ea98b98d9324af00f05a7e1673c3f391c117f2a7257bc4a9",
+      "bytes": 447
+    },
+    {
+      "path": "assets/share/facebook.svg",
+      "mode": "100644",
+      "sha256": "f28e58c7114b6a311760f76a7c4b0d2dae208929393eacbe054f3a06ab56b728",
+      "bytes": 1264
+    },
+    {
+      "path": "assets/share/flipboard.svg",
+      "mode": "100644",
+      "sha256": "83ef193bf2025bfa8eca9691dc9efb36543415ad41aa31127b7d8b7b44952b62",
+      "bytes": 786
+    },
+    {
+      "path": "assets/share/hackernews.svg",
+      "mode": "100644",
+      "sha256": "d57fd0e26820b82e87e4d5b12aad6c8fdf0750ae2fb5159f64e2ba0adb9bbef1",
+      "bytes": 936
+    },
+    {
+      "path": "assets/share/instapaper.svg",
+      "mode": "100644",
+      "sha256": "db34e6c7d56295c917d520b104e69f6d0e524b157f65d8328832ad3abf7dea40",
+      "bytes": 956
+    },
+    {
+      "path": "assets/share/line.svg",
+      "mode": "100644",
+      "sha256": "1070a4af090d6fde44f2b6c270ab15c428b8d71313bec4366d378222a301b528",
+      "bytes": 2098
+    },
+    {
+      "path": "assets/share/linkedin.svg",
+      "mode": "100644",
+      "sha256": "7caccbb6d3cffaae4c2397928d84dab0ff2d73f12cc75e2fb61f1732c31cc17f",
+      "bytes": 445
+    },
+    {
+      "path": "assets/share/mastodon.svg",
+      "mode": "100644",
+      "sha256": "f9a81399ad5a34974492d8ecf36b20addc0e2ea90fd3675e4325c1efc430825d",
+      "bytes": 2164
+    },
+    {
+      "path": "assets/share/okru.svg",
+      "mode": "100644",
+      "sha256": "f756084f684d6a82f8cb0fe2d786f3a5b0a07868c5c3418cebe0d985a4721732",
+      "bytes": 1432
+    },
+    {
+      "path": "assets/share/pinboard.svg",
+      "mode": "100644",
+      "sha256": "9ac3bae2772fafc0624dd308e67d8e5979323d89cdfb02e141a0dbde75194196",
+      "bytes": 860
+    },
+    {
+      "path": "assets/share/pinterest.svg",
+      "mode": "100644",
+      "sha256": "7bf819d17245a48e87ee626a9fe8d407cce33fc04f12c4aa21dc9291d6c385d7",
+      "bytes": 1770
+    },
+    {
+      "path": "assets/share/reddit.svg",
+      "mode": "100644",
+      "sha256": "f83071751024c0ebd0d9ca70995b1b979df9b8579e91d60f906dd26df2e069d9",
+      "bytes": 2186
+    },
+    {
+      "path": "assets/share/telegram.svg",
+      "mode": "100644",
+      "sha256": "9b2c0bd36c4d329485cc3f50ac5f33b66e23634ff7dcc0d7332b0c50edffa592",
+      "bytes": 1532
+    },
+    {
+      "path": "assets/share/threads.svg",
+      "mode": "100644",
+      "sha256": "cb3e0e91878d69d735fd98a02426def5a79ef8ea4465a581db5bb58d23fcb806",
+      "bytes": 1664
+    },
+    {
+      "path": "assets/share/tumblr.svg",
+      "mode": "100644",
+      "sha256": "44224f5799d3e968de28b87312ef733787058f48ea99567102bc23fd5511488a",
+      "bytes": 1066
+    },
+    {
+      "path": "assets/share/vk.svg",
+      "mode": "100644",
+      "sha256": "6ec9e47d57ac34133a739c175364a42fb531282e199bd7c12d037553ff051252",
+      "bytes": 2234
+    },
+    {
+      "path": "assets/share/weibo.svg",
+      "mode": "100644",
+      "sha256": "e28c984e45efb80f17400b1c60670f430677bda08dbdc895ddfa3014c4bf8363",
+      "bytes": 2532
+    },
+    {
+      "path": "assets/share/whatsapp.svg",
+      "mode": "100644",
+      "sha256": "ab6b25e8b950abbab38351188d4eb9854c37f1a5554d8b7472dc5870ff21e795",
+      "bytes": 2164
+    },
+    {
+      "path": "assets/share/x.svg",
+      "mode": "100644",
+      "sha256": "114a8579e074f2d9218a833fb7606a93db98b45afeeafb5062c62284f64a8445",
+      "bytes": 927
     },
     {
       "path": "assets/terminal/kitty.ansi",
@@ -2994,10 +3114,10 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Installer 0.3.7 consolidates automatic X11/KDE Wayland profiles, shared keyboard output, profile prerequisites and payload verification, filesystem capability checks and receipt-scoped removal. Four current diagrams and 239 passing regressions. Source only; no vendor payload, compiled Wine runtime or populated prefix.",
+  "publication_note": "Installer 0.3.7 consolidates automatic X11/KDE Wayland profiles, shared keyboard output, profile prerequisites and payload verification, filesystem capability checks and receipt-scoped removal. Four current diagrams and 239 passing regressions. Source only; no vendor payload, compiled Wine runtime or populated prefix. README adds twenty centered social sharing and bookmarking links with locally stored badge artwork.",
   "publication_branch": "release",
-  "file_count": 494,
-  "total_bytes": 13511183,
-  "source_release": "v0.9.0-preview.5",
+  "file_count": 514,
+  "total_bytes": 13544781,
+  "source_release": "unreleased",
   "release_parent_commit": "4b889eb1cd9e603ef5d593a89c7382532deabc82"
 }

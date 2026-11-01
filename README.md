@@ -13,6 +13,40 @@
   <a href="https://www.patreon.com/cw/cencyte"><img src="https://img.shields.io/badge/Patreon-Support-FF424D?logo=patreon&amp;logoColor=white" alt="Support on Patreon"></a>
 </p>
 
+<h3 align="center">Share the project</h3>
+
+<p align="center">
+  <a href="https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;title=Penguin-LGHUB" title="Share on Reddit"><img src="assets/share/reddit.svg" alt="Share on Reddit" height="28"></a>
+  <a href="https://bsky.app/intent/compose?text=Penguin-LGHUB%20https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share on Bluesky"><img src="assets/share/bluesky.svg" alt="Share on Bluesky" height="28"></a>
+  <a href="https://s2f.kytta.dev/?text=Penguin-LGHUB%20https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Choose your Mastodon or Fediverse server via Share₂Fedi"><img src="assets/share/mastodon.svg" alt="Share on Mastodon" height="28"></a>
+  <a href="https://x.com/intent/tweet?text=Penguin-LGHUB&amp;url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share on X"><img src="assets/share/x.svg" alt="Share on X" height="28"></a>
+  <a href="https://www.threads.com/intent/post?text=Penguin-LGHUB%20https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share on Threads"><img src="assets/share/threads.svg" alt="Share on Threads" height="28"></a>
+</p>
+
+<p align="center">
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share on Facebook"><img src="assets/share/facebook.svg" alt="Share on Facebook" height="28"></a>
+  <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share on LinkedIn"><img src="assets/share/linkedin.svg" alt="Share on LinkedIn" height="28"></a>
+  <a href="https://www.tumblr.com/widgets/share/tool?canonicalUrl=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;content=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;posttype=link&amp;title=Penguin-LGHUB" title="Share on Tumblr"><img src="assets/share/tumblr.svg" alt="Share on Tumblr" height="28"></a>
+  <a href="https://www.pinterest.com/pin/create/button/?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;media=https%3A%2F%2Fraw.githubusercontent.com%2FCencyte%2FPenguin-LGHUB%2Frelease%2Fassets%2Fpenguin-lghub-logo.png&amp;description=Penguin-LGHUB" title="Share on Pinterest"><img src="assets/share/pinterest.svg" alt="Share on Pinterest" height="28"></a>
+  <a href="https://share.flipboard.com/bookmarklet/popout?v=2&amp;title=Penguin-LGHUB&amp;url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share on Flipboard"><img src="assets/share/flipboard.svg" alt="Share on Flipboard" height="28"></a>
+</p>
+
+<p align="center">
+  <a href="https://t.me/share/url?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;text=Penguin-LGHUB" title="Share on Telegram"><img src="assets/share/telegram.svg" alt="Share on Telegram" height="28"></a>
+  <a href="https://wa.me/?text=Penguin-LGHUB%20https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share on WhatsApp"><img src="assets/share/whatsapp.svg" alt="Share on WhatsApp" height="28"></a>
+  <a href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;text=Penguin-LGHUB" title="Share on LINE"><img src="assets/share/line.svg" alt="Share on LINE" height="28"></a>
+  <a href="https://service.weibo.com/share/share.php?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;title=Penguin-LGHUB" title="Share on Weibo"><img src="assets/share/weibo.svg" alt="Share on Weibo" height="28"></a>
+  <a href="https://vk.com/share.php?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;title=Penguin-LGHUB" title="Share on VK"><img src="assets/share/vk.svg" alt="Share on VK" height="28"></a>
+</p>
+
+<p align="center">
+  <a href="https://connect.ok.ru/dk?st.cmd=WidgetSharePreview&amp;st.shareUrl=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;title=Penguin-LGHUB" title="Share on OK.ru"><img src="assets/share/okru.svg" alt="Share on OK.ru" height="28"></a>
+  <a href="https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;t=Penguin-LGHUB" title="Share on Hacker News"><img src="assets/share/hackernews.svg" alt="Share on Hacker News" height="28"></a>
+  <a href="https://www.instapaper.com/edit?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;title=Penguin-LGHUB" title="Save to Instapaper"><img src="assets/share/instapaper.svg" alt="Save to Instapaper" height="28"></a>
+  <a href="https://pinboard.in/add?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;title=Penguin-LGHUB" title="Save to Pinboard"><img src="assets/share/pinboard.svg" alt="Save to Pinboard" height="28"></a>
+  <a href="mailto:?subject=Penguin-LGHUB&amp;body=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share by email"><img src="assets/share/email.svg" alt="Share by email" height="28"></a>
+</p>
+
 ## Table of contents
 
 - [AI Disclosure](#ai-disclosure)
