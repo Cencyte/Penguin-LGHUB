@@ -1,7 +1,6 @@
 """Temporary KWin focus subscription. No input interception or persistent config."""
 import json
 import os
-from pathlib import Path
 import secrets
 import time
 
@@ -51,11 +50,18 @@ class KWin:
         self.loaded = False; self.focus = None
 
     def install(self, owner):
-        # Confirm this is our user's Wayland compositor, not another X11/xrdp bus.
-        pid = self.bus.call('org.freedesktop.DBus', '/org/freedesktop/DBus',
-                            'org.freedesktop.DBus', 'GetConnectionUnixProcessID', owner)[0]
-        process = Path('/proc') / str(pid)
-        if process.stat().st_uid != os.getuid() or Path(os.readlink(process/'exe')).name != 'kwin_wayland':
+        # Authenticate the unique connection through the bus, not /proc/pid/exe.
+        # Packaged KWin can have CAP_SYS_NICE: procfs then denies readlink even
+        # to the same user. Keep those protections and distinguish X11/xrdp by
+        # asking this exact connection for KWin's documented operation mode.
+        credentials = self.bus.call('org.freedesktop.DBus', '/org/freedesktop/DBus',
+                                    'org.freedesktop.DBus', 'GetConnectionUnixUser', owner)
+        if (len(credentials) != 1 or type(credentials[0]) is not int
+                or credentials[0] != os.getuid()):
+            raise RuntimeError('Session bus does not belong to this user\'s Wayland KWin')
+        support = self.bus.call(owner, '/KWin', 'org.kde.KWin', 'supportInformation')
+        if (len(support) != 1 or not isinstance(support[0], str)
+                or 'Operation Mode: Wayland' not in support[0].splitlines()):
             raise RuntimeError('Session bus does not belong to this user\'s Wayland KWin')
         self.epoch = secrets.token_hex(16); self.sequence = 0
         self.path.write_text(SCRIPT.replace('DESTINATION', json.dumps(self.bus.name))

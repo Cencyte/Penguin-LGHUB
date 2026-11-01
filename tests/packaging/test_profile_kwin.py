@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -7,7 +8,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'tools/wine'))
-from profile_kwin import KWin
+from profile_kwin import KWin, BusError
 
 
 class KWinTests(unittest.TestCase):
@@ -26,6 +27,54 @@ class KWinTests(unittest.TestCase):
         data = dict(epoch='current',sequence=1,pid=20,window='uuid',desktop=False,dock=False)
         data.update(changes)
         return json.dumps(data)
+
+    def test_protected_compositor_uses_bus_credentials_without_procfs(self):
+        w = self.observer
+        self.bus.call.side_effect = [(os.getuid(),), ('KWin\nOperation Mode: Wayland\n',), (7,), ()]
+        with patch('os.readlink', side_effect=PermissionError(13, 'Permission denied')) as readlink:
+            w.install(w.owner)
+            readlink.assert_not_called()
+        self.assertTrue(w.loaded)
+        self.assertTrue(w.path.is_file())
+        self.bus.call.assert_any_call('org.freedesktop.DBus', '/org/freedesktop/DBus',
+                                     'org.freedesktop.DBus', 'GetConnectionUnixUser', w.owner)
+        self.bus.call.assert_any_call(w.owner, '/KWin', 'org.kde.KWin', 'supportInformation')
+        self.bus.call.assert_any_call(w.owner, '/Scripting/Script7', 'org.kde.kwin.Script', 'run')
+        self.bus.call.side_effect = None
+
+    def test_foreign_or_invalid_bus_credentials_cannot_load_script(self):
+        for credentials in [(os.getuid()+1,), (True,), (), ('1000',)]:
+            with self.subTest(credentials=credentials):
+                self.bus.call.reset_mock()
+                self.bus.call.return_value = credentials
+                with self.assertRaisesRegex(RuntimeError, 'Wayland KWin'):
+                    self.observer.install(self.observer.owner)
+                self.assertEqual(self.bus.call.call_count, 1)
+                self.assertFalse(self.observer.path.exists())
+
+    def test_x11_or_malformed_operation_mode_cannot_load_script(self):
+        for support in [('Operation Mode: X11\n',), ('missing mode',), (True,), (),
+                        ('Prefix Operation Mode: Wayland\n',)]:
+            with self.subTest(support=support):
+                self.bus.call.reset_mock()
+                self.bus.call.side_effect = [(os.getuid(),), support]
+                with self.assertRaisesRegex(RuntimeError, 'Wayland KWin'):
+                    self.observer.install(self.observer.owner)
+                self.assertEqual(self.bus.call.call_count, 2)
+                self.assertFalse(self.observer.path.exists())
+        self.bus.call.side_effect = None
+
+    def test_owner_disappearing_during_validation_retries_without_loading_script(self):
+        w = self.observer
+        w.loaded = False; w.last_refresh = 0
+        self.bus.owner.side_effect = [w.owner, None]
+        self.bus.call.side_effect = [(os.getuid(),), BusError('Owner exited')]
+        w.refresh()
+        self.assertFalse(w.loaded)
+        self.assertIsNone(w.focus)
+        self.assertEqual(self.bus.call.call_count, 2)
+        self.assertFalse(w.path.exists())
+        self.bus.call.side_effect = None
 
     def test_sender_epoch_sequence_and_schema_gate_focus(self):
         w = self.observer

@@ -405,5 +405,217 @@
     "tools/packaging/wayland_profile_probe.cpp": "3f8ac9e7a85a5bbc2e077946c2a0994724dcb5934ba136ef244963367d4ae110",
     "tests/packaging/test_native_profiles.py": "8b34c67840afc1f53ab5e9ae9de24aefdd966b5f82da3f46429663283eee8eab",
     "tests/packaging/test_profile_kwin.py": "12518ed07762725e8ce2bc99e0d39b078baa781e1ab6ee0a21a2edc6e003a2b6"
+  },
+  "protected_compositor_followup": {
+    "recorded_on": "2026-10-31",
+    "issue": "Packaged KWin CAP_SYS_NICE can deny same-user /proc/PID/exe reads during compositor validation, aborting launcher startup.",
+    "fix": "Authenticate the KWin unique connection with D-Bus GetConnectionUnixUser and verify its supportInformation reports Wayland. Preserve kernel permissions.",
+    "before": {
+      "passed": false,
+      "error": "Native profile observer failed: [Errno 13] Permission denied: '/proc/5/exe'",
+      "evidence": "/mnt/Captures/penguin-protected-kwin-before-20261031/result.json"
+    },
+    "after": {
+      "passed": true,
+      "passed_checks": 19,
+      "checks": [
+        {
+          "case": "protected compositor denies procfs executable access",
+          "passed": true
+        },
+        {
+          "case": "ephemeral KWin script loaded",
+          "passed": true
+        },
+        {
+          "case": "initial native Wayland foreground snapshot",
+          "passed": true,
+          "event": {
+            "application": "org.penguin.ProbeOne",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 14,
+            "protocol": 1,
+            "reason": "initial",
+            "received_ms": 1793498456343,
+            "resourceClass": "org.penguin.ProbeOne",
+            "sender": ":1.1",
+            "sequence": 1,
+            "window": "{00550785-f79b-472b-af1b-84a0a5a9c652}"
+          }
+        },
+        {
+          "case": "heartbeat without focus changes",
+          "passed": true
+        },
+        {
+          "case": "non-KWin sender rejected",
+          "passed": true
+        },
+        {
+          "case": "wayland-two: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 99,
+          "executable": "/tmp/penguin-profile-probe/wayland-two",
+          "process_start_time": "507453",
+          "event": {
+            "application": "org.penguin.ProbeTwo",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 99,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793498457017,
+            "resourceClass": "org.penguin.ProbeTwo",
+            "sender": ":1.1",
+            "sequence": 4,
+            "window": "{93bfaf93-ac49-4392-b71a-4f93d94bc47e}"
+          }
+        },
+        {
+          "case": "wayland-two: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "xwayland-one: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 168,
+          "executable": "/tmp/penguin-profile-probe/xwayland-one",
+          "process_start_time": "507469",
+          "event": {
+            "application": "org.penguin.ProbeX11",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 168,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793498457290,
+            "resourceClass": "xwayland-one",
+            "sender": ":1.1",
+            "sequence": 6,
+            "window": "{651fc726-1529-40f0-9eb1-eb8dc2a2b78a}"
+          }
+        },
+        {
+          "case": "xwayland-one: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "wayland-two: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 99,
+          "executable": "/tmp/penguin-profile-probe/wayland-two",
+          "process_start_time": "507453",
+          "event": {
+            "application": "org.penguin.ProbeTwo",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 99,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793498457301,
+            "resourceClass": "org.penguin.ProbeTwo",
+            "sender": ":1.1",
+            "sequence": 8,
+            "window": "{93bfaf93-ac49-4392-b71a-4f93d94bc47e}"
+          }
+        },
+        {
+          "case": "wayland-two: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "wayland-one: compositor PID resolves actual executable",
+          "passed": true,
+          "pid": 14,
+          "executable": "/tmp/penguin-profile-probe/wayland-one",
+          "process_start_time": "507365",
+          "event": {
+            "application": "org.penguin.ProbeOne",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 14,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793498457318,
+            "resourceClass": "org.penguin.ProbeOne",
+            "sender": ":1.1",
+            "sequence": 10,
+            "window": "{00550785-f79b-472b-af1b-84a0a5a9c652}"
+          }
+        },
+        {
+          "case": "wayland-one: compatible with existing authenticated mailbox",
+          "passed": true
+        },
+        {
+          "case": "no foreground window reported explicitly",
+          "passed": true,
+          "event": {
+            "application": "",
+            "desktop": false,
+            "dock": false,
+            "kind": "focus",
+            "pid": 0,
+            "protocol": 1,
+            "reason": "activation",
+            "received_ms": 1793498457337,
+            "resourceClass": "",
+            "sender": ":1.1",
+            "sequence": 11,
+            "window": ""
+          }
+        },
+        {
+          "case": "ephemeral script unloaded",
+          "passed": true
+        },
+        {
+          "case": "unloading also stops heartbeat",
+          "passed": true
+        },
+        {
+          "case": "production observer resolves wayland executable",
+          "passed": true
+        },
+        {
+          "case": "production observer resolves xcb executable",
+          "passed": true
+        },
+        {
+          "case": "production observer removes its KWin script",
+          "passed": true
+        }
+      ],
+      "evidence": "/mnt/Captures/penguin-protected-kwin-20261031/result.json"
+    },
+    "project_tests": {
+      "passed": 227,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "log": "/home/firesongz/.local/state/penguin-lghub/project-tests-20261031-220053-603881-306040.log"
+    },
+    "scope": "Protected headless KWin production observer, native Wayland/Xwayland focus, and source regression suite. Actual G HUB in the physical Wayland desktop awaits user retest.",
+    "source_sha256": {
+      "tools/wine/profile_kwin.py": "6d69193bd82b30e87204ee3eb7d315489c55f9b1fab11f52b4b1f3a5fbd257de",
+      "tests/packaging/test_profile_kwin.py": "8160851a507dec82e156ef8c0051ae57704f58aace41bf812acb71f318f1be49",
+      "tools/packaging/wayland_profile_probe.py": "95e1fc1d74616baf6fefcf8aed9f760391a92ce6cf6f058e5042a2b6bcb5052d",
+      "tools/packaging/wayland_profile_protected.c": "3772a57ed16616b3f4f29179a574a9a871cadbe857de9816c74eb6be97ceb1b2"
+    },
+    "deployment": {
+      "updated_file": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/desktop-tested-gesture-20261014/runner/profile_kwin.py",
+      "sha256": "6d69193bd82b30e87204ee3eb7d315489c55f9b1fab11f52b4b1f3a5fbd257de",
+      "backup": "/home/firesongz/Source2/Penguin-GHUB/wine-lab/codex-run/desktop-tested-gesture-20261014/logs/protected-kwin-backup-20261031-220217",
+      "prefix_processes_before_update": 0,
+      "pinned_files_verified": 51,
+      "GUI_launched": false,
+      "graphics_permissions_changed": false
+    }
   }
 }

@@ -127,6 +127,22 @@ def inside():
             raise AssertionError(case)
 
     try:
+        if (PRIVATE/'protected-compositor').exists():
+            from profile_dbus import Bus
+            bus = Bus()
+            try:
+                owner = bus.owner('org.kde.KWin')
+                pid = bus.call('org.freedesktop.DBus', '/org/freedesktop/DBus',
+                               'org.freedesktop.DBus', 'GetConnectionUnixProcessID', owner)[0]
+                try:
+                    os.readlink(f'/proc/{pid}/exe')
+                except PermissionError:
+                    denied = True
+                else:
+                    denied = False
+                check('protected compositor denies procfs executable access', denied)
+            finally:
+                bus.close()
         receiver = spawn('receiver', ['--receiver'])
         events = PRIVATE/'receiver.log'
         wait_record(events, lambda x: x.get('kind') == 'ready', receiver)
@@ -238,11 +254,16 @@ def inside():
     return 0 if result['passed'] else 1
 
 
-def run(output, linux_runtime=None, production=False):
+def run(output, linux_runtime=None, production=False, protected=False):
     output = output.resolve()
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     if production:
         (output/'production-observer').touch()
+    if protected:
+        (output/'protected-compositor').touch()
+        subprocess.run(['gcc', '-shared', '-fPIC', '-Wall', '-Wextra', '-Werror',
+                        str(HERE/'wayland_profile_protected.c'),
+                        '-o', str(output/'protected-compositor.so')], check=True)
     for name in ('home', 'config', 'run'):
         (output/name).mkdir(mode=0o700)
     versions = subprocess.run(['kwin_wayland', '--version'], capture_output=True, text=True)
@@ -284,6 +305,8 @@ def run(output, linux_runtime=None, production=False):
            '__GLX_VENDOR_LIBRARY_NAME': 'mesa', 'GALLIUM_DRIVER': 'llvmpipe',
            'PENGUIN_PRIVATE_PROFILE_PROBE': '1', 'QT_NO_XDG_DESKTOP_PORTAL': '1',
            'QT_FORCE_STDERR_LOGGING': '1', 'LANG': 'C.UTF-8', 'PYTHONDONTWRITEBYTECODE': '1'}
+    if protected:
+        env['LD_PRELOAD'] = str(PRIVATE/'protected-compositor.so')
     for key, value in env.items():
         args += ['--setenv', key, value]
     args += ['dbus-run-session', '--', 'kwin_wayland_wrapper', '--virtual', '--xwayland',
@@ -302,13 +325,17 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=Path)
     parser.add_argument('--linux-runtime', type=Path, help='Also test an existing private Linux runtime')
     parser.add_argument('--production-observer', action='store_true', help='Also exercise the production focus backend without G HUB')
+    parser.add_argument('--protected-compositor', action='store_true',
+                        help='Reproduce denied KWin procfs access inside the private test session')
     parser.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
     if not args.inside and not args.output:
         parser.error('--output is required')
+    if args.protected_compositor and not args.production_observer:
+        parser.error('--protected-compositor requires --production-observer')
     if args.inside:
         inside()
         # KWin's wrapper retries a nonzero session exit, overwriting evidence.
         # The outer process reads result.json and propagates the actual failure.
         sys.exit(0)
-    sys.exit(run(args.output, args.linux_runtime, args.production_observer))
+    sys.exit(run(args.output, args.linux_runtime, args.production_observer, args.protected_compositor))
