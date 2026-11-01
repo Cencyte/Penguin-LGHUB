@@ -854,5 +854,519 @@
     "hardware": "G502 X Plus",
     "result": "The reported delayed/stuck mouse key-binding anomaly was confirmed fixed on booted Bazzite.",
     "scope": "Manual confirmation of this defect only; historical isolated test boundaries and transport measurements above remain unchanged."
+  },
+  "legacy_manjaro_investigation_20261031": {
+    "date": "2026-10-31",
+    "scope": "Legacy Manjaro Tested Wine repeated portal prompts and stuck Wayland key bindings",
+    "finding": "The frozen workstation driver predates shared-output patch 0046. The current installer patch series already contains the fix; the standalone host-keyboard build helper applied only 0043.",
+    "mechanism": "Thread-local X connections create separate emulated keyboards and portal sessions. Cross-thread releases do not release the key held by the first keyboard.",
+    "confidence": "High for the bridge defect and consent-session fan-out; actual physical G HUB retest remains pending.",
+    "installed_driver_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+    "candidate_driver_sha256": "3128c16a4e2e4fb3b58ce9f5a10c7430b0c2c53f3674870767c41f0628cba964",
+    "candidate_build": "Only keyboard.c compiled with patch 0046; linked with the unchanged local Wine routing build objects. Dynamic exported symbols unchanged. Candidate validated before installation.",
+    "environment": {
+      "kwin": "6.5.4-3",
+      "xwayland": "24.1.9-1",
+      "libei": "1.5.0-1",
+      "xdg-desktop-portal": "1.20.3-2",
+      "xdg-desktop-portal-kde": "6.5.4-1"
+    },
+    "observed_session": {
+      "boot_id": "cbb53807d63c4fab84f78c116d1bee7f",
+      "portal_input_only_messages": [
+        "22:14:31",
+        "22:14:33",
+        "22:14:35",
+        "22:14:36",
+        "22:14:50",
+        "22:14:57"
+      ],
+      "timezone": "America/New_York",
+      "note": "Six input-only portal approvals in 26 seconds; EI_EVENT_SYNC warnings also appear in successful synthetic runs and are not assigned as the cause."
+    },
+    "coverage": {
+      "candidate_transport_cases_passed": 7,
+      "candidate_transport_cases_total": 7,
+      "candidate_expected_key_transitions": 74,
+      "candidate_received_key_transitions": 74,
+      "pending_consent_checks_passed": 3,
+      "pending_consent_checks_total": 3,
+      "project_tests_passed": 230,
+      "project_tests_total": 230,
+      "helper_upgrade_and_idempotence_verified": true,
+      "candidate_deployed": true,
+      "live_mouse_retest": false
+    },
+    "limits": [
+      "Synthetic sender uses the real installed or candidate driver and private host-version KWin/Xwayland; it is not the actual G HUB process.",
+      "The pending-portal runs never approve consent: they measure request counts and confirm no delivery before permission.",
+      "Shared-connection transport checks grant permission only within the disposable compositor configuration.",
+      "No live desktop interaction, input devices, global permission bypass, or host package changes. Installed only after the user quit G HUB; launch lock held and no prefix processes present.",
+      "One initial consent request may still be needed on this older stack when a new G HUB process starts; persistent cross-launch permission is not validated.",
+      "700 ms baseline releases are explicit fixture cleanup, not a natural maximum for the stuck-key fault."
+    ],
+    "upstream_sources": [
+      "https://www.x.org/releases/individual/xserver/xwayland-24.1.9.tar.xz",
+      "https://libinput.pages.freedesktop.org/libei/api/group__liboeffis.html",
+      "https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.RemoteDesktop.html"
+    ],
+    "xwayland_source_sha256": "057eeb381b4df469f99e1db07494172f4210a8d3393f5623467fa2a5b6ce26c6",
+    "runs": {
+      "legacy-driver-before": {
+        "passed": false,
+        "permission": "test-direct",
+        "driver_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+        "harness_sha256": "70af73c712d42a972d204caa62dd71614de93d00944c51adf345870e2cc69d67",
+        "portal_calls": null,
+        "received_key_events": null,
+        "cases": {
+          "same-thread": {
+            "passed": true,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.748,
+              0.915,
+              1.259,
+              0.368,
+              0.712,
+              0.814
+            ]
+          },
+          "cross-thread": {
+            "passed": false,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 32,
+            "delivery_ms": [
+              1.14,
+              700.526,
+              0.727,
+              701.207,
+              0.444,
+              700.954
+            ]
+          },
+          "reverse-thread": {
+            "passed": false,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 30,
+            "delivery_ms": [
+              1.193,
+              700.642,
+              0.801,
+              701.19,
+              0.352,
+              700.723
+            ]
+          },
+          "rapid-taps": {
+            "passed": false,
+            "expected_transitions": 48,
+            "received_transitions": 2,
+            "repeat_events": 40,
+            "delivery_ms": []
+          },
+          "modifier-chord": {
+            "passed": false,
+            "expected_transitions": 4,
+            "received_transitions": 4,
+            "repeat_events": 12,
+            "delivery_ms": [
+              0.972,
+              1.159,
+              700.743,
+              700.855
+            ]
+          },
+          "worker-exit": {
+            "passed": false,
+            "expected_transitions": 2,
+            "received_transitions": 1,
+            "repeat_events": 8,
+            "delivery_ms": []
+          },
+          "intentional-hold": {
+            "passed": false,
+            "expected_transitions": 2,
+            "received_transitions": 1,
+            "repeat_events": 78,
+            "delivery_ms": []
+          }
+        },
+        "evidence_sha256": {
+          "result.json": "f6cfbfdff2e926e8462062123cbecd7c1e8ad75e021ec5a191c24c126b27088d",
+          "provenance.json": "7e6411ed5733a00d8b2842d915eef50123a2922e88e821e4e95862436d30ac6f",
+          "sender.log": "78564961cc1d8e08e4c2c6c6e819bfd054ab718349f9bc24b98c697c5a42bd51",
+          "receiver.log": "e45f86d78a1f0811502e630884c8e4d7a758d36dade9400c7decb3ad8331cfad"
+        }
+      },
+      "release-driver-after": {
+        "passed": true,
+        "permission": "test-direct",
+        "driver_sha256": "c4a1a81dd52ba193a1bb039a827b13095afbedfbb2baa5e0f7a9461fefabf8c9",
+        "harness_sha256": "70af73c712d42a972d204caa62dd71614de93d00944c51adf345870e2cc69d67",
+        "portal_calls": null,
+        "received_key_events": null,
+        "cases": {
+          "same-thread": {
+            "passed": true,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.328,
+              0.518,
+              0.891,
+              1.131,
+              0.432,
+              0.607
+            ]
+          },
+          "cross-thread": {
+            "passed": true,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.852,
+              0.938,
+              0.364,
+              0.51,
+              0.909,
+              0.991
+            ]
+          },
+          "reverse-thread": {
+            "passed": true,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.518,
+              0.693,
+              1.074,
+              1.159,
+              0.544,
+              0.628
+            ]
+          },
+          "rapid-taps": {
+            "passed": true,
+            "expected_transitions": 48,
+            "received_transitions": 48,
+            "repeat_events": 0,
+            "delivery_ms": [
+              1.112,
+              1.187,
+              0.297,
+              0.413,
+              0.537,
+              0.653,
+              0.802,
+              0.95,
+              1.116,
+              0.229,
+              0.358,
+              0.484,
+              0.617,
+              0.727,
+              0.882,
+              1.032,
+              1.167,
+              0.283,
+              0.414,
+              0.543,
+              0.673,
+              0.807,
+              0.936,
+              1.093,
+              0.223,
+              0.338,
+              0.462,
+              0.597,
+              0.722,
+              0.852,
+              1.03,
+              1.207,
+              0.366,
+              0.475,
+              0.613,
+              0.762,
+              0.89,
+              1.04,
+              1.175,
+              0.295,
+              0.436,
+              0.557,
+              0.705,
+              0.813,
+              0.955,
+              1.152,
+              0.27,
+              0.391
+            ]
+          },
+          "modifier-chord": {
+            "passed": true,
+            "expected_transitions": 4,
+            "received_transitions": 4,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.842,
+              0.933,
+              1.121,
+              1.13
+            ]
+          },
+          "worker-exit": {
+            "passed": true,
+            "expected_transitions": 2,
+            "received_transitions": 2,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.599,
+              1.185
+            ]
+          },
+          "intentional-hold": {
+            "passed": true,
+            "expected_transitions": 2,
+            "received_transitions": 2,
+            "repeat_events": 12,
+            "delivery_ms": [
+              11.884,
+              1.041
+            ]
+          }
+        },
+        "evidence_sha256": {
+          "result.json": "5cb331adbd5c996f25dd0c4a4cdbc1aba464e4b154f6dc21afd39db800eefe26",
+          "provenance.json": "d1fd981a2d641106ec4d9bcd0127078209ef8a0e64191755d63da856c1a0e0cf",
+          "sender.log": "fd31dde8a6f187424d8a69e866532be6bf29260cdf193b8acdc9fafd0e8a18c2",
+          "receiver.log": "98492349b73d1bf2df487641c2c6d531e14c82ff59ca4baa8d8e4c6abce94c32"
+        }
+      },
+      "matched-driver-after": {
+        "passed": true,
+        "permission": "test-direct",
+        "driver_sha256": "3128c16a4e2e4fb3b58ce9f5a10c7430b0c2c53f3674870767c41f0628cba964",
+        "harness_sha256": "059404a10e733cc37ca62ba75ad17030eff2c5e493cdc686a4f3844a2f820235",
+        "portal_calls": null,
+        "received_key_events": null,
+        "cases": {
+          "same-thread": {
+            "passed": true,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 0,
+            "delivery_ms": [
+              1.193,
+              0.263,
+              0.517,
+              0.662,
+              0.874,
+              0.949
+            ]
+          },
+          "cross-thread": {
+            "passed": true,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 0,
+            "delivery_ms": [
+              1.326,
+              0.395,
+              0.76,
+              0.977,
+              0.306,
+              0.482
+            ]
+          },
+          "reverse-thread": {
+            "passed": true,
+            "expected_transitions": 6,
+            "received_transitions": 6,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.822,
+              0.956,
+              0.383,
+              0.463,
+              0.873,
+              0.96
+            ]
+          },
+          "rapid-taps": {
+            "passed": true,
+            "expected_transitions": 48,
+            "received_transitions": 48,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.369,
+              0.424,
+              0.549,
+              0.662,
+              0.782,
+              0.9,
+              1.042,
+              1.144,
+              0.278,
+              0.383,
+              0.507,
+              0.632,
+              0.755,
+              0.886,
+              1.032,
+              1.162,
+              0.294,
+              0.427,
+              0.543,
+              0.655,
+              0.784,
+              0.889,
+              1.043,
+              1.164,
+              0.316,
+              0.447,
+              0.578,
+              0.692,
+              0.821,
+              0.95,
+              1.112,
+              0.243,
+              0.367,
+              0.48,
+              0.606,
+              0.724,
+              0.903,
+              1.036,
+              1.157,
+              0.262,
+              0.399,
+              0.503,
+              0.641,
+              0.763,
+              0.91,
+              1.062,
+              0.186,
+              0.321
+            ]
+          },
+          "modifier-chord": {
+            "passed": true,
+            "expected_transitions": 4,
+            "received_transitions": 4,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.694,
+              0.732,
+              0.851,
+              0.95
+            ]
+          },
+          "worker-exit": {
+            "passed": true,
+            "expected_transitions": 2,
+            "received_transitions": 2,
+            "repeat_events": 0,
+            "delivery_ms": [
+              0.495,
+              1.196
+            ]
+          },
+          "intentional-hold": {
+            "passed": true,
+            "expected_transitions": 2,
+            "received_transitions": 2,
+            "repeat_events": 14,
+            "delivery_ms": [
+              12.622,
+              0.776
+            ]
+          }
+        },
+        "evidence_sha256": {
+          "result.json": "fa1961c6d786004cca5fbe808a82eb26ba3c9e51211d6e886407336f4e15dcba",
+          "provenance.json": "ed1d273bb8e057b06a45c39dc37bdff69aae9c5d341be6f67ed46938831f7d41",
+          "sender.log": "d19d4ebf0217cf1a4bbf996b5b48935042ea19fde7965006b50df472f989e64d",
+          "receiver.log": "3b8b18938a8b7605481fdbe07c2f9f952edcf76adbc33a152575593ad2a31ed7"
+        }
+      },
+      "legacy-portal-pending": {
+        "passed": true,
+        "permission": "portal-pending",
+        "driver_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+        "harness_sha256": "059404a10e733cc37ca62ba75ad17030eff2c5e493cdc686a4f3844a2f820235",
+        "portal_calls": {
+          "create_session": 2,
+          "start": 2,
+          "backend_start": 2,
+          "connect_to_eis": 0
+        },
+        "received_key_events": 0,
+        "cases": {},
+        "evidence_sha256": {
+          "result.json": "b0afd9ba2d3c98942828ce77eef19c4454127223b8d4b0e0e3f23d7cfb3f1b71",
+          "provenance.json": "e338022357c2ff5f218a64e783897571f88ac5cc3b482f2ab571dce59c4791d1",
+          "sender.log": "baa75c0ea94cf3481194cef024f033764b981ff3e9615152218b780d84de402d",
+          "receiver.log": "4f1d16dfb05441be5a69d9679e9938a5ee9620182baebb9c3949cd93e47ab068",
+          "portal-monitor.log": "3dcfd0e89a3697763f397795d6086e7be7c6c1e9e7a63efa54c3ebbc5532ba23"
+        }
+      },
+      "release-portal-pending": {
+        "passed": true,
+        "permission": "portal-pending",
+        "driver_sha256": "c4a1a81dd52ba193a1bb039a827b13095afbedfbb2baa5e0f7a9461fefabf8c9",
+        "harness_sha256": "059404a10e733cc37ca62ba75ad17030eff2c5e493cdc686a4f3844a2f820235",
+        "portal_calls": {
+          "create_session": 1,
+          "start": 1,
+          "backend_start": 1,
+          "connect_to_eis": 0
+        },
+        "received_key_events": 0,
+        "cases": {},
+        "evidence_sha256": {
+          "result.json": "2f3b540467cba933a12787dec8d071fb099e96599a0b5a72a7e011088b4f69d5",
+          "provenance.json": "4f4fe42de1099288dc07bbeb62c4fa3619c989002058513da75e3ddd0b367383",
+          "sender.log": "f510a586889943a20a3521e582f847d84d8102f8aad24c5dcb99326332144618",
+          "receiver.log": "4f1d16dfb05441be5a69d9679e9938a5ee9620182baebb9c3949cd93e47ab068",
+          "portal-monitor.log": "aeca63545776ec517c71c302cc43660b368cdfda06d869397f9d6f46e10d0e75"
+        }
+      },
+      "matched-portal-pending": {
+        "passed": true,
+        "permission": "portal-pending",
+        "driver_sha256": "3128c16a4e2e4fb3b58ce9f5a10c7430b0c2c53f3674870767c41f0628cba964",
+        "harness_sha256": "059404a10e733cc37ca62ba75ad17030eff2c5e493cdc686a4f3844a2f820235",
+        "portal_calls": {
+          "create_session": 1,
+          "start": 1,
+          "backend_start": 1,
+          "connect_to_eis": 0
+        },
+        "received_key_events": 0,
+        "cases": {},
+        "evidence_sha256": {
+          "result.json": "2f3b540467cba933a12787dec8d071fb099e96599a0b5a72a7e011088b4f69d5",
+          "provenance.json": "75f506efda813b5485ac78cb951c5a740ddff1578d49b65fdaa337bfb044a07a",
+          "sender.log": "165dce62f5845c18986f43d7913c5c0b4cf4c02a6f0ccdd542eec11420097977",
+          "receiver.log": "4f1d16dfb05441be5a69d9679e9938a5ee9620182baebb9c3949cd93e47ab068",
+          "portal-monitor.log": "d091a896dcdfd441b3410e0c5d2e24ff1c41a02fc9b4e1b38c147d952dd16c27"
+        }
+      }
+    },
+    "deployment": {
+      "installed_at": "2026-10-31T22:37:40-0400",
+      "old_sha256": "ed5b32b12f62123614858edd86647aa287571aed1d0d750960dbad4734b9bc4f",
+      "new_sha256": "3128c16a4e2e4fb3b58ce9f5a10c7430b0c2c53f3674870767c41f0628cba964",
+      "verified_pins": 51,
+      "gui_launched": false,
+      "backup_relative": "logs/shared-keyboard-backup-20261031-223739",
+      "scope": "One installed winex11.so and its launch.json hash pin; profile observer and all other pins unchanged."
+    }
   }
 }

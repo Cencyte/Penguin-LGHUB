@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shlex
 import shutil
 import subprocess
 import sys
@@ -74,6 +75,30 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2) + '\n')
 
 
+def analyze_pending_portal(sender, receiver, monitor):
+    """Measure consent requests without approving any input in the private session."""
+    attempted = analyze(sender, receiver)
+    submitted = all(len(case.get('requests', [])) == count
+                    and all(event['sent'] == 1 for event in case['requests'])
+                    for case, count in zip(attempted['cases'].values(), COUNTS))
+    def calls(interface, method):
+        return sum(line.startswith('method call ') and
+                   f'interface={interface}; member={method}' in line
+                   for line in monitor.splitlines())
+    frontend = 'org.freedesktop.portal.RemoteDesktop'
+    backend = 'org.freedesktop.impl.portal.RemoteDesktop'
+    counts = {'create_session': calls(frontend, 'CreateSession'),
+              'start': calls(frontend, 'Start'),
+              'backend_start': calls(backend, 'Start'),
+              'connect_to_eis': calls(frontend, 'ConnectToEIS')}
+    received = sum(line.startswith('TIMED_KEY ') for line in receiver.splitlines())
+    return {'passed': submitted and counts['start'] > 0 and counts['backend_start'] > 0
+            and counts['connect_to_eis'] == 0 and received == 0,
+            'scope': 'Private portal requests while consent is pending; no approval performed',
+            'submitted_all_cases': submitted, 'portal_calls': counts,
+            'received_key_events': received}
+
+
 def inside():
     if (os.environ.get('PENGUIN_PRIVATE_WAYLAND_PROBE') != '1'
             or os.environ.get('XDG_RUNTIME_DIR') != str(PRIVATE/'run')
@@ -83,10 +108,26 @@ def inside():
     config = json.loads((PRIVATE/'control.json').read_text())
     result = {'passed': False}
     receiver = None
+    services, service_logs = [], []
     wine_env = dict(os.environ, WINEPREFIX=str(PRIVATE/'prefix'), WINE_GHUB_HOST_KEYBOARD='1',
                     GHUB_HOST_INPUT_PRIVATE_TEST='1', WINEDEBUG='-all',
                     WINEDLLOVERRIDES='winemenubuilder.exe=d;winebus.sys=d;wineusb.sys=d;mscoree,mshtml=d')
     try:
+        if config['permission'] == 'portal-pending':
+            portal_env = dict(os.environ, QT_QPA_PLATFORM='wayland',
+                              QT_LOGGING_RULES='xdp*.debug=true')
+            subprocess.run(['dbus-update-activation-environment', 'DISPLAY', 'WAYLAND_DISPLAY',
+                            'XDG_CURRENT_DESKTOP', 'XDG_SESSION_TYPE', 'QT_QPA_PLATFORM'],
+                           env=portal_env, check=True, timeout=10)
+            for name, argv in [('portal-monitor', ['dbus-monitor', '--session',
+                    "interface='org.freedesktop.impl.portal.RemoteDesktop'",
+                    "interface='org.freedesktop.portal.RemoteDesktop'"]),
+                    ('portal-kde', ['/usr/lib/xdg-desktop-portal-kde']),
+                    ('portal', ['/usr/lib/xdg-desktop-portal', '-v'])]:
+                log = (PRIVATE/(name + '.log')).open('w')
+                service_logs.append(log)
+                services.append(subprocess.Popen(argv, env=portal_env,
+                    stdout=log, stderr=subprocess.STDOUT))
         with (PRIVATE/'receiver.log').open('w') as log:
             receiver = subprocess.Popen([str(PRIVATE/'receiver')], stdout=log, stderr=subprocess.STDOUT,
                 env=dict(os.environ, QT_QPA_PLATFORM=config['target'],
@@ -100,8 +141,13 @@ def inside():
                 proc = subprocess.run([str(PRIVATE/'wine/usr/bin/wine'), str(PRIVATE/'lghub_agent.exe')],
                     env=wine_env, stdout=sendlog, stderr=subprocess.STDOUT, timeout=60)
             time.sleep(.2)
-            result = analyze((PRIVATE/'sender.log').read_text(errors='replace'),
-                             (PRIVATE/'receiver.log').read_text(errors='replace'))
+            sender_text = (PRIVATE/'sender.log').read_text(errors='replace')
+            receiver_text = (PRIVATE/'receiver.log').read_text(errors='replace')
+            if config['permission'] == 'portal-pending':
+                result = analyze_pending_portal(sender_text, receiver_text,
+                    (PRIVATE/'portal-monitor.log').read_text(errors='replace'))
+            else:
+                result = analyze(sender_text, receiver_text)
             result['sender_exit'] = proc.returncode
             result['passed'] &= proc.returncode == 0
     except Exception as exc:
@@ -115,6 +161,15 @@ def inside():
                 receiver.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 receiver.kill(); receiver.wait()
+        for service in reversed(services):
+            if service.poll() is None:
+                service.terminate()
+                try:
+                    service.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    service.kill(); service.wait()
+        for log in service_logs:
+            log.close()
         write_json(PRIVATE/'result.json', result)
     return 0  # The outer controller checks the receipt; KWin must not restart it.
 
@@ -129,11 +184,12 @@ def run(args):
     for source, target in [(Path(__file__), 'harness.py'), (args.sender, 'lghub_agent.exe'),
                            (args.receiver, 'receiver')]:
         shutil.copy2(source, output/target)
-    permission = ('XwaylandEisNoPrompt=true' if args.permission == 'test-direct'
-                  else 'XwaylandEisNoPromptApps=lghub_agent.exe')
+    permission = {'test-direct': 'XwaylandEisNoPrompt=true',
+                  'test-app': 'XwaylandEisNoPromptApps=lghub_agent.exe',
+                  'portal-pending': ''}[args.permission]
     (output/'config/kwinrc').write_text('[Xwayland]\n' + permission + '\n')
     (output/'config/kxkbrc').write_text('[Layout]\nUse=true\nLayoutList=us\n')
-    write_json(output/'control.json', {'target': args.target})
+    write_json(output/'control.json', {'target': args.target, 'permission': args.permission})
     (output/'session').write_text('#!/bin/sh\nexec /usr/bin/python3 ' + str(PRIVATE/'harness.py') + ' --inside\n')
     (output/'session').chmod(0o700)
     command = ['bwrap', '--ro-bind', str(osroot), '/', '--tmpfs', '/tmp', '--perms', '1777',
@@ -145,14 +201,23 @@ def run(args):
         command += ['--ro-bind', str(args.module.resolve()), str(PRIVATE/'wine/usr/lib/wine/x86_64-unix/winex11.so')]
     env = {'PATH': '/usr/bin:/bin', 'HOME': str(PRIVATE/'home'), 'XDG_CONFIG_HOME': str(PRIVATE/'config'),
         'XDG_RUNTIME_DIR': str(PRIVATE/'run'), 'XDG_SESSION_TYPE': 'wayland', 'XDG_CURRENT_DESKTOP': 'KDE',
+        'XDG_MENU_PREFIX': 'plasma-',
         'QT_QPA_PLATFORM': 'offscreen', 'KWIN_COMPOSE': 'Q', 'XWAYLAND_NO_GLAMOR': '1',
         '__EGL_VENDOR_LIBRARY_FILENAMES': '/usr/share/glvnd/egl_vendor.d/50_mesa.json',
         'LIBGL_ALWAYS_SOFTWARE': '1', 'PENGUIN_PRIVATE_WAYLAND_PROBE': '1',
         'QT_NO_XDG_DESKTOP_PORTAL': '1', 'LANG': 'C.UTF-8'}
     for key, value in env.items():
         command += ['--setenv', key, value]
-    command += ['dbus-run-session', '--', 'kwin_wayland_wrapper', '--virtual', '--xwayland',
-                '--no-lockscreen', '--no-global-shortcuts', '--no-kactivities', '--exit-with-session', str(PRIVATE/'session')]
+    compositor = ['kwin_wayland_wrapper', '--virtual', '--xwayland', '--no-lockscreen',
+                  '--no-global-shortcuts', '--no-kactivities', '--exit-with-session', str(PRIVATE/'session')]
+    if args.permission == 'portal-pending':
+        start = ('#!/bin/sh\nkbuildsycoca6 --noincremental >' + str(PRIVATE/'sycoca.log') +
+                 ' 2>&1\npipewire >' + str(PRIVATE/'pipewire.log') +
+                 ' 2>&1 &\nexec ' + shlex.join(compositor) + '\n')
+        (output/'compositor').write_text(start)
+        (output/'compositor').chmod(0o700)
+        compositor = [str(PRIVATE/'compositor')]
+    command += ['dbus-run-session', '--', *compositor]
     digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
     write_json(output/'provenance.json', {'scope': __doc__, 'target': args.target,
         'os_release': (osroot/'etc/os-release').read_text(), 'kernel': os.uname().release,
@@ -166,6 +231,7 @@ def run(args):
     result = json.loads((output/'result.json').read_text())
     print(json.dumps({'passed': result['passed'], 'output': str(output),
                       'cases': {k: v['passed'] for k, v in result.get('cases', {}).items()},
+                      'portal_calls': result.get('portal_calls'),
                       'error': result.get('error')}, indent=2))
     return 0 if result['passed'] else 1
 
@@ -179,7 +245,7 @@ def main():
     parser.add_argument('--sender', type=Path)
     parser.add_argument('--receiver', type=Path)
     parser.add_argument('--target', choices=('wayland', 'xcb'), default='wayland')
-    parser.add_argument('--permission', choices=('test-app', 'test-direct'), default='test-app')
+    parser.add_argument('--permission', choices=('test-app', 'test-direct', 'portal-pending'), default='test-app')
     parser.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.inside:
