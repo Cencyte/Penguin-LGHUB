@@ -58,10 +58,10 @@
   - [Recorded test environments](#recorded-test-environments)
 - [Installation](#installation)
   - [Installation requirements](#installation-requirements)
+  - [Checking this computer's compatibility](#checking-this-computers-compatibility)
   - [Automatic application profiles](#automatic-application-profiles)
 - [What the project contains](#what-the-project-contains)
 - [Running project tests](#running-project-tests)
-  - [Checking this computer's compatibility](#checking-this-computers-compatibility)
 - [Additional details](#additional-details)
 - [Branding and licenses](#branding-and-licenses)
 - [Glossary of terms](#glossary-of-terms)
@@ -80,7 +80,7 @@ Learn more: [Dalia scale](https://daliascale.org)
 
 ## Introduction
 
-An experimental compatibility layer for running the original **Logitech G HUB** on Linux through a custom Wine runtime. The working setup retains the actual G HUB agent and main interface for device configuration, key bindings, macros, profiles, lighting and G-Shift.
+Penguin-LGHUB is an experimental compatibility layer for running the original **Logitech G HUB** on Linux through a custom Wine runtime. The working setup retains the actual G HUB agent and main interface for device configuration, key bindings, macros, profiles, lighting and G-Shift.
 
 ### Current status:
 
@@ -206,18 +206,6 @@ Optional switches, added to the installation command:
 - `--jobs 4` — choose 1–16 build jobs; the default is 4.
 - `--engine podman` — use an existing rootless Podman installation for Windows-resource acquisition. The default is bubblewrap.
 
-Alternatively, download **Source code (zip)** from the [source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.5), extract it, and open a terminal in the extracted folder. Run `./install.sh` there; if executable permissions were lost during extraction, use `bash install.sh`. No Git checkout is needed for the ZIP workflow.
-
-Preview 5 includes installer **0.3.7**, automatic X11/Wayland application-profile observers, the shared keyboard connection, profile-component verification, transactional removal and the **31 GiB** storage budget.
-
-This release retains the Wine input fix introduced in Preview 3 for keys that remained held when G HUB worker threads sent the press and release through different Xwayland connections. The installer builds this fix automatically. [Isolated regression results](docs/packaging/host-keyboard-threads-verification.json) cover native Wayland and Xwayland destinations; the G502 X Plus fix is also manually confirmed on booted Bazzite and the Manjaro Wayland workstation.
-
-### Automatic application profiles:
-
-Enable automatic profile switching in G HUB and associate a profile with the Linux application's executable. In the installed **Penguin-LGHUB** launcher, Kate's path is `Z:\run\host\usr\bin\kate`. Type the complete path into the file chooser's **File name** field: its executable filter hides extensionless Linux programs, and browsing a large `/usr/bin` can stall. The older **G HUB — Tested Wine** launcher instead uses `Z:\usr\bin\kate`.
-
-Focus the application, then another application, and check that the active G HUB profile changes. The host observer supplies application identity to G HUB's original profile logic. On Wayland it uses a temporary KWin script; this is separate from input-control permission. One Share request can be normal on a new session with older Plasma, but every key press should not request fresh permission.
-
 Standalone commands, run from the project directory:
 
 - `./install.sh --help` — show usage, switches and examples.
@@ -226,6 +214,32 @@ Standalone commands, run from the project directory:
 - `./install.sh --uninstall --directory /path/to/installation` — remove an installation stored at a custom location.
 
 Back up any G HUB profiles or settings you want to keep before uninstalling. Removal works without a graphical session and requests sudo only for its device rule. The source download, independently generated diagnostic reports and unrelated software remain. Legacy lab installations without an ownership receipt require separate cleanup; they are not removed by guessing paths. If the selected installation directory is absent, the command reports that nothing was removed.
+
+Alternatively, download **Source code (zip)** from the [source release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.5), extract it, and open a terminal in the extracted folder. Run `./install.sh` there; if executable permissions were lost during extraction, use `bash install.sh`. No Git checkout is needed for the ZIP workflow.
+
+Preview 5 includes installer **0.3.7**, automatic X11/Wayland application-profile observers, the shared keyboard connection, profile-component verification, transactional removal and the **31 GiB** storage budget.
+
+This release retains the Wine input fix introduced in Preview 3 for keys that remained held when G HUB worker threads sent the press and release through different Xwayland connections. The installer builds this fix automatically. [Isolated regression results](docs/packaging/host-keyboard-threads-verification.json) cover native Wayland and Xwayland destinations; the G502 X Plus fix is also manually confirmed on booted Bazzite and the Manjaro Wayland workstation.
+
+### Checking this computer's compatibility:
+
+Run this from the target KDE desktop terminal:
+
+```sh
+./install.sh --check
+```
+
+This checks the actual host's OS, CPU architecture, required tools, user namespaces, desktop session and the selected storage location’s Linux link/permission behavior. It records graphics drivers, audio-socket presence, SELinux state and Logitech device access. It also checks host libraries for both profile backends. On Wayland it verifies Xwayland authentication, the Wayland KWin operation mode, its scripting interface and the input-control portal. It does not load a focus script or request input permission during `--check`. Blockers stop the check with an explanation; warnings identify remaining verification needs. A successful readiness check is followed by installation checks and hands-on device testing.
+
+Readiness checking and installation share the same categorized step headers. In `--check` mode, each completed check shows an aligned `OK` or `FAIL` result. Installation uses descriptions with an activity spinner and no per-check result labels. `OK` means that check found no installation blocker; hardware acceptance and warnings remain separately reported. The complete host report is always saved with the log.
+
+- `--verbose` — also display the host report in the terminal.
+
+### Automatic application profiles:
+
+Enable automatic profile switching in G HUB and associate a profile with the Linux application's executable. In the installed **Penguin-LGHUB** launcher, Kate's path is `Z:\run\host\usr\bin\kate`. Type the complete path into the file chooser's **File name** field: its executable filter hides extensionless Linux programs, and browsing a large `/usr/bin` can stall. The older **G HUB — Tested Wine** launcher instead uses `Z:\usr\bin\kate`.
+
+Focus the application, then another application, and check that the active G HUB profile changes. The host observer supplies application identity to G HUB's original profile logic. On Wayland it uses a temporary KWin script; this is separate from input-control permission. One Share request can be normal on a new session with older Plasma, but every key press should not request fresh permission.
 
 The installer supplies private build tools, Wine, Linux libraries and launcher helpers. The repository requires authorized GitHub access while it remains private. See [installation, recovery and validation details](docs/packaging/release-installer.md).
 
@@ -263,20 +277,6 @@ These regression tests exercise the installer and launcher code with controlled 
 | Desktop behavior | Launcher/startup/shutdown logic, tray-registration handling and frontend resource transformations. |
 | Profiles and key output | Application identity, KWin bus authentication, stale events, observer cleanup, packaged prerequisites and threaded key-delivery measurements. |
 | Installer workflow and removal | OS policy, step ordering, transactional rollback, help, logs, ownership receipts and safe removal of managed files. |
-
-### Checking this computer's compatibility:
-
-Run this from the target KDE desktop terminal:
-
-```sh
-./install.sh --check
-```
-
-This checks the actual host's OS, CPU architecture, required tools, user namespaces, desktop session and the selected storage location’s Linux link/permission behavior. It records graphics drivers, audio-socket presence, SELinux state and Logitech device access. It also checks host libraries for both profile backends. On Wayland it verifies Xwayland authentication, the Wayland KWin operation mode, its scripting interface and the input-control portal. It does not load a focus script or request input permission during `--check`. Blockers stop the check with an explanation; warnings identify remaining verification needs. A successful readiness check is followed by installation checks and hands-on device testing.
-
-Readiness checking and installation share the same categorized step headers. In `--check` mode, each completed check shows an aligned `OK` or `FAIL` result. Installation uses descriptions with an activity spinner and no per-check result labels. `OK` means that check found no installation blocker; hardware acceptance and warnings remain separately reported. The complete host report is always saved with the log.
-
-- `--verbose` — also display the host report in the terminal.
 
 ## Additional details
 

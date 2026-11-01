@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "1858195ae05a130e07fc53bad60f17df57ebfde3",
+  "github_base_commit": "695a98ee3316b3e97cf9d0640a3ca919d8913092",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "0ddca66a3c1dac4f2d0bc6172a43cf4151ac857ffe5b669cee918c9280812775",
-      "bytes": 75488
+      "sha256": "d643632978ad6c1b8a92e0b271a327add673ff31ffd96d88d6d7585e249591bf",
+      "bytes": 75505
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -3117,7 +3117,7 @@
   "publication_note": "Installer 0.3.7 consolidates automatic X11/KDE Wayland profiles, shared keyboard output, profile prerequisites and payload verification, filesystem capability checks and receipt-scoped removal. Four current diagrams and 239 passing regressions. Source only; no vendor payload, compiled Wine runtime or populated prefix. README adds twenty centered social sharing and bookmarking links with locally stored badge artwork.",
   "publication_branch": "release",
   "file_count": 514,
-  "total_bytes": 13544781,
+  "total_bytes": 13544798,
   "source_release": "unreleased",
   "release_parent_commit": "4b889eb1cd9e603ef5d593a89c7382532deabc82"
 }
