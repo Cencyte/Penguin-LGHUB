@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Initialize the pinned UI's own fonts before its first layout under Wine.
+"""Apply pinned frontend startup, window and tray compatibility corrections.
 
 Initialize fonts in index.html and preserve native tray errors in main.js.
 Fonts stay in the locally acquired vendor archive; this tool does not ship them.
@@ -61,18 +61,19 @@ STARTUP_READY = '''(function(win) {
     } catch (error) { console.error('Penguin LGHUB readiness report failed', error); }
   });
 })(Z)'''
-# Keep Chromium's native minimum inside the monitor work area. Otherwise KWin
-# can constrain the window below that minimum, leaving Wine waiting for size
-# acknowledgement and refusing to propagate the WM's restore to Win32.
+# Fit the initial window to the work area, but allow smaller subsequent sizes.
+# KWin edge drags/tiling can shrink the native window below the vendor's
+# 1024x768 minimum. Fighting that accepted geometry leaves Wine's client rect
+# and resize hit-testing stale. FIT_CONTENT preserves the full logical UI.
 FIT_OPTIONS = '''function(options, screen) {
   if (process.env.PENGUIN_GHUB_FIT_WORKAREA !== '1') return options;
   const area = screen.getDisplayMatching({x: options.x ?? 0, y: options.y ?? 0,
     width: options.width || 1024, height: options.height || 768}).workArea;
   if (!(area.width > 0 && area.height > 0)) return options;
-  options.minWidth = Math.min(1024, area.width);
-  options.minHeight = Math.min(768, area.height);
-  options.width = Math.min(area.width, Math.max(options.width || 1024, options.minWidth));
-  options.height = Math.min(area.height, Math.max(options.height || 768, options.minHeight));
+  options.minWidth = Math.min(320, area.width);
+  options.minHeight = Math.min(240, area.height);
+  options.width = Math.min(area.width, Math.max(options.width || 1024, Math.min(1024, area.width)));
+  options.height = Math.min(area.height, Math.max(options.height || 768, Math.min(768, area.height)));
   options.x = Math.max(area.x, Math.min(options.x ?? area.x, area.x + area.width - options.width));
   options.y = Math.max(area.y, Math.min(options.y ?? area.y, area.y + area.height - options.height));
   console.error('Penguin LGHUB work-area fit', {area, width: options.width, height: options.height});
@@ -94,29 +95,39 @@ FIT_CONTENT = '''(function(win) {
   fit();
 })(Z)'''
 # Electron 39's onscreen invalidate() schedules a full widget repaint. A
-# restored Xwayland drawable can lose the foreign-process software output
+# restored or resized X11/Xwayland drawable can lose the software output
 # while Chromium still considers its existing frame current. Request damage
 # after restoring/showing, including one bounded retry after remapping settles.
+# Coalesce resize bursts into one repaint after the last geometry event; this
+# also covers maximization/tiling without repainting continuously during a drag.
 # Never reload the page, resize the window, or run a continuous repaint timer.
 RESTORE_REPAINT = '''(function(win) {
   if (process.env.PENGUIN_GHUB_REPAINT_ON_RESTORE !== '1') return;
-  let immediate = null, settled = null;
+  let immediate = null, settled = null, resizeSettled = null;
   const cancel = () => {
-    clearImmediate(immediate); clearTimeout(settled);
-    immediate = settled = null;
+    clearImmediate(immediate); clearTimeout(settled); clearTimeout(resizeSettled);
+    immediate = settled = resizeSettled = null;
   };
-  const paint = () => {
+  const paint = (reason = 'restore') => {
     if (win.isDestroyed() || !win.isVisible() || win.isMinimized() || win.webContents.isDestroyed()) return;
     win.webContents.invalidate();
-    console.error('Penguin LGHUB restore repaint');
+    console.error('Penguin LGHUB ' + reason + ' repaint');
   };
   const restore = () => {
     cancel();
     immediate = setImmediate(() => { immediate = null; paint(); });
     settled = setTimeout(() => { settled = null; paint(); }, 250);
   };
+  const resize = () => {
+    clearTimeout(resizeSettled);
+    resizeSettled = setTimeout(() => { resizeSettled = null; paint('resize'); }, 250);
+  };
   win.on('restore', restore);
   win.on('show', restore);
+  win.on('resize', resize);
+  win.on('resized', resize);
+  win.on('maximize', resize);
+  win.on('unmaximize', resize);
   win.on('minimize', cancel);
   win.on('hide', cancel);
   win.on('closed', cancel);

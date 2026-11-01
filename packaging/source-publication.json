@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "9b5b3040e99aa7954c05df75e8392bfb3b6ce5b2",
+  "github_base_commit": "4acc4347261f73d00841114aa16a42540ae65a09",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "13172f666659556904feb8a9e2c8584c1db3aeec79bb02060b098ed2ead15b37",
-      "bytes": 76279
+      "sha256": "ed3fc9d6c1c12a60a6857a20a6dd24e23e33a973ab7ce8aaf9c0b69a03943a0b",
+      "bytes": 76345
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -728,14 +728,14 @@
     {
       "path": "docs/packaging/release-installer-verification.json",
       "mode": "100644",
-      "sha256": "f6b4567ed473c4a74beac5dbf8b8aa1daf737be4021ea01613628ded33606662",
-      "bytes": 17957
+      "sha256": "c7011c814d5de523429d0e8f6f91a5f7f2e2cbe9d1dd1a05718386e9c5833105",
+      "bytes": 24590
     },
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "11395b9065ee4c244779f0cc284bff7d33f05e09374105d3f77b69e847ea67a8",
-      "bytes": 24435
+      "sha256": "9edd91fcb8fa49451319fc6c8033073e0e143eaa9dca1fd7d9ace43a2db956e3",
+      "bytes": 24643
     },
     {
       "path": "docs/packaging/source-publication.md",
@@ -860,8 +860,8 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "8eb85669d1c039378b3e81888555fe5441f8477b7380622a71acfe2fcc360d35",
-      "bytes": 252
+      "sha256": "496edf0a5f42fc42216ad13477b1fdbef448002c4e0d1bf4cbed871804dfb7a3",
+      "bytes": 253
     },
     {
       "path": "packaging/licenses/Wine-LGPL-2.1.txt",
@@ -908,8 +908,8 @@
     {
       "path": "packaging/release-review.json",
       "mode": "100644",
-      "sha256": "400fb280afdc02b1b9014cb1310f9a298ae24adc2ef4d2840f79b67720301a61",
-      "bytes": 15157
+      "sha256": "c1bfce522cb2898f6ee0580f11444c276f9721df8c425422874cd70eda4f9d61",
+      "bytes": 16597
     },
     {
       "path": "packaging/runtime-baseline.json",
@@ -1328,8 +1328,8 @@
     {
       "path": "tests/packaging/test_frontend_startup.py",
       "mode": "100644",
-      "sha256": "4d6d437e54c012dbea10ed9435a9683153fd376358a10e37fc0b78c8a684c9ee",
-      "bytes": 10866
+      "sha256": "07881d51a06c4eacbd45b8ae1db0e45d08e962d1d963d08f8575bd6544e86787",
+      "bytes": 12733
     },
     {
       "path": "tests/packaging/test_host_keyboard_threads.py",
@@ -2810,8 +2810,8 @@
     {
       "path": "tools/wine/prepare_frontend_startup.py",
       "mode": "100644",
-      "sha256": "68444714cbeed6041f67620f37e15ca1b23c45b223db2f9d09272d6313594d1e",
-      "bytes": 11483
+      "sha256": "b63fb3d62e24ad2a8f20383b32143b1e843b493676528f0d443794179af15763",
+      "bytes": 12100
     },
     {
       "path": "tools/wine/prepare_kernelbase_probe.py",

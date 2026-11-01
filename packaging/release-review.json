@@ -314,5 +314,31 @@
     },
     "evidence": "docs/packaging/release-installer-verification.json#x11_restore_activation_2026_11_01",
     "earlier_review": "Earlier entries retain their dated release context."
+  },
+  "preview_8_followup": {
+    "source_release": "v0.9.0-preview.8",
+    "installer": "0.3.10",
+    "changes": [
+      "Separate the normal startup size from the smaller native resize minimum, keeping existing full-UI scaling.",
+      "Coalesce resize/maximize events into one settled repaint and cancel pending work when hidden or closed.",
+      "Record manual confirmation of the preceding minimize-button repair and the separate resize/bottom-edge acceptance gate."
+    ],
+    "validation": {
+      "local_regressions_passed": 264,
+      "original_archive_transform": "267 packed entries verified; generated archive matches isolated production candidate byte-for-byte.",
+      "isolated_desktop_checks": {
+        "x11_resize_sequences": 12,
+        "wayland_resize_transitions": 9,
+        "additional_compact_size_transitions": 7,
+        "native_geometry_and_bottom_hit_checks": 36,
+        "x11_application_button_restores": 12,
+        "wayland_panel_restores": 12,
+        "limits": "Three headless Wayland native edge gestures did not execute; manual acceptance remains pending."
+      },
+      "manual_resize_acceptance": "pending"
+    },
+    "evidence": "docs/packaging/release-installer-verification.json#resize_geometry_2026_11_01",
+    "uninstall": "Existing receipt-owned frontend removal covers the change; no new persistent host resource.",
+    "earlier_review": "Earlier entries retain their dated release context."
   }
 }

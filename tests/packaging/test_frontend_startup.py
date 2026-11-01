@@ -88,13 +88,16 @@ delete process.env.PENGUIN_GHUB_FIT_WORKAREA;
 assert.deepEqual(fit({...original},screen), original);
 process.env.PENGUIN_GHUB_FIT_WORKAREA='1';
 const small=fit({...original},screen);
-assert.equal(small.height,743); assert.equal(small.minHeight,743);
+assert.equal(small.height,743); assert.equal(small.minHeight,240);
 assert.equal(small.y,0); assert.equal(small.x,-1100); assert.equal(small.frame,false);
 area={x:0,y:0,width:800,height:600};
 const tiny=fit({...original},screen);
-assert.deepEqual([tiny.x,tiny.y,tiny.width,tiny.height,tiny.minWidth,tiny.minHeight],[0,0,800,600,800,600]);
+assert.deepEqual([tiny.x,tiny.y,tiny.width,tiny.height,tiny.minWidth,tiny.minHeight],[0,0,800,600,320,240]);
 area={x:-1280,y:0,width:1280,height:1024};
-assert.deepEqual(fit({...original},screen),original);
+assert.deepEqual(fit({...original},screen),{...original,minWidth:320,minHeight:240});
+area={x:0,y:0,width:280,height:200};
+const smallest=fit({...original},screen);
+assert.deepEqual([smallest.width,smallest.height,smallest.minWidth,smallest.minHeight],[280,200,280,200]);
 '''
         subprocess.run(['node', '-e', script], check=True, capture_output=True, timeout=10)
 
@@ -112,11 +115,14 @@ assert.equal(zoom,743/768); assert.equal(size[1]/zoom,768);
 Z.emit('resize'); assert.equal(changes,1);
 minimized=true; size=[160,31]; Z.emit('resize'); assert.equal(changes,1);
 minimized=false; size=[1280,900]; Z.emit('restore'); assert.equal(zoom,1);
-destroyed=true; size=[800,600]; Z.emit('resize'); assert.equal(changes,2);
+size=[640,437]; Z.emit('resize'); assert.equal(zoom,437/768);
+assert.ok(size[0]/zoom>=1024); assert.equal(size[1]/zoom,768);
+size=[320,240]; Z.emit('resize'); assert.equal(zoom,.3125);
+destroyed=true; size=[800,600]; Z.emit('resize'); assert.equal(changes,4);
 '''
         subprocess.run(['node', '-e', script], check=True, capture_output=True, timeout=10)
 
-    def test_repaint_hook_is_inert_without_wayland_opt_in(self):
+    def test_repaint_hook_is_inert_without_compatibility_opt_in(self):
         script = '''
 const assert = require('node:assert/strict');
 const EventEmitter = require('node:events');
@@ -124,6 +130,31 @@ const Z = new EventEmitter();
 delete process.env.PENGUIN_GHUB_REPAINT_ON_RESTORE;
 ''' + m.RESTORE_REPAINT + ''';
 assert.deepEqual(Z.eventNames(), []);
+'''
+        subprocess.run(['node', '-e', script], check=True, capture_output=True, timeout=10)
+
+    def test_resize_repaint_coalesces_bursts_and_cancels_when_hidden(self):
+        script = '''
+const assert = require('node:assert/strict');
+const EventEmitter = require('node:events');
+const Z = new EventEmitter();
+let minimized=false, visible=true, destroyed=false, paints=0, next=0;
+const pending=new Map();
+global.setTimeout=(fn, delay)=>{assert.equal(delay,250);const id=++next;pending.set(id,fn);return id;};
+global.clearTimeout=id=>pending.delete(id);
+const flush=()=>{const callbacks=[...pending.values()];pending.clear();for(const fn of callbacks)fn();};
+Z.isMinimized=()=>minimized;Z.isVisible=()=>visible;Z.isDestroyed=()=>destroyed;
+Z.webContents={isDestroyed:()=>destroyed,invalidate:()=>paints++};
+process.env.PENGUIN_GHUB_REPAINT_ON_RESTORE='1';console.error=()=>{};
+''' + m.RESTORE_REPAINT + ''';
+for(let i=0;i<100;i++) Z.emit('resize');
+Z.emit('resized');assert.equal(pending.size,1);assert.equal(paints,0);
+flush();assert.equal(paints,1);assert.equal(pending.size,0);
+Z.emit('maximize');Z.emit('unmaximize');flush();assert.equal(paints,2);
+Z.emit('resize');visible=false;Z.emit('hide');flush();assert.equal(paints,2);
+visible=true;Z.emit('resize');minimized=true;Z.emit('minimize');flush();assert.equal(paints,2);
+minimized=false;Z.emit('resize');destroyed=true;Z.emit('closed');flush();assert.equal(paints,2);
+assert.equal(pending.size,0);
 '''
         subprocess.run(['node', '-e', script], check=True, capture_output=True, timeout=10)
 

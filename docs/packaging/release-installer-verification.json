@@ -450,7 +450,7 @@
       "fixture_limit": "Private runtime user identity creates a disposable Wine user alongside the source user; this is not an exact replay of the live desktop settings."
     },
     "manual_acceptance": {
-      "manjaro_vm_after_reinstall": "pending",
+      "manjaro_vm_after_reinstall": "User confirms Preview7 minimize/restore works; subsequent resize and bottom-edge failure investigated separately.",
       "bazzite_regression": "pending",
       "cachyos_regression": "pending"
     },
@@ -460,5 +460,127 @@
       "https://raw.githubusercontent.com/chromium/chromium/142.0.7444.134/ui/views/win/hwnd_message_handler.cc"
     ],
     "retained_private_evidence": "~/.local/state/penguin-x11-restore-20261101 on the Manjaro VM; matching local diagnostic-source archive."
+  },
+  "resize_geometry_2026_11_01": {
+    "installer_version": "0.3.10",
+    "reported_trigger": "Manjaro VM X11 and Wayland: edge drags or snapped sizes leave white/stale content; bottom resize edge missing. Workstation comparison does not show this.",
+    "installed_version_inspected": {
+      "project": "0.9.0-preview.7",
+      "installer": "0.3.9"
+    },
+    "live_read_only_evidence": {
+      "session": "Plasma Wayland / Xwayland",
+      "window_position": [
+        130,
+        101
+      ],
+      "x11_size": [
+        1071,
+        437
+      ],
+      "win32_size": [
+        1071,
+        756
+      ],
+      "win32_style": "0x14c70000",
+      "win32_minimized": false,
+      "driver_current_rect": [
+        130,
+        101,
+        1201,
+        538
+      ],
+      "driver_desired_and_pending_rect": [
+        130,
+        101,
+        1201,
+        857
+      ],
+      "configure_serial": 2508,
+      "other_restore_blocking_serials": 0,
+      "method": "Read-only X properties and matched Wine /proc structures. No live input, screenshot capture or debugger attachment."
+    },
+    "diagnosis": [
+      "The native 1024xwork-area minimum can reject smaller geometry already accepted by KWin, leaving the Win32 client rect and native edge hit-testing out of sync.",
+      "After permitting smaller geometry, independent stale-pixel failures can remain following resize/maximize transitions; a coalesced full repaint resolves the isolated comparison."
+    ],
+    "changes": [
+      "Retain the normal startup size and work-area fit; permit subsequent native sizes down to 320x240 (or the smaller work area). Existing zoom fits the full logical UI.",
+      "Coalesce resize/resized/maximize/unmaximize into one full repaint 250 ms after the last event; cancel on minimize/hide/close. No continuous repaint, page reload or window-size nudge."
+    ],
+    "installer_integration": "Existing verified prepare_frontend_startup transform, called by activate_frontend. No new host packages, runtime binary or compositor setting.",
+    "uninstall_scope": "The transformed archive remains inside the receipt-owned private installation, removed by the existing uninstall transaction.",
+    "original_archive_validation": {
+      "source_sha256": "04afa23969d90e3f315f9183a5babf84bfcc9559ff2fc8ae190d8a2d8466cd15",
+      "output_sha256": "b6140633a20f968481919e7c5b72bd67113fa7ee63be4e1e6e67ac8a343beb8d",
+      "changed_entries": [
+        "index.html",
+        "main.js"
+      ],
+      "packed_entries_verified": 267,
+      "startup_protocol": 1,
+      "method": "Same verified prepare_frontend transform invoked by activate_frontend during installation"
+    },
+    "isolated_validation": {
+      "environment": "Manjaro VM, private KWin X11 6.5.5 and virtual KWin Wayland 6.5.6 / Xwayland; llvmpipe LLVM 22.1.1 / Mesa 26.0.2-arch1; 1280x800 display.",
+      "isolation": "Disposable prefix/runtime copies, private PID/network/dev/display/session bus; no live desktop or physical input devices. Wayland compositor received only a render node for OpenGL screenshots.",
+      "comparison": {
+        "previous_behavior": {
+          "pixel_failures": 1,
+          "resize_sequences": 12
+        },
+        "minimum_only": {
+          "pixel_failures": 1,
+          "resize_sequences": 12
+        },
+        "repaint_only": "12/12 pixel checks passed, but native/client geometry remained inconsistent; insufficient on its own.",
+        "combined_candidate": {
+          "pixel_failures": 0,
+          "resize_sequences": 12
+        }
+      },
+      "production_transform": {
+        "matches_installer_output_sha256": "b6140633a20f968481919e7c5b72bd67113fa7ee63be4e1e6e67ac8a343beb8d",
+        "x11_resize_sequences_passed": 12,
+        "wayland_geometry_transitions_passed": 9,
+        "wayland_synthetic_edge_gestures_not_exercised": 3,
+        "additional_compact_size_transitions_passed": {
+          "x11": 3,
+          "wayland": 4
+        },
+        "compact_size_limit": "Wayland reached 320x240. In the X11 tile fixture the WM retained the initial 756-pixel height; width reached 320. One unchanged X11 sample is excluded from transition totals.",
+        "window_size_and_bottom_hit_measurements_passed": 36,
+        "window_size_and_bottom_hit_measurements_total": 36,
+        "hit_test_result": "WM_NCHITTEST = HTBOTTOM (15) at the displayed bottom border; displayed X11 and native Win32 sizes agreed in every measured snapshot.",
+        "pixel_checks": "Native drawable plus composed display captures retained page content and avoided large white/blank areas after each settled transition. Samples taken one second after the gesture, not a claim of artifact-free animation during dragging.",
+        "x11_application_button_restore_cycles_passed": 12,
+        "successful_run_shutdown": "Exit 0, no remaining prefix processes, installation inventory intact.",
+        "wayland_panel_restore_cycles_passed": 12
+      },
+      "excluded_attempts": "Earlier fixture failures (stale clone inventories, capture helper signature, QPainter screenshot cancellation, inaccurate fixed button coordinates) are excluded. Synthetic XTEST button/edge input did not reliably initiate Wayland native actions; no pass is inferred from those no-ops.",
+      "project_regression_suite": {
+        "passed": 264,
+        "failed": 0,
+        "skipped": 0
+      },
+      "limits": "Headless checks do not establish physical-GPU behavior, manual Wayland edge dragging, or complete fresh-install acceptance. No reliability percentage is inferred from these counts."
+    },
+    "manual_acceptance": {
+      "manjaro_vm_resize_after_reinstall": "pending",
+      "bazzite_regression": "pending",
+      "cachyos_regression": "pending"
+    },
+    "primary_sources": [
+      "https://raw.githubusercontent.com/electron/electron/v39.1.2/docs/api/base-window.md",
+      "https://raw.githubusercontent.com/electron/electron/v39.1.2/docs/api/web-contents.md",
+      "https://raw.githubusercontent.com/electron/electron/v39.1.2/shell/browser/api/electron_api_web_contents.cc"
+    ],
+    "retained_private_evidence": "~/.local/state/penguin-resize-20261101 on the Manjaro VM and workstation",
+    "separate_observation": {
+      "report": "lghub_crash.txt on the VM Desktop, predating this repair",
+      "process": "lghub_agent.exe",
+      "fault": "NULL read in ucrtbase, with strtod/strtold on the symbolized export stack",
+      "status": "Retained for separate triage; relationship to resize is unestablished. No crash fix is claimed."
+    }
   }
 }
