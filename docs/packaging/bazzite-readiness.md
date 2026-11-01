@@ -11,7 +11,7 @@ fixed after patch 0046. Offscreen hardware EGL and PulseAudio connection probes
 also passed. These confirmations supersede the original pending-install status;
 they do not certify every G HUB feature or a full X11 desktop session.
 
-Preview 5 contains installer 0.3.7, its 31 GiB budget, workspace cleanup and automatic-profile components. The newest profile observer still requires packaged Bazzite acceptance.
+Preview 6 contains installer 0.3.8, its 31 GiB budget, workspace cleanup, automatic-profile components and untimed sudo-readiness pause. The newest profile observer still requires packaged Bazzite acceptance.
 Fresh installation on CachyOS and the Manjaro VM was subsequently confirmed on October 31. See the
 [current environment record](../../packaging/tested-environments.json) and
 [installation guide](release-installer.md#verification-boundaries).

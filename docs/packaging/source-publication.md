@@ -118,3 +118,14 @@ uses four revised October 31 diagrams with their Mermaid sources.
 
 The source-only publication keeps the existing dependency-use and binary-runtime
 release boundaries. Prior release ZIPs and tags are preserved.
+
+## November 1 authorization repair
+
+Preview 6 / installer 0.3.8 adds an untimed pause before late sudo authentication,
+confirmed-absent device-rule cleanup, and read-only inspection of Xwayland
+native-input bridge support. The Manjaro failure was a password prompt timeout;
+runtime and isolated UI/tray checks had already passed, and rollback removed
+the incomplete installation. All 262 local regressions and 55 focused VM tests
+pass. Fresh installation with this repair remains a manual acceptance step.
+The source archive also contains the current README layout and sharing buttons.
+Prior release archives and tags remain unchanged.

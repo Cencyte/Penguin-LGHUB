@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "a78de97fd665a59cf0e9b99bbaea89cafe8ec3c74549e011ce5c5feabc839b0e",
-      "bytes": 75679
+      "sha256": "b3372828d7c7ee52d28cc82921967c2448cda26b4d3ae9155c62d6430b028dfa",
+      "bytes": 76016
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -680,8 +680,8 @@
     {
       "path": "docs/packaging/bazzite-readiness.md",
       "mode": "100644",
-      "sha256": "846af93c7d9b44baaefa8bd895ad39c3e2ad1492c665f348e120abb4f25ff428",
-      "bytes": 7462
+      "sha256": "18807778ae73245289132b832783a2fae7d02192787cf67a4d6042208e177c5e",
+      "bytes": 7492
     },
     {
       "path": "docs/packaging/cachyos-wayland-launcher-verification.json",
@@ -734,14 +734,14 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "212ab20a8f12a7b4f0c13f24605d96760183221d5747608c64c0689bf4ce3d50",
-      "bytes": 24000
+      "sha256": "f62c2cdcfe769ed43b1a6ef3a6fc6aae1836c63e581d02c4022caeb595c66b72",
+      "bytes": 24114
     },
     {
       "path": "docs/packaging/source-publication.md",
       "mode": "100644",
-      "sha256": "0cebdcde06519d65c3da80e9712fe5cac83d61a37cb855e94b44c2825a6ea054",
-      "bytes": 6934
+      "sha256": "939885e0dafca3e5404d32ac2bae1ca1fccf678800c613dc67701b56f5caf0ae",
+      "bytes": 7571
     },
     {
       "path": "docs/packaging/status-bazzite.svg",
@@ -860,7 +860,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "f34a1541bf38b5627b568d49b6ba87073a49a936c35564d353c3b3ec04953f62",
+      "sha256": "820257496440f4fd46db2b7a90e7767fca71454aaff05b96ad880370f29ee324",
       "bytes": 252
     },
     {
@@ -908,8 +908,8 @@
     {
       "path": "packaging/release-review.json",
       "mode": "100644",
-      "sha256": "3cb02148c1657937e58284841f73fef8668ba8343e234f7aa24870cb2ab45653",
-      "bytes": 13514
+      "sha256": "7cff720d937c334d6473537f6872d4d5569cdf0b8ca21db442230b42535332af",
+      "bytes": 14189
     },
     {
       "path": "packaging/runtime-baseline.json",
@@ -3132,10 +3132,10 @@
       "bytes": 1474
     }
   ],
-  "publication_note": "Post-Preview5 source: adds read-only Xwayland libei bridge and portal/private-EIS route inspection to compatibility checks and launch preflight. 253 passing regressions. Source only; no vendor payload, compiled Wine runtime or populated prefix. README includes twenty centered social sharing links with locally stored badges. Installer0.3.8 adds an untimed authorization pause and skips privileged rollback when its rule was never created. 262 local regressions and 55 focused Manjaro VM regressions pass; full fresh-install retry remains manual.",
+  "publication_note": "Preview6, installer0.3.8: untimed sudo readiness, confirmed-absent rule cleanup, Xwayland compiled native-input and active-route checks. 262 local regressions and 55 focused VM regressions pass. Source only; no vendor payload, compiled runtime or populated prefix. Fresh installer retry remains manual.",
   "publication_branch": "release",
   "file_count": 517,
-  "total_bytes": 13575466,
-  "source_release": "unreleased",
-  "release_parent_commit": "4b889eb1cd9e603ef5d593a89c7382532deabc82"
+  "total_bytes": 13577259,
+  "source_release": "v0.9.0-preview.6",
+  "release_parent_commit": "65a6a97f8ddef9a31619bcc9f9e07b9fb996be74"
 }

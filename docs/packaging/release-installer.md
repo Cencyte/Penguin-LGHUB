@@ -13,11 +13,11 @@ cd Penguin-LGHUB-release
 ./install.sh
 ```
 
-Installer 0.3.7 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
+Installer 0.3.8 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.5) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.6) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
 
-Preview 5 includes installer 0.3.7, automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal.
+Preview 6 includes installer 0.3.8, automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal. It adds an untimed pause before sudo authentication and checks the actual Xwayland binary and native-input route.
 
 The release-consolidation run rebuilt the current Wine patches and supplements in the pinned SDK, then prepared a new prefix with host Wine hidden. All 8 activation checks, 4 registry checks and 6 isolated UI/tray checks passed; the combined project suite passed 239 tests. The profile payload gate also verified the adapter, pinned agent and both observer backends. These automated checks complement the recorded manual confirmations; they do not establish fresh packaged-profile acceptance on CachyOS or Bazzite. [Validation record](release-installer-verification.json).
 

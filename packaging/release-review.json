@@ -281,5 +281,20 @@
     "local_links_checked": 119,
     "missing_local_targets": 0,
     "missing_readme_toc_anchors": 0
+  },
+  "preview_6_followup": {
+    "source_release": "v0.9.0-preview.6",
+    "installer": "0.3.8",
+    "changes": [
+      "Untimed user-readiness pause before sudo authentication; confirmed-absent device rules need no privileged cleanup.",
+      "Read-only Xwayland native-input bridge and active portal/private-EIS route verification.",
+      "Centered sharing buttons and installation documentation reorganization."
+    ],
+    "validation": {
+      "local_regressions_passed": 262,
+      "manjaro_vm_focused_regressions_passed": 55,
+      "fresh_installer_retry": "pending user acceptance"
+    },
+    "earlier_review": "Other entries retain their Preview5 review context."
   }
 }
