@@ -617,5 +617,11 @@
       "GUI_launched": false,
       "graphics_permissions_changed": false
     }
+  },
+  "manual_follow_up_20261031": {
+    "environment": "Manjaro workstation, KDE Plasma Wayland",
+    "profile_switching": "Confirmed working by manual test",
+    "physical_key_bindings": "Confirmed working after shared-connection driver update",
+    "scope": "Existing Tested Wine installation; fresh packaged installer with these profile additions still requires validation."
   }
 }

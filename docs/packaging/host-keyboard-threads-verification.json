@@ -895,7 +895,7 @@
       "project_tests_total": 230,
       "helper_upgrade_and_idempotence_verified": true,
       "candidate_deployed": true,
-      "live_mouse_retest": false
+      "live_mouse_retest": true
     },
     "limits": [
       "Synthetic sender uses the real installed or candidate driver and private host-version KWin/Xwayland; it is not the actual G HUB process.",
@@ -1367,6 +1367,11 @@
       "gui_launched": false,
       "backup_relative": "logs/shared-keyboard-backup-20261031-223739",
       "scope": "One installed winex11.so and its launch.json hash pin; profile observer and all other pins unchanged."
+    },
+    "manual_follow_up": {
+      "result": "Repeated consent and sticky key binding reported fixed in physical Wayland testing",
+      "recorded_on": "2026-10-31",
+      "installation": "Original Manjaro Tested Wine with patched driver"
     }
   }
 }
