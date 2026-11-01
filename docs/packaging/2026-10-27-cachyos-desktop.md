@@ -1,5 +1,7 @@
 # CachyOS physical-machine installation, October 27
 
+> Historical investigation record. For current installation, X11/Wayland profiles and validation status, see the [installation guide](release-installer.md) and [recorded environments](../../packaging/tested-environments.json).
+
 **October 28 update:** a separate opt-in Wayland installation is now prepared
 with the current Manjaro-tested runtime fixes. See the final section below;
 the original X11 installation remains available.

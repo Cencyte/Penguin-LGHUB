@@ -104,3 +104,17 @@ Repository visibility remains private at this consolidation step. Publishing a
 release there does not make its assets anonymously downloadable. Visibility can
 be changed separately after an explicit publication decision; it exposes both
 published repository history and release assets.
+
+
+## October 31 profile and Wayland consolidation
+
+Preview 5 / installer 0.3.7 includes host-side X11/KWin automatic-profile
+observers, the authenticated mailbox/agent adapter, the shared XTEST keyboard
+connection and explicit profile checks in setup. Physical profile/input tests
+on the original Manjaro workstation now pass. Current source build, fresh-prefix,
+regression and removal results are recorded separately from remaining target
+acceptance. The original and October 29 diagrams remain preserved; the README
+uses four revised October 31 diagrams with their Mermaid sources.
+
+The source-only publication keeps the existing dependency-use and binary-runtime
+release boundaries. Prior release ZIPs and tags are preserved.

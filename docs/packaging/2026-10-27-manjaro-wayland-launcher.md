@@ -1,5 +1,7 @@
 # Opt-in Manjaro Wayland launcher
 
+> Historical investigation record. For current installation, X11/Wayland profiles and validation status, see the [installation guide](release-installer.md) and [recorded environments](../../packaging/tested-environments.json).
+
 **Follow-up:** the initial smoke test missed deletion of the extracted depots
 in the prefix later handed to the user. Its window/tray result did not establish
 frontend readiness. See [the depot-state repair](2026-10-27-wayland-depot-repair.md)

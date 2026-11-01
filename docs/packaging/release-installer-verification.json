@@ -163,8 +163,9 @@
     "scope": "Manual installer completion and uninstall/reinstall with installer 0.3.2; targeted physical G502 X Plus input fix confirmed. Not exhaustive feature qualification or a fresh 0.3.5 rerun."
   },
   "remaining": [
-    "Remaining uninstall/session-switching confirmations and native Wayland automatic application-profile matching implementation/testing",
-    "Remaining per-feature/device/graphics qualification beyond the recorded manual confirmations",
+    "Fresh packaged-profile acceptance on CachyOS and Bazzite; original Manjaro workstation X11/Wayland confirmed",
+    "Remaining per-feature/device/graphics qualification beyond recorded manual confirmations",
+    "Component-use policy for reconstructed Windows resources",
     "Corresponding-source and notices audit before hosting a compiled runtime release"
   ],
   "end_to_end_qualified": false,
@@ -209,5 +210,79 @@
     "installation_targets_total": 3,
     "scope": "Manual installation results, not blanket feature qualification; no separate new uninstall or session-switching confirmation inferred.",
     "installer_0_3_6_default_action": "208 project tests passed, including default install, explicit action isolation, help and invalid-option handling. No live installation run for this CLI-only change."
+  },
+  "release_consolidation_2026_11_01": {
+    "project_version": "0.9.0-preview.5",
+    "installer_version": "0.3.7",
+    "runtime_build": {
+      "completed": true,
+      "patch_topics": 46,
+      "input": "Pinned Wine source, package lock and current repository supplement implementations",
+      "prebuilt_compatibility_dlls_used": false,
+      "verified_download_and_object_cache_reused": true,
+      "runtime_manifest_sha256": "af71652fdf18490863cf201206438912b0180438404ccc5c43b4697032d225b7"
+    },
+    "fresh_prefix": {
+      "donor_prefix_cloned": false,
+      "host_wine_hidden": true,
+      "activation_factories_passed": 8,
+      "activation_factories_total": 8,
+      "registry_routes_passed": 4,
+      "registry_routes_total": 4
+    },
+    "profile_payload": {
+      "passed": true,
+      "backends": [
+        "x11",
+        "kde-wayland"
+      ],
+      "adapter_export_verified": true,
+      "pinned_agent_sha256_verified": true,
+      "observer_modules_verified": 3,
+      "persistent_kwin_configuration": false
+    },
+    "isolated_ui": {
+      "checks": {
+        "required_files_present": true,
+        "bundled_fonts_loaded": true,
+        "desktop_and_default_profile": true,
+        "first_run_prompt_readable": true,
+        "native_tray_running": true,
+        "xembed_dock_received": true
+      },
+      "passed": true,
+      "scope": "Isolated frontend and native tray startup/XEmbed registration; no Plasma popup/input, physical devices or host GPU validation",
+      "host_wine_hidden": true,
+      "mapped_runtime_image_count": 127,
+      "live_desktop_used": false,
+      "physical_devices_exposed": false,
+      "isolated_network": true,
+      "end_to_end_qualified": false
+    },
+    "project_tests": {
+      "passed": 239,
+      "total": 239,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "uninstall_regression": "Verified-stop removal fixture covers profile observers, adapter DLL and mailbox; unrelated KWin settings survive. This is not a new physical uninstall acceptance test.",
+    "storage_regression": {
+      "reproduced": "NTFS3 mount rejected directory-relative symlink creation required by pressure-vessel; same operations and complete fresh-prefix/UI steps passed on ZFS",
+      "fix": "Early cleaned-up directory-relative symlink/hardlink/rename and private-permission probe; native filesystem requirement documented"
+    },
+    "limitations": [
+      "Fresh packaged-profile acceptance on CachyOS and Bazzite; original Manjaro workstation X11/Wayland confirmed",
+      "Remaining per-feature/device/graphics qualification beyond recorded manual confirmations",
+      "Component-use policy for reconstructed Windows resources",
+      "Corresponding-source and notices audit before hosting a compiled runtime release"
+    ],
+    "host_readiness": {
+      "session": "x11",
+      "checks_passed": 10,
+      "checks_total": 10,
+      "input_injected": false,
+      "windows_created": false
+    }
   }
 }

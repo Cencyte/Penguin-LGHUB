@@ -26,11 +26,14 @@ The launcher never approves that request for you.
 
 Try opening and restoring the main window, the tray menu and each menu entry.
 With Logitech peripherals connected, also try bindings, macros, G-Shift,
-manual profile switching and ordinary lighting. In a VM, USB passthrough is
+automatic profile switching and ordinary lighting. In a VM, USB passthrough is
 needed for physical devices to appear.
 
-Automatic profile matching for native Wayland apps and screen-sampled lighting
-are still separate work. Feature support on Wayland remains under validation.
+Automatic application profiles use a temporary KWin focus observer. Enable
+automatic switching in G HUB and assign the application's executable path.
+For packaged installations, Kate is Z:\\run\\host\\usr\\bin\\kate. Type the
+path into the file chooser rather than browsing a large executable directory.
+Screen-sampled lighting, Flatpak identities and other compositors are unqualified.
 
 Right-click this launcher for Check setup, Open logs, or Quit. You can
 test at your own pace; there is no deadline and no automatic input recording.

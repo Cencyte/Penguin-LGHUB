@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""User-operated X11 launcher with opt-in KDE/Xwayland testing.
+"""User-operated launcher with automatic X11 or KDE/Xwayland session selection.
 
 prepare creates a separate working prefix; check reads runtime/session capabilities.
 launch is deliberately interactive. This container provides library portability,

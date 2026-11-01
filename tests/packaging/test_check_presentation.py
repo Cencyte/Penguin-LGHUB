@@ -17,6 +17,7 @@ import install
 import installer_ui
 import run_project_tests
 import wayland_session
+import profile_support
 
 
 class CheckPresentationTests(unittest.TestCase):
@@ -31,13 +32,15 @@ class CheckPresentationTests(unittest.TestCase):
                 with patch.object(host_preflight, 'os_identity', return_value={'ID': 'manjaro'}), \
                      patch.object(host_preflight.shutil, 'which', side_effect=lambda n: '/usr/bin/' + n), \
                      patch.object(host_preflight, 'capture', side_effect=command), \
+                     patch.object(profile_support, 'inspect', return_value={'errors': []}), \
                      patch.object(wayland_session, 'inspect', return_value={'errors': ['portal fixture']}):
                     plain = host_preflight.inventory(env, Path(tmp))
                     presented = host_preflight.inventory(env, Path(tmp), lambda *e: events.append(e))
                 self.assertEqual(plain, presented)
                 self.assertTrue(any('namespace test failed' in e for e in presented['errors']))
                 self.assertEqual(any('portal fixture' == e for e in presented['errors']), session == 'wayland')
-                self.assertEqual(len(events), 9 if session == 'wayland' else 8)
+                self.assertEqual(len(events), 10 if session == 'wayland' else 9)
+                self.assertIn(('Desktop', 'Check native application-profile observer support'), events)
                 self.assertEqual(events[-1], ('Verify', 'Test an isolated user namespace'))
                 self.assertTrue(all(c in installer_ui.STYLE['category_colors'] for c, _ in events))
 
@@ -253,6 +256,7 @@ class CheckPresentationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, \
              patch.object(host_preflight,'os_identity',return_value={'ID':'bazzite'}), \
              patch.object(host_preflight.shutil,'which',side_effect=lambda n:'/bin/'+n), \
+             patch.object(profile_support,'inspect',return_value={'errors':[]}), \
              patch.object(host_preflight,'capture',return_value={'status':1,'output':'fixture denial'}):
             report=host_preflight.inventory({'XDG_SESSION_TYPE':'x11'},Path(tmp),result=lambda *row:events.append(row))
         self.assertEqual(events[-1],('Verify','Test an isolated user namespace','FAIL'))

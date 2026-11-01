@@ -1,0 +1,142 @@
+%% title: Penguin LGHUB 04 Detailed Connected 2026-10-31
+%% system: Penguin-LGHUB · connected system · source preview
+%% summary: Updated connected architecture: purple is project implementation, turquoise is vendor code, amber is locally acquired Windows dependencies and blue is the Linux host. Dotted links identify configuration or verification. Manjaro Wayland profiles and key output are manually confirmed; third-party component-use policy remains unresolved.
+%% layout: horizontal
+%% sort: sequence
+%% colors: 4 purple turquoise amber blue
+%% split: off
+%% theme: dark
+%% crop: yes
+%% fill: #171923
+
+%% graph: Current runtime and the sources that configure it
+flowchart LR
+    subgraph PREP["Preparation · install.sh · private tools and verified downloads"]
+        RESEARCH["DragonShard / Ghidra evidence and regression fixtures · development only"]
+        SOURCES["Project sources: patches/wine and tools/wine"]
+        DEPOT["Official G HUB depots · 30 archives · 1,115 extracted files · 438 application files"]
+        PREPARE["install.sh → private SDK → build_release_runtime.py · 46 Wine patch topics and helper DLL builds"]
+        ASARPATCH["Frontend transformations · color preview, startup, readiness and graceful shutdown"]
+        TRAYPATCH["prepare_tray_background.py · patches MainWindow.xbf and resources.pri"]
+        RESEARCH -. "informs implementation" .-> SOURCES
+        SOURCES --> PREPARE
+        SOURCES --> ASARPATCH
+        SOURCES --> TRAYPATCH
+        DEPOT -. "verified extraction" .-> PREPARE
+        MEDIA["Official Windows media + updates → private bubblewrap or rootless Podman tools → 2 verified DLLs"]
+        LIBS["Pinned Linux runtime · Steam Linux Runtime 4 · extra libraries · Node and isolated display tools"]
+        VERIFY["Installer integrity, profile payload, loader, activation, UI and tray checks"]
+        PREPARE --> VERIFY
+        MEDIA -. "local acquisition" .-> NATIVE
+        LIBS -. "private userspace" .-> MOUNTS
+    end
+
+    subgraph START["Launch and configuration"]
+        DESKTOP["Desktop and application-menu entry · project icon · open, quit and setup checks"]
+        RUNNER["desktop_runtime.py · desktop.json · verified files, process ownership and frontend readiness"]
+        MOUNTS["pressure-vessel and bubblewrap · private Linux userspace · normal user · host graphics/session import"]
+        FREEZE["G HUB update freeze · checks/downloads off · software manager blocked · application and depot files read-only"]
+        PREFIX["Fresh dedicated WINEPREFIX · registry, services, overrides and user settings · no donor prefix"]
+        REGISTRY["WinRT registrations: ApiInformation, CoreApplication, DispatcherQueue, ThreadPoolTimer, streams/DataWriter, InputSite/activation; lghubapp URL handler"]
+        DIAG["agent_snapshot.cjs · read-only readiness / device / profile checks; color_picker_monitor.cjs · optional diagnostics"]
+        DESKTOP --> RUNNER --> MOUNTS
+        RUNNER --> FREEZE
+        SYNC["Per-application NTSYNC mask · Wine server synchronization · CachyOS tray correction"]
+        RUNNER --> SYNC --> MOUNTS
+        OBSERVER["Host-side native_profiles.py · X11 focus or temporary KWin script · current-user process identity"]
+        MAILBOX["Private authenticated session mailbox · stale-event and process guards"]
+        RUNNER --> OBSERVER --> MAILBOX --> SENSOR
+        SENSOR -. "typed application events; original automatic-profile policy" .-> AGENT
+        RUNNER --> DIAG
+        RUNNER --> PREFIX
+        REGISTRY -. "activation and launch configuration" .-> PREFIX
+        PREPARE -. "generates and pins" .-> RUNNER
+        PREPARE -. "creates fresh prefix" .-> PREFIX
+    end
+
+    subgraph APP["Original Logitech application · G HUB 2026.6.974819"]
+        AGENT["lghub_agent.exe · devices, assignments, macros, G-Shift, profiles, lighting"]
+        FRONT["lghub.exe · Electron main interface"]
+        ASAR["Locally transformed app.asar · color picker, startup and shutdown fixes"]
+        TRAY["lghub_system_tray.exe · original tray menu"]
+        TRAYASSETS["MainWindow.xbf and resources.pri · solid tray background fix"]
+        UPDATER["lghub_updater.exe · service retained; automatic updating frozen"]
+        OTHER["Other vendor assets and device depots · Chromium resources, modules, metadata"]
+        FRONT <-- "local agent API" --> AGENT
+        TRAY <-- "agent integration" --> AGENT
+        FRONT --> ASAR
+        TRAY --> TRAYASSETS
+        UPDATER --> AGENT
+        OTHER --> AGENT
+        ASARPATCH -. "local asset transformation" .-> ASAR
+        TRAYPATCH -. "local asset transformation" .-> TRAYASSETS
+        MOUNTS --> AGENT
+        MOUNTS --> FRONT
+        PREFIX -. "installed application state" .-> AGENT
+        FREEZE -. "scoped update policy" .-> UPDATER
+        DIAG -. "ws://127.0.0.1:9010" .-> AGENT
+    end
+
+    subgraph COMPAT["Supplementary compatibility components · separate from the Wine build"]
+        APIPROXY["api_information_proxy.dll · targeted capability query override"]
+        COREAPP["core_application_experiment.dll · required CoreApplication ABI"]
+        SENSOR["mfsensorgroup.dll · optional sensor fallback + native profile-event adapter"]
+        QUEUE["ghub_dispatcher_queue.dll · DispatcherQueue and tray popup anchoring"]
+        COREMSG["CoreMessaging.dll · custom adapter"]
+        XP["CoreMessagingXP.dll · original module with guarded in-memory adaptation"]
+        UDK["Microsoft.Internal.FrameworkUdk.dll · original module with guarded in-memory adaptation"]
+        FALLBACK["ghub_wine_coremessaging.dll · renamed Wine fallback"]
+        DCOMP["dcomp.dll · project DirectComposition implementation · surfaces, visual trees and input binding"]
+        WINUI["Vendor WinUI / composition stack: Microsoft.UI.Xaml, Controls, Phone, UI.Input, InputStateManager, DirectManipulation, dcompi, dwmcorei, marshal, D3DCompiler_47 and runtime resources"]
+        NATIVE["Windows d2d1.dll and ninput.dll · exact hashes reconstructed from official media · use clearance unresolved"]
+        FONTS["Fonts · vendor-bundled BrownPro and private-runtime DejaVu Sans · first-run and tray checks passed"]
+        AGENT --> APIPROXY
+        AGENT --> COREAPP
+        AGENT --> SENSOR
+        TRAY --> WINUI
+        TRAY --> QUEUE
+        WINUI --> COREMSG
+        COREMSG --> XP
+        COREMSG --> UDK
+        COREMSG --> FALLBACK
+        WINUI --> DCOMP
+        WINUI --> NATIVE
+        FRONT --> FONTS
+        WINUI --> FONTS
+    end
+
+    subgraph RUNTIME["Private Wine 10.20 · independent of system Wine"]
+        WINE["Custom Wine 10.20: ntdll, wineserver, win32u, user32, winex11, kernelbase, setupapi, ntoskrnl, shcore, dwmapi, d3d11, dxgi, wined3d, dwrite, windows.ui, windows.storage, threadpoolwinrt"]
+        STOCK["Remaining stock modules · pinned Arch Wine 10.20-2 package · privately extracted"]
+        MOUNTS -. "matched private modules and server" .-> WINE
+        STOCK --> WINE
+        DCOMP --> WINE
+        NATIVE --> WINE
+        AGENT --> WINE
+        FRONT --> WINE
+        QUEUE --> WINE
+        PREPARE -. "source-built patched modules" .-> WINE
+    end
+
+    subgraph HOST["Linux host · Manjaro and CachyOS X11 / Wayland · Bazzite Wayland"]
+        DEVICES["G502 X PLUS and G915 X LIGHTSPEED TKL · USB/HID via host kernel, permissions and Wine device drivers"]
+        DISPLAY["X11 or Plasma Wayland via Xwayland · compositor and native tray proxy"]
+        KEYS["Linux applications · XTEST on X11; libei / KWin-authorized input on Wayland"]
+        GPU["Host GPU driver · OpenGL / WineD3D · shared-texture presentation"]
+        SESSION["User session · D-Bus, PipeWire/PulseAudio, filesystem and sockets"]
+        PERMISSIONS["Logitech-only udev uaccess rules · sudo during setup · active local-seat ACLs"]
+        PREPARE -. "scoped setup" .-> PERMISSIONS
+        PERMISSIONS --> DEVICES
+        WINE <-- "device traffic" --> DEVICES
+        OUTPUT["One serialized XTEST output connection across agent workers · press and release share a virtual keyboard"]
+        WINE --> DISPLAY
+        WINE --> OUTPUT --> KEYS
+        DISPLAY -. "foreground application identity" .-> OBSERVER
+        WINE --> GPU
+        WINE <--> SESSION
+    end
+
+    class OBSERVER,MAILBOX,OUTPUT,FONTS,LIBS,SYNC,VERIFY,PERMISSIONS,SOURCES,PREPARE,ASARPATCH,TRAYPATCH,DESKTOP,RUNNER,MOUNTS,FREEZE,REGISTRY,DIAG,APIPROXY,COREAPP,SENSOR,QUEUE,COREMSG,DCOMP,WINE c1
+    class DEPOT,AGENT,FRONT,ASAR,TRAY,TRAYASSETS,UPDATER,OTHER,XP,UDK,WINUI c2
+    class NATIVE,MEDIA c3
+    class DEVICES,DISPLAY,KEYS,GPU,SESSION c4

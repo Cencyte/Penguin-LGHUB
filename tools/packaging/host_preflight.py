@@ -83,6 +83,10 @@ def inventory(env=None, sysroot=Path('/sys'), progress=None, result=None):
         import wayland_session
         report['wayland']=wayland_session.inspect(env)
         errors.extend(report['wayland']['errors'])
+    progress('Desktop', 'Check native application-profile observer support')
+    import profile_support
+    report['profiles']=profile_support.inspect(env)
+    errors.extend(report['profiles']['errors'])
     progress('Verify', 'Test an isolated user namespace')
     report['namespace_probe']=capture(['bwrap','--unshare-all','--ro-bind','/usr','/usr',
         '--symlink','usr/lib','/lib','--symlink','usr/lib64','/lib64',

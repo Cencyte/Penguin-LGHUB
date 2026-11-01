@@ -148,26 +148,24 @@ process/network isolation.
 
 ## Remaining portability work
 
-1. **Qualify the new real-session container launcher** on actual X11 desktops.
-   It now imports host graphics, preserves device-node access, shares desktop
-   connections and carries the existing input bridge. Device reconnect, tray
-   actions and actual rendering remain interactive acceptance work. Keep the
-   known-working launcher until this candidate passes those checks.
-2. **Finish the complete corresponding-source/build pipeline**, dependency
-   acquisition policy, font/UI qualification and installer/uninstaller
-   integration. No ready-to-install binary release is supplied yet.
-3. **Qualify a fresh Manjaro control, then CachyOS/X11** on actual hardware.
-   Cover installation/relaunch, device discovery and reconnect, native Linux
-   key output, macros, G-Shift press/release, profiles, lighting, tray actions,
-   resize/hover/color interactions, update freeze and rollback. Graphics and
-   device checks remain available for the user to perform without a deadline.
+The current installer builds the custom Wine components, supplies private Linux
+libraries and creates one X11/Plasma Wayland launcher. Installation is manually
+confirmed on Manjaro, CachyOS and Bazzite; Bazzite uninstall/reinstall and the
+shared keyboard-connection repair are confirmed. Native X11/Wayland automatic
+profiles and repaired Wayland input are manually confirmed on the Manjaro
+workstation. See the [current installer guide](release-installer.md) and
+[environment record](../../packaging/tested-environments.json).
 
-Debian host testing follows later. Bazzite remains outside this validation.
-Distrobox alone does not translate XTEST input, but modern Xwayland can forward
-XTEST through libei to KWin's native Wayland input stack. The first isolated
-positive and authorization-pending controls now pass on CachyOS; see the
-[Wayland research and implementation sequence](2026-10-27-wayland-research.md).
-This does not yet qualify the packaged Wine bridge or enable Wayland launches.
+Remaining qualification covers the latest packaged profile observer on the
+other target desktops, additional device/hotplug combinations, real lock-screen
+and compositor restart behavior, and screen-sampled lighting. Non-KWin Wayland,
+Flatpak application identities and foreign Wine/Proton prefixes are unqualified.
+The three-distribution release scope remains fixed; Debian is future work.
+Dependency-use policy and the corresponding-source audit for a hosted binary
+runtime are separate release boundaries. No binary runtime is hosted.
+
+The dated measurements below preserve their original scope; current acceptance
+supersedes their original pending statuses.
 
 ## Upstream references
 

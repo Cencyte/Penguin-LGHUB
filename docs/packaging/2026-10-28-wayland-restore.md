@@ -1,5 +1,7 @@
 # Wayland restore investigation
 
+> Historical investigation record. For current installation, X11/Wayland profiles and validation status, see the [installation guide](release-installer.md) and [recorded environments](../../packaging/tested-environments.json).
+
 **Latest acceptance and scope:** the user confirms the red shutdown banner is
 fixed, reports that the windowing anomalies remain, and explicitly declares
 those anomalies out of scope. Do not claim the quit expansion or brief restore

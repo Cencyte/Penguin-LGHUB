@@ -11,6 +11,23 @@ import prepare_clean_prefix as m
 
 
 class CleanPrefixTests(unittest.TestCase):
+    def test_failed_stage_reports_log_without_exposing_forwarded_environment(self):
+        import subprocess
+        import traceback
+        for failure in (subprocess.CalledProcessError(1, ['env', 'TOKEN=private-fixture']),
+                        subprocess.TimeoutExpired(['env', 'TOKEN=private-fixture'], 180)):
+            with self.subTest(failure=type(failure).__name__), tempfile.TemporaryDirectory() as tmp, \
+                 patch.object(m, 'sandbox', return_value=['env', 'TOKEN=private-fixture']), \
+                 patch.object(m.subprocess, 'run', side_effect=failure):
+                try:
+                    m.run_logged(Path(tmp), 'activation', ['wine', 'fixture'], {})
+                except RuntimeError:
+                    message = traceback.format_exc()
+                else:
+                    self.fail('Failed stage did not raise')
+                self.assertIn('activation.log', message)
+                self.assertNotIn('private-fixture', message)
+
     def test_metadata_has_no_donor_input_and_uses_windows_paths(self):
         lock = {'application_version': 'fixture', 'build_id': '123',
                 'public_access': {'access_group': 'public'}, 'depots': {'core': {

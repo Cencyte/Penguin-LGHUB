@@ -65,6 +65,24 @@ class UninstallTests(unittest.TestCase):
         self.assertIn(self.state['installation_id'], command);self.assertIn('--remove', command)
         self.assertFalse(self.root.exists())
 
+    def test_profile_payload_and_stale_mailbox_removed_after_session_stop(self):
+        self.create(desktop=True)
+        files = ('source/tools/wine/profile_kwin.py', 'source/tools/wine/profile_dbus.py',
+                 'source/tools/wine/native_profiles.py',
+                 'desktop/prefix/drive_c/Program Files/LGHUB/mfsensorgroup.dll',
+                 'desktop/logs/profile-session-test/kwin-focus.js',
+                 'desktop/logs/profile-session-test/focus.bin')
+        for name in files:
+            path = self.root/name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(b'fixture')
+        outside = self.base/'kwinrc'; outside.write_text('unrelated desktop settings')
+        def stopped(*args):
+            self.assertTrue(all((self.root/name).is_file() for name in files))
+        with patch.object(desktop_runtime.desktop, 'stop', side_effect=stopped) as stop:
+            uninstall.remove(self.root, self.ui)
+        stop.assert_called_once()
+        self.assertFalse(self.root.exists())
+        self.assertEqual(outside.read_text(), 'unrelated desktop settings')
+
     def test_changed_and_symlinked_launchers_block_before_removal(self):
         entry, _ = self.entry()
         entry.write_text('customized')

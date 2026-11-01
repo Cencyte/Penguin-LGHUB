@@ -1,5 +1,7 @@
 # Fresh desktop: tray fonts, launcher icon, and restore investigation
 
+> Historical investigation record. For current installation, X11/Wayland profiles and validation status, see the [installation guide](release-installer.md) and [recorded environments](../../packaging/tested-environments.json).
+
 The fresh Manjaro VM exposed a missing native-tray prerequisite after the
 four-check frontend startup gate passed. That gate did not test the tray or
 minimize/restore. It must not be treated as desktop acceptance.

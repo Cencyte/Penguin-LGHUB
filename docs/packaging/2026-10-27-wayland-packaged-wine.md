@@ -1,5 +1,7 @@
 # Packaged Wine keyboard output reaches native Wayland
 
+> Historical investigation record. For current installation, X11/Wayland profiles and validation status, see the [installation guide](release-installer.md) and [recorded environments](../../packaging/tested-environments.json).
+
 **October 30 follow-up:** the single-thread fixture below missed a cross-thread
 key-release defect. Patch 0046 now keeps G HUB's host output on one connection.
 The [threaded regression receipt](host-keyboard-threads-verification.json)

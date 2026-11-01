@@ -144,6 +144,8 @@ def _pipeline(args,ui,report,directory,state):
     desktop=directory/'desktop'
     step('desktop','Desktop','Prepare the desktop installation',cmd('desktop_runtime.py','prepare',
         '--candidate',candidate,'--linux-runtime',linux,'--wine',wine,'--test-tools',helpers,'--output',desktop))
+    step('profiles','Verify','Verify X11 and Wayland automatic-profile components',
+         cmd('profile_support.py','--config',desktop/'desktop.json'))
     step('loader','Verify','Check the private runtime without desktop or device access',
         cmd('linux_runtime.py','audit','--linux-runtime',linux,'--wine',wine,'--output',work/'loader-audit'))
     step('ui','Verify','Test first-run UI and tray registration in an isolated display',
@@ -182,6 +184,17 @@ def present_install(args,state,stamp):
     ui.check_results=args.check
     def inspect():
         report=host_preflight.inventory(progress=ui.begin_check,result=ui.finish_check);save(state/('host-'+stamp+'.json'),report)
+        description='Check installation filesystem links and private permissions'
+        ui.begin_check('System',description)
+        try:
+            report['installation_filesystem']=install_storage.check_filesystem(args.directory)
+            status='OK'
+        except ValueError as error:
+            report['errors'].append(str(error))
+            status='FAIL'
+        ui.finish_check('System',description,status)
+        report.setdefault('checks',[]).append({'category':'System','description':description,'status':status})
+        save(state/('host-'+stamp+'.json'),report)
         ui.output(json.dumps(report,indent=2)+'\n')
         for warning in report['warnings']:ui.write('Note: '+warning)
         if report['errors']:raise RuntimeError('\n'.join(report['errors']))

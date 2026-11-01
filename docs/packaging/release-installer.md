@@ -13,14 +13,13 @@ cd Penguin-LGHUB-release
 ./install.sh
 ```
 
-Installer 0.3.6 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
+Installer 0.3.7 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.4) is also available. Extract it, open a terminal in its folder, and run `./install.sh --install`. If the archive tool drops executable permissions, run `bash install.sh --install` instead. No Git metadata is needed by the installer.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.5) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
 
-Preview 4 includes installer 0.3.5, automatic X11/Wayland selection and the
-31 GiB storage budget with verified temporary-workspace cleanup. The
-[latest branch source ZIP](https://github.com/Cencyte/Penguin-LGHUB/archive/refs/heads/release.zip)
-also includes installer 0.3.6 and the default installation action. The immutable Preview 4 ZIP still requires `--install`.
+Preview 5 includes installer 0.3.7, automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal.
+
+The release-consolidation run rebuilt the current Wine patches and supplements in the pinned SDK, then prepared a new prefix with host Wine hidden. All 8 activation checks, 4 registry checks and 6 isolated UI/tray checks passed; the combined project suite passed 239 tests. The profile payload gate also verified the adapter, pinned agent and both observer backends. These automated checks complement the recorded manual confirmations; they do not establish fresh packaged-profile acceptance on CachyOS or Bazzite. [Validation record](release-installer-verification.json).
 
 The repository currently requires GitHub access while it remains private.
 Run as your regular user. The installer requests sudo for its small Logitech
@@ -44,7 +43,8 @@ For diagnostics, `desktop_runtime.py` accepts:
 Bazzite's intended test is its default Plasma Wayland session; setup does not
 add an unsupported full-X11 desktop.
 
-Initial scope: x86-64 Manjaro, CachyOS and Bazzite KDE. Reserve **31 GiB free**
+Initial scope: x86-64 Manjaro, CachyOS and Bazzite KDE. Use native Linux storage
+(such as ext4, Btrfs or ZFS) and reserve **31 GiB free**
 for the pinned source installer. This is an offline capacity budget, including
 filesystem overhead and 2 GiB of free headroom. Verified downloads, build tools
 and test copies are removed after their final use. This is working space, not
@@ -52,6 +52,12 @@ the download size or final application size. A failed installation rolls back;
 a new attempt starts clean. To choose another storage location, add:
 
 - `--directory /path/to/spacious/local/storage` — store the runtime, prefix and build files here.
+
+Setup and `--check` create and remove a small temporary filesystem probe before
+acquisition. It verifies directory-relative symlinks, hardlinks, renames and
+private permissions used by the runtime. A tested NTFS3 volume rejected
+`symlinkat` despite passing runtime file-hash verification; it now produces an
+early error requesting another `--directory`. No storage is reformatted.
 
 Keep that directory after installation: it contains the actual runtime and desktop prefix.
 
@@ -107,7 +113,7 @@ Optional installation switches:
 - `--verbose` — display command output beneath each colored step.
 - `--jobs 4` — select 1–16 Wine build jobs; the default is 4.
 
-No arguments prints only usage. Mode-0600 command logs and host reports are retained
+No arguments starts installation; `--help` prints usage without installing. Mode-0600 command logs and host reports are retained
 under `${XDG_STATE_HOME:-~/.local/state}/penguin-lghub/`, outside the removable
 installation. Failed-transaction receipts are retained there too. This preserves
 the reason for a failure after rollback removes downloaded and generated payloads. Do not publish raw logs without checking them for
@@ -115,7 +121,7 @@ local paths, usernames, device identifiers and application state.
 
 Readiness checking and installation both show separate headers for system,
 desktop, tools, device access, security policy and namespace checks. Wayland
-adds its Xwayland/KWin/portal check. Labels and descriptions start in consistent
+adds its Xwayland/KWin/portal check. A separate profile check verifies the observer libraries and, on Wayland, KWin operation mode and scripting availability without loading a script. Labels and descriptions start in consistent
 columns; ellipses immediately follow the description text. Only `--check` adds
 aligned `OK`/`FAIL` results. An `OK` records no blocking error in that check, not completed hardware
 acceptance. Verbose mode also prints the saved host
@@ -166,7 +172,8 @@ lines. Category colors are fixed in `packaging/installer.json`.
    application, generate registry/service/depot state, and apply resource fixes.
 7. Prepare the desktop prefix with fonts, frontend fixes, frozen application
    and depot state, server synchronization and integrated startup/restore fixes.
-8. Check native/dynamic libraries, a real Windows command, first-run UI/fonts
+8. Verify both native-profile backends, the pinned agent and source-built adapter.
+   Check native/dynamic libraries, a real Windows command, first-run UI/fonts
    and native tray registration in an isolated display. Inspect offscreen host
    graphics import and audio connectivity without application windows or sound.
 9. Install the vendor-scoped udev rules and the desktop/application-menu entry.
@@ -199,6 +206,7 @@ Each step calls a focused helper and records successful completion for retries.
 | Decision | Input | Behavior |
 |---|---|---|
 | Supported OS and package inventory | `/etc/os-release` → shared `host_policy.py` | Manjaro/CachyOS use pacman inventory; Bazzite uses RPM inventory. Installing a second package manager does not change the choice. No host package transactions. |
+| Automatic profiles | Host session, X11/libdbus libraries and KWin capabilities | Host observer resolves the executable; a private authenticated mailbox feeds the adapter built into `mfsensorgroup.dll`. Both backends are installed. |
 | Desktop/input path | Actual session and capability probes | X11 launcher, or KDE Wayland via Xwayland, authenticated display, KWin and input portal. |
 | Windows-resource acquisition | Explicit engine switch | Bubblewrap by default; existing rootless Podman when requested. |
 | Container labels | SELinux enforcing + Podman selected | Label only private acquisition directories; preserve host policy. |
@@ -228,7 +236,7 @@ diagnostics are retained separately. Receipt-recorded Desktop
 and application-menu launchers are removed only if their content still matches.
 Each installation has a separate udev rule, scoped to its user and installation ID;
 sudo removes only that rule and reloads udev without retriggering unrelated devices.
-The same removal path applies on Manjaro, CachyOS and Bazzite.
+The same removal path applies on Manjaro, CachyOS and Bazzite. The supervisor stops the profile observer and unloads its temporary KWin script before releasing the launch lock. Observer modules, the adapter and any remaining session mailbox are inside the managed directory and are removed with it. No permanent KWin configuration is installed.
 
 Removal signals only a supervisor whose PID, start time, boot ID and command match
 this installation, then waits for its launch lock. Unexpected prefix processes,
@@ -316,11 +324,9 @@ binding fix. They do not automatically complete every device/reconnect, macro,
 G-Shift, profile, lighting, tray and relaunch check. Fresh installation on
 CachyOS and the Manjaro VM was also manually confirmed on October 31, completing
 installation checks on all three target distributions. That confirmation does
-not separately certify removal, session switching or automatic native-Wayland
-application profiles. KDE may request
+not separately certify removal, session switching or the new packaged profile adapter on those installations. KDE may request
 input-control authorization when an assignment is used. Setup does not approve
-that permission. Automatic profile detection of native Wayland applications and
-screen-sampled lighting remain separately scoped limitations.
+that permission. Automatic X11 and native Wayland application profiles are now manually confirmed on the Manjaro workstation. Screen-sampled lighting remains unqualified.
 
 ### Native application selection and profile tests
 
@@ -342,13 +348,9 @@ workaround, not a repaired browser. No renaming or copying of Kate is needed.
 File selection/application registration and automatic profile matching are
 separate checks; selecting an executable does not establish focus detection.
 
-Manual profile behavior can be checked with two temporary profiles assigning
-different keys to the same spare mouse button, selecting each profile and
-checking its output in an empty editor document. Use the persistent-profile
-setting if necessary to hold the selection during this test, then restore it.
-Automatic native-Wayland matching requires a compositor-aware integration;
-the proposed [KWin activation adapter](2026-10-27-wayland-research.md#six-feature-boundaries-and-what-each-needs)
-is not implemented. Do not treat a failed focus-switch test as a failed installation.
+To test automatic switching, enable it in G HUB, disable a forced persistent profile, and assign different harmless keys to a spare button in two application profiles. Focus each application and confirm both the selected profile and emitted key change. Return to an unmatched application to check the Desktop profile.
+
+The native observer uses X11 foreground properties or a temporary, current-user KWin focus script. Executable identity is resolved on the host, outside the runtime container. Its authenticated mailbox feeds G HUB's original typed application-event/profile logic through the source-built adapter. Script shutdown and mailbox cleanup are part of the launcher lifecycle and uninstall tests. Manjaro X11/Wayland behavior is manually confirmed; packaged-profile acceptance on CachyOS/Bazzite remains separately tracked. Flatpak identities and foreign Wine/Proton prefixes are unqualified.
 
 The [Bazzite readiness findings](bazzite-readiness.md) explain the remaining
 host-policy/driver boundaries. Existing [third-party use questions](third-party-use.md)

@@ -1,5 +1,7 @@
 # CachyOS: native tray absent from the real X11 session
 
+> Historical investigation record. For current installation, X11/Wayland profiles and validation status, see the [installation guide](release-installer.md) and [recorded environments](../../packaging/tested-environments.json).
+
 ## Confirmed cause and repair
 
 **Owner acceptance, October 27:** after relaunch, the owner clearly sees the

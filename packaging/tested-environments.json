@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "updated": "2026-10-31",
-  "review_after": "Native Wayland automatic application-profile matching investigation and remaining per-feature acceptance",
+  "review_after": "Fresh packaged-profile acceptance on CachyOS/Bazzite and remaining hardware regressions",
   "meaning": "Recorded environments, not supported minimum versions; inventory does not imply acceptance.",
   "shared": {
     "wine": "10.20 with project patches",
     "ghub": "2026.6.974819",
     "linux_runtime": "4.0.20260928.262390",
-    "source_release": "0.9.0-preview.4",
-    "installer": "0.3.6"
+    "source_release": "0.9.0-preview.5",
+    "installer": "0.3.7"
   },
   "hosts": {
     "manjaro_desktop": {
@@ -30,7 +30,8 @@
         "docs/packaging/release-installer-verification.json: offscreen_session.graphics records the hardware RTX 3090 context",
         "Read-only PCI inventory rechecked 2026-10-31: 10de:2204, NVIDIA kernel driver; separate GTX 1050 Ti bound to vfio-pci is not a Penguin-LGHUB test GPU."
       ],
-      "native_x11_profile_switching": "Confirmed working by user on 2026-10-31 with the existing workstation launcher; packaged-runtime and Wayland profile paths are not covered by that acceptance."
+      "native_x11_profile_switching": "Confirmed working by user on 2026-10-31 with the existing workstation launcher; packaged-runtime and Wayland profile paths are not covered by that acceptance.",
+      "native_wayland_profiles_and_input": "Manually confirmed 2026-10-31: automatic application profiles and repaired physical key bindings on Plasma Wayland, using the original Tested Wine installation."
     },
     "manjaro_vm": {
       "os": "Manjaro rolling",

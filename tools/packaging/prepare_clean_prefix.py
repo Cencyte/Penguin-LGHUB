@@ -235,7 +235,13 @@ def run_logged(output, name, command, env, private=None, runtime=None, freeze_ap
     if private:
         argv = private + argv
     with (output / (name + '.log')).open('xb') as log:
-        subprocess.run(argv, env=env, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=180)
+        try:
+            subprocess.run(argv, env=env, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=180)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+            # argv contains forwarded environment values. Report the stage/log,
+            # never dump the entire environment into the installer traceback.
+            code = getattr(error, 'returncode', 'timeout')
+            raise RuntimeError(f'{name} failed ({code}); inspect {log.name}') from None
 
 
 def initialize_installation(output, lock):

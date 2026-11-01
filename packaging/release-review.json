@@ -1,0 +1,285 @@
+{
+  "recorded_on": "2026-10-31",
+  "source_release": "v0.9.0-preview.5",
+  "installer": "0.3.7",
+  "readme_sections": [
+    {
+      "section": "## Table of contents",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## AI Disclosure",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Agent info:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Introduction",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Current status:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Diagrams: LGHUB Wine Compatibility System",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Warning:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>\u26a0\ufe0f Requires a custom-patched, version-pinned Wine runtime</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>\u26a0\ufe0f Installation requires sudo permissions</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>\u26a0\ufe0f Installation requires 31 GiB of free working space</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>\u26a0\ufe0f Experimental code. Use at your own risk.</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Distribution setup status",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Recorded test environments:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Installation:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Installation requirements:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Automatic application profiles:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## What the project contains",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Running project tests:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Checking this computer's compatibility:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Additional details",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>Publication gates</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>Verified Logitech depot extraction</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>Wine prefix development installer</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Development prerequisites:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Current validation:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>Packaged private Wine runtime</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Base Wine bundle:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Linux userspace verification, October 26:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>Dependency sourcing findings and the prefix question</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Recommended common policy:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### The prefix is necessary; this populated prefix is not a blanket-cleared artifact:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### G HUB vendor downloads:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Fonts:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### If permission is unavailable, investigate the narrowest substitute:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>Portable runtime recommendation and container tradeoffs</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "### Recommendation: a complete private runner first; a pinned Linux userspace container as a tested portability layer:",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "<summary><strong>Manjaro control and CachyOS investigation matrix</strong></summary>",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Branding and licenses",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    },
+    {
+      "section": "## Glossary of terms",
+      "reviewed": true,
+      "policy": "Current feature, version and validation wording updated where applicable; historical findings retain dated boundaries."
+    }
+  ],
+  "diagrams": [
+    {
+      "name": "simple-modular",
+      "previous_sources_preserved": "docs/architecture/2026-10-29/simple-modular.mmd",
+      "new_source": "docs/architecture/2026-10-31/simple-modular.mmd",
+      "changes": [
+        "Automatic application-profile flow",
+        "Shared keyboard output connection (detailed views)",
+        "Current installer and validation status (detailed views)"
+      ]
+    },
+    {
+      "name": "simple-connected",
+      "previous_sources_preserved": "docs/architecture/2026-10-29/simple-connected.mmd",
+      "new_source": "docs/architecture/2026-10-31/simple-connected.mmd",
+      "changes": [
+        "Automatic application-profile flow",
+        "Shared keyboard output connection (detailed views)",
+        "Current installer and validation status (detailed views)"
+      ]
+    },
+    {
+      "name": "detailed-modular",
+      "previous_sources_preserved": "docs/architecture/2026-10-29/detailed-modular.mmd",
+      "new_source": "docs/architecture/2026-10-31/detailed-modular.mmd",
+      "changes": [
+        "Automatic application-profile flow",
+        "Shared keyboard output connection (detailed views)",
+        "Current installer and validation status (detailed views)"
+      ]
+    },
+    {
+      "name": "detailed-connected",
+      "previous_sources_preserved": "docs/architecture/2026-10-29/detailed-connected.mmd",
+      "new_source": "docs/architecture/2026-10-31/detailed-connected.mmd",
+      "changes": [
+        "Automatic application-profile flow",
+        "Shared keyboard output connection (detailed views)",
+        "Current installer and validation status (detailed views)"
+      ]
+    }
+  ],
+  "maintenance": {
+    "topics_added": [
+      "wayland",
+      "kde-plasma",
+      "bazzite"
+    ],
+    "funding": "Existing Ko-fi, Buy Me a Coffee and Patreon links retained",
+    "ci": "Pinned actions and Python 3.12/3.14 matrix retained",
+    "visibility": "Private; no visibility change made"
+  },
+  "remaining": [
+    "Manual newest packaged-profile acceptance on CachyOS and Bazzite",
+    "Dependency-use policy for reconstructed Windows components",
+    "Corresponding-source audit before hosting compiled Wine runtimes"
+  ],
+  "historical_research": {
+    "preserved": [
+      "docs/dragonshard",
+      "docs/architecture/penguin-lghub-original-20261025.*",
+      "docs/architecture/2026-10-29"
+    ],
+    "navigation_added": "Dated docs/packaging research now links to current installer and environment guidance"
+  },
+  "completed_on": "2026-11-01",
+  "validation_record": "docs/packaging/release-installer-verification.json#release_consolidation_2026_11_01",
+  "specific_changes": {
+    "introduction_and_distribution": "Separate three-OS installation acceptance from newest Manjaro profile/input confirmation and remaining packaged-profile coverage.",
+    "installation": "Preview 5 / installer 0.3.7; native Linux filesystem; one automatic session-selecting launcher.",
+    "automatic_profiles": "Added exact packaged/legacy Kate paths, chooser workaround, focus test and separation from input authorization.",
+    "warnings": "Added experimental use-at-own-risk dropdown; retained runtime, sudo and 31 GiB warnings.",
+    "tests_and_check": "239 regressions; profile payload, KWin interface, host library and filesystem checks.",
+    "components_and_glossary": "Added foreground observer, transient KWin script, mailbox and original-agent profile adapter.",
+    "history_and_gates": "Preserved dated evidence while removing obsolete pending-implementation claims; retained qualification and dependency-use boundaries.",
+    "badges_and_funding": "Existing three distribution badges match recorded installation/session evidence; CI badge remains tied to actual runs; funding links retained.",
+    "diagrams": "Four new dated source/render pairs; all original diagrams preserved."
+  },
+  "link_audit": {
+    "local_links_checked": 119,
+    "missing_local_targets": 0,
+    "missing_readme_toc_anchors": 0
+  }
+}

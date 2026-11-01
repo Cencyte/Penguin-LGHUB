@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import tempfile
 from pathlib import Path
 import shutil
 
@@ -95,3 +96,35 @@ def prune_verified(root, after, ui):
                     item.chmod(info.st_mode | 0o700)
         shutil.rmtree(path)
         ui.output('Removed temporary workspace: ' + relative + '\n')
+
+
+def check_filesystem(directory):
+    """Exercise the dirfd link operations used by pressure-vessel, then clean up."""
+    parent = Path(directory).expanduser().absolute()
+    while not parent.exists() and parent != parent.parent:
+        parent = parent.parent
+    try:
+        with tempfile.TemporaryDirectory(prefix='.penguin-storage-check-', dir=parent) as tmp:
+            fd = os.open(tmp, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                # NTFS3 can permit pathname symlinks yet reject symlinkat(dirfd).
+                # Test the actual runtime requirement instead of guessing by OS.
+                os.symlink('future-target', 'link', dir_fd=fd)
+                if os.readlink('link', dir_fd=fd) != 'future-target':
+                    raise OSError('Symlink target changed')
+                source = Path(tmp)/'source'; source.write_bytes(b'private filesystem probe')
+                source.chmod(0o600)
+                if source.stat().st_mode & 0o777 != 0o600:
+                    raise OSError('Private file permissions are not preserved')
+                os.link('source', 'hardlink', src_dir_fd=fd, dst_dir_fd=fd)
+                if (Path(tmp)/'hardlink').stat().st_ino != source.stat().st_ino:
+                    raise OSError('Hardlink identity not preserved')
+                os.rename('link', 'renamed', src_dir_fd=fd, dst_dir_fd=fd)
+            finally:
+                os.close(fd)
+    except OSError as error:
+        raise ValueError('Installation storage lacks required Linux link/permission behavior: '
+                         f'{parent} ({error}). Choose a writable native Linux filesystem '
+                         'such as ext4, Btrfs or ZFS with --directory.') from None
+    return {'checked_parent': str(parent), 'linux_file_operations': 'passed',
+            'temporary_files_removed': True}

@@ -1,5 +1,7 @@
 # Wayland launcher: missing installation depots
 
+> Historical investigation record. For current installation, X11/Wayland profiles and validation status, see the [installation guide](release-installer.md) and [recorded environments](../../packaging/tested-environments.json).
+
 October 27, 2026. The owner reported a functional tray but a frontend stuck on
 “Some required files are missing,” followed by the installation-damaged screen.
 The cause is missing installation state, not evidence of a Wayland rendering

@@ -19,6 +19,20 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class StorageTests(unittest.TestCase):
+    def test_filesystem_probe_cleans_up_and_checks_nearest_existing_parent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            parent=Path(tmp)
+            result=storage.check_filesystem(parent/'not-created'/'installation')
+            self.assertEqual(result['checked_parent'],str(parent))
+            self.assertEqual(list(parent.iterdir()),[])
+
+    def test_failed_dirfd_symlink_reports_storage_error_before_downloads(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch.object(storage.os,'symlink',side_effect=FileNotFoundError('fixture NTFS3 failure')):
+            with self.assertRaisesRegex(ValueError,'--directory'):
+                storage.check_filesystem(Path(tmp))
+            self.assertEqual(list(Path(tmp).iterdir()),[])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.base = Path(self.temp.name);self.root = self.base / 'install'

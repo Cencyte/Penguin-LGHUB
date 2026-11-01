@@ -148,9 +148,11 @@ class InstallerTests(unittest.TestCase):
                         install.pipeline(args,view,{'session':session,'selinux':'Enforcing'})
                     flattened=[' '.join(c) for c in commands]
                     ui_at=next(i for i,c in enumerate(flattened) if 'linux_ui_probe.py' in c)
+                    profile_at=next(i for i,c in enumerate(flattened) if 'profile_support.py' in c)
                     sudo_at=next(i for i,c in enumerate(commands) if c[0]=='sudo')
                     launcher_at=next(i for i,c in enumerate(flattened) if 'install-entry' in c)
                     self.assertLess(ui_at,sudo_at);self.assertLess(sudo_at,launcher_at)
+                    self.assertLess(profile_at,sudo_at)
                     self.assertNotIn('--experimental-wayland',commands[launcher_at])
                     self.assertEqual(commands[launcher_at][commands[launcher_at].index('--session')+1],'auto')
                     self.assertEqual(Path(commands[launcher_at][commands[launcher_at].index('--destination')+1]).name,'Penguin-LGHUB.desktop')

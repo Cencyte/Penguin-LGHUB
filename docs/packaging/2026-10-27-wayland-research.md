@@ -1,5 +1,7 @@
 # Wayland: preserve the Wine work, validate the host boundaries
 
+> Historical investigation record. For current installation, X11/Wayland profiles and validation status, see the [installation guide](release-installer.md) and [recorded environments](../../packaging/tested-environments.json).
+
 Investigated October 27, 2026, after the owner confirmed the repaired CachyOS
 tray icon. This is a research and feasibility result, not a Wayland release.
 

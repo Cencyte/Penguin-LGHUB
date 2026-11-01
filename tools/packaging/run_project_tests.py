@@ -34,6 +34,9 @@ EXAMPLES
 # Use the installer's existing palette; discovery still includes newly added
 # test modules even before a friendly label is assigned here.
 STEPS = {
+    'test_profile_support': ('Desktop', 'Test automatic-profile prerequisites and packaged components'),
+    'test_native_profiles': ('Desktop', 'Test host application identity and observer lifecycle'),
+    'test_profile_kwin': ('Desktop', 'Test Wayland focus authentication and cleanup'),
     'test_clean_prefix': ('Wine', 'Test clean-prefix configuration and integrity'),
     'test_desktop_runtime': ('Desktop', 'Test launcher and container configuration'),
     'test_desktop_shutdown': ('Desktop', 'Test graceful application shutdown'),
