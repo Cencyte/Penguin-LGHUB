@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "a077764081186f3fc6688ab5c8fd168d8e335bf6",
+  "github_base_commit": "8591f8af210e6ed14aa530041139f51947fa361c",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "46ad0e20cf0b7dc11e4ddb67d0eac811d8904522f9b5cec8180f00b742bdb317",
-      "bytes": 76235
+      "sha256": "c68c23968232261eca565b2594c8d89c0298cd0f956c108410e10d62c8fd956d",
+      "bytes": 76334
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -842,8 +842,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "5febadedf53c56f4bbbb8718c526fd87eb83ad387f3393b5a3c930e9b6f33a29",
-      "bytes": 24378
+      "sha256": "2f5946516618970b1cc71849a3a7c21755999655d469d1cbae231839011ee8d1",
+      "bytes": 24384
     },
     {
       "path": "docs/packaging/release-v1.0.0.md",

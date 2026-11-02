@@ -141,6 +141,13 @@ The [installer](docs/packaging/release-installer.md) includes automatic session 
 
 [![Packaging tests](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml/badge.svg)](https://github.com/Cencyte/Penguin-LGHUB/actions/workflows/packaging-tests.yml)
 
+### Devices tested:
+
+| Device | Model |
+|---|---|
+| Mouse | G502 X Plus |
+| Keyboard | G915 TKL |
+
 ### Recorded test environments:
 
 Versions are comparison points, **not minimum requirements or a compatibility guarantee**.

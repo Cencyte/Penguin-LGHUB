@@ -23,7 +23,7 @@ Final manual acceptance was reported November 1 for the Manjaro VM and CachyOS i
 
 The earlier source-consolidation run rebuilt Wine patches and supplements in the pinned SDK, prepared a new prefix with host Wine hidden, and passed 8 activation checks, 4 registry checks and 6 isolated UI/tray checks. The current combined project suite has 264 tests. These automated results and the final manual acceptance are recorded separately in the [validation record](release-installer-verification.json).
 
-The repository currently requires GitHub access while it remains private.
+The repository and release downloads are public; no GitHub account is required.
 Run as your regular user. The installer requests sudo for its small Logitech
 device-rule helper; it never starts G HUB as root. It installs one
 **Penguin-LGHUB** Desktop launcher and an application-menu copy, with the
