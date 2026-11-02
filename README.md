@@ -24,9 +24,6 @@
   <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share on Facebook"><img src="assets/share/facebook.svg" alt="Share on Facebook" width="32" height="32"></a>
   <a href="https://www.pinterest.com/pin/create/button/?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;media=https%3A%2F%2Fraw.githubusercontent.com%2FCencyte%2FPenguin-LGHUB%2Frelease%2Fassets%2Fpenguin-lghub-logo.png&amp;description=Penguin-LGHUB" title="Share on Pinterest"><img src="assets/share/pinterest.svg" alt="Share on Pinterest" width="32" height="32"></a>
   <a href="https://t.me/share/url?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;text=Penguin-LGHUB" title="Share on Telegram"><img src="assets/share/telegram.svg" alt="Share on Telegram" width="32" height="32"></a>
-  <a href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;text=Penguin-LGHUB" title="Share on LINE"><img src="assets/share/line.svg" alt="Share on LINE" width="32" height="32"></a>
-  <a href="https://service.weibo.com/share/share.php?url=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;title=Penguin-LGHUB" title="Share on Weibo"><img src="assets/share/weibo.svg" alt="Share on Weibo" width="32" height="32"></a>
-  <a href="https://connect.ok.ru/dk?st.cmd=WidgetSharePreview&amp;st.shareUrl=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB&amp;title=Penguin-LGHUB" title="Share on OK.ru"><img src="assets/share/okru.svg" alt="Share on OK.ru" width="32" height="32"></a>
   <a href="mailto:?subject=Penguin-LGHUB&amp;body=https%3A%2F%2Fgithub.com%2FCencyte%2FPenguin-LGHUB" title="Share by email"><img src="assets/share/email.svg" alt="Share by email" width="32" height="32"></a>
 </p>
 

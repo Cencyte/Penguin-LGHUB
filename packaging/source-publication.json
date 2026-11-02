@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "7f09490afe650f98d0dd927e9ceb0b3806fa58eb",
+  "github_base_commit": "0f9176f5a4989151e3bf55a55c6bb1ded68b8fde",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "a24f3e3c195cd9b396424a8be1aeeca670b8398e4000cae63d6634c3780fd4cc",
-      "bytes": 74508
+      "sha256": "091096b8d6fbac1948eb27e21e0a3e58f3c4d41aceb9cca687926052588e9b97",
+      "bytes": 73773
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -90,22 +90,10 @@
       "bytes": 715
     },
     {
-      "path": "assets/share/line.svg",
-      "mode": "100644",
-      "sha256": "faaa74a875c82839db3c336ef22747c2296549cb8e218b0edc89bac7c8390c8b",
-      "bytes": 1345
-    },
-    {
       "path": "assets/share/mastodon.svg",
       "mode": "100644",
       "sha256": "a81ff22e9d6dde4b0fc6998e5fd58a3b28440d2e2bf02d18c823e849a0dc1acf",
       "bytes": 1388
-    },
-    {
-      "path": "assets/share/okru.svg",
-      "mode": "100644",
-      "sha256": "1f90a71c072705bdef0ff49577900e1fdb44b5fd1f2c822d70bd3c4f2b134cf8",
-      "bytes": 845
     },
     {
       "path": "assets/share/pinterest.svg",
@@ -130,12 +118,6 @@
       "mode": "100644",
       "sha256": "9bb44d7a89fafe6185be4d341835728b4ba321c309192318629d1d3526bd8669",
       "bytes": 1007
-    },
-    {
-      "path": "assets/share/weibo.svg",
-      "mode": "100644",
-      "sha256": "50ae7872cbe4cdfd513106ba20f7e72ec159bec271d98a2326e8d9fcb88478f1",
-      "bytes": 1668
     },
     {
       "path": "assets/share/x.svg",
