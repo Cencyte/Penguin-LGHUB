@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "8591f8af210e6ed14aa530041139f51947fa361c",
+  "github_base_commit": "7f09490afe650f98d0dd927e9ceb0b3806fa58eb",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -56,14 +56,14 @@
     {
       "path": "NOTICE.md",
       "mode": "100644",
-      "sha256": "1c3d86498d57bd637f592f9c3eedd3da6c8a6d78092975917623e05aa30ec1dc",
-      "bytes": 3049
+      "sha256": "a358d0d6708cc9389b8432bb4f5ba65c509472f84fb3024e4982b9bb48ad676f",
+      "bytes": 3437
     },
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "c68c23968232261eca565b2594c8d89c0298cd0f956c108410e10d62c8fd956d",
-      "bytes": 76334
+      "sha256": "a24f3e3c195cd9b396424a8be1aeeca670b8398e4000cae63d6634c3780fd4cc",
+      "bytes": 74508
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -74,122 +74,74 @@
     {
       "path": "assets/share/bluesky.svg",
       "mode": "100644",
-      "sha256": "4f940044e75621c775a362fdc4f0fb6d6c7773285123d947e83b503a6ba8f3f0",
-      "bytes": 1304
+      "sha256": "3909aa39df7a5da8d915193643052d061d4275bc3a09f55a516350ec9336dddd",
+      "bytes": 737
     },
     {
       "path": "assets/share/email.svg",
       "mode": "100644",
-      "sha256": "0a907ec3ef350ce3ea98b98d9324af00f05a7e1673c3f391c117f2a7257bc4a9",
-      "bytes": 447
+      "sha256": "4fa06da0bcf903abf3e0ac12c008d5cfa7e68077d7eda47919e604ac5c9f483c",
+      "bytes": 437
     },
     {
       "path": "assets/share/facebook.svg",
       "mode": "100644",
-      "sha256": "f28e58c7114b6a311760f76a7c4b0d2dae208929393eacbe054f3a06ab56b728",
-      "bytes": 1264
-    },
-    {
-      "path": "assets/share/flipboard.svg",
-      "mode": "100644",
-      "sha256": "83ef193bf2025bfa8eca9691dc9efb36543415ad41aa31127b7d8b7b44952b62",
-      "bytes": 786
-    },
-    {
-      "path": "assets/share/hackernews.svg",
-      "mode": "100644",
-      "sha256": "d57fd0e26820b82e87e4d5b12aad6c8fdf0750ae2fb5159f64e2ba0adb9bbef1",
-      "bytes": 936
-    },
-    {
-      "path": "assets/share/instapaper.svg",
-      "mode": "100644",
-      "sha256": "db34e6c7d56295c917d520b104e69f6d0e524b157f65d8328832ad3abf7dea40",
-      "bytes": 956
+      "sha256": "31656c612224536aa254649bc5a654526b2eb3f2c9ff8fc334fdbdf0eccbbf05",
+      "bytes": 715
     },
     {
       "path": "assets/share/line.svg",
       "mode": "100644",
-      "sha256": "1070a4af090d6fde44f2b6c270ab15c428b8d71313bec4366d378222a301b528",
-      "bytes": 2098
-    },
-    {
-      "path": "assets/share/linkedin.svg",
-      "mode": "100644",
-      "sha256": "7caccbb6d3cffaae4c2397928d84dab0ff2d73f12cc75e2fb61f1732c31cc17f",
-      "bytes": 445
+      "sha256": "faaa74a875c82839db3c336ef22747c2296549cb8e218b0edc89bac7c8390c8b",
+      "bytes": 1345
     },
     {
       "path": "assets/share/mastodon.svg",
       "mode": "100644",
-      "sha256": "f9a81399ad5a34974492d8ecf36b20addc0e2ea90fd3675e4325c1efc430825d",
-      "bytes": 2164
+      "sha256": "a81ff22e9d6dde4b0fc6998e5fd58a3b28440d2e2bf02d18c823e849a0dc1acf",
+      "bytes": 1388
     },
     {
       "path": "assets/share/okru.svg",
       "mode": "100644",
-      "sha256": "f756084f684d6a82f8cb0fe2d786f3a5b0a07868c5c3418cebe0d985a4721732",
-      "bytes": 1432
-    },
-    {
-      "path": "assets/share/pinboard.svg",
-      "mode": "100644",
-      "sha256": "9ac3bae2772fafc0624dd308e67d8e5979323d89cdfb02e141a0dbde75194196",
-      "bytes": 860
+      "sha256": "1f90a71c072705bdef0ff49577900e1fdb44b5fd1f2c822d70bd3c4f2b134cf8",
+      "bytes": 845
     },
     {
       "path": "assets/share/pinterest.svg",
       "mode": "100644",
-      "sha256": "7bf819d17245a48e87ee626a9fe8d407cce33fc04f12c4aa21dc9291d6c385d7",
-      "bytes": 1770
+      "sha256": "a218f2c70bda182f6d306c0f6486f5f7e454d6698cac3f745345eb4e3ac46965",
+      "bytes": 1083
     },
     {
       "path": "assets/share/reddit.svg",
       "mode": "100644",
-      "sha256": "f83071751024c0ebd0d9ca70995b1b979df9b8579e91d60f906dd26df2e069d9",
-      "bytes": 2186
+      "sha256": "20bfce99f174974da75491ef4bb95f19d4a9216d92ff03a6bd9df21d186807e4",
+      "bytes": 1404
     },
     {
       "path": "assets/share/telegram.svg",
       "mode": "100644",
-      "sha256": "9b2c0bd36c4d329485cc3f50ac5f33b66e23634ff7dcc0d7332b0c50edffa592",
-      "bytes": 1532
+      "sha256": "6043ebd92e90981e16a0a1c8751a6f8ad24feeb3451448b7f025a3b8d4a3bb2f",
+      "bytes": 915
     },
     {
       "path": "assets/share/threads.svg",
       "mode": "100644",
-      "sha256": "cb3e0e91878d69d735fd98a02426def5a79ef8ea4465a581db5bb58d23fcb806",
-      "bytes": 1664
-    },
-    {
-      "path": "assets/share/tumblr.svg",
-      "mode": "100644",
-      "sha256": "44224f5799d3e968de28b87312ef733787058f48ea99567102bc23fd5511488a",
-      "bytes": 1066
-    },
-    {
-      "path": "assets/share/vk.svg",
-      "mode": "100644",
-      "sha256": "6ec9e47d57ac34133a739c175364a42fb531282e199bd7c12d037553ff051252",
-      "bytes": 2234
+      "sha256": "9bb44d7a89fafe6185be4d341835728b4ba321c309192318629d1d3526bd8669",
+      "bytes": 1007
     },
     {
       "path": "assets/share/weibo.svg",
       "mode": "100644",
-      "sha256": "e28c984e45efb80f17400b1c60670f430677bda08dbdc895ddfa3014c4bf8363",
-      "bytes": 2532
-    },
-    {
-      "path": "assets/share/whatsapp.svg",
-      "mode": "100644",
-      "sha256": "ab6b25e8b950abbab38351188d4eb9854c37f1a5554d8b7472dc5870ff21e795",
-      "bytes": 2164
+      "sha256": "50ae7872cbe4cdfd513106ba20f7e72ec159bec271d98a2326e8d9fcb88478f1",
+      "bytes": 1668
     },
     {
       "path": "assets/share/x.svg",
       "mode": "100644",
-      "sha256": "114a8579e074f2d9218a833fb7606a93db98b45afeeafb5062c62284f64a8445",
-      "bytes": 927
+      "sha256": "6f41114fe49fab5cc9c94dc27f8914f85a58fefdbf2133035985a7f45dd10985",
+      "bytes": 465
     },
     {
       "path": "assets/terminal/kitty.ansi",
@@ -976,6 +928,12 @@
       "mode": "100644",
       "sha256": "1095bef04acb9e83ef613f890e3f77bdb600e8d722ff6f57c26e8d39bbb778ac",
       "bytes": 243
+    },
+    {
+      "path": "packaging/licenses/Simple-Icons-CC0-1.0.txt",
+      "mode": "100644",
+      "sha256": "9046848b63a5c92bff14e4accca80bd987e0623b74adf9226ce5198d312b79d5",
+      "bytes": 6569
     },
     {
       "path": "packaging/licenses/Wine-LGPL-2.1.txt",

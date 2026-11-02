@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="65.25" height="28" role="img" aria-label="EMAIL"><title>EMAIL</title><g shape-rendering="crispEdges"><rect width="65.25" height="28" fill="#59636e"/></g><g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="100"><text transform="scale(.1)" x="326.25" y="175" textLength="412.5" font-weight="bold">EMAIL</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Email">
+  <title>Email</title>
+  <rect width="32" height="32" rx="7" fill="#59636e"/>
+  <g transform="translate(6 6) scale(.8333333333)" fill="#fff"><g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m3 6 9 7 9-7"/></g></g>
+</svg>

@@ -35,6 +35,11 @@ Copyright and license notices already present in files remain in effect.
   separately sourced elements is asserted. Tux, where derived from Larry
   Ewing's original, requires credit to Larry Ewing and GIMP. This notice does
   not establish the provenance of every element of the supplied composite.
+- **Social sharing icons:** the platform glyphs in `assets/share/` are retained
+  from the earlier Shields badges, using [Simple Icons](https://simpleicons.org/)
+  artwork under [CC0 1.0](packaging/licenses/Simple-Icons-CC0-1.0.txt). The rounded
+  tiles and email envelope are project artwork. Platform names and marks retain
+  their respective ownership and do not indicate endorsement.
 - **Diagrams and documentation:** project-authored material is included with
   the source. Third-party names, quoted identifiers and linked documents
   retain their respective ownership; linking does not relicense them.
