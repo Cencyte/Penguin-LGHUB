@@ -1,5 +1,14 @@
 # Bazzite readiness investigation — 2026-10-29
 
+## November 1 v1.0 acceptance
+
+Final manual testing passed on Bazzite Plasma Wayland with installer 0.3.10,
+including uninstall/reinstall, automatic Kate profiles, key delivery, tray
+actions and resize/minimize/restore regressions. Version 1.0.0 promotes that
+Preview 8 implementation without new runtime changes. The earlier inventory and
+investigation remain below as dated evidence; see the [release notes](release-v1.0.0.md)
+and [current acceptance record](release-installer-verification.json) for the final scope.
+
 ## October 31 follow-up
 
 The initial inventory below is historical. The completed booted installer run
@@ -11,7 +20,7 @@ fixed after patch 0046. Offscreen hardware EGL and PulseAudio connection probes
 also passed. These confirmations supersede the original pending-install status;
 they do not certify every G HUB feature or a full X11 desktop session.
 
-Preview 6 contains installer 0.3.8, its 31 GiB budget, workspace cleanup, automatic-profile components and untimed sudo-readiness pause. The newest profile observer still requires packaged Bazzite acceptance.
+At Preview 6, installer 0.3.8 included the 31 GiB budget, workspace cleanup, automatic-profile components and untimed sudo-readiness pause; packaged Bazzite profile acceptance was still pending at that stage.
 Fresh installation on CachyOS and the Manjaro VM was subsequently confirmed on October 31. See the
 [current environment record](../../packaging/tested-environments.json) and
 [installation guide](release-installer.md#verification-boundaries).

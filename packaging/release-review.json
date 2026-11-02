@@ -1,7 +1,7 @@
 {
-  "recorded_on": "2026-10-31",
-  "source_release": "v0.9.0-preview.5",
-  "installer": "0.3.7",
+  "recorded_on": "2026-11-01",
+  "source_release": "v1.0.0",
+  "installer": "0.3.10",
   "readme_sections": [
     {
       "section": "## Table of contents",
@@ -252,9 +252,9 @@
     "visibility": "Private; no visibility change made"
   },
   "remaining": [
-    "Manual newest packaged-profile acceptance on CachyOS and Bazzite",
     "Dependency-use policy for reconstructed Windows components",
-    "Corresponding-source audit before hosting compiled Wine runtimes"
+    "Corresponding-source audit before hosting compiled Wine runtimes",
+    "Qualification beyond the three recorded OS targets and their tested session/device scope"
   ],
   "historical_research": {
     "preserved": [
@@ -265,17 +265,17 @@
     "navigation_added": "Dated docs/packaging research now links to current installer and environment guidance"
   },
   "completed_on": "2026-11-01",
-  "validation_record": "docs/packaging/release-installer-verification.json#release_consolidation_2026_11_01",
+  "validation_record": "docs/packaging/release-installer-verification.json#v1_0_manual_acceptance_2026_11_01",
   "specific_changes": {
-    "introduction_and_distribution": "Separate three-OS installation acceptance from newest Manjaro profile/input confirmation and remaining packaged-profile coverage.",
-    "installation": "Preview 5 / installer 0.3.7; native Linux filesystem; one automatic session-selecting launcher.",
-    "automatic_profiles": "Added exact packaged/legacy Kate paths, chooser workaround, focus test and separation from input authorization.",
+    "introduction_and_distribution": "Final manual acceptance recorded for all three targets: Manjaro/CachyOS X11 and Plasma Wayland; Bazzite Plasma Wayland.",
+    "installation": "v1.0.0 source release promotes Preview 8 implementation with unchanged installer 0.3.10.",
+    "automatic_profiles": "Automatic Kate profile switching included in final requested target acceptance.",
     "warnings": "Added experimental use-at-own-risk dropdown; retained runtime, sudo and 31 GiB warnings.",
-    "tests_and_check": "239 regressions; profile payload, KWin interface, host library and filesystem checks.",
+    "tests_and_check": "264 regression checks; existing host-readiness checks unchanged.",
     "components_and_glossary": "Added foreground observer, transient KWin script, mailbox and original-agent profile adapter.",
     "history_and_gates": "Preserved dated evidence while removing obsolete pending-implementation claims; retained qualification and dependency-use boundaries.",
     "badges_and_funding": "Existing three distribution badges match recorded installation/session evidence; CI badge remains tied to actual runs; funding links retained.",
-    "diagrams": "Four new dated source/render pairs; all original diagrams preserved."
+    "diagrams": "Two detailed diagrams refreshed for accepted profiles and resize corrections; original sources/renders and compact diagrams preserved."
   },
   "link_audit": {
     "local_links_checked": 119,
@@ -340,5 +340,48 @@
     "evidence": "docs/packaging/release-installer-verification.json#resize_geometry_2026_11_01",
     "uninstall": "Existing receipt-owned frontend removal covers the change; no new persistent host resource.",
     "earlier_review": "Earlier entries retain their dated release context."
+  },
+  "earlier_review_context": {
+    "source_release": "v0.9.0-preview.5",
+    "installer": "0.3.7",
+    "recorded_on": "2026-10-31",
+    "note": "Earlier preview sections retain their dated results; current completion is v1_0_release below."
+  },
+  "v1_0_release": {
+    "project_version": "1.0.0",
+    "installer_version": "0.3.10",
+    "tested_implementation_commit": "a077764081186f3fc6688ab5c8fd168d8e335bf6",
+    "runtime_or_installer_behavior_changed": false,
+    "manual_acceptance_targets_passed": 3,
+    "manual_acceptance_targets_total": 3,
+    "sessions": {
+      "manjaro_vm": [
+        "x11",
+        "kde-wayland"
+      ],
+      "cachyos_bare_metal": [
+        "x11",
+        "kde-wayland"
+      ],
+      "bazzite_bare_metal": [
+        "kde-wayland"
+      ]
+    },
+    "source_only": true,
+    "repository_visibility": "Private, unchanged; anonymous downloads require a later visibility change.",
+    "notes": "docs/packaging/release-v1.0.0.md",
+    "validation": "Final source archive, publication manifest and CI verified before publication. Earlier 264-test and isolated graphics results remain applicable because implementation is unchanged.",
+    "earlier_crash": "No recurrence reported during final acceptance; root cause not claimed resolved.",
+    "diagrams": {
+      "detailed_sources_and_renders": "docs/architecture/2026-11-01-v1",
+      "originals_preserved": "docs/architecture/2026-10-31",
+      "compact_overviews": "Unchanged: their structural overview is still accurate.",
+      "updated_labels": "Final three-target acceptance and frontend resize geometry/repaint."
+    },
+    "link_audit": {
+      "changed_document_relative_targets_checked": 96,
+      "missing_targets": 0,
+      "readme_toc_anchors_verified": true
+    }
   }
 }

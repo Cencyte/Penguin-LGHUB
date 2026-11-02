@@ -1,5 +1,12 @@
 {
   "schema": 1,
+  "current_release": {
+    "project_version": "1.0.0",
+    "installer_version": "0.3.10",
+    "manual_acceptance_record": "v1_0_manual_acceptance_2026_11_01",
+    "accepted_targets": 3,
+    "total_targets": 3
+  },
   "recorded_local_date": "2026-10-29",
   "kind": "release-installer-integration",
   "project_version": "0.9.0-dev",
@@ -163,8 +170,7 @@
     "scope": "Manual installer completion and uninstall/reinstall with installer 0.3.2; targeted physical G502 X Plus input fix confirmed. Not exhaustive feature qualification or a fresh 0.3.5 rerun."
   },
   "remaining": [
-    "Fresh packaged-profile acceptance on CachyOS and Bazzite; original Manjaro workstation X11/Wayland confirmed",
-    "Remaining per-feature/device/graphics qualification beyond recorded manual confirmations",
+    "Qualification beyond the recorded OS/session, device and graphics configurations",
     "Component-use policy for reconstructed Windows resources",
     "Corresponding-source and notices audit before hosting a compiled runtime release"
   ],
@@ -459,7 +465,8 @@
       "https://raw.githubusercontent.com/electron/electron/v39.1.2/shell/browser/native_window_views.cc",
       "https://raw.githubusercontent.com/chromium/chromium/142.0.7444.134/ui/views/win/hwnd_message_handler.cc"
     ],
-    "retained_private_evidence": "~/.local/state/penguin-x11-restore-20261101 on the Manjaro VM; matching local diagnostic-source archive."
+    "retained_private_evidence": "~/.local/state/penguin-x11-restore-20261101 on the Manjaro VM; matching local diagnostic-source archive.",
+    "manual_acceptance_follow_up": "Completed by v1_0_manual_acceptance_2026_11_01; the original pending fields above retain their pre-release observation date."
   },
   "resize_geometry_2026_11_01": {
     "installer_version": "0.3.10",
@@ -581,6 +588,64 @@
       "process": "lghub_agent.exe",
       "fault": "NULL read in ucrtbase, with strtod/strtold on the symbolized export stack",
       "status": "Retained for separate triage; relationship to resize is unestablished. No crash fix is claimed."
+    },
+    "manual_acceptance_follow_up": "Completed by v1_0_manual_acceptance_2026_11_01; the original pending fields above retain their pre-release observation date."
+  },
+  "record_structure": "The root integration measurements and version fields describe October 29. Dated follow-ups preserve later evidence; v1_0_manual_acceptance_2026_11_01 is the current release acceptance, distinct from the original headless end_to_end_qualified flag.",
+  "v1_0_manual_acceptance_2026_11_01": {
+    "reported_on": "2026-11-01",
+    "kind": "manual acceptance reported in project conversation",
+    "source_release_tested": "v0.9.0-preview.8",
+    "source_commit_tested": "a077764081186f3fc6688ab5c8fd168d8e335bf6",
+    "installer_version": "0.3.10",
+    "release_promoted_to": "v1.0.0",
+    "implementation_changes_since_acceptance": false,
+    "result": "passed",
+    "release_acceptance_targets_passed": 3,
+    "release_acceptance_targets_total": 3,
+    "targets": {
+      "manjaro_vm": {
+        "result": "passed",
+        "sessions": [
+          "x11",
+          "kde-wayland"
+        ],
+        "scope": "Installer, UI/session and automatic-profile coverage; no physical Logitech hardware in the VM."
+      },
+      "cachyos_bare_metal": {
+        "result": "passed",
+        "sessions": [
+          "x11",
+          "kde-wayland"
+        ],
+        "scope": "Requested final bare-metal regression checklist."
+      },
+      "bazzite_bare_metal": {
+        "result": "passed",
+        "sessions": [
+          "kde-wayland"
+        ],
+        "scope": "Requested final bare-metal regression checklist; full X11 desktop outside Bazzite scope."
+      }
+    },
+    "requested_checklist": [
+      "Fresh receipt-scoped uninstall and reinstall",
+      "Automatic Kate profile switching",
+      "Key bindings with clean key release and macros, where physical hardware is available",
+      "Tray actions",
+      "Top-edge down/up dragging, bottom resize edge and window snapping",
+      "Application and panel minimize/restore"
+    ],
+    "report_basis": "Manjaro repair confirmed first, followed by the final report that all requested Bazzite/CachyOS retests passed. These are manual results, not newly generated automated telemetry.",
+    "boundaries": [
+      "No new package inventory, hardware model list or exhaustive feature matrix is inferred.",
+      "The original Manjaro workstation has separate development-installation acceptance.",
+      "No broader distro, non-KWin Wayland compositor, Flatpak identity or screen-sampled-lighting qualification is claimed."
+    ],
+    "earlier_agent_crash": {
+      "final_regression_report": "No recurrence was reported in the successful final acceptance.",
+      "root_cause_resolved": false,
+      "status": "Earlier report retained for follow-up; no separate crash fix claimed."
     }
   }
 }

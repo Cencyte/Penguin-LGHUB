@@ -15,11 +15,13 @@ cd Penguin-LGHUB-release
 
 Installer 0.3.10 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v0.9.0-preview.8) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v1.0.0) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
 
-Preview 8 includes installer 0.3.10, automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal. It retains the untimed pause before sudo authentication and the Xwayland native-input route check. The Manjaro VM minimize-button repair is manually confirmed. Preview 8 addresses resize failures by allowing smaller native window sizes with the existing content scaling and requesting one full repaint after resize bursts settle. This keeps native resize borders aligned with the displayed window. The installer applies both changes through its verified frontend transformation; no host Wine, graphics-driver or compositor change is required. Manual resize acceptance and Bazzite/CachyOS regression checks for this revision remain pending.
+Version 1.0.0 promotes the tested Preview 8 implementation with installer 0.3.10. It includes automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal. It retains the untimed pause before sudo authentication and the Xwayland native-input route check. Window restoration, smaller native sizes with full-UI scaling, and a repaint after resize bursts are applied by the verified frontend transformation. No host Wine, graphics-driver or compositor change is required by those corrections.
 
-The release-consolidation run rebuilt the current Wine patches and supplements in the pinned SDK, then prepared a new prefix with host Wine hidden. All 8 activation checks, 4 registry checks and 6 isolated UI/tray checks passed; the combined project suite passed 239 tests. The profile payload gate also verified the adapter, pinned agent and both observer backends. These automated checks complement the recorded manual confirmations; they do not establish fresh packaged-profile acceptance on CachyOS or Bazzite. [Validation record](release-installer-verification.json).
+Final manual acceptance was reported November 1 for the Manjaro VM and CachyOS in X11/Plasma Wayland, and Bazzite in Plasma Wayland. It covers the requested uninstall/reinstall, profile switching, key delivery, tray actions and resize/restore checks. The VM supplies UI/session coverage; physical device results come from bare metal. [Release notes](release-v1.0.0.md).
+
+The earlier source-consolidation run rebuilt Wine patches and supplements in the pinned SDK, prepared a new prefix with host Wine hidden, and passed 8 activation checks, 4 registry checks and 6 isolated UI/tray checks. The current combined project suite has 264 tests. These automated results and the final manual acceptance are recorded separately in the [validation record](release-installer-verification.json).
 
 The repository currently requires GitHub access while it remains private.
 Run as your regular user. The installer requests sudo for its small Logitech
@@ -47,7 +49,7 @@ For diagnostics, `desktop_runtime.py` accepts:
 - `--session x11` or `--session wayland` — require the selected session explicitly.
 - `--experimental-wayland` — retained as a legacy alias for `--session wayland`.
 
-Bazzite's intended test is its default Plasma Wayland session; setup does not
+Bazzite's tested session is its default Plasma Wayland session; setup does not
 add an unsupported full-X11 desktop.
 
 Initial scope: x86-64 Manjaro, CachyOS and Bazzite KDE. Use native Linux storage
@@ -319,21 +321,14 @@ keyboards; a release on a different connection can leave the original key
 held. The [regression receipt](host-keyboard-threads-verification.json) records
 before/after tests. This fix is built by the normal installer, with no manual
 DLL copying or new host dependency. Existing installations are preserved by
-the installer; installing the new preview into an occupied directory requires
+the installer; installing a replacement into an occupied directory requires
 the documented backup/uninstall workflow first.
 
 The observed one-time Bazzite permission prompt was KWin input authorization.
 Its per-application approval for `lghub_agent.exe` survived uninstalling G HUB,
 as intended. Setup neither clears that approval nor enables a global bypass.
 
-The Bazzite confirmations establish installation/removal and the reported mouse
-binding fix. They do not automatically complete every device/reconnect, macro,
-G-Shift, profile, lighting, tray and relaunch check. Fresh installation on
-CachyOS and the Manjaro VM was also manually confirmed on October 31, completing
-installation checks on all three target distributions. That confirmation does
-not separately certify removal, session switching or the new packaged profile adapter on those installations. KDE may request
-input-control authorization when an assignment is used. Setup does not approve
-that permission. Automatic X11 and native Wayland application profiles are now manually confirmed on the Manjaro workstation. Screen-sampled lighting remains unqualified.
+The final November 1 acceptance report supersedes the earlier incomplete target coverage: installer 0.3.10 passed uninstall/reinstall and the requested application-profile, input, tray and window regressions on Manjaro, CachyOS and Bazzite in their recorded sessions. This is manual acceptance of those test environments, not exhaustive coverage of every device, graphics driver or feature. KDE may request input-control authorization when an assignment is used; setup does not approve that permission. Screen-sampled lighting remains unqualified.
 
 ### Native application selection and profile tests
 
@@ -357,7 +352,7 @@ separate checks; selecting an executable does not establish focus detection.
 
 To test automatic switching, enable it in G HUB, disable a forced persistent profile, and assign different harmless keys to a spare button in two application profiles. Focus each application and confirm both the selected profile and emitted key change. Return to an unmatched application to check the Desktop profile.
 
-The native observer uses X11 foreground properties or a temporary, current-user KWin focus script. Executable identity is resolved on the host, outside the runtime container. Its authenticated mailbox feeds G HUB's original typed application-event/profile logic through the source-built adapter. Script shutdown and mailbox cleanup are part of the launcher lifecycle and uninstall tests. Manjaro X11/Wayland behavior is manually confirmed; packaged-profile acceptance on CachyOS/Bazzite remains separately tracked. Flatpak identities and foreign Wine/Proton prefixes are unqualified.
+The native observer uses X11 foreground properties or a temporary, current-user KWin focus script. Executable identity is resolved on the host, outside the runtime container. Its authenticated mailbox feeds G HUB's original typed application-event/profile logic through the source-built adapter. Script shutdown and mailbox cleanup are part of the launcher lifecycle and uninstall tests. Automatic Kate profile switching is included in the final manual acceptance on the recorded Manjaro, CachyOS and Bazzite sessions. Flatpak identities and foreign Wine/Proton prefixes are unqualified.
 
 The [Bazzite readiness findings](bazzite-readiness.md) explain the remaining
 host-policy/driver boundaries. Existing [third-party use questions](third-party-use.md)

@@ -2,7 +2,7 @@
   "schema": 1,
   "prepared_on": "2026-11-01",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "4acc4347261f73d00841114aa16a42540ae65a09",
+  "github_base_commit": "a077764081186f3fc6688ab5c8fd168d8e335bf6",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "ed3fc9d6c1c12a60a6857a20a6dd24e23e33a973ab7ce8aaf9c0b69a03943a0b",
-      "bytes": 76345
+      "sha256": "46ad0e20cf0b7dc11e4ddb67d0eac811d8904522f9b5cec8180f00b742bdb317",
+      "bytes": 76235
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -432,6 +432,114 @@
       "bytes": 106900
     },
     {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/PNG/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_01.png",
+      "mode": "100644",
+      "sha256": "0482682cbc3972f6dc925b5172c3cb24e6c9d08edaa57eb9536760248dd97ec5",
+      "bytes": 91153
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/PNG/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_02.png",
+      "mode": "100644",
+      "sha256": "d7875dd9caad44e01aad46795a31810adb49bffccd770417f005b5858bd6a703",
+      "bytes": 122746
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/PNG/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_03.png",
+      "mode": "100644",
+      "sha256": "cc1d9b5295e7ae3bc00d7e48a98d2d93f0036951cd3aa96f50cd72e446b22c33",
+      "bytes": 125155
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/PNG/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_04.png",
+      "mode": "100644",
+      "sha256": "938ccecdcf0d1beaee41ce23ccf7e024b09732401f449db9fa173a8d52cfa57f",
+      "bytes": 147290
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/PNG/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_05.png",
+      "mode": "100644",
+      "sha256": "54abcaa90ef5957799a7f1e1558aa4bed50c137dc15b4944c3a98aec68a5a6b5",
+      "bytes": 129233
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/PNG/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_06.png",
+      "mode": "100644",
+      "sha256": "5fca5f33aa830384e45559927671e23256a1743b78b5acc3570dfc3cba91cc56",
+      "bytes": 91537
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/markdown/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_01.md",
+      "mode": "100644",
+      "sha256": "40de5a7b515ad52c760ec80aa29051deaba85179385774d59d1fcadb497c6551",
+      "bytes": 1243
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/markdown/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_02.md",
+      "mode": "100644",
+      "sha256": "986f772c0392719d2e58c137b5cbe80514fdfdb4cb456a6cae13d1d35ee3c4cd",
+      "bytes": 1743
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/markdown/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_03.md",
+      "mode": "100644",
+      "sha256": "b9785d0ddd2bb8485752976e554f3f81185b8e008ac01fc8a2d2e9f6c0f52a04",
+      "bytes": 1498
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/markdown/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_04.md",
+      "mode": "100644",
+      "sha256": "ca2f603b84eb792c2bc79e6e5d701b93f4c59ed3f6f111c1c24807072bd1fdbd",
+      "bytes": 1551
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/markdown/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_05.md",
+      "mode": "100644",
+      "sha256": "e7ac0e3992d9e15a8c2add44cd8cf751702cfc213764afece149df4b42b8ebc9",
+      "bytes": 1431
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01/markdown/Penguin_LGHUB_03_Detailed_Modular_v1_2026_11_01_slice_06.md",
+      "mode": "100644",
+      "sha256": "378b89d84ecc2ab010107efc64d4a102301290d6314d8a32d8af4fd50a145e12",
+      "bytes": 1374
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/detailed-connected.md",
+      "mode": "100644",
+      "sha256": "cd5f3754445be8b9920026ed70762ad0dd2d0b7b8bc2dc84e3cffff9d5adf294",
+      "bytes": 9122
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/detailed-connected.mmd",
+      "mode": "100644",
+      "sha256": "55984892546a1d41bc1184305821154f3e9d39bd1626453be73e2c810a0c804f",
+      "bytes": 8705
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/detailed-connected.png",
+      "mode": "100644",
+      "sha256": "aa14dfb8be6924105222594b2f6222856b1d859dbd0a7c99ad63af70668d93c2",
+      "bytes": 1320747
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/detailed-modular.md",
+      "mode": "100644",
+      "sha256": "92add9bd7dae20d468ec831ce93bea24d9d5793e8ea9a7d48d59c213cb5fd32e",
+      "bytes": 9249
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/detailed-modular.mmd",
+      "mode": "100644",
+      "sha256": "d742370c55607a423b0129346a709fec1b8408ad0e1dac8b3b4479a0c78fbd9d",
+      "bytes": 6529
+    },
+    {
+      "path": "docs/architecture/2026-11-01-v1/detailed-modular.png",
+      "mode": "100644",
+      "sha256": "73661846dcbb9598c727cf464d70144fdd4e0d4469bba2566756a850c2678828",
+      "bytes": 788444
+    },
+    {
       "path": "docs/architecture/penguin-lghub-detailed-preserved.md",
       "mode": "100644",
       "sha256": "59efd7b138d51a2643186491a4e64f2187cd35fb357fed57c5e2f28e550e1164",
@@ -680,8 +788,8 @@
     {
       "path": "docs/packaging/bazzite-readiness.md",
       "mode": "100644",
-      "sha256": "18807778ae73245289132b832783a2fae7d02192787cf67a4d6042208e177c5e",
-      "bytes": 7492
+      "sha256": "0ebcfbbcbe907566a19a2ab66778d32185351b19cde4b52f4465f523a63ffefc",
+      "bytes": 8012
     },
     {
       "path": "docs/packaging/cachyos-wayland-launcher-verification.json",
@@ -728,20 +836,26 @@
     {
       "path": "docs/packaging/release-installer-verification.json",
       "mode": "100644",
-      "sha256": "c7011c814d5de523429d0e8f6f91a5f7f2e2cbe9d1dd1a05718386e9c5833105",
-      "bytes": 24590
+      "sha256": "b02da16624822a32ed6579e324f61d1ded1de71a2d068a7fa72842194fbce113",
+      "bytes": 27665
     },
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "9edd91fcb8fa49451319fc6c8033073e0e143eaa9dca1fd7d9ace43a2db956e3",
-      "bytes": 24643
+      "sha256": "5febadedf53c56f4bbbb8718c526fd87eb83ad387f3393b5a3c930e9b6f33a29",
+      "bytes": 24378
+    },
+    {
+      "path": "docs/packaging/release-v1.0.0.md",
+      "mode": "100644",
+      "sha256": "9b00eff1eb9b4469df541dbdf54201b194e8cd4913e7e9fc7f725ce2687b7b80",
+      "bytes": 3479
     },
     {
       "path": "docs/packaging/source-publication.md",
       "mode": "100644",
-      "sha256": "939885e0dafca3e5404d32ac2bae1ca1fccf678800c613dc67701b56f5caf0ae",
-      "bytes": 7571
+      "sha256": "17ddba60aa0317b5aec0d07a3b21621ad82a53778d3f7261f8dffaedc9ac5fbb",
+      "bytes": 8749
     },
     {
       "path": "docs/packaging/status-bazzite.svg",
@@ -860,8 +974,8 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "496edf0a5f42fc42216ad13477b1fdbef448002c4e0d1bf4cbed871804dfb7a3",
-      "bytes": 253
+      "sha256": "1095bef04acb9e83ef613f890e3f77bdb600e8d722ff6f57c26e8d39bbb778ac",
+      "bytes": 243
     },
     {
       "path": "packaging/licenses/Wine-LGPL-2.1.txt",
@@ -908,8 +1022,8 @@
     {
       "path": "packaging/release-review.json",
       "mode": "100644",
-      "sha256": "c1bfce522cb2898f6ee0580f11444c276f9721df8c425422874cd70eda4f9d61",
-      "bytes": 16597
+      "sha256": "3675a9205305396658532381335859c788487547642bd91cc7cbff7e953174c6",
+      "bytes": 18370
     },
     {
       "path": "packaging/runtime-baseline.json",
@@ -926,8 +1040,8 @@
     {
       "path": "packaging/tested-environments.json",
       "mode": "100644",
-      "sha256": "edf44c63362a6bf9aff2170db5abe6fba840781087a12e57b0d055d309142610",
-      "bytes": 6749
+      "sha256": "ea8a7391ead25cad7eca47ac9cb8a3eaad8d2cdbbf02c29e2353b4658df288fc",
+      "bytes": 8884
     },
     {
       "path": "packaging/toolchain.lock.json",

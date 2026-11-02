@@ -1,14 +1,16 @@
 {
   "schema": 1,
-  "updated": "2026-10-31",
-  "review_after": "Fresh packaged-profile acceptance on CachyOS/Bazzite and remaining hardware regressions",
+  "updated": "2026-11-01",
+  "review_after": "Future runtime, host-stack or device changes; v1.0 manual acceptance completed",
   "meaning": "Recorded environments, not supported minimum versions; inventory does not imply acceptance.",
   "shared": {
     "wine": "10.20 with project patches",
     "ghub": "2026.6.974819",
     "linux_runtime": "4.0.20260928.262390",
-    "source_release": "0.9.0-preview.5",
-    "installer": "0.3.7"
+    "source_release": "1.0.0",
+    "installer": "0.3.10",
+    "manually_tested_source_release": "0.9.0-preview.8",
+    "promotion": "Runtime and installer behavior unchanged from Preview 8; only project version and release documentation change."
   },
   "hosts": {
     "manjaro_desktop": {
@@ -48,13 +50,31 @@
         "docs/packaging/manjaro-wayland-launcher-verification.json",
         "docs/packaging/wayland-restore-verification.json"
       ],
-      "manual_acceptance": "X11/Wayland GUI; accepted remaining cosmetic restore anomalies; no physical Logitech hardware.",
-      "current_installer_acceptance": "Fresh installation manually confirmed successful on 2026-10-31. This report does not separately confirm removal or switching sessions after installation; installer 0.3.6 default-action change has automated routing tests.",
+      "manual_acceptance": "Final requested regression tests passed, reported 2026-11-01; VM UI/session coverage, without physical Logitech device testing.",
+      "current_installer_acceptance": "Installer 0.3.10 uninstall/reinstall and final application-profile, key-delivery where hardware is available, tray and resize/minimize/restore acceptance passed in the recorded sessions.",
       "graphics_evidence": [
         "docs/packaging/2026-10-28-wayland-restore.md: private VM OpenGL/llvmpipe tests",
         "Libvirt domain video configuration rechecked 2026-10-31 against the pre-cleanup saved domain XML: VirtIO display, no 3D acceleration or GPU passthrough."
       ],
-      "fresh_installation_confirmed": "2026-10-31"
+      "fresh_installation_confirmed": "2026-11-01",
+      "tested_installer": "0.3.10",
+      "tested_source_release": "0.9.0-preview.8",
+      "promoted_source_release": "1.0.0",
+      "release_acceptance": {
+        "reported": "2026-11-01",
+        "result": "passed",
+        "kind": "manual report in project conversation",
+        "sessions": [
+          "X11",
+          "Plasma Wayland"
+        ],
+        "scope": "Requested final Preview 8 regression checklist; see docs/packaging/release-installer-verification.json#v1_0_manual_acceptance_2026_11_01",
+        "inventory_limit": "This confirmation does not remeasure package versions; original inventory dates and sources are retained."
+      },
+      "kwin_x11": "6.5.5-2",
+      "kwin_wayland": "6.5.6-1",
+      "mesa": "26.0.2 (November 1 isolated resize validation)",
+      "resize_inventory_recorded": "2026-11-01"
     },
     "cachyos": {
       "os": "CachyOS rolling",
@@ -74,16 +94,28 @@
         "docs/packaging/cachyos-wayland-launcher-verification.json",
         "Read-only installed receipt on 2026-10-31: installer 0.3.5, committed installation, all 18 pipeline steps complete."
       ],
-      "manual_acceptance": "Manually confirmed X11 tray and working Wayland installation; does not retroactively expand isolated automated test scope.",
-      "current_installer_acceptance": "Fresh installation manually confirmed successful on 2026-10-31. This report does not separately confirm removal or switching sessions after installation; installer 0.3.6 default-action change has automated routing tests.",
+      "manual_acceptance": "Final requested regression tests passed, reported 2026-11-01; bare-metal target acceptance.",
+      "current_installer_acceptance": "Installer 0.3.10 uninstall/reinstall and final application-profile, key-delivery where hardware is available, tray and resize/minimize/restore acceptance passed in the recorded sessions.",
       "graphics": "NVIDIA GeForce GT 730 (GK208B), NVIDIA 470.256.02 driver.",
       "graphics_evidence": [
         "docs/packaging/2026-10-27-cachyos-tray.md: isolated GLX context reports NVIDIA GeForce GT 730, OpenGL 4.6.0",
         "Read-only remote PCI inventory rechecked 2026-10-31: 10de:1287, NVIDIA kernel driver."
       ],
-      "fresh_installation_confirmed": "2026-10-31",
-      "tested_installer": "0.3.5",
-      "tested_source_release": "0.9.0-preview.4"
+      "fresh_installation_confirmed": "2026-11-01",
+      "tested_installer": "0.3.10",
+      "tested_source_release": "0.9.0-preview.8",
+      "promoted_source_release": "1.0.0",
+      "release_acceptance": {
+        "reported": "2026-11-01",
+        "result": "passed",
+        "kind": "manual report in project conversation",
+        "sessions": [
+          "X11",
+          "Plasma Wayland"
+        ],
+        "scope": "Requested final Preview 8 regression checklist; see docs/packaging/release-installer-verification.json#v1_0_manual_acceptance_2026_11_01",
+        "inventory_limit": "This confirmation does not remeasure package versions; original inventory dates and sources are retained."
+      }
     },
     "bazzite": {
       "os": "Bazzite 44.20261026.0 Kinoite NVIDIA Open",
@@ -108,13 +140,25 @@
       "recorded": "2026-10-30",
       "podman": "5.8.9-1.fc44",
       "session": "Plasma Wayland with Xwayland",
-      "tested_installer": "0.3.2",
-      "tested_source_release": "0.9.0-preview.3",
-      "manual_acceptance": "Installation and uninstall/reinstall completed; delayed/stuck G502 X Plus key binding confirmed fixed after patch 0046.",
-      "current_installer_acceptance": "Installer 0.3.5 storage cleanup has offline tests and runtime-inventory validation; no complete booted install/removal rerun claimed.",
+      "tested_installer": "0.3.10",
+      "tested_source_release": "0.9.0-preview.8",
+      "manual_acceptance": "Final requested regression tests passed, reported 2026-11-01; bare-metal target acceptance.",
+      "current_installer_acceptance": "Installer 0.3.10 uninstall/reinstall and final application-profile, key-delivery where hardware is available, tray and resize/minimize/restore acceptance passed in the recorded sessions.",
       "graphics": "Offscreen EGL acquired a hardware NVIDIA GeForce RTX 3090 context; PulseAudio connection passed without playing sound.",
       "nvidia_inventory_date": "2026-10-29; package version not re-recorded by October 30 host preflight",
-      "full_x11_session_tested": false
+      "full_x11_session_tested": false,
+      "promoted_source_release": "1.0.0",
+      "fresh_installation_confirmed": "2026-11-01",
+      "release_acceptance": {
+        "reported": "2026-11-01",
+        "result": "passed",
+        "kind": "manual report in project conversation",
+        "sessions": [
+          "Plasma Wayland"
+        ],
+        "scope": "Requested final Preview 8 regression checklist; see docs/packaging/release-installer-verification.json#v1_0_manual_acceptance_2026_11_01",
+        "inventory_limit": "This confirmation does not remeasure package versions; original inventory dates and sources are retained."
+      }
     }
   }
 }

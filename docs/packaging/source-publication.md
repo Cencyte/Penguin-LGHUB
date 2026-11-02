@@ -129,3 +129,24 @@ the incomplete installation. All 262 local regressions and 55 focused VM tests
 pass. Fresh installation with this repair remains a manual acceptance step.
 The source archive also contains the current README layout and sharing buttons.
 Prior release archives and tags remain unchanged.
+
+## November 1 v1.0 release
+
+Version 1.0.0 promotes Preview 8's accepted implementation with installer 0.3.10.
+Final manual uninstall/reinstall and regression acceptance is recorded for the
+Manjaro VM and CachyOS on X11/Plasma Wayland, and Bazzite on Plasma Wayland.
+The [release notes](release-v1.0.0.md) describe the test scope and remaining
+boundaries. Runtime, installer and test code and dependency pins are unchanged
+from the accepted Preview 8 revision.
+
+The README and current environment/review records now reflect that acceptance.
+Two detailed architecture diagrams have refreshed labels in a new dated folder;
+the earlier source/render pairs and the compact overviews are preserved.
+Historical measurements retain their original versions and dates, with a
+separate current manual-acceptance record.
+
+The versioned source ZIP is built from the tagged Git tree, with executable
+script modes and a regenerated per-file manifest. Its attached checksum file
+is named `SHA256SUMS`. Publication verifies the extracted archive and uploaded
+asset bytes. The repository's private visibility is unchanged by this release;
+anonymous access requires a separate visibility change.
