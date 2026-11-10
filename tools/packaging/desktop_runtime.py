@@ -233,7 +233,8 @@ def prepare(candidate, linux_root, wine, test_tools, output):
     linux_probe.verify(test_tools)
     receipt = json.loads((candidate / 'clean-prefix.json').read_text())
     linux_probe.matching_runtime(receipt, wine)
-    space_check(output.parent, 4 * 1024**3)
+    budget = json.loads((ROOT / 'packaging/install-storage.json').read_text())
+    space_check(output.parent, budget['components']['desktop']['budget_bytes'])
     output.mkdir(mode=0o700)
     subprocess.run(['cp', '-a', '--reflink=auto', str(candidate / 'prefix'), str(output / 'prefix')], check=True)
     for name in ('home', 'logs', 'runner'):

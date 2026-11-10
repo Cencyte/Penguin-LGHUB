@@ -34,6 +34,7 @@ EXAMPLES
 # Use the installer's existing palette; discovery still includes newly added
 # test modules even before a friendly label is assigned here.
 STEPS = {
+    'test_support_commands': ('Verify', 'Test diagnostics privacy, device coverage and installer-source updates'),
     'test_sudo_authorization': ('System', 'Test untimed authorization pause and terminal handling'),
     'test_xwayland_input': ('Desktop', 'Test Xwayland native-input bridge detection'),
     'test_profile_support': ('Desktop', 'Test automatic-profile prerequisites and packaged components'),

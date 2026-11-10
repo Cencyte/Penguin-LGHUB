@@ -17,7 +17,8 @@ PRUNE_AFTER = {
     'windows': ('work/windows-cache', 'work/windows-control', 'toolchain', 'work/source'),
     'prefix': ('work/logitech-cache', 'work/logitech-stage', 'work/windows-reconstructed'),
     'loader': ('work/loader-audit',),
-    'ui': ('work/ui-audit', 'work/candidate'),
+    'ui': ('work/ui-audit',),
+    'desktop': ('work/candidate',),
 }
 
 

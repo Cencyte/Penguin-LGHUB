@@ -24,6 +24,8 @@ HELP='''USAGE
   ./install.sh [--install] [--verbose] [--directory <path>] [--engine <bwrap|podman>]
   ./install.sh --check [--verbose]
   ./install.sh --uninstall [--directory <path>] [--verbose]
+  ./install.sh --diag [--directory <path>] [--verbose]
+  ./install.sh --update [--verbose]
 
 SUMMARY
   Prepare a private, pinned G HUB installation from verified downloads and
@@ -36,6 +38,8 @@ FLAGS
   --install                Run the complete installation pipeline (default).
   --check                  Record host compatibility without installing anything.
   --uninstall              Remove a managed installation, including G HUB settings.
+  --diag                   Save a sanitized .txt.gz report in this project folder.
+  --update                 Update installer source only; never the installed app.
   --directory <path>       Installation storage (default: ~/.local/share/penguin-lghub).
   --engine <bwrap|podman>   Private acquisition engine (default: bwrap).
   --jobs <number>          Wine build jobs, 1–16 (default: 4).
@@ -48,12 +52,15 @@ EXAMPLES
   ./install.sh --directory /path/with/enough/space
   ./install.sh --check
   ./install.sh --uninstall
+  ./install.sh --diag
+  ./install.sh --update
 '''
 
 
 def parser():
     p=argparse.ArgumentParser(add_help=False,allow_abbrev=False)
     action=p.add_mutually_exclusive_group();action.add_argument('--install',action='store_true');action.add_argument('--check',action='store_true');action.add_argument('--uninstall',action='store_true')
+    action.add_argument('--diag',action='store_true');action.add_argument('--update',action='store_true')
     p.add_argument('--help',action='store_true');p.add_argument('--verbose',action='store_true')
     p.add_argument('--directory',type=Path,default=Path(os.environ.get('XDG_DATA_HOME',str(Path.home()/'.local/share')))/'penguin-lghub')
     p.add_argument('--engine',choices=('bwrap','podman'),default='bwrap');p.add_argument('--jobs',type=int,default=4)
@@ -142,15 +149,17 @@ def _pipeline(args,ui,report,directory,state):
         '--linux-runtime',linux,'--windows-dlls',work/'windows-reconstructed/dlls'),
         cmd('prepare_clean_prefix.py','--output',candidate,'--verify-only'))
     desktop=directory/'desktop'
-    step('desktop','Desktop','Prepare the desktop installation',cmd('desktop_runtime.py','prepare',
-        '--candidate',candidate,'--linux-runtime',linux,'--wine',wine,'--test-tools',helpers,'--output',desktop))
-    step('profiles','Verify','Verify X11 and Wayland automatic-profile components',
-         cmd('profile_support.py','--config',desktop/'desktop.json'))
     step('loader','Verify','Check the private runtime without desktop or device access',
         cmd('linux_runtime.py','audit','--linux-runtime',linux,'--wine',wine,'--output',work/'loader-audit'))
     step('ui','Verify','Test first-run UI and tray registration in an isolated display',
         cmd('linux_ui_probe.py','probe','--candidate',candidate,'--linux-runtime',linux,'--wine',wine,
             '--test-tools',helpers,'--output',work/'ui-audit'))
+    # Dispose of the isolated UI copy before creating the desktop copy: at
+    # most two complete prefixes coexist, even with the full device catalog.
+    step('desktop','Desktop','Prepare the desktop installation',cmd('desktop_runtime.py','prepare',
+        '--candidate',candidate,'--linux-runtime',linux,'--wine',wine,'--test-tools',helpers,'--output',desktop))
+    step('profiles','Verify','Verify X11 and Wayland automatic-profile components',
+         cmd('profile_support.py','--config',desktop/'desktop.json'))
     step('graphics','Verify','Inspect imported graphics and audio without opening an application',
         cmd('session_probe.py','--config',desktop/'desktop.json','--output',work/'session-audit/report.json'))
     # Only this small, reviewable helper runs under sudo. No application runs as root.
@@ -168,11 +177,17 @@ def main(argv=None):
     argv=sys.argv[1:] if argv is None else argv
     args=parser().parse_args(argv)
     if args.help:print(HELP);return 0
-    args.install=not(args.check or args.uninstall)
+    args.install=not(args.check or args.uninstall or args.diag or args.update)
     if os.geteuid()==0:raise ValueError('Run as your normal desktop user; setup requests sudo when needed.')
     if args.uninstall:
         from uninstall import run
         return run(args.directory,args.verbose)
+    if args.diag:
+        from diagnostics import run
+        return run(args.directory,args.verbose)
+    if args.update:
+        from installer_update import run
+        return run(args.verbose)
     if not 1<=args.jobs<=16:raise ValueError('--jobs must be 1–16')
     state=Path(os.environ.get('XDG_STATE_HOME',str(Path.home()/'.local/state')))/'penguin-lghub'
     stamp=datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+str(os.getpid())
@@ -184,6 +199,13 @@ def present_install(args,state,stamp):
     ui.check_results=args.check
     def inspect():
         report=host_preflight.inventory(progress=ui.begin_check,result=ui.finish_check);save(state/('host-'+stamp+'.json'),report)
+        import device_compatibility
+        coverage=device_compatibility.inspect()
+        device_compatibility.present(coverage,ui)
+        report['device_compatibility']=coverage
+        report.setdefault('checks',[]).append({'category':'Verify','description':'Checking device compatibility','status':coverage['status']})
+        report['errors'].extend(coverage['errors'])
+        report['warnings'].extend(coverage['warnings'])
         description='Check installation filesystem links and private permissions'
         ui.begin_check('System',description)
         try:

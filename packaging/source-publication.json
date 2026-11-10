@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "prepared_on": "2026-11-01",
+  "prepared_on": "2026-11-09",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "0f9176f5a4989151e3bf55a55c6bb1ded68b8fde",
+  "github_base_commit": "bd86d1090740c17cb9cd667f3f6a8611d0826bf6",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -44,8 +44,8 @@
     {
       "path": ".gitignore",
       "mode": "100644",
-      "sha256": "c21fc8cb9165b59e33b5022d3622741ee86d1409e080ac6fd6a11c24f337fc3d",
-      "bytes": 403
+      "sha256": "29225763900fcbd893e1c3b896a096ed165079239b7875b21caf13c8785edb7d",
+      "bytes": 465
     },
     {
       "path": "LICENSE",
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "091096b8d6fbac1948eb27e21e0a3e58f3c4d41aceb9cca687926052588e9b97",
-      "bytes": 73773
+      "sha256": "77de9e1d7b752137ed8e76d9e58ebef8fffd8c9743ee0fa2a757fef6ce24ed51",
+      "bytes": 78965
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -776,8 +776,8 @@
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "2f5946516618970b1cc71849a3a7c21755999655d469d1cbae231839011ee8d1",
-      "bytes": 24384
+      "sha256": "73c442ce63d5059d68825081adb8e08482e595a2c4c3669b4e69d5d1004bc14d",
+      "bytes": 25300
     },
     {
       "path": "docs/packaging/release-v1.0.0.md",
@@ -788,8 +788,8 @@
     {
       "path": "docs/packaging/source-publication.md",
       "mode": "100644",
-      "sha256": "17ddba60aa0317b5aec0d07a3b21621ad82a53778d3f7261f8dffaedc9ac5fbb",
-      "bytes": 8749
+      "sha256": "6024659c85396cd89585eca90f760a58eeb07ac5079b8e1614267e45ea2339c1",
+      "bytes": 10059
     },
     {
       "path": "docs/packaging/status-bazzite.svg",
@@ -864,6 +864,18 @@
       "bytes": 4853
     },
     {
+      "path": "packaging/device-catalog.json",
+      "mode": "100644",
+      "sha256": "332e3528cd834a53d936dc71e5714e5c515479cc6978aa14d1eef86ff35504aa",
+      "bytes": 73982
+    },
+    {
+      "path": "packaging/device-coverage-verification.json",
+      "mode": "100644",
+      "sha256": "f0df15a9b33b262bfd4ed82f877a70f3175cf22fa50767f5f15aae7d55f6c929",
+      "bytes": 5282
+    },
+    {
       "path": "packaging/dockur/Dockur-LICENSE.txt",
       "mode": "100644",
       "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
@@ -902,14 +914,14 @@
     {
       "path": "packaging/install-storage.json",
       "mode": "100644",
-      "sha256": "5f318e512939567ca96e308a85fb74bc7f6ea02ee2b9272e2ebec38b1702ab25",
-      "bytes": 5194
+      "sha256": "07648f119feba3374b40cf2b10afedb3b58cf216ec2545e819bb4e924210463d",
+      "bytes": 5693
     },
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "1095bef04acb9e83ef613f890e3f77bdb600e8d722ff6f57c26e8d39bbb778ac",
-      "bytes": 243
+      "sha256": "d5aca1cce0ed2c0a0a9177db498934f4124cdbf10e14645d5b714d6d5c981ecc",
+      "bytes": 247
     },
     {
       "path": "packaging/licenses/Simple-Icons-CC0-1.0.txt",
@@ -950,8 +962,8 @@
     {
       "path": "packaging/logitech-depots.lock.json",
       "mode": "100644",
-      "sha256": "8a0128c8cf4456355828a8bfadc4e1aa3df272f2c250c5c66ec4a85adb4e7d66",
-      "bytes": 68468
+      "sha256": "1d149ebf663a9a6a15144ae8b39c48b5928c7ce7490cd7cbca7ed3ba5e063384",
+      "bytes": 776446
     },
     {
       "path": "packaging/native-profiles-verification.json",
@@ -980,8 +992,8 @@
     {
       "path": "packaging/tested-environments.json",
       "mode": "100644",
-      "sha256": "ea8a7391ead25cad7eca47ac9cb8a3eaad8d2cdbbf02c29e2353b4658df288fc",
-      "bytes": 8884
+      "sha256": "f4202d9dbfc93fb5e18634b8dba50076997983aed02b54b3db743fc11ee40155",
+      "bytes": 9239
     },
     {
       "path": "packaging/toolchain.lock.json",
@@ -1346,8 +1358,8 @@
     {
       "path": "tests/packaging/test_check_presentation.py",
       "mode": "100644",
-      "sha256": "7b5ac78a0855be3e9dd8ca2a96e8e254091c0dc58de316c4183ebad756102bbb",
-      "bytes": 17086
+      "sha256": "73841d3c3af86e5ca1c69350ebf66f012a7e2bb41a625dabd26d31f0e4dbce83",
+      "bytes": 17337
     },
     {
       "path": "tests/packaging/test_clean_prefix.py",
@@ -1456,6 +1468,12 @@
       "mode": "100644",
       "sha256": "85783d8848df0330a491c335da37c70f4ce184a19382988e7a9262901b6ae310",
       "bytes": 5705
+    },
+    {
+      "path": "tests/packaging/test_support_commands.py",
+      "mode": "100644",
+      "sha256": "a873be924cbc627481b8532cbd8117ed08458c6d06d7765f577aeb36bd99a9c4",
+      "bytes": 16569
     },
     {
       "path": "tests/packaging/test_tray_registration.py",
@@ -1998,6 +2016,12 @@
       "bytes": 4270
     },
     {
+      "path": "tools/packaging/build_device_catalog.py",
+      "mode": "100644",
+      "sha256": "878e72507006359346f26f0fbf85afa3c688fc2bc34ff8b1bd0dba66b3d742e6",
+      "bytes": 3872
+    },
+    {
       "path": "tools/packaging/build_release_runtime.py",
       "mode": "100644",
       "sha256": "7ec528bca7ead219a7eb7e7d9b62625165aae685af9caab42390a3c6026306a6",
@@ -2018,8 +2042,20 @@
     {
       "path": "tools/packaging/desktop_runtime.py",
       "mode": "100644",
-      "sha256": "b6f23338304043f6e716aa5993b7ba908d50015edc4b721037d4ba23e1baf2e4",
-      "bytes": 32579
+      "sha256": "3f7e55ebabe86c515d0fa6f9f47e0224648c2fc7200c3df9d897b0bbf9df9f5f",
+      "bytes": 32694
+    },
+    {
+      "path": "tools/packaging/device_compatibility.py",
+      "mode": "100644",
+      "sha256": "064282f6dbd33755742e68bc76840953818b99f193d130d9205e188cf5753fcb",
+      "bytes": 5736
+    },
+    {
+      "path": "tools/packaging/diagnostics.py",
+      "mode": "100644",
+      "sha256": "eaa0bc020c08c7b43111d9898e90ccb86845908f56fcc0b73e044887cd049bc1",
+      "bytes": 15150
     },
     {
       "path": "tools/packaging/dockur_acquire.py",
@@ -2060,8 +2096,8 @@
     {
       "path": "tools/packaging/install.py",
       "mode": "100644",
-      "sha256": "8c11b21e5e1c8560fd799c3282499aae6456080cccda0f73fddbb28784a234f8",
-      "bytes": 13042
+      "sha256": "0af33d4ef7cc76546a85572f8fed1b90727d70c9494ec8bb6ad0beafeff371b1",
+      "bytes": 14259
     },
     {
       "path": "tools/packaging/install_device_rules.py",
@@ -2072,8 +2108,8 @@
     {
       "path": "tools/packaging/install_storage.py",
       "mode": "100644",
-      "sha256": "9162987677648a21ea28b89299dcc0847e5ec8e5b9d6ff46e6f67f1b67e3fa40",
-      "bytes": 6500
+      "sha256": "bd756745f5ff5623baac6bacc2dd90907dd8033337cf692d0af5c6b7e438ffe3",
+      "bytes": 6519
     },
     {
       "path": "tools/packaging/install_transaction.py",
@@ -2090,8 +2126,14 @@
     {
       "path": "tools/packaging/installer_ui.py",
       "mode": "100644",
-      "sha256": "5318916c003cd6855b64fd691b297dc00664bbfc8e5f23da0aa38f8be6638f44",
-      "bytes": 10394
+      "sha256": "06a892999f35a41cc0f01746c3a8d6cd76113d890764748e43ac57245881b7c2",
+      "bytes": 10709
+    },
+    {
+      "path": "tools/packaging/installer_update.py",
+      "mode": "100644",
+      "sha256": "d3f511b0b7582e00d04f5f2f97779457d75bca7a2612d2fe4c6841077002bde3",
+      "bytes": 10131
     },
     {
       "path": "tools/packaging/linux_probe.py",
@@ -2126,14 +2168,14 @@
     {
       "path": "tools/packaging/logitech_depots.py",
       "mode": "100644",
-      "sha256": "21385135a45569d6e159dbc82ad3fc10bfc92d040a40f8c6b04423acede5d97a",
-      "bytes": 18176
+      "sha256": "6e19252779b5eae0a2310193e5f1e0def554953f1b76370083f866fd3b9f048c",
+      "bytes": 18225
     },
     {
       "path": "tools/packaging/prepare_clean_prefix.py",
       "mode": "100644",
-      "sha256": "3c252cb4a47e3e035f2af4558f13328720515132e36aae09722b845b1b158ef6",
-      "bytes": 28420
+      "sha256": "c1b9c72a73934e12559536fe0e50687a1ef1e6cc94ee39445854b36881e71e24",
+      "bytes": 29006
     },
     {
       "path": "tools/packaging/probe_clean_agent.py",
@@ -2174,8 +2216,8 @@
     {
       "path": "tools/packaging/run_project_tests.py",
       "mode": "100644",
-      "sha256": "dd9a304c52d47746bd9ba2b60e8e5bec40193b4e7fdc92041e6cdd629e6a3cfb",
-      "bytes": 8001
+      "sha256": "cb44f668b7dc3a2a2ede187be5e7bf457b6850f94ff8cfc7a0500ea78175e9f5",
+      "bytes": 8116
     },
     {
       "path": "tools/packaging/server_sync.py",

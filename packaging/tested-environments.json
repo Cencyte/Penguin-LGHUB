@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-11-01",
+  "updated": "2026-11-09",
   "review_after": "Future runtime, host-stack or device changes; v1.0 manual acceptance completed",
   "meaning": "Recorded environments, not supported minimum versions; inventory does not imply acceptance.",
   "shared": {
@@ -115,6 +115,16 @@
         ],
         "scope": "Requested final Preview 8 regression checklist; see docs/packaging/release-installer-verification.json#v1_0_manual_acceptance_2026_11_01",
         "inventory_limit": "This confirmation does not remeasure package versions; original inventory dates and sources are retained."
+      },
+      "physical_mouse_acceptance": {
+        "reported": "2026-11-09",
+        "device": "G502 X Plus",
+        "sessions": [
+          "X11",
+          "Plasma Wayland"
+        ],
+        "result": "recognized and working in G HUB",
+        "scope": "User report on existing installation; does not validate installer 0.4.0 or other G502 models"
       }
     },
     "bazzite": {

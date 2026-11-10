@@ -125,7 +125,7 @@ def inspect_depot(path, spec, keys=None):
             header = strict_json(decoded)
         if magic not in (PLAIN, CAPSULE) or set(header) != {'files'} or not isinstance(header['files'], list):
             raise ValueError('Unsupported depot format')
-        if not 0 < len(header['files']) <= MAX_FILES:
+        if not 0 <= len(header['files']) <= MAX_FILES:
             raise ValueError('Unexpected depot file count')
         records = []
         for item in header['files']:
@@ -321,7 +321,7 @@ def stage(work, output, lock, selection):
     if output.exists() or output.is_symlink() or work.is_relative_to(output):
         raise ValueError('Stage must be a new directory outside the download cache ancestors')
     names = select_depots(lock, selection)
-    keys = public_keys(work, lock['public_access']) if selection == 'tested_setup' else {}
+    keys = public_keys(work, lock['public_access']) if selection in ('tested_setup', 'all_devices') else {}
     indexes = {name: inspect_depot(work / lock['depots'][name]['local_name'], lock['depots'][name], keys)
                for name in names}
     # At most one additional application copy of each payload byte.
@@ -359,7 +359,7 @@ def main():
     for command in ('fetch', 'stage'):
         p = sub.add_parser(command)
         p.add_argument('--work-dir', required=True)
-        p.add_argument('--selection', choices=('core', 'required', 'tested_setup'), default='tested_setup')
+        p.add_argument('--selection', choices=('core', 'required', 'tested_setup', 'all_devices'), default='all_devices')
         if command == 'stage':
             p.add_argument('--output-dir', required=True)
     p = sub.add_parser('verify')
@@ -375,7 +375,7 @@ def main():
         if args.command == 'fetch':
             for name in select_depots(lock, args.selection):
                 download_asset(work, lock['depots'][name], validate=official_url)
-            if args.selection == 'tested_setup':
+            if args.selection in ('tested_setup', 'all_devices'):
                 public_keys(work, lock['public_access'], fetch=True)
         else:
             stage(work, external_path(args.output_dir), lock, args.selection)

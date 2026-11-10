@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "recorded": "2026-11-09",
+  "project_version": "1.0.1-rc.1",
+  "installer_version": "0.4.0",
+  "scope": "Offline catalog audit, isolated fresh-prefix/UI verification and source regression tests; no new physical-device qualification.",
+  "depot_lock_sha256": "1d149ebf663a9a6a15144ae8b39c48b5928c7ce7490cd7cbca7ed3ba5e063384",
+  "catalog_entries": 779,
+  "selected_depots": 757,
+  "selected_archive_bytes": 3614601041,
+  "excluded_depots": [
+    {
+      "name": "0b6a73f1-6719-4ff8-99a6-6c89e85ac59b",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "181d1831-dac5-4737-8be4-939d29c66320",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "182e9b98-2bad-4c15-9308-2be2ad800d93",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "225fe556-6765-47e3-96b5-5560f5b52ea3",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "3417b651-4fac-4006-bdd3-981889ac234e",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "3c3d6974-7518-47b6-b40c-997d14e07c14",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "5b295da5-56a1-42e6-b706-aef16af8ce0b",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "60dbbaaa-a8ab-41f9-8de6-07d0e8948fc8",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "67169382-f814-44dc-8df7-c0fd1e0b7e65",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "6d6cb52f-5055-4e45-b6e7-71115ba7a4e7",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "728c8c1c-0d99-4008-a9e2-704c10afdb81",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "72e36f19-ee69-45ce-8528-95da79d63a13",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "90f5da25-8071-4cf2-be37-4dc9a90cf80b",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "a5369c13-3732-442e-8b25-55f8f9c9da96",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "b43c9763-30c5-4f74-a4e5-454ce3e15d2b",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "b4a313e2-68a5-4709-bcb5-8f039c8d266d",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "c5b48853-83dd-4fea-ada9-eb2f995d52d5",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "ce6ebe4a-1db9-4df8-9dcf-f694b661279a",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "cedfcecb-9ff5-46fe-9d05-01b088640456",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "d95a0471-41f8-4c8b-b3d1-8c3765bd1c44",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "eed65a5f-c2c5-4827-b17a-c3093548990c",
+      "reason": "Capsule requests an unpinned public key"
+    },
+    {
+      "name": "f7748d7f-b334-4092-9329-302e0549b5b5",
+      "reason": "Capsule requests an unpinned public key"
+    }
+  ],
+  "decoded_device_models": 146,
+  "catalog_sections": 75,
+  "unreadable_catalog_sections": 11,
+  "depot_files": 10205,
+  "application_layout_files": 438,
+  "pending_installer_actions": {
+    "extensions": 15,
+    "detection": 4,
+    "conditional_or_external_file": 17,
+    "product": 1,
+    "shortcuts": 1,
+    "installer": 1,
+    "updater": 1,
+    "uninstaller": 1,
+    "userRepair": 1,
+    "userUninstaller": 1,
+    "processControl": 1,
+    "will_connect_to_lus_ipc": 1,
+    "launchables": 1,
+    "missing_source_file": 2,
+    "registerLibrary": 2,
+    "driverPackages": 2
+  },
+  "prefix": {
+    "managed_files_verified": 11420,
+    "depot_files": 10205,
+    "activation_factories_verified_at_install": 8,
+    "public_installer_ready": false
+  },
+  "ui": {
+    "passed": true,
+    "checks": {
+      "required_files_present": true,
+      "bundled_fonts_loaded": true,
+      "desktop_and_default_profile": true,
+      "first_run_prompt_readable": true,
+      "native_tray_running": true,
+      "xembed_dock_received": true
+    },
+    "physical_devices_exposed": false,
+    "live_desktop_used": false,
+    "isolated_network": true
+  },
+  "runtime_rebuilt": false,
+  "runtime_basis": "Existing source-built v1.0.0 private runtime; no Wine patch changes in this update.",
+  "remaining": [
+    "Manual uninstall/source-update/reinstall acceptance",
+    "External G502 reporter confirmation",
+    "22 depot keys and 11 catalog section keys absent from the official public response",
+    "Physical qualification of additional device families and Windows-driver-dependent features"
+  ],
+  "regression_tests": {
+    "total": 286,
+    "passed": 286,
+    "failed": 0,
+    "skipped": 0
+  },
+  "support_command_tests": {
+    "total": 22,
+    "passed": 22,
+    "includes": [
+      "diagnostic redaction and live WebSocket protocol",
+      "wineserver socket ownership",
+      "ZIP and Git source-update flows",
+      "source-update rollback and interrupted-journal recovery",
+      "duplicate archive cache content",
+      "known, missing and unknown device resources"
+    ]
+  }
+}

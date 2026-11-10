@@ -248,7 +248,10 @@ class CheckPresentationTests(unittest.TestCase):
                     code=install.present_install(args,Path(tmp),'fixture')
                 self.assertEqual(code,int(fail))
                 self.assertIn('Inspect fixture host...',stream.getvalue())
-                self.assertNotIn('OK',stream.getvalue())
+                # Device-resource coverage is the explicit install-mode
+                # exception; routine installation tasks still omit results.
+                rows=stream.getvalue().splitlines()
+                self.assertTrue(all('Checking device compatibility' in row for row in rows if 'OK' in row))
                 celebration='\n\n🎉 Installation complete! 🎉\n'
                 self.assertEqual(celebration in stream.getvalue(),not fail)
 

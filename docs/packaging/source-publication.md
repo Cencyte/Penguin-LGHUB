@@ -150,3 +150,26 @@ script modes and a regenerated per-file manifest. Its attached checksum file
 is named `SHA256SUMS`. Publication verifies the extracted archive and uploaded
 asset bytes. The repository's private visibility is unchanged by this release;
 anonymous access requires a separate visibility change.
+
+
+## November 9 expanded-catalog testing release
+
+Version 1.0.1-rc.1 / installer 0.4.0 adds 757 publicly extractable Logitech
+resource depots, a local minimized diagnostic report, source-folder updating
+and connected-device resource checks. The 22 excluded encrypted depots and 11
+unreadable catalog sections are recorded explicitly. No downloaded resource,
+key material or populated prefix is published. Device/model IDs, public-key
+fingerprints and audited file metadata support reproducible acquisition.
+
+The expanded prefix and isolated UI/tray tests pass; the combined suite has
+286 passing tests. New manual uninstall/update/reinstall acceptance remains
+pending. The original v1.0.0 release is retained. See the
+[coverage record](../../packaging/device-coverage-verification.json) and
+[installer instructions](release-installer.md).
+
+`--update` uses this publication manifest to verify a source ZIP or a clean Git
+checkout before replacement. The branch is resolved once to a commit, then its
+complete source tree is checked against that commit's manifest. This protects
+against corrupt/incomplete downloads and accidental local modifications; the
+manifest is not an independent digital signature. Repository/TLS trust remains
+required. Updating never installs the payload or changes an existing prefix.

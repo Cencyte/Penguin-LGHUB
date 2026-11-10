@@ -101,7 +101,13 @@ def install_depot_cache(cache, data, lock, report):
         check_asset(source, spec)
     for name in report['extracted']:
         spec = lock['depots'][name]
-        copy_checked(cache / spec['local_name'], data / 'cache' / spec['sha256'], spec['sha256'])
+        target = data / 'cache' / spec['sha256']
+        # Identical vendor archives can have different depot names. The
+        # updater's content-addressed cache stores each verified blob once.
+        if target.exists():
+            check_asset(target, spec)
+        else:
+            copy_checked(cache / spec['local_name'], target, spec['sha256'])
 
 
 def initialize_application_catalog(prefix, report):
@@ -140,6 +146,7 @@ def disposition(declaration):
         'conditional_or_external_file': ('deferred', 'Optional integration needs explicit application detection and destination.'),
         'detection': ('deferred', 'Optional integration detection is not run against the host.'),
         'extensions': ('deferred', 'Windows driver/SDK installer requires separate Wine qualification; not marked installed.'),
+        'driverPackages': ('deferred', 'Vendor Windows kernel drivers cannot be installed into the Linux kernel; resources are retained without claiming driver support.'),
         'registerLibrary': ('deferred', 'Legacy LED SDK COM registration requires qualification.'),
         'missing_source_file': ('unresolved', 'Vendor core rule names an absent Trueforce SDK; investigate its separate manager.'),
     }
@@ -298,8 +305,8 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None, lin
     lock, baseline = json.loads(LOCK_PATH.read_text()), json.loads(BASELINE.read_text())
     verified = verify_stage(stage, lock)
     report = json.loads((stage / 'extraction.json').read_text())
-    if report['selection'] != 'tested_setup':
-        raise ValueError('This first prefix recipe requires the verified tested_setup selection')
+    if report['selection'] not in ('tested_setup', 'all_devices'):
+        raise ValueError('Prefix preparation requires a verified device-resource selection')
     actions = [disposition(d) for d in report['layout']['pending_installer_actions']]
     public_keys(cache, lock['public_access'])
     keys_document = json.loads((cache / 'vendor-public-access.json').read_text())
@@ -327,7 +334,8 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None, lin
         subprocess.run(['sudo', '-n', 'true'], check=True, timeout=15)
     subprocess.run(['bwrap', '--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc',
                     '--tmpfs', '/tmp', '--unshare-net', '--unshare-pid', '--', '/usr/bin/true'], check=True)
-    space_check(output.parent, 5 * 1024**3)
+    budget = json.loads((ROOT / 'packaging/install-storage.json').read_text())
+    space_check(output.parent, budget['components']['candidate']['budget_bytes'])
     output.mkdir(mode=0o700)
     (output / 'home').mkdir()
     probe = output / 'clean_prefix_probe.exe'
@@ -346,7 +354,7 @@ def prepare(stage, cache, output, compatibility, windows_dlls, runtime=None, lin
         if path.is_symlink():
             path.unlink()
             path.mkdir()
-    print('Installing verified application files and 30 depot trees...', flush=True)
+    print(f"Installing verified application files and {len(report['extracted'])} depot trees...", flush=True)
     for item in report['layout']['files']:
         copy_checked(stage / 'application/LGHUB' / item['destination'], app / item['destination'], item['sha256'])
     for name, records in report['extracted'].items():

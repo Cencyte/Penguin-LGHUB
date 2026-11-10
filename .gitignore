@@ -40,3 +40,5 @@ dist/
 *.rep/
 *.swp
 .DS_Store
+Penguin-LGHUB-diagnostics-*.txt.gz
+.penguin-installer-update/

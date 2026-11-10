@@ -1,0 +1,2889 @@
+{
+  "schema": 1,
+  "build_id": "869589",
+  "basis": "Identity/resource metadata derived from the hash-verified pinned official device catalog. No hardware qualification is inferred.",
+  "unreadable_catalog_sections": 11,
+  "unavailable_sections": [
+    "data/devices/devices_0064.json",
+    "data/devices/devices_0065.json",
+    "data/devices/devices_0067.json",
+    "data/devices/devices_0068.json",
+    "data/devices/devices_0069.json",
+    "data/devices/devices_0070.json",
+    "data/devices/devices_0071.json",
+    "data/devices/devices_0072.json",
+    "data/devices/devices_0076.json",
+    "data/devices/devices_0077.json",
+    "data/devices/devices_0078.json"
+  ],
+  "sources": [
+    {
+      "path": "data/devices/devices_0001.json",
+      "sha256": "66e89481a32ceb0a26484a36b9c8402b63f13cfb9552d2e710de879e212136a5"
+    },
+    {
+      "path": "data/devices/devices_0002.json",
+      "sha256": "d6bd3c12481481787f649bf4e070b307a525f25f05c48216f30e5f8fd0684621"
+    },
+    {
+      "path": "data/devices/devices_0003.json",
+      "sha256": "e0f7a9cfd701e5c6b2f8b804dce09ebb7ed29b6841765b8abee3adfc1cb63fbd"
+    },
+    {
+      "path": "data/devices/devices_0004.json",
+      "sha256": "def05bbd22178704cdaeefc196b8086d467f11b3a26282513d46bf238fd4c071"
+    },
+    {
+      "path": "data/devices/devices_0005.json",
+      "sha256": "b62946c166ab6400e361bb948a506372f8af6425812a84fc1b20c7b323328b0f"
+    },
+    {
+      "path": "data/devices/devices_0006.json",
+      "sha256": "1df86aecfd2df33afaf251982c7c80f253024d57f221c1897d3d7755dc236b85"
+    },
+    {
+      "path": "data/devices/devices_0007.json",
+      "sha256": "bd9f25765af37a0e62bd1b845603d9c8dff74c28f22b5f008b038cd56a6087fe"
+    },
+    {
+      "path": "data/devices/devices_0008.json",
+      "sha256": "dd991c088c65ebf5f1df6da17c19dea066cc391cce046202a6d719bcf8da688c"
+    },
+    {
+      "path": "data/devices/devices_0009.json",
+      "sha256": "14636a7cb3b62363886aa5ffe47ce67b817c68ae930cf40c1744915179bd1a74"
+    },
+    {
+      "path": "data/devices/devices_0010.json",
+      "sha256": "92ba514c094fe5a9105766868448abc5491c1580b64af4c990634efbc5f33887"
+    },
+    {
+      "path": "data/devices/devices_0011.json",
+      "sha256": "55ad920758f217faae967a27f4e0dedb5cd14088043612e96bf9f8acec434f3b"
+    },
+    {
+      "path": "data/devices/devices_0012.json",
+      "sha256": "009bb0a34c8bc286bbf5d7322d54d38510810c8581bbce7d065f6948c0672cc0"
+    },
+    {
+      "path": "data/devices/devices_0013.json",
+      "sha256": "046a11748d9e79b8babede7b43dc5f3e33783c220afada1c0ab8a99502f5ff78"
+    },
+    {
+      "path": "data/devices/devices_0014.json",
+      "sha256": "6e1c66810bc5d0808ee7af54c66be45278e4556886ba7948b6ce311ade40c461"
+    },
+    {
+      "path": "data/devices/devices_0015.json",
+      "sha256": "770b7f6bdc916744bcb5cef0821f903667330b479f2de4a62f9a73b9c2983918"
+    },
+    {
+      "path": "data/devices/devices_0016.json",
+      "sha256": "e6654e5c968a4f93621a8c11d8499bdb98755174c81d4d38f0b7b3af711b4477"
+    },
+    {
+      "path": "data/devices/devices_0017.json",
+      "sha256": "66c6f624cc8f713d7292e2263c3baf7fd69d6d2afc515d9f1b87a940cd72f0a9"
+    },
+    {
+      "path": "data/devices/devices_0018.json",
+      "sha256": "0666748a28ec178e98c4cabb6bac02927ea9cb0eca2f2ea1e44e7d941a769f69"
+    },
+    {
+      "path": "data/devices/devices_0019.json",
+      "sha256": "47f33eb287a1b347665a3eacc8971c2c53f05d81faaa8b93c2ca758716bcc915"
+    },
+    {
+      "path": "data/devices/devices_0021.json",
+      "sha256": "f7d1d497f890fbb27f77a2bbb29b91e0d82cb8bb72df2e573a543beb73191c46"
+    },
+    {
+      "path": "data/devices/devices_0022.json",
+      "sha256": "3185ec198793ca5012451ad1458b4de1ed4f2b939c54785eade1906fd680b10d"
+    },
+    {
+      "path": "data/devices/devices_0023.json",
+      "sha256": "5829f813141d34dba01768d6964fb051cc9be1d5e67555105775b1d4b7c3a534"
+    },
+    {
+      "path": "data/devices/devices_0024.json",
+      "sha256": "990070c588b9bf9123a15085ae13b740386136287fbf0f12008a00e1dc240ff7"
+    },
+    {
+      "path": "data/devices/devices_0025.json",
+      "sha256": "3338510f11dba1a7daa8506792ca938a8452d7554488b7ebc7c7e433e3c787a8"
+    },
+    {
+      "path": "data/devices/devices_0026.json",
+      "sha256": "3b56b6641c7948b134c62b9d0186ba1136ec12ece88a6f1a8702102fbebd8442"
+    },
+    {
+      "path": "data/devices/devices_0027.json",
+      "sha256": "5aae3f8959d7dd2caec1745820610f0bc7ee8161e990b4345835d921c11c3eb7"
+    },
+    {
+      "path": "data/devices/devices_0028.json",
+      "sha256": "a4fa4d8000bf6de8adde0a98b18d75a23bdfed9ef40beed2abaeaf431f22fc63"
+    },
+    {
+      "path": "data/devices/devices_0029.json",
+      "sha256": "e09945debcb78d44f6efe6afc5139c98693951a3b783318e4753f44d6a256c3f"
+    },
+    {
+      "path": "data/devices/devices_0030.json",
+      "sha256": "51d0b619b4862a213f2dd11ea4fbdd6409870e0c1cf572d0711a2311d22d5faa"
+    },
+    {
+      "path": "data/devices/devices_0031.json",
+      "sha256": "1979846943b2b62bb0c0d870c50ec608d5a941f9d02b9f1cb7c7c95fc34a243d"
+    },
+    {
+      "path": "data/devices/devices_0032.json",
+      "sha256": "a94b881ec19d6ce0355d091f2b708b7f06cf7013e4aeef565ae247777d245df6"
+    },
+    {
+      "path": "data/devices/devices_0033.json",
+      "sha256": "3a5c9314191423d609bc42b5a6cf5cb1015f37b0d158b93341b1885a43936a01"
+    },
+    {
+      "path": "data/devices/devices_0034.json",
+      "sha256": "45dde3b331ed71a746146d5f1f35fb63283c36bccbc3c84ba501d07428981ba8"
+    },
+    {
+      "path": "data/devices/devices_0035.json",
+      "sha256": "80c47bb2d47a31f912e24031904512a15a881278fcf2e49496ed18abe372c882"
+    },
+    {
+      "path": "data/devices/devices_0036.json",
+      "sha256": "0ce41bba1157b2692a72acafb7fe236863e6dbba204829c52ff810ec576ac6d7"
+    },
+    {
+      "path": "data/devices/devices_0037.json",
+      "sha256": "a988f29b5a22a50d2f5de090760d94df8f1829b328af997aa3aa086e2a4e2122"
+    },
+    {
+      "path": "data/devices/devices_0038.json",
+      "sha256": "57db7c569282e2b773b50a564a8ce8f120c6fcf787fb88b2b027d853974f3c07"
+    },
+    {
+      "path": "data/devices/devices_0039.json",
+      "sha256": "badd52d160f2358c3f931a85fc07435f8e5afe0211dc517a27c784af30b9d846"
+    },
+    {
+      "path": "data/devices/devices_0040.json",
+      "sha256": "249f41e4544a483c4a98539ead69e5b8d75292f98d51581ff77086a5a744202b"
+    },
+    {
+      "path": "data/devices/devices_0042.json",
+      "sha256": "43b815b77c713d2bf29bd36c14706abe9cde46ec7293310c0048cf2d0260924d"
+    },
+    {
+      "path": "data/devices/devices_0043.json",
+      "sha256": "e36603d33aed56b4d79becbc2748065c3f7b11128fb79ec665fd2f1f565a908f"
+    },
+    {
+      "path": "data/devices/devices_0044.json",
+      "sha256": "a2bfdef3dfc1d0e35ffa8c185a885d86d3ee1bf5e28e8efcf7186ccd283288f2"
+    },
+    {
+      "path": "data/devices/devices_0045.json",
+      "sha256": "419d85b20342c5e74c5fb157a561962ecd5874f9b3609b9713fd88ee7e20ab73"
+    },
+    {
+      "path": "data/devices/devices_0046.json",
+      "sha256": "c3c3956061add3e1ff31e3e74de1d937fe958468c193ce8e299d4f3558aa36fd"
+    },
+    {
+      "path": "data/devices/devices_0047.json",
+      "sha256": "78c98aa39b5289ac68f6719f517ada5985603d1c600169d5e1fbac20610ea5e3"
+    },
+    {
+      "path": "data/devices/devices_0048.json",
+      "sha256": "016f23bd5de6aff1aca5fc036b6adaffd7aaf271c60da4e41b609128b527dfad"
+    },
+    {
+      "path": "data/devices/devices_0049.json",
+      "sha256": "48bf5237265d3210e18dc83fb85d3eb66789585dc12bd79296c9f3d5c99fef5d"
+    },
+    {
+      "path": "data/devices/devices_0050.json",
+      "sha256": "beeee5613f0196d119e1b4a1414febeb3313645cfb4ff00eb8bc964f0b97d185"
+    },
+    {
+      "path": "data/devices/devices_0051.json",
+      "sha256": "70c85d89f98968ca0a3300ff1057c631727ae2581a3046e4a297b83471e0befa"
+    },
+    {
+      "path": "data/devices/devices_0052.json",
+      "sha256": "be57005d2b03a51cd174729891789d0a6df58d1aeb9e2b06ba88721293b221c9"
+    },
+    {
+      "path": "data/devices/devices_0053.json",
+      "sha256": "76da93209b8d2723cf2688eb16c06aaefac5a4ba51a1bfe8277daa6485620ec1"
+    },
+    {
+      "path": "data/devices/devices_0054.json",
+      "sha256": "f64643da7cedf8988095a8f3c334209e68a6839316d6afb3505019f11c4ff66b"
+    },
+    {
+      "path": "data/devices/devices_0055.json",
+      "sha256": "7a405070feec78e4b33fe7e2ba45fd04f498b4bb1f79113ddc795bd14f4d751a"
+    },
+    {
+      "path": "data/devices/devices_0056.json",
+      "sha256": "a07d9680e57f4aa9e4e246957cf6961ba4563c3274f798f8c50afa44f83faa79"
+    },
+    {
+      "path": "data/devices/devices_0057.json",
+      "sha256": "92b6d3f4d60290fda98a0616b218cdaefd1c3caec5c3e2c9eb88fc6ee4e9fbd0"
+    },
+    {
+      "path": "data/devices/devices_0058.json",
+      "sha256": "7c84f50ac8a83daf8dbbfe22e354c1868aedeb45b02a28f116a6b3226434c491"
+    },
+    {
+      "path": "data/devices/devices_0059.json",
+      "sha256": "a5c3dc61722898eeeedf07b29e7ce1bdaed2b4885d20a4f8ced51a4131d22790"
+    },
+    {
+      "path": "data/devices/devices_0060.json",
+      "sha256": "8e84e8ce71084bc8feee2ce3a1b23ab644072326fb98f2952534b8e18c5beb54"
+    },
+    {
+      "path": "data/devices/devices_0061.json",
+      "sha256": "1577710bc9c419605c6b7b7348dafb078b9bae535f56b0a413388039cdc4cf0b"
+    },
+    {
+      "path": "data/devices/devices_0062.json",
+      "sha256": "88129a81cb969e9df4a8c8c0c6a205ac39750f3a75104eca9bf9a964418f59bc"
+    },
+    {
+      "path": "data/devices/devices_0063.json",
+      "sha256": "52d1f1490902c7566330dda3823ecc05a69396c90321c830a6bdaeaff4cd608e"
+    },
+    {
+      "path": "data/devices/devices_0064.json",
+      "sha256": "df783a380c347fcae2ea22cd9e2fab144481da9917a1a2a2ea9500dce532f525"
+    },
+    {
+      "path": "data/devices/devices_0065.json",
+      "sha256": "fe6cb18eb7308be9cfcf2eedeca53aaef8840daa1420c3fd66672e72ff2919c5"
+    },
+    {
+      "path": "data/devices/devices_0066.json",
+      "sha256": "e3dccd4b7bbd4b7b5fbb372bb7f9bb70eabc961eb2692d7b900e8361546a0128"
+    },
+    {
+      "path": "data/devices/devices_0067.json",
+      "sha256": "6ea87f83acd5628701f30b944f6097bddc06bd8be3605a5d6af76e92908e544e"
+    },
+    {
+      "path": "data/devices/devices_0068.json",
+      "sha256": "ed93aa305d0c894390a1122c654e16035138dd4a4f814f36cf9787383442b74b"
+    },
+    {
+      "path": "data/devices/devices_0069.json",
+      "sha256": "a167b8108942da81467c8a0af804cb6b80e516952046e5ef43f7dfd7c05928ce"
+    },
+    {
+      "path": "data/devices/devices_0070.json",
+      "sha256": "71eb6667b6b6ef93cabc02cfbcaca87d3a4a6184b62d9ec101fd26b506125c43"
+    },
+    {
+      "path": "data/devices/devices_0071.json",
+      "sha256": "5420ead42e917ee34092137bb0f10f122006b290ace3ff2f3a8dbf79b4d95a02"
+    },
+    {
+      "path": "data/devices/devices_0072.json",
+      "sha256": "e75a264de51906af86bb5ea3f152156d4a89452a5ebd512eef302ae0e365d786"
+    },
+    {
+      "path": "data/devices/devices_0076.json",
+      "sha256": "8700db5b8ed4bdec7452768e02f6cc3cbbb516aa2d27c3d1f989b24a88793a92"
+    },
+    {
+      "path": "data/devices/devices_0077.json",
+      "sha256": "e7477049ee80d6f6ea1258cec2aadd23f91d8fbce20c2f2b5b4943c45352f7fa"
+    },
+    {
+      "path": "data/devices/devices_0078.json",
+      "sha256": "c66e3763db0988f052a65bbb626401ea967d9f37339519b2cea4103e5466e071"
+    },
+    {
+      "path": "data/devices/microphones.json",
+      "sha256": "5445250b0a19162d7e9f9c21de273993fa731e4a01f0f8e300099094e4e4f1c1"
+    },
+    {
+      "path": "data/devices/wheels_win.json",
+      "sha256": "0c193e8ec4ce1534facdffdd3dc0602850a6b7632fd8c9c9f7d8a68c344554a2"
+    }
+  ],
+  "devices": [
+    {
+      "model": "4kpro",
+      "name": "BRIO 4K STREAM",
+      "type": "CAMERA",
+      "identities": [
+        "046d:086b"
+      ],
+      "depots": [
+        "brio"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "a20_x",
+      "name": "A20 X Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0b2e",
+        "046d:0b35"
+      ],
+      "depots": [
+        "1c835082-43ce-40f2-93ca-80b95279778a",
+        "54af531d-0d5e-4a05-b4d0-6c568b69cd34"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "a50",
+      "name": "A50 Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0b1a",
+        "046d:0b1c"
+      ],
+      "depots": [
+        "31c57519-4155-4492-b0c7-e0018fed3ef7",
+        "bf6f516d-b41d-4ae7-911f-b08e86c829e3"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "a50_x",
+      "name": "A50 X Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0b09",
+        "046d:0b0b"
+      ],
+      "depots": [
+        "8074da8b-78a1-42ca-bfbe-a99c2f924231",
+        "b74b0e5f-da26-4c85-94cc-252316bacac7"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "brio",
+      "name": "Logitech BRIO",
+      "type": "CAMERA",
+      "identities": [
+        "046d:085e"
+      ],
+      "depots": [
+        "brio"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "brio_500",
+      "name": "Logi BRIO 500",
+      "type": "CAMERA",
+      "identities": [
+        "046d:0943"
+      ],
+      "depots": [
+        "12c2963a-9eb9-41fa-b036-087ab39fd082",
+        "85875e86-f3e1-4e79-91ee-232575e2807f"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "brio_501",
+      "name": "Logi BRIO 501",
+      "type": "CAMERA",
+      "identities": [
+        "046d:0946"
+      ],
+      "depots": [
+        "61dc5dd7-7070-4cee-8ad6-8b319e88a712",
+        "809506ef-f10a-4226-b105-8424388e7ad5"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "brio_505",
+      "name": "Logi BRIO 505",
+      "type": "CAMERA",
+      "identities": [
+        "046d:0919"
+      ],
+      "depots": [
+        "3f4405f7-ba51-4dfb-b073-2af81b0996ef",
+        "856ff758-4dac-4dd4-9a95-5ea6ccfcbf81"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "brio_700",
+      "name": "Logi MX Brio 700",
+      "type": "CAMERA",
+      "identities": [
+        "046d:0944"
+      ],
+      "depots": [
+        "6ed8e2d5-3a6c-445b-b162-245e59e994b7",
+        "cf22b71e-6011-4db3-adb7-ca2e29e3a66c"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "brio_705",
+      "name": "Logi BRIO 705",
+      "type": "CAMERA",
+      "identities": [
+        "046d:091d"
+      ],
+      "depots": [
+        "a66cdd1d-9e86-4b2e-a4ef-0246a9179377",
+        "b33be2d7-9bb6-41a2-a474-3a55f1700f9d"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "c920",
+      "name": "HD Pro Webcam C920",
+      "type": "CAMERA",
+      "identities": [
+        "046d:082d",
+        "046d:0892",
+        "046d:08e5"
+      ],
+      "depots": [
+        "c920"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "c922",
+      "name": "1080p Pro Stream Webcam",
+      "type": "CAMERA",
+      "identities": [
+        "046d:085c",
+        "046d:0883",
+        "046d:0894"
+      ],
+      "depots": [
+        "c922"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "c930n",
+      "name": "\u7f57\u6280\u9ad8\u6e05\u7f51\u7edc\u6444\u50cf\u673a C930n",
+      "type": "CAMERA",
+      "identities": [
+        "046d:091c"
+      ],
+      "depots": [
+        "3ae519c1-cd1f-4fac-a6ab-1c7d29f24ecc"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "c930s",
+      "name": "Logi WebCam C930s",
+      "type": "CAMERA",
+      "identities": [
+        "046d:091b"
+      ],
+      "depots": [
+        "4949cb5f-4cba-4919-acc6-cebc1e325df8"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g203",
+      "name": "G102 Prodigy Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:c084"
+      ],
+      "depots": [
+        "g203"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g203_lightsync",
+      "name": "G203 LIGHTSYNC Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:aafd",
+        "046d:ab28",
+        "046d:c092",
+        "046d:c09d"
+      ],
+      "depots": [
+        "g102_g203"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g213",
+      "name": "G213 Prodigy Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:c336"
+      ],
+      "depots": [
+        "g213_belgian",
+        "g213_chinese",
+        "g213_czech",
+        "g213_french",
+        "g213_german",
+        "g213_hungary",
+        "g213_international_2",
+        "g213_italian",
+        "g213_japanese",
+        "g213_korean",
+        "g213_nordic",
+        "g213_portuguese_brazilian",
+        "g213_russian",
+        "g213_spanish",
+        "g213_swiss",
+        "g213_thai",
+        "g213_turkish",
+        "g213_uk",
+        "g213_ukrainian",
+        "g213_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g29",
+      "name": "G29 Driving Force Racing Wheel",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:aab8",
+        "046d:c24f"
+      ],
+      "depots": [
+        "g29",
+        "g29_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g302",
+      "name": "G302 Daedalus Prime",
+      "type": "MOUSE",
+      "identities": [
+        "046d:aab5",
+        "046d:c07f"
+      ],
+      "depots": [
+        "g302"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g303",
+      "name": "G303 Daedalus Apex",
+      "type": "MOUSE",
+      "identities": [
+        "046d:aab6",
+        "046d:c080"
+      ],
+      "depots": [
+        "g303"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g303_wireless",
+      "name": "G303 Shroud Edition Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:409e",
+        "046d:ab11",
+        "046d:c097"
+      ],
+      "depots": [
+        "g303_wireless",
+        "g303_wireless_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g304x",
+      "name": "G304 X LIGHTSPEED Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40bc",
+        "046d:abe5",
+        "046d:c0a7"
+      ],
+      "depots": [
+        "9fc962b1-6556-4b2d-914c-279bffc6fb99",
+        "e2a8e5b2-ae29-4a51-99dc-cc360bb970cf"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g305",
+      "name": "G305 Lightspeed Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4074"
+      ],
+      "depots": [
+        "g305"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g305_x",
+      "name": "G305 X SUPERLIGHT Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40bb",
+        "046d:ab37",
+        "046d:b046",
+        "046d:c0a4"
+      ],
+      "depots": [
+        "0d085330-7f9d-458b-b71e-9fb1f9e0bf43"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g309",
+      "name": "G309 LIGHTSPEED Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40b1",
+        "046d:b03c"
+      ],
+      "depots": [
+        "336aca3f-d16d-4cb9-99fc-43dabff554f5",
+        "3be0a036-daa1-4278-8026-de8b5270d1a9"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g310",
+      "name": "G310 Atlas Dawn",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:aab3",
+        "046d:c32d"
+      ],
+      "depots": [
+        "g310_chinese",
+        "g310_french",
+        "g310_german",
+        "g310_international",
+        "g310_japanese",
+        "g310_korean",
+        "g310_nordic",
+        "g310_russian",
+        "g310_spanish",
+        "g310_swiss",
+        "g310_thai",
+        "g310_turkish",
+        "g310_uk",
+        "g310_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g316",
+      "name": "G316",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abe8",
+        "046d:c366"
+      ],
+      "depots": [
+        "ca3a7ac2-5171-4d12-842a-4172f9c1d26b"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g316x",
+      "name": "G316 X",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abe2",
+        "046d:c361"
+      ],
+      "depots": [
+        "2bec9a95-b8b6-4cc3-a5e6-82a466bb2d32",
+        "cfd40118-da7c-4797-b34a-7ab0cb68ff43"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g316x_ww_75",
+      "name": "G316 X 75",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abed",
+        "046d:c36a"
+      ],
+      "depots": [
+        "ea8c44dc-82bf-460d-b2eb-c6cfec19909d",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec19909e",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec19909f",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199100",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199101",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199102",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199103",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199104",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199105",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199106",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199107",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199108",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199109",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec19910a",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec19910c",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec19910f",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199110",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199111",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199112",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199113",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199114",
+        "ea8c44dc-82bf-460d-b2eb-c6cfec199115"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g316x_ww_98",
+      "name": "G316 X 98",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abee",
+        "046d:c36b"
+      ],
+      "depots": [
+        "35ff0dc2-4a1e-42be-89ab-bf064418945a",
+        "35ff0dc2-4a1e-42be-89ab-bf064418945b",
+        "35ff0dc2-4a1e-42be-89ab-bf064418945c",
+        "35ff0dc2-4a1e-42be-89ab-bf064418945d",
+        "35ff0dc2-4a1e-42be-89ab-bf064418945e",
+        "35ff0dc2-4a1e-42be-89ab-bf064418945f",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189460",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189461",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189462",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189463",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189464",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189465",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189466",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189467",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189469",
+        "35ff0dc2-4a1e-42be-89ab-bf064418946c",
+        "35ff0dc2-4a1e-42be-89ab-bf064418946d",
+        "35ff0dc2-4a1e-42be-89ab-bf064418946e",
+        "35ff0dc2-4a1e-42be-89ab-bf064418946f",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189470",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189471",
+        "35ff0dc2-4a1e-42be-89ab-bf0644189472",
+        "ffea1ec3-d8e6-43ea-a183-e29905192aee"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g325",
+      "name": "G325 Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0b21"
+      ],
+      "depots": [
+        "fea2de54-d088-419f-88ee-06415eb17698"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g402",
+      "name": "G402 Hyperion Fury",
+      "type": "MOUSE",
+      "identities": [
+        "046d:aab4",
+        "046d:c07e"
+      ],
+      "depots": [
+        "g402"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g403_hero",
+      "name": "G403 HERO Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:aaf2",
+        "046d:c08f"
+      ],
+      "depots": [
+        "g403_hero",
+        "g403_hero_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g403_wired",
+      "name": "G403 Prodigy Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:c083"
+      ],
+      "depots": [
+        "g403"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g403_wireless",
+      "name": "G403 Prodigy Gaming Mouse Wireless",
+      "type": "MOUSE",
+      "identities": [
+        "046d:405d",
+        "046d:c082"
+      ],
+      "depots": [
+        "g403"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g410",
+      "name": "G410 Atlas Spectrum",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:aabc",
+        "046d:c330"
+      ],
+      "depots": [
+        "g410_chinese",
+        "g410_french",
+        "g410_german",
+        "g410_international",
+        "g410_japanese",
+        "g410_korean",
+        "g410_nordic",
+        "g410_russian",
+        "g410_spanish",
+        "g410_swiss",
+        "g410_turkish",
+        "g410_uk",
+        "g410_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g413",
+      "name": "G413 Carbon",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:c33a"
+      ],
+      "depots": [
+        "g413_belgian",
+        "g413_chinese",
+        "g413_french",
+        "g413_german",
+        "g413_international_2",
+        "g413_italian",
+        "g413_japanese",
+        "g413_korean",
+        "g413_nordic",
+        "g413_portuguese",
+        "g413_portuguese_brazilian",
+        "g413_russian",
+        "g413_spanish",
+        "g413_swiss",
+        "g413_thai",
+        "g413_turkish",
+        "g413_uk",
+        "g413_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g430",
+      "name": "G430",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a4d"
+      ],
+      "depots": [
+        "g430"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g431",
+      "name": "G431 Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a9b"
+      ],
+      "depots": [
+        "g431"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g432",
+      "name": "G432 Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a9c"
+      ],
+      "depots": [
+        "g432"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g433",
+      "name": "G433 Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a6d"
+      ],
+      "depots": [
+        "g433"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g502_core",
+      "name": "G502 Proteus Core",
+      "type": "MOUSE",
+      "identities": [
+        "046d:aab3",
+        "046d:c07d"
+      ],
+      "depots": [
+        "g502"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g502_hero",
+      "name": "G502 Hero Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:aae6",
+        "046d:c08b"
+      ],
+      "depots": [
+        "g502_hero",
+        "g502_hero_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g502_spectrum",
+      "name": "G502 Proteus Spectrum",
+      "type": "MOUSE",
+      "identities": [
+        "046d:c332"
+      ],
+      "depots": [
+        "g502"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g502_wireless",
+      "name": "G502 LIGHTSPEED Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:407f",
+        "046d:aaef",
+        "046d:c08d"
+      ],
+      "depots": [
+        "g502_wireless"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g502x",
+      "name": "G502 X Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:c099"
+      ],
+      "depots": [
+        "c2faa1f8-29e1-4807-af39-ad470c43b872"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g502x_lightspeed",
+      "name": "G502 X LIGHTSPEED Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:409f",
+        "046d:ab12",
+        "046d:c098"
+      ],
+      "depots": [
+        "a33e3279-a071-4e44-a540-69563ca5a0a8"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g502x_plus",
+      "name": "G502 X PLUS Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4099",
+        "046d:ab0b",
+        "046d:c095"
+      ],
+      "depots": [
+        "97b085d9-0fde-406b-8bcd-b244746387e7"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g502x_wl",
+      "name": "G502 X PLUS MILLENNIUM FALCON\u2122 Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40b2",
+        "046d:abd2",
+        "046d:c09e"
+      ],
+      "depots": [
+        "4b69eab3-c305-42ce-a98c-03a7247d06b2"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g512_se",
+      "name": "G512",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:c342"
+      ],
+      "depots": [
+        "g512_se_belgian",
+        "g512_se_chinese",
+        "g512_se_french",
+        "g512_se_german",
+        "g512_se_international_2",
+        "g512_se_italian",
+        "g512_se_japanese",
+        "g512_se_korean",
+        "g512_se_nordic",
+        "g512_se_portuguese",
+        "g512_se_portuguese_brazilian",
+        "g512_se_russian",
+        "g512_se_spanish",
+        "g512_se_swiss",
+        "g512_se_thai",
+        "g512_se_turkish",
+        "g512_se_uk",
+        "g512_se_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g512_x_75",
+      "name": "G512 X 75% Corded Dual Switch Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abe0",
+        "046d:c35f"
+      ],
+      "depots": [
+        "14b1f0ea-d572-4c96-9b76-ea9c9274e1c4",
+        "1e503de0-f0f4-42a1-a0b6-69ca12a123eb",
+        "23953f4d-82ee-4378-a238-c9434f91a75f",
+        "388e811f-cbdd-4e08-b66c-c188371357b9",
+        "3ed54256-5ffc-4464-9d0f-457b62a44ee8",
+        "421c0c94-40a1-4afc-9216-5b46540e964a",
+        "595a01d7-4f1e-4600-851e-2c6e71461b24",
+        "6b584551-a9b1-4f65-9079-486b2460d728",
+        "806028b2-bd9b-4a89-bf57-16d80f900ad6",
+        "8d9cd12b-3d0e-456c-9735-43da43e631c7",
+        "90892c30-dc90-4f46-a411-a2c4fc8bfe99",
+        "a32198e0-7f83-4322-b58c-2d1a32125667",
+        "a4df6ee7-2510-407a-8a76-8558498e99e5",
+        "a8d1a043-4b05-4e85-8c4c-d0f456b4c36e",
+        "f6040f85-cf3c-4134-9fac-c5b4e3c17e66"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g512_x_98",
+      "name": "G512 X 98% Corded Dual Switch Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abe1",
+        "046d:c360"
+      ],
+      "depots": [
+        "0c329ff7-fa0b-4741-8c95-104aa6f036bf",
+        "13b9242d-9457-4bbe-92ba-5bd94d0628ea",
+        "1572b599-01ee-4370-9c49-0d5ff2b5ef65",
+        "2800719c-f920-4a6f-bd89-57b24563e165",
+        "2db679b6-b4d7-419b-b79f-d05cba659976",
+        "a012f6c5-f9ab-4fd4-8e89-631c8efa168b",
+        "a43492be-99fd-4674-a783-f7f865792a6a",
+        "b3e76c83-9667-42dd-875e-130d3f0583ce",
+        "b94010f8-37b7-4658-bd0b-9f955b09e822",
+        "bac1cbf1-2def-43ad-89d8-f48b5be36715",
+        "c0262f8c-74e8-48bb-962c-6a9be68a0d16",
+        "c050a319-be0e-4970-ba8c-42e16a68627e",
+        "d11c02b5-ada8-42d9-a993-2aa85cc530ec",
+        "d9a2fc40-c216-4df0-aae7-1bf62b6ba4bb",
+        "eea1b26b-945c-44ea-835e-cbb912c1cfaa"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g513",
+      "name": "G513 Carbon Tactile",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:aadc",
+        "046d:c33c"
+      ],
+      "depots": [
+        "g513_belgian",
+        "g513_chinese",
+        "g513_french",
+        "g513_german",
+        "g513_international_2",
+        "g513_italian",
+        "g513_japanese",
+        "g513_korean",
+        "g513_nordic",
+        "g513_portuguese",
+        "g513_portuguese_brazilian",
+        "g513_russian",
+        "g513_spanish",
+        "g513_swiss",
+        "g513_thai",
+        "g513_turkish",
+        "g513_uk",
+        "g513_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g515_ls_tkl",
+      "name": "G515 LIGHTSPEED TKL Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:40b4",
+        "046d:abd5",
+        "046d:b389",
+        "046d:c355"
+      ],
+      "depots": [
+        "11d708d4-5294-4949-818d-30b10d66860e",
+        "168fecf9-2c54-4e4f-b0bd-820469ee2504",
+        "1decae9f-87d6-46f7-a919-c6ab9a5283b4",
+        "20937555-aa45-44eb-ad8f-a18f7e74474e",
+        "27e3186e-9182-4252-ade3-f2d400643032",
+        "28606d05-bf0c-4747-ba1d-e0dd4a0fb007",
+        "42a18b9f-7614-4b4e-9b31-36c9d3bd3225",
+        "5116aa21-97c2-40d4-8d7c-1bb4707634d8",
+        "592b81ab-6e86-4218-85da-b679b35be659",
+        "62ef05de-a129-4824-acbb-dc00c5e1c1d4",
+        "718eb03f-c6af-426f-ba35-2401cbc1e989",
+        "7da7c149-6cf5-4ff8-82e5-1b998560b026",
+        "82cf42dc-4cc0-45ef-920f-9aed797290bc",
+        "84343abb-8548-4492-8e62-5ab57e6cebdd",
+        "8908cd51-96c7-483e-9ab2-f333ee9e4517",
+        "8d6999f7-796d-4bc4-b322-9f0d3486f79e",
+        "90995a44-767b-46ed-a50a-93744fedaaba",
+        "976a554b-f096-4788-a9e1-301c8dcd8de3",
+        "bbd45cf1-3eca-49a5-a6a6-bc0827523c5c",
+        "c5068917-823b-423d-a96b-a06f4a7fcb01",
+        "c79eadf5-db83-4b70-94ed-94f57aa1356a",
+        "d45fc597-f678-49fc-a148-01084abdb421",
+        "g515_ls_tkl_keyboard_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g515_tkl",
+      "name": "G515 TKL Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abd8",
+        "046d:c358"
+      ],
+      "depots": [
+        "01230255-b0fa-4590-89af-9a58a7fc22ec",
+        "0554111e-d37b-4649-a53d-4ea9c34c71fd",
+        "0878eac0-cf51-455c-8307-7920e400ccef",
+        "124e1e80-3e8b-409a-96dd-44c3b8249a03",
+        "19d951e5-7977-409b-8bf3-b3f920f525c4",
+        "2ba9327d-53eb-4375-89b0-4c0c1a20f48d",
+        "40415a1f-2565-449a-bfa5-9dd85205e253",
+        "4b7db0d1-c963-4a33-86d4-64f2df0adcf0",
+        "573c1a65-905a-457e-a5ad-954330e71aad",
+        "6f1c1089-e92f-4d91-8790-bfeb5bc08cb5",
+        "6fca4623-67ae-4aba-be50-ed282c6e4ca5",
+        "75aefdca-bb5d-485a-8e76-97600fa759ce",
+        "7a6da0e4-56fe-4c55-807b-02214d154bf9",
+        "7c7590ec-564e-4666-83bd-b6b645e78c7d",
+        "7e813621-2df6-43d7-b3a7-70150d071b3a",
+        "8be87e67-b6e0-48c1-baaf-6bd67e0bfd75",
+        "bd071574-a8c2-426e-a255-d9273e34cd50",
+        "c1aacf44-61f5-4b6c-9b3f-dd8f7fe91360",
+        "dd7d3225-74e2-4acc-a4bf-38712d2aa200",
+        "f1bf2d4b-f2a9-4740-a30b-33f975fc5845",
+        "f52e3ffd-f87d-4236-ba1d-06b05a93edf5",
+        "f7062948-7d78-4c2a-8431-0cf72feb2fc2",
+        "g515_tkl_keyboard_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g515_tkl_rapid",
+      "name": "G515 RAPID TKL Analog Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abe3",
+        "046d:c363"
+      ],
+      "depots": [
+        "1ac4e07d-5ac6-4e53-a32f-ea6f3ed1eb59",
+        "23a7e7d1-8939-40e3-ab2d-0c898898bf54",
+        "347a6453-62d4-485d-b67c-2f74659b2470",
+        "430bca5a-b2b3-4554-92ee-547e345c0838",
+        "49f96773-cdda-4ff6-ae99-a98f6e20e03c",
+        "5a5d4e01-8dd8-4274-8f84-dcc0002a66ab",
+        "5df957a3-beef-4d93-bdcb-e40af067e24a",
+        "898528d9-4756-4a52-a152-09faddd94224",
+        "8a47c541-db43-4641-b514-266288bdb93f",
+        "9e576b39-aaf7-413b-8ca5-04d3f94a5f99",
+        "ac1a3e01-6a76-4ddf-8afa-8914ed5ebeb5",
+        "b58e145a-6249-46aa-a935-4198d2402ddb",
+        "b5c3c16a-bd98-4905-8c93-43f192e81a11",
+        "cc059033-4ed5-42b0-b3c7-610678fa93e7"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g517_ls_tkl",
+      "name": "G517 Lightspeed TKL Wireless Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:40b9",
+        "046d:abda",
+        "046d:b390",
+        "046d:c35a"
+      ],
+      "depots": [
+        "09a9f2d2-e759-4f21-bec1-0c1ac618b3cb"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g522",
+      "name": "G522 Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0b18",
+        "046d:0b19"
+      ],
+      "depots": [
+        "61dcbf19-df53-4ac1-8fbf-03ef427ebac6",
+        "ab60b41d-80d9-4a6c-b2be-65436b76070d"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g533",
+      "name": "G533 Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a66"
+      ],
+      "depots": [
+        "g533"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g535",
+      "name": "G535 Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0ac4"
+      ],
+      "depots": [
+        "g535"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g560",
+      "name": "G560 Gaming Speaker",
+      "type": "SPEAKER",
+      "identities": [
+        "046d:0a78"
+      ],
+      "depots": [
+        "g560"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g600",
+      "name": "G600 MMO Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:c24a"
+      ],
+      "depots": [
+        "g600"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g602",
+      "name": "G602 Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:c537"
+      ],
+      "depots": [
+        "g602"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g603",
+      "name": "G603 Lightspeed Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:406c"
+      ],
+      "depots": [
+        "g603"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g604",
+      "name": "G604 Lightspeed Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4085",
+        "046d:b024"
+      ],
+      "depots": [
+        "g604",
+        "g604_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g610",
+      "name": "G610 Orion",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:aacd",
+        "046d:c333",
+        "046d:c338"
+      ],
+      "depots": [
+        "g610_chinese",
+        "g610_french",
+        "g610_german",
+        "g610_international",
+        "g610_international_2",
+        "g610_japanese",
+        "g610_korean",
+        "g610_nordic",
+        "g610_russian",
+        "g610_spanish",
+        "g610_swiss",
+        "g610_thai",
+        "g610_turkish",
+        "g610_uk",
+        "g610_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g613",
+      "name": "G613 Wireless Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:4065",
+        "046d:aacd"
+      ],
+      "depots": [
+        "g613_chinese",
+        "g613_french",
+        "g613_german",
+        "g613_international_2",
+        "g613_japanese",
+        "g613_korean",
+        "g613_nordic",
+        "g613_russian",
+        "g613_spanish",
+        "g613_swiss",
+        "g613_thai",
+        "g613_turkish",
+        "g613_uk",
+        "g613_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g633",
+      "name": "G633 Artemis Spectrum",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a5c"
+      ],
+      "depots": [
+        "g633"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g635",
+      "name": "G635 Wired 7.1 LIGHTSYNC Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a89"
+      ],
+      "depots": [
+        "g635"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g703",
+      "name": "G703 LIGHTSPEED Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4070",
+        "046d:c087"
+      ],
+      "depots": [
+        "g703"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g703_hero",
+      "name": "G703 LIGHTSPEED Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4086",
+        "046d:aaf6",
+        "046d:c090"
+      ],
+      "depots": [
+        "g703_hero",
+        "g703_hero_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g705",
+      "name": "G705 Garnet",
+      "type": "MOUSE",
+      "identities": [
+        "046d:409d",
+        "046d:ab10",
+        "046d:b02e",
+        "046d:c096"
+      ],
+      "depots": [
+        "c69d172e-a23c-421b-a5f0-d7f18c8d127c"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g713",
+      "name": "G713 Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:ab16",
+        "046d:c348"
+      ],
+      "depots": [
+        "070460a0-f4ac-419c-856e-bdee7b3fb66f",
+        "08286cd5-c05d-4334-8829-431eac4533a5",
+        "385f8a73-5cf2-435e-ac25-1cf5c11f3ede",
+        "391a3f4a-6f05-41e7-a91d-016453c51d7c",
+        "3cad4340-1644-4d5b-b554-18179aa6292f",
+        "411b607d-3d77-46f1-90fc-a07cadbac9fd",
+        "49cbb334-f817-440c-9b6b-0845774383b2",
+        "49ee6659-b7f0-435d-88f4-30d3153b6992",
+        "5e51f692-f375-492d-86f7-3f858a1b0283",
+        "63a8f634-3e0a-484c-a3a6-30cd1350be16",
+        "78294dca-b8a3-4fb2-af34-09767b5721f6",
+        "7dd50cd2-e0f1-4a9f-86d7-9ab30b5a4714",
+        "8ef3e317-46c8-442c-ae82-bd3a8dacf57c",
+        "d6f4c83e-1324-47b5-ad96-f5b05f5db90b",
+        "g713_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g715",
+      "name": "G715 Wireless Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:40a2",
+        "046d:ab15",
+        "046d:b368",
+        "046d:c347"
+      ],
+      "depots": [
+        "11baa3b3-8a93-4bbd-ac4a-faf25dbc201a",
+        "16bcbb4c-9268-4cfd-b028-c7c932c72da9",
+        "1bff222d-d949-4e7c-8c2b-8176eea12e87",
+        "3a3958e5-08b9-4128-afd3-84523481ad09",
+        "5e9569e9-e481-4a69-a8f1-9df97d9aca16",
+        "65000386-1d13-432a-877c-6767f63f9c8b",
+        "7ea56a96-6672-4d8a-9d27-54bdc8cfdf35",
+        "98215737-4251-470b-8a92-5764f398080a",
+        "a06f883a-d365-4fe3-8282-04fcfd4a68fa",
+        "bdc71c09-4558-4aef-8830-c6c36b64bc6c",
+        "dca1192d-ace8-48d4-b4f0-4eafd7e81a90",
+        "efa33740-ae72-4a4e-b71a-47dd76e9c988",
+        "f0f9fbb1-0444-49ad-8894-56d22092b733",
+        "f6e75734-ceff-4a20-b3c1-82ecdd956136",
+        "g715_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g733",
+      "name": "G733 Wireless LIGHTSYNC Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0ab5",
+        "046d:0afe",
+        "046d:0b1f"
+      ],
+      "depots": [],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g735",
+      "name": "G735 Wireless Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0ad8"
+      ],
+      "depots": [
+        "g735"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g810",
+      "name": "G810 Orion Spectrum",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:aabd",
+        "046d:aacc",
+        "046d:c331",
+        "046d:c337"
+      ],
+      "depots": [
+        "g810_chinese",
+        "g810_french",
+        "g810_german",
+        "g810_international",
+        "g810_international_2",
+        "g810_japanese",
+        "g810_korean",
+        "g810_nordic",
+        "g810_russian",
+        "g810_spanish",
+        "g810_swiss",
+        "g810_thai",
+        "g810_turkish",
+        "g810_uk",
+        "g810_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g815",
+      "name": "G815 RGB Mechanical Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:c33f"
+      ],
+      "depots": [
+        "g815_belgian",
+        "g815_chinese",
+        "g815_french",
+        "g815_german",
+        "g815_international_2",
+        "g815_italian",
+        "g815_japanese",
+        "g815_korean",
+        "g815_nordic",
+        "g815_portuguese",
+        "g815_russian",
+        "g815_spanish",
+        "g815_swiss",
+        "g815_thai",
+        "g815_turkish",
+        "g815_uk",
+        "g815_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g900",
+      "name": "G900 Chaos Spectrum Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4053",
+        "046d:aaba",
+        "046d:c081"
+      ],
+      "depots": [
+        "g900"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g903",
+      "name": "G903 LIGHTSPEED Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4067",
+        "046d:aad8",
+        "046d:c086"
+      ],
+      "depots": [
+        "g903",
+        "g903_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g903_hero",
+      "name": "G903 LIGHTSPEED Wireless Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4087",
+        "046d:aaf7",
+        "046d:c091"
+      ],
+      "depots": [
+        "g903_hero",
+        "g903_hero_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g910",
+      "name": "G910 Orion Spark",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:c32b",
+        "046d:c335"
+      ],
+      "depots": [
+        "g910_chinese",
+        "g910_french",
+        "g910_german",
+        "g910_international",
+        "g910_international_2",
+        "g910_japanese",
+        "g910_korean",
+        "g910_nordic",
+        "g910_russian",
+        "g910_spanish",
+        "g910_swiss",
+        "g910_thai",
+        "g910_turkish",
+        "g910_uk",
+        "g910_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g915",
+      "name": "G915 Wireless RGB Mechanical Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:407c",
+        "046d:aae3",
+        "046d:b354",
+        "046d:c33e"
+      ],
+      "depots": [
+        "g915_belgian",
+        "g915_chinese",
+        "g915_dfu",
+        "g915_french",
+        "g915_german",
+        "g915_international_2",
+        "g915_italian",
+        "g915_japanese",
+        "g915_korean",
+        "g915_nordic",
+        "g915_portuguese",
+        "g915_russian",
+        "g915_spanish",
+        "g915_swiss",
+        "g915_thai",
+        "g915_tkl_belgian",
+        "g915_tkl_chinese",
+        "g915_tkl_dfu",
+        "g915_tkl_french",
+        "g915_tkl_german",
+        "g915_tkl_international",
+        "g915_tkl_international_2",
+        "g915_tkl_italian",
+        "g915_tkl_japanese",
+        "g915_tkl_korean",
+        "g915_tkl_nordic",
+        "g915_tkl_portuguese",
+        "g915_tkl_portuguese_brazilian",
+        "g915_tkl_russian",
+        "g915_tkl_spanish",
+        "g915_tkl_swiss",
+        "g915_tkl_thai",
+        "g915_tkl_turkish",
+        "g915_tkl_uk",
+        "g915_tkl_us",
+        "g915_turkish",
+        "g915_uk",
+        "g915_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g915_tkl",
+      "name": "G915 TKL Wireless RGB Mechanical Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:408e",
+        "046d:aafb",
+        "046d:b35f",
+        "046d:c343"
+      ],
+      "depots": [
+        "g915_tkl_belgian",
+        "g915_tkl_chinese",
+        "g915_tkl_dfu",
+        "g915_tkl_french",
+        "g915_tkl_german",
+        "g915_tkl_international",
+        "g915_tkl_international_2",
+        "g915_tkl_italian",
+        "g915_tkl_japanese",
+        "g915_tkl_korean",
+        "g915_tkl_nordic",
+        "g915_tkl_portuguese",
+        "g915_tkl_portuguese_brazilian",
+        "g915_tkl_russian",
+        "g915_tkl_spanish",
+        "g915_tkl_swiss",
+        "g915_tkl_thai",
+        "g915_tkl_turkish",
+        "g915_tkl_uk",
+        "g915_tkl_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g915_x",
+      "name": "G915 X RGB Mechanical Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abd9",
+        "046d:c359"
+      ],
+      "depots": [
+        "17948d46-65d6-4d0d-8768-da6bb1d5783c",
+        "2700fc8f-9a72-431c-a8e2-3b642f1bc5f9",
+        "27eac74c-a34a-4420-9e10-cbe1af903fc9",
+        "388cadc3-a20d-4a9d-9d3e-bc180dbb0112",
+        "3b9d92fc-a5e9-4393-963f-8b39e6f78723",
+        "668962f5-9912-4911-9c48-50fc141ed41f",
+        "81a7e5b3-9c1d-4800-9d6f-2a1975f897c6",
+        "86f94a9a-a124-423b-9a6f-0d99c6cdc160",
+        "8a4ebfbf-ca9c-434e-91e6-cd6a61a82397",
+        "96a30933-0aa1-4d70-b350-226e88d369bb",
+        "b0ea4a2b-3684-41d1-ba8f-bbf68723c570",
+        "e5435cd3-0ce1-4331-a52d-a539f75e8bd8",
+        "fb14b7ba-8cd5-4257-aa13-fbc0010f8fb5"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g915_x_ls",
+      "name": "G915 X Lightspeed Wireless RGB Mechanical Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:40b5",
+        "046d:abd6",
+        "046d:b38a",
+        "046d:c356"
+      ],
+      "depots": [
+        "0f9d5591-f106-4635-865f-dcfff3e2b781",
+        "1f334057-4eb6-4b7e-bcba-c0fb62a46d97",
+        "29f96668-148b-469f-bc99-1a86c06a1489",
+        "3afe8435-3d4e-429e-85d0-e75cf8188af6",
+        "4280d878-a5c6-4ba8-9b10-aa3caac6faca",
+        "723738e4-875b-4c80-bb32-c417931dd4f1",
+        "83294219-16aa-4d9f-80f8-2b14d2cb8421",
+        "9a335f05-656a-4a89-a6f2-303feee3efc0",
+        "9fdb2f69-d9ce-432f-82a1-d1775b69c178",
+        "bf327cec-5df2-46a5-991a-ddb9b7b1bac7",
+        "d4913693-ce0c-4b01-829b-2b5e004bd7b0",
+        "e4130fc1-349c-47c9-a5a6-3dc27321dc0c",
+        "fa77a0ed-508c-4bdb-b295-ea7bde631ff9"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g915_x_ls_tkl",
+      "name": "G915 X Lightspeed TKL Wireless RGB Mechanical Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:40b6",
+        "046d:abd7",
+        "046d:b38b",
+        "046d:c357"
+      ],
+      "depots": [
+        "1f6cd425-0e3e-4029-8f2f-dc9050650e00",
+        "36bf857e-0716-4270-b0cd-d2c23f45c52e",
+        "3741d61a-266f-4248-9328-312093c8413b",
+        "58187d7c-16d9-4669-8eed-968f15ca407f",
+        "58d5f811-a82b-42bb-949d-4ab7e0b8ea8d",
+        "67a4f473-454a-4aeb-915b-a88e1411c89e",
+        "a7c227e7-d14a-4efe-9883-6c230f51791c",
+        "ac80f1ef-97ca-4528-bb71-514eeed9a315",
+        "b5238a42-9631-4abc-9711-1895614c3b6b",
+        "bf7f5fb3-930c-42e8-8e81-444b41c142da",
+        "d82948f6-1065-4521-8bc0-6e38d05f7776",
+        "e79d4062-8251-4a2e-93de-661f09abf5c0",
+        "fd06962e-6e72-4606-bacc-88d9425f31f3"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g920",
+      "name": "G920 Driving Force Racing Wheel",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:aab9",
+        "046d:c262"
+      ],
+      "depots": [
+        "g920",
+        "g920_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g923",
+      "name": "G923 Racing Wheel for XBox One and PC",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:aaf1",
+        "046d:c26e"
+      ],
+      "depots": [
+        "driver_usb",
+        "g923_pc_xb_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g923_ps4",
+      "name": "G923 Racing Wheel for PlayStation 4 and PC",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c266"
+      ],
+      "depots": [
+        "g923_ps4"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g933",
+      "name": "G933 Gaming Wireless Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a5b"
+      ],
+      "depots": [
+        "g933"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g935",
+      "name": "G935 Wireless 7.1 LIGHTSYNC Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0a87"
+      ],
+      "depots": [
+        "g935"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "g_fits",
+      "name": "G FITS Dongle",
+      "type": "EARBUDS",
+      "identities": [
+        "046d:0a7b"
+      ],
+      "depots": [
+        "65f9e7a5-2f4c-4ee3-8b5c-10d856baf847",
+        "990cd69d-53be-4a9d-ad64-586cfab9b274"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "litra_beam",
+      "name": "LITRA BEAM",
+      "type": "ILLUMINATION_LIGHT",
+      "identities": [
+        "046d:b901",
+        "046d:c901",
+        "046d:c902"
+      ],
+      "depots": [
+        "c3c4ac7f-10c5-425f-9872-968c2e35cf2e",
+        "fc0fb96e-2917-4919-814f-d1f6f17b7e0a"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "litra_beam_lx",
+      "name": "LITRA BEAM LX",
+      "type": "ILLUMINATION_LIGHT",
+      "identities": [
+        "046d:b903",
+        "046d:c903",
+        "046d:c904"
+      ],
+      "depots": [
+        "dcc226e3-fa1b-40a3-9b26-c687ff62dd80",
+        "fc910d40-e699-460d-a0c0-9e6f2a3774c0"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "litra_glow",
+      "name": "LITRA GLOW",
+      "type": "ILLUMINATION_LIGHT",
+      "identities": [
+        "046d:c900"
+      ],
+      "depots": [
+        "95e074bb-3756-4e14-b7ed-f3ba899826b3"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "mx518",
+      "name": "MX518 Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:c08e"
+      ],
+      "depots": [
+        "mx518"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "ni_g413_se",
+      "name": "G413 SE / G412 SE Mechanical Gaming Keyboard",
+      "type": "HID_DEVICE",
+      "identities": [
+        "046d:c349"
+      ],
+      "depots": [],
+      "subdevice": false,
+      "non_interactive": true
+    },
+    {
+      "model": "ni_g413_tkl_se",
+      "name": "G413 TKL SE / G412 TKL SE Mechanical Gaming Keyboard",
+      "type": "HID_DEVICE",
+      "identities": [
+        "046d:c34a"
+      ],
+      "depots": [],
+      "subdevice": false,
+      "non_interactive": true
+    },
+    {
+      "model": "ni_g435",
+      "name": "G435",
+      "type": "HID_DEVICE",
+      "identities": [
+        "046d:0acb",
+        "046d:0adf"
+      ],
+      "depots": [],
+      "subdevice": false,
+      "non_interactive": true
+    },
+    {
+      "model": "powerplay",
+      "name": "POWERPLAY Wireless Charging System",
+      "type": "CHARGE_PAD",
+      "identities": [
+        "046d:405f"
+      ],
+      "depots": [
+        "powerplay"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_2_wireless_mouse",
+      "name": "PRO 2 Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40a8",
+        "046d:ab1b",
+        "046d:c09a"
+      ],
+      "depots": [
+        "4641b15e-c030-4e6f-bd28-3d0d07ca0250",
+        "da57e425-427d-4c55-84f4-bdc13471f298"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_71_gaming_headset",
+      "name": "PRO X Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0aaa"
+      ],
+      "depots": [
+        "pro_headset"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_71_gaming_wireless_headset",
+      "name": "PRO X Wireless Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0aba"
+      ],
+      "depots": [
+        "pro_headset"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_base_drive",
+      "name": "PRO WHEEL DRIVE",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c268",
+        "046d:c272"
+      ],
+      "depots": [],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_gaming_headset",
+      "name": "Pro Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0aa7"
+      ],
+      "depots": [
+        "pro_headset"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_keyboard",
+      "name": "PRO Mechanical gaming keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:aadc",
+        "046d:c339"
+      ],
+      "depots": [
+        "pro_keyboard_chinese",
+        "pro_keyboard_french",
+        "pro_keyboard_german",
+        "pro_keyboard_international_2",
+        "pro_keyboard_japanese",
+        "pro_keyboard_korean",
+        "pro_keyboard_nordic",
+        "pro_keyboard_russian",
+        "pro_keyboard_spanish",
+        "pro_keyboard_thai",
+        "pro_keyboard_uk",
+        "pro_keyboard_us"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_mouse",
+      "name": "PRO Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:c085"
+      ],
+      "depots": [
+        "pro_mouse"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_mouse_hero",
+      "name": "PRO HERO Gaming Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:aae7",
+        "046d:c08c"
+      ],
+      "depots": [
+        "pro_mouse_hero",
+        "pro_mouse_hero_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_racing_pedals",
+      "name": "PRO RACING PEDALS",
+      "type": "PEDALS",
+      "identities": [
+        "046d:aaec",
+        "046d:c268",
+        "046d:c26a",
+        "046d:c272",
+        "046d:c276"
+      ],
+      "depots": [
+        "pro_racing_pedals",
+        "pro_racing_pedals_dfu"
+      ],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_racing_wheel",
+      "name": "PRO RACING WHEEL",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:aaff",
+        "046d:c268",
+        "046d:c272"
+      ],
+      "depots": [
+        "pro_racing_wheel_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_rim_pc",
+      "name": "PRO PC RIM",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c272",
+        "046d:c276"
+      ],
+      "depots": [],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_rim_playstation",
+      "name": "PRO PLAYSTATION RIM",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c268",
+        "046d:c276"
+      ],
+      "depots": [],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_rim_xbox",
+      "name": "PRO XBOX RIM",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c272",
+        "046d:c276"
+      ],
+      "depots": [],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_wireless_mouse",
+      "name": "Pro Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4079",
+        "046d:aadf",
+        "046d:c088"
+      ],
+      "depots": [
+        "pro_wireless_mouse_depot",
+        "pro_wireless_mouse_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x2_gaming_wireless_headset",
+      "name": "PRO X 2 Lightspeed Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0af7"
+      ],
+      "depots": [
+        "097fdd67-a78f-4e1f-8807-f2fc4f951705",
+        "9c0508de-b0c8-4204-b1bf-07046bf5853a"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x2_rapid",
+      "name": "PRO X2 Rapid Analog Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abe4",
+        "046d:c364"
+      ],
+      "depots": [
+        "054ba23c-be19-472b-b6db-057398090ca2",
+        "106267f8-db51-4308-83fa-c317074ba17b",
+        "1c17516e-d06f-496e-a0d6-721673c18100",
+        "638a4d71-68e4-4212-88a2-54eb33b08650",
+        "8f623124-8390-4c8e-b001-8c2bfa37a410",
+        "939a589b-18b0-4b84-9982-ffa961c03f90",
+        "a921423a-c953-4f95-afa8-440e7339549d",
+        "b2976b85-75ee-4e5f-883e-e58ff040c2a1",
+        "cc85e30e-e9db-4009-b331-474829689516",
+        "d1940f7e-a763-44dd-8158-55355a07dd51",
+        "dc52b437-a1c1-44ef-960f-817a60251745",
+        "f5d16b53-4600-407a-b884-9253c23ad610",
+        "f69d0c95-0da2-4f91-a418-0bb359047cca"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x3_gaming_wireless_headset",
+      "name": "PRO X3 LIGHTSPEED Gaming Headset",
+      "type": "HEADSET",
+      "identities": [
+        "046d:0b45"
+      ],
+      "depots": [
+        "a6691c36-0981-43dd-b41a-a404866a9105"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_2_compact_wireless_mouse",
+      "name": "PRO X SUPERLIGHT 2c Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40b7",
+        "046d:ab35",
+        "046d:c09f"
+      ],
+      "depots": [
+        "3fb3e67d-372d-4f50-8c78-8c82beccba09"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_2_superstrike_wireless_mouse",
+      "name": "PRO X2 SUPERSTRIKE Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40bd",
+        "046d:ab39",
+        "046d:c0a8"
+      ],
+      "depots": [
+        "fe61de21-a6c5-46d0-8e2f-f71e37d6c766"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_2_wireless_mouse",
+      "name": "PRO X SUPERLIGHT 2 Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40a9",
+        "046d:ab1c",
+        "046d:c09b"
+      ],
+      "depots": [
+        "20f15041-7156-48cf-b517-25d15a18d20e",
+        "a61bf574-f5f1-4bb6-b971-12e369cb0b92"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_3_superstrike_wireless_mouse",
+      "name": "PRO X3 SUPERSTRIKE Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40be",
+        "046d:ab39",
+        "046d:c0a9"
+      ],
+      "depots": [
+        "878aa6e8-aee4-44a3-b33b-373857326476",
+        "d34391a4-e9ea-4ea7-b3bd-a157ca83562e"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_60",
+      "name": "PRO X 60% Wireless Gaming Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:40af",
+        "046d:ab29",
+        "046d:b37b",
+        "046d:c351"
+      ],
+      "depots": [
+        "16dd9e25-fd04-4d7a-b4fa-c2af868eef62",
+        "191d80c5-2ad3-4682-b8fd-187434058587",
+        "23434376-6a33-44ea-be3a-4089a6810836",
+        "2714074b-fd2e-41bc-9475-28e421be1763",
+        "2a4dfe6b-ca40-436c-be4b-790cfe1fb807",
+        "2f71e10c-496a-4a64-9fd9-b3ae99799c21",
+        "306f1b32-afdb-4211-8fd8-0af121004f90",
+        "54edc638-c5de-4d2c-8995-293ad20595df",
+        "60fcc10b-59b2-4c8c-97dd-9fb3340842fa",
+        "70d2418b-677e-499d-900a-999a757d15cc",
+        "7217fab2-2fa7-4402-8011-d1c26e1420f2",
+        "7e7b4fc2-a542-4eec-a204-def1e50f0dba",
+        "8d9138cc-0047-4446-908a-443c744af6de",
+        "98e5a5b9-22af-4d20-91ef-72b0a7d89b74",
+        "a0d06604-ba87-48b1-9d64-08e3acf077c4",
+        "bb696445-a31a-441c-aa53-6a0fcd6f5de3",
+        "ccb38616-e3b7-4256-92ba-5efaff09f443",
+        "pro_x_60_keyboard_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_r_wireless_mouse",
+      "name": "PRO X SUPERLIGHT 2 DEX Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:40b8",
+        "046d:ab36",
+        "046d:c0a0"
+      ],
+      "depots": [
+        "7044b939-ba7b-440a-95ec-c65f8d6b9fb5",
+        "e6cb1509-5855-4628-8c97-7a3be9da86f8"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_tkl",
+      "name": "PRO X TKL Wireless Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:40b0",
+        "046d:ab2a",
+        "046d:b382",
+        "046d:c352"
+      ],
+      "depots": [
+        "02b3b2f0-99b3-4d39-8dfa-db29a5c35930",
+        "0371ad82-d169-4ecf-8bec-1a482c849eb5",
+        "169e8eba-a7d0-4068-b8ef-be6b0f5b52e3",
+        "2656754e-35ad-4bbf-8793-95de7124630f",
+        "4ffa2cd8-b23d-47d3-a52c-60b43b14b442",
+        "6f8cb9cb-513d-4897-bb06-0f044371eeb4",
+        "7bcb5242-7a73-4f0d-8a12-d5bd0ce6266c",
+        "7da0cd3e-1407-42d0-8bba-adf143bd01fd",
+        "8f9de36a-ddc1-4a98-8df6-091f69c551a6",
+        "90dc559a-78b4-4387-8140-46ea4fd0a6aa",
+        "952fc551-94f3-41e8-b2cc-03001925e536",
+        "c3eb4c43-25ff-4e7e-bb6f-91bb978efa96",
+        "d49b5dd9-2dc7-428b-b378-a6bb5b6c116e",
+        "e58b079f-3ef0-4124-91e1-99366841bd83",
+        "fc0f8956-ed91-48a4-b025-bb6e691f0e2d"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_tkl_rapid",
+      "name": "PRO X TKL Rapid Analog Keyboard",
+      "type": "KEYBOARD",
+      "identities": [
+        "046d:abdb",
+        "046d:c35b"
+      ],
+      "depots": [
+        "0467c4b2-2e4e-4854-b4b2-c8473bf15297",
+        "0c92b621-d5c3-4bac-a159-3234d7dede93",
+        "30d78363-d122-44d0-b33b-98a0c0ad1674",
+        "366b6cab-4e7f-4840-8f18-96ed93cf554a",
+        "3cbab34c-31f3-46b9-ba62-20ee2f8a3748",
+        "449086f0-92c0-457c-8792-621fbac55f29",
+        "4df437a3-c031-442b-8496-1b07e830b28d",
+        "8a9f863a-953d-4e59-ac9e-1ac4c2a008a6",
+        "c112a6e3-605c-49aa-9cdc-0917b6ca5e38",
+        "d2547c85-6218-4b1f-bab9-e3c999d52eba",
+        "dcad8db9-2397-4e29-af50-549518a518aa"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "pro_x_wireless_mouse",
+      "name": "PRO X SUPERLIGHT Wireless Mouse",
+      "type": "MOUSE",
+      "identities": [
+        "046d:4093",
+        "046d:ab00",
+        "046d:c094"
+      ],
+      "depots": [
+        "pro_x_wireless_mouse",
+        "pro_x_wireless_mouse_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "racing_adapter",
+      "name": "RACING ADAPTER",
+      "type": "ADAPTER",
+      "identities": [
+        "046d:ab23",
+        "046d:c268",
+        "046d:c272",
+        "046d:c273",
+        "046d:c276"
+      ],
+      "depots": [
+        "racing_adapter",
+        "racing_adapter_dfu"
+      ],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "reach",
+      "name": "Logi Reach",
+      "type": "CAMERA",
+      "identities": [
+        "046d:0948"
+      ],
+      "depots": [
+        "c77b8df5-8f33-45c1-9cbc-0db7a9d34b20"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "rs50_base_drive",
+      "name": "RS50 DRIVE",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c268",
+        "046d:c272",
+        "046d:c276"
+      ],
+      "depots": [
+        "rs50_drive_dfu"
+      ],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "rs50_racing_wheel",
+      "name": "RS50 RACING WHEEL",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:ab2b",
+        "046d:c276"
+      ],
+      "depots": [
+        "rs50_racing_wheel_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "rs_h_shifter",
+      "name": "RS H-SHIFTER",
+      "type": "H_SHIFTER",
+      "identities": [
+        "046d:aaed",
+        "046d:c268",
+        "046d:c26b",
+        "046d:c272",
+        "046d:c276"
+      ],
+      "depots": [
+        "081b6e23-1e2b-4bea-9690-b10f6c4b0d22",
+        "5d9706fe-15ec-4239-bac2-42d605e8f0a9"
+      ],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "rs_pedals",
+      "name": "RS PEDALS",
+      "type": "PEDALS",
+      "identities": [
+        "046d:ab2c",
+        "046d:c268",
+        "046d:c272",
+        "046d:c276",
+        "046d:c277"
+      ],
+      "depots": [],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "rs_rim_pc",
+      "name": "RS PC RIM",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c272",
+        "046d:c276"
+      ],
+      "depots": [],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "rs_rim_playstation",
+      "name": "RS PLAYSTATION RIM",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c272",
+        "046d:c276"
+      ],
+      "depots": [],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "rs_rim_xbox",
+      "name": "RS XBOX RIM",
+      "type": "STEERING_WHEEL",
+      "identities": [
+        "046d:c272",
+        "046d:c276"
+      ],
+      "depots": [],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "rs_shifter_handbrake",
+      "name": "RS SHIFTER & HANDBRAKE",
+      "type": "RS_SHIFTER_HANDBRAKE",
+      "identities": [
+        "046d:ab2d",
+        "046d:c268",
+        "046d:c272",
+        "046d:c276",
+        "046d:c278"
+      ],
+      "depots": [
+        "rs_shifter_handbrake"
+      ],
+      "subdevice": true,
+      "non_interactive": false
+    },
+    {
+      "model": "streamcam",
+      "name": "StreamCam",
+      "type": "CAMERA",
+      "identities": [
+        "046d:0893"
+      ],
+      "depots": [
+        "streamcam"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "yeti_2",
+      "name": "Yeti 2",
+      "type": "MICROPHONE",
+      "identities": [
+        "046d:0b3a",
+        "046d:0b47"
+      ],
+      "depots": [
+        "5fcfb055-14a5-4851-98cb-20032608e0ee",
+        "97dc0e52-037f-4c2f-ada2-5901cfe4552a"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "yeti_classic",
+      "name": "Yeti",
+      "type": "MICROPHONE",
+      "identities": [
+        "046d:0ab7",
+        "b58e:9e84"
+      ],
+      "depots": [
+        "yeti_classic"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "yeti_gx",
+      "name": "Yeti GX",
+      "type": "MICROPHONE",
+      "identities": [
+        "046d:0afc",
+        "046d:0afd"
+      ],
+      "depots": [
+        "4d90cf6a-6b47-4d54-985e-ac029aeb7e64",
+        "cba8a7c9-04e8-4c43-aaae-1af8ab629e01"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "yeti_nano",
+      "name": "Yeti Nano",
+      "type": "MICROPHONE",
+      "identities": [
+        "046d:0acf",
+        "046d:0ad0"
+      ],
+      "depots": [
+        "yeti_nano"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "yeti_orb",
+      "name": "Yeti Orb",
+      "type": "MICROPHONE",
+      "identities": [
+        "046d:0ad5",
+        "046d:0ad6"
+      ],
+      "depots": [
+        "67899afe-cf8c-4d2e-ba00-8f857c65476a",
+        "818e325e-9d21-4f8d-be79-9aae233776d6"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "yeti_original_nano",
+      "name": "Yeti Nano",
+      "type": "MICROPHONE",
+      "identities": [
+        "046d:0ab1",
+        "b58e:0005",
+        "b58e:0006",
+        "b58e:0ab2"
+      ],
+      "depots": [
+        "yeti_original_nano",
+        "yeti_original_nano_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "yeti_x",
+      "name": "Yeti X",
+      "type": "MICROPHONE",
+      "identities": [
+        "046d:0aae",
+        "046d:0aaf",
+        "046d:0ad1",
+        "046d:0ad3",
+        "b58e:0008"
+      ],
+      "depots": [
+        "yetix",
+        "yetix_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    },
+    {
+      "model": "yeti_x_wow",
+      "name": "Yeti X WoW\u00ae Edition",
+      "type": "MICROPHONE",
+      "identities": [
+        "046d:0aae",
+        "046d:0ac6",
+        "046d:0ad2",
+        "046d:0ad3",
+        "b58e:0008"
+      ],
+      "depots": [
+        "yetix_wow",
+        "yetix_wow_dfu"
+      ],
+      "subdevice": false,
+      "non_interactive": false
+    }
+  ]
+}

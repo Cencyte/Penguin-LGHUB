@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "basis": "Offline lifetime analysis of pinned source installer; completed Bazzite files rounded to 4 KiB, with every hardlink/reflink copy counted separately. Component budgets include compilation/replacement scratch; no compression or link savings assumed. Planning budget, not a measured live peak or filesystem quota.",
+  "basis": "Offline lifetime analysis of pinned source installer; completed Bazzite files rounded to 4 KiB, with every hardlink/reflink copy counted separately. Component budgets include compilation/replacement scratch; no compression or link savings assumed. Planning budget, not a measured live peak or filesystem quota. Full public catalog audit 2026-11-09: depot/stage sizes measured; candidate, desktop and UI budgets include both extracted depots and retained archives. UI validation now precedes desktop cloning so three prefixes never coexist.",
   "recipe_locks": {
     "packaging/toolchain.lock.json": "7d29ad276cbadf743e17772d607c1ca82a8c5e6cebfb1ea018872ffafbc2fac2",
     "packaging/linux-sdk.lock.json": "d337f2016b24d8d8da022fa4d5fde867a9ef0323dc2d974b1d726e7ed782dcba",
@@ -8,7 +8,7 @@
     "packaging/linux-runtime.lock.json": "2176527a287d94b7490683d8c09f1f99be36aa747825f5df2c5720960de16a79",
     "packaging/linux-test-tools.lock.json": "8615825689dbf0ef10d123fb058787eb8a50c249ef2be60b47ad0ffd1972b88e",
     "packaging/windows-acquisition.lock.json": "a427e2350a75ae3112def6da0ac861b721da4219194449b70993536de984a41b",
-    "packaging/logitech-depots.lock.json": "8a0128c8cf4456355828a8bfadc4e1aa3df272f2c250c5c66ec4a85adb4e7d66"
+    "packaging/logitech-depots.lock.json": "1d149ebf663a9a6a15144ae8b39c48b5928c7ce7490cd7cbca7ed3ba5e063384"
   },
   "filesystem_allowance_bytes": 2147483648,
   "free_space_floor_bytes": 2147483648,
@@ -75,27 +75,28 @@
     },
     "depots": {
       "path": "work/logitech-cache",
-      "budget_bytes": 1073741824,
-      "observed_4k_bytes": 910553088,
-      "observed_files": 62
+      "budget_bytes": 4294967296,
+      "observed_4k_bytes": 3616178176,
+      "observed_files": 757
     },
     "stage": {
       "path": "work/logitech-stage",
-      "budget_bytes": 2147483648,
-      "observed_4k_bytes": 1542664192,
-      "observed_files": 1555
+      "budget_bytes": 4831838208,
+      "observed_4k_bytes": 4268056576,
+      "observed_files": 10645
     },
     "candidate": {
       "path": "work/candidate",
-      "budget_bytes": 5368709120,
-      "observed_4k_bytes": 2918998016,
-      "observed_files": 3421
+      "budget_bytes": 9663676416,
+      "observed_4k_bytes": 8341176320,
+      "observed_files": 13231
     },
     "desktop": {
       "path": "desktop",
-      "budget_bytes": 5368709120,
-      "observed_4k_bytes": 3063349248,
-      "observed_files": 3664
+      "budget_bytes": 9663676416,
+      "observed_4k_bytes": 9028231168,
+      "observed_files": 14229,
+      "observation_basis": "Isolated UI probe uses the same desktop.prepare copy; conservatively includes probe artifacts."
     },
     "loader": {
       "path": "work/loader-audit",
@@ -105,9 +106,9 @@
     },
     "ui": {
       "path": "work/ui-audit",
-      "budget_bytes": 5368709120,
-      "observed_4k_bytes": 3051458560,
-      "observed_files": 3668
+      "budget_bytes": 9663676416,
+      "observed_4k_bytes": 9028231168,
+      "observed_files": 14229
     }
   },
   "phases": [
@@ -174,7 +175,6 @@
         "linux",
         "helpers",
         "candidate",
-        "desktop",
         "loader"
       ]
     },
@@ -186,8 +186,18 @@
         "linux",
         "helpers",
         "candidate",
-        "desktop",
         "ui"
+      ]
+    },
+    {
+      "name": "desktop",
+      "components": [
+        "source",
+        "wine",
+        "linux",
+        "helpers",
+        "candidate",
+        "desktop"
       ]
     },
     {

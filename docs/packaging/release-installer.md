@@ -13,15 +13,15 @@ cd Penguin-LGHUB-release
 ./install.sh
 ```
 
-Installer 0.3.10 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall` and `--help` keep their explicit behavior.
+Installer 0.4.0 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall`, `--diag`, `--update` and `--help` keep their explicit behavior.
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v1.0.0) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v1.0.1-rc.1) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
 
 Version 1.0.0 promotes the tested Preview 8 implementation with installer 0.3.10. It includes automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal. It retains the untimed pause before sudo authentication and the Xwayland native-input route check. Window restoration, smaller native sizes with full-UI scaling, and a repaint after resize bursts are applied by the verified frontend transformation. No host Wine, graphics-driver or compositor change is required by those corrections.
 
 Final manual acceptance was reported November 1 for the Manjaro VM and CachyOS in X11/Plasma Wayland, and Bazzite in Plasma Wayland. It covers the requested uninstall/reinstall, profile switching, key delivery, tray actions and resize/restore checks. The VM supplies UI/session coverage; physical device results come from bare metal. [Release notes](release-v1.0.0.md).
 
-The earlier source-consolidation run rebuilt Wine patches and supplements in the pinned SDK, prepared a new prefix with host Wine hidden, and passed 8 activation checks, 4 registry checks and 6 isolated UI/tray checks. The current combined project suite has 264 tests. These automated results and the final manual acceptance are recorded separately in the [validation record](release-installer-verification.json).
+The earlier source-consolidation run rebuilt Wine patches and supplements in the pinned SDK, prepared a new prefix with host Wine hidden, and passed 8 activation checks, 4 registry checks and 6 isolated UI/tray checks. The current combined project suite has 286 tests. These automated results and the final manual acceptance are recorded separately in the [validation record](release-installer-verification.json).
 
 The repository and release downloads are public; no GitHub account is required.
 Run as your regular user. The installer requests sudo for its small Logitech
@@ -75,8 +75,7 @@ The capacity calculation is recorded in
 to the seven acquisition/runtime lock files. Changed pins require a budget review.
 It uses the pinned operations and completed Bazzite artifacts, with files rounded
 to 4 KiB and every hardlinked/reflinked copy counted separately. Component budgets
-allow for compilation scratch, temporary replacements and prefix growth. The
-largest planned stage is DLL reconstruction: **26.625 GiB**, including the SDK,
+allow for compilation scratch, temporary replacements and prefix growth. Several stages share the maximum planned bound, including DLL reconstruction: **26.625 GiB**, including the SDK,
 Linux libraries, Wine, helpers, both media downloads and reconstruction work.
 Adding **2 GiB for filesystem overhead** and **2 GiB left free**, then rounding
 up, gives **31 GiB**. This is a conservative offline planning bound, not a measured
@@ -89,9 +88,10 @@ space. Lower-level output/download checks retain the same 2 GiB floor.
 | Wine compilation | 11.125 GiB |
 | Linux libraries and helpers | 16.625 GiB |
 | Windows DLL reconstruction | 26.625 GiB |
-| G HUB prefix preparation | 17.125 GiB |
-| Loader verification | 20.625 GiB |
-| UI/tray verification | 23.625 GiB |
+| G HUB prefix preparation | 26.625 GiB |
+| Loader verification | 19.625 GiB |
+| UI/tray verification | 26.625 GiB |
+| Desktop preparation, after removing the UI test copy | 26.625 GiB |
 
 The earlier completed installation contained 28.8 GiB of files, including retained
 build/test material; that observation was not a live peak measurement. Its active
@@ -111,9 +111,13 @@ performed. Missing prerequisites produce a named error rather than silently
 changing an immutable image or a version-pinned workstation. OpenSSL libcrypto
 is used for the encrypted Logitech resource depots.
 
+The 0.4.0 update expands resource acquisition to 757 publicly extractable depots and retains the 31 GiB initial budget by running and removing the UI test clone before preparing the final desktop clone. The 1.0.0 manual acceptance above does not certify this new selection. See [device coverage, privacy and source-update details](../../README.md#device-coverage-and-support-reports).
+
 Standalone commands:
 
 - `./install.sh --check` — record host readiness and explain blockers.
+- `./install.sh --diag` — save one minimized, sanitized `.txt.gz` report in the project root, without uploading it; live checks need G HUB running.
+- `./install.sh --update` — refresh installer source only, preserving the installed application and refusing edited source files.
 - `./install.sh --help` — show usage, switches and examples.
 - `./install.sh --uninstall` — remove the managed installation and its G HUB settings.
 
@@ -131,8 +135,7 @@ local paths, usernames, device identifiers and application state.
 Readiness checking and installation both show separate headers for system,
 desktop, tools, device access, security policy and namespace checks. Wayland
 adds its Xwayland/KWin/portal check. A separate profile check verifies the observer libraries and, on Wayland, KWin operation mode and scripting availability without loading a script. Labels and descriptions start in consistent
-columns; ellipses immediately follow the description text. Only `--check` adds
-aligned `OK`/`FAIL` results. An `OK` records no blocking error in that check, not completed hardware
+columns; ellipses immediately follow the description text. `--check` adds aligned `OK`/`FAIL` results; installation also shows them for the requested device-resource compatibility step, and `--diag` reports each diagnostic result. An `OK` records no blocking error in that check, not completed hardware
 acceptance. Verbose mode also prints the saved host
 report; ordinary mode keeps the headers, warnings and blockers visible.
 

@@ -38,6 +38,7 @@
   - [Recorded test environments](#recorded-test-environments)
 - [Installation](#installation)
   - [Installation requirements](#installation-requirements)
+  - [Device coverage and support reports](#device-coverage-and-support-reports)
   - [Checking this computer's compatibility](#checking-this-computers-compatibility)
   - [Automatic application profiles](#automatic-application-profiles)
 - [What the project contains](#what-the-project-contains)
@@ -63,6 +64,8 @@ Learn more: [Dalia scale](https://daliascale.org)
 Penguin-LGHUB is an experimental compatibility layer for running the original **Logitech G HUB** on Linux through a custom Wine runtime. The working setup retains the actual G HUB agent and main interface for device configuration, key bindings, macros, profiles, lighting and G-Shift.
 
 ### Current status:
+
+**Testing update 1.0.1-rc.1** adds the expanded device catalog, local diagnostics and installer-source updating; its fresh manual reinstall checks are pending.
 
 **Version 1.0.0** completes the recorded manual acceptance tests on Manjaro and CachyOS with X11/Plasma Wayland, and Bazzite with Plasma Wayland. The installer builds the custom Wine components from pinned source, acquires the required vendor resources, prepares a dedicated prefix and installs one desktop launcher. The final tests cover uninstall/reinstall, automatic application profiles, key delivery, tray actions and window resizing/restoration. This remains an experimental source release; no compiled Wine runtime is hosted. See the [v1.0 release notes](docs/packaging/release-v1.0.0.md) for the tested scope.
 
@@ -131,7 +134,8 @@ The [installer](docs/packaging/release-installer.md) includes automatic session 
 ### Recorded test environments:
 
 Versions are comparison points, **not minimum requirements or a compatibility guarantee**.
-Package inventories retain their collection dates; final manual acceptance was
+The new physical G502 X Plus check on CachyOS passed in X11 and Wayland (reported November 9); broader hardware coverage remains unverified.
+Package inventories retain their collection dates; v1.0.0 manual acceptance was
 reported November 1. The Bazzite inventory comes from the booted October 30
 report. Full revisions, evidence and validation boundaries are in the
 [environment record](packaging/tested-environments.json).
@@ -181,7 +185,7 @@ cd Penguin-LGHUB-release
 ./install.sh
 ```
 
-With installer **0.3.6 or newer**, installation is the default; the explicit `--install` flag remains supported. `--help`, `--check` and `--uninstall` retain their separate actions.
+With installer **0.3.6 or newer**, installation is the default; the explicit `--install` flag remains supported. `--help`, `--check`, `--uninstall`, `--diag` and `--update` retain their separate actions.
 
 Allow **31 GiB of free working space** for the initial source build and acquisition. All command output is saved to the log path printed below the logo.
 
@@ -199,17 +203,45 @@ Optional switches, added to the installation command:
 Standalone commands, run from the project directory:
 
 - `./install.sh --help` — show usage, switches and examples.
-- `./install.sh --check` — check the current host's installation prerequisites and save a report.
+- `./install.sh --check` — check the current host's prerequisites and connected Logitech G device-resource coverage.
+- `./install.sh --diag` — write one sanitized `Penguin-LGHUB-diagnostics-<date>-<id>.txt.gz` file in this project folder; nothing is uploaded. Open G HUB first for live device checks.
+- `./install.sh --update` — update this downloaded/cloned installer source folder only. The installed application, Wine runtime and settings are unchanged.
 - `./install.sh --uninstall` — remove this managed installation, including G HUB settings, private Wine, downloaded inputs, launchers, icon and its device-access rule. Installer diagnostics are retained separately.
 - `./install.sh --uninstall --directory /path/to/installation` — remove an installation stored at a custom location.
 
 Back up any G HUB profiles or settings you want to keep before uninstalling. Removal works without a graphical session and requests sudo only for its device rule. The source download, independently generated diagnostic reports and unrelated software remain. Legacy lab installations without an ownership receipt require separate cleanup; they are not removed by guessing paths. If the selected installation directory is absent, the command reports that nothing was removed.
 
-Alternatively, download **Penguin-LGHUB-v1.0.0-source.zip** from the [v1.0 release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v1.0.0), extract it, and open a terminal in the extracted folder. Run `./install.sh` there; if executable permissions were lost during extraction, use `bash install.sh`. No Git checkout is needed for the ZIP workflow.
+For the expanded device catalog and support commands, download **Penguin-LGHUB-v1.0.1-rc.1-source.zip** from the [1.0.1 testing release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v1.0.1-rc.1), extract it, and open a terminal in the extracted folder. The earlier [v1.0.0 release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v1.0.0) remains available with its original, narrower catalog. Run `./install.sh` there; if executable permissions were lost during extraction, use `bash install.sh`. No Git checkout is needed for the ZIP workflow.
 
 Version **1.0.0** includes the tested installer **0.3.10**, automatic X11/Wayland application-profile observers, the shared keyboard connection, profile-component verification, transactional removal and the **31 GiB** storage budget. When sudo needs a password, setup waits without a countdown for Enter before opening the password prompt. Wayland checks inspect Xwayland's native-input bridge and its portal or private EIS socket route. Window restore, resize and bottom-edge corrections are included and manually accepted; the full UI scales to smaller windows and repaints after resizing settles.
 
 This release retains the Wine input fix introduced in Preview 3 for keys that remained held when G HUB worker threads sent the press and release through different Xwayland connections. The installer builds this fix automatically. [Isolated regression results](docs/packaging/host-keyboard-threads-verification.json) cover native Wayland and Xwayland destinations; the G502 X Plus fix is also manually confirmed on booted Bazzite and the Manjaro Wayland workstation.
+
+### Device coverage and support reports:
+
+Installer **0.4.0** expands the default selection from **30 to 757 depots** (**3.61 GB downloaded**), covering the publicly decodable resources in the pinned Logitech catalog: mice, keyboards, headsets, wheels/pedals/shifters, microphones, cameras, lighting and other listed families. The catalog has **779 entries**; **22 depots and 11 encrypted device-catalog sections lack keys in Logitech's public response**. These exclusions are recorded, not silently marked installed. Windows kernel drivers and optional SDK installers are retained as resources but are not executed or declared working. More resources do not establish support for every device or force-feedback feature.
+
+Both installation and compatibility checking show **Checking device compatibility** with an aligned `OK` or `FAIL`. Known Logitech G devices with missing resources fail the check; covered models are listed individually. The check uses pinned USB/HID identities and Logitech gaming-product names, rather than treating every Logitech office device as a gaming product. A receiver alone may not identify its paired mouse. No identified device means coverage is unverified. Here, **compatible means resource coverage**, not a completed physical hardware test.
+
+`./install.sh --diag`
+
+The report records relevant OS/package/session versions, Logitech USB/HID identities and access permissions, installed-resource coverage, private-runtime integrity, selected live G HUB device status and bounded error summaries. Run it while G HUB is open; otherwise a red notice appears first and the live checks report `FAIL`. It still produces the report when checks fail. Add `--directory` for a custom installation location and `--verbose` to show collected results beneath the usual step headers.
+
+The single **`.txt.gz` file is saved at the root of this project folder**, with no separate text file. Collection follows [SoS-style](https://github.com/sosreport/sos/wiki/#clean) minimization and consistent masking: no serial numbers, network configuration, account data, profiles, application lists, recorded input or raw logs are intentionally exported. Home paths, usernames, hostnames, addresses and obvious secrets are masked. This is the project's collector, not a run of SoS itself; sanitization cannot guarantee anonymity. Review the decompressed text before sharing. Compression is not encryption, and no report is automatically uploaded. System specifications are useful for bug fixes; consent, limited collection and review keep that disclosure under the reporter's control.
+
+`./install.sh --update`
+
+This updates only the project folder from the published `release` branch, pinned to one fetched commit and checked against its source manifest. It supports Git checkouts and extracted source ZIPs, preserves unrelated files (including reports), and refuses local source edits or conflicting paths. No sudo, application restart or application update occurs. This is the current development source, which can be newer than the manually accepted stable release.
+
+To apply an installer fix to an existing installation: back up desired G HUB settings, quit G HUB, then run these commands from the project folder, stopping if any command fails:
+
+```sh
+./install.sh --uninstall
+./install.sh --update
+./install.sh
+```
+
+An old installer without `--update` needs the new source ZIP once before it can use this flow. Uninstall deletes G HUB settings; source updating alone does not. Manual acceptance of this expanded-catalog release is pending; the recorded v1.0.0 platform results below remain historical evidence.
 
 ### Checking this computer's compatibility:
 
@@ -221,7 +253,7 @@ Run this from the target KDE desktop terminal:
 
 This checks the actual host's OS, CPU architecture, required tools, user namespaces, desktop session and the selected storage location’s Linux link/permission behavior. It records graphics drivers, audio-socket presence, SELinux state and Logitech device access. It also checks host libraries for both profile backends. On Wayland it checks Xwayland authentication, compiled libei keyboard support and either its enabled liboeffis portal route or KWin's private EIS socket, alongside KWin's operation mode, scripting interface and the input-control portal. An unreadable or ambiguous server is reported as unverified. It does not load a focus script, request input permission or send keys during `--check`. Blockers stop the check with an explanation; warnings identify remaining verification needs. A successful readiness check is followed by installation checks and hands-on device testing.
 
-Readiness checking and installation share the same categorized step headers. In `--check` mode, each completed check shows an aligned `OK` or `FAIL` result. Installation uses descriptions with an activity spinner and no per-check result labels. `OK` means that check found no installation blocker; hardware acceptance and warnings remain separately reported. The complete host report is always saved with the log.
+Readiness checking and installation share the same categorized step headers. In `--check` mode, each completed check shows an aligned `OK` or `FAIL` result. Installation uses descriptions with an activity spinner; the device-compatibility step is its one explicit `OK`/`FAIL` exception. `OK` means that check found no installation blocker; hardware acceptance and warnings remain separately reported. The complete host report is always saved with the log.
 
 - `--verbose` — also display the host report in the terminal.
 
@@ -231,7 +263,7 @@ Enable automatic profile switching in G HUB and associate a profile with the Lin
 
 Focus the application, then another application, and check that the active G HUB profile changes. The host observer supplies application identity to G HUB's original profile logic. On Wayland it uses a temporary KWin script; this is separate from input-control permission. One Share request can be normal on a new session with older Plasma, but every key press should not request fresh permission.
 
-The installer supplies private build tools, Wine, Linux libraries and launcher helpers. The repository requires authorized GitHub access while it remains private. See [installation, recovery and validation details](docs/packaging/release-installer.md).
+The installer supplies private build tools, Wine, Linux libraries and launcher helpers. The repository and release downloads are public. See [installation, recovery and validation details](docs/packaging/release-installer.md).
 
 ## What the project contains
 
@@ -253,7 +285,7 @@ From the cloned project directory, run:
 python3 tools/packaging/run_project_tests.py --run
 ```
 
-These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required; JavaScript frontend fixtures also require Node.js on the development host. The runner saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The current combined suite contains **264 checks**, including profile routing, observer cleanup, native-input capability and authorization regressions.
+These regression tests exercise the installer and launcher code with controlled sample data, temporary files and simulated failures. Python 3.12 or newer is required; JavaScript frontend fixtures also require Node.js on the development host. The runner saves complete test output to the printed log path, and keeps failure details visible. `OK` means the run completed without unexpected failures; the summary also reports skips and expected failures. The current combined suite contains **286 checks**, including profile routing, observer cleanup, native-input capability and authorization regressions.
 
 - `--verbose` — show individual test results and captured output beneath the headers.
 - `--log-file /path/to/new-tests.log` — choose a new log file; existing logs are preserved.
@@ -291,7 +323,7 @@ These checkpoints track dependency policy, installation reproducibility and rele
 <details>
 <summary><strong>Verified Logitech depot extraction</strong></summary>
 
-[The lock file](packaging/logitech-depots.lock.json) pins G HUB **2026.6.974819**, build **869589**, to official Logitech URLs, sizes, SHA-256 values, dependency closure and expected file lists. `tested_setup` selects the 30 depots marked present in the working setup, including the G502 X PLUS and G915 X LIGHTSPEED TKL resources. It does **not** cover all 779 catalog entries or claim support for every Logitech device. `core` selects the six-depot core closure; `required` follows the vendor-required roots and their dependencies.
+[The lock file](packaging/logitech-depots.lock.json) pins G HUB **2026.6.974819**, build **869589**, to official Logitech URLs, sizes, SHA-256 values, dependency closure and expected file lists. The default `all_devices` selection installs **757 publicly extractable depots out of 779**. `tested_setup` retains the original 30-depot selection for development comparisons. The 22 exclusions are recorded under `unavailable_depots`; no key is invented or bypassed. Resource inclusion does not certify physical operation. `core` selects the six-depot core closure; `required` follows the vendor-required roots and their dependencies.
 
 The [extractor](tools/packaging/logitech_depots.py) downloads into an external cache, verifies each archive, extracts into a new directory and assembles the application-root copy rules. It never starts vendor executables, writes a Wine prefix, registers a service or changes host packages. It requires Python 3.12+ and OpenSSL's `libcrypto`; no third-party Python packages or Wine are needed for this step.
 
@@ -309,13 +341,15 @@ python tools/packaging/logitech_depots.py verify \
   --output-dir /path/to/private-cache/logitech-2026.6.974819/stage-001
 ```
 
-The default selection downloads **910,350,368 bytes (868 MiB)**. Staging conservatively reserves twice the extracted payload size, in addition to a 2 GiB free-space floor; it never overwrites an existing stage. Downloads support checked resumption. Vendor downloads, keys, manifests, extracted files and full local receipts stay outside Git. The staged directories are `depots/<name>/` and `application/LGHUB/`; `extraction.json` records file hashes, layout origins and pending installer declarations. `verification.json` records the verified counts. Verification detects changes against that local receipt; it is not an independent signature on an editable receipt.
+The default selection downloads **3,614,601,041 bytes (3.61 GB / 3.37 GiB)**. Staging conservatively reserves twice the extracted payload size, in addition to a 2 GiB free-space floor; it never overwrites an existing stage. Downloads support checked resumption. Vendor downloads, keys, manifests, extracted files and full local receipts stay outside Git. The staged directories are `depots/<name>/` and `application/LGHUB/`; `extraction.json` records file hashes, layout origins and pending installer declarations. `verification.json` records the verified counts. Verification detects changes against that local receipt; it is not an independent signature on an editable receipt.
 
-The encrypted resource keys are fetched without authentication from [Logitech's public access-group endpoint](https://updates.ghub.logitechg.com/pipeline/v2/access/20d0dda2-4c0c-4f5a-98d0-f9cf0819544b/content.json). Only the required key fingerprints are pinned, so adding unrelated keys upstream does not invalidate this recipe. A missing or changed required key fails closed. The observed capsule format uses AES-128-GCM's stream with PBKDF2-HMAC-SHA512-derived IVs, but stores no GCM tag; integrity is checked using the pinned depot hash and the vendor header/member hashes. Six mouse images are nested capsules: their decoded contents are verified while their installed encoding is preserved.
+The encrypted resource keys are fetched without authentication from [Logitech's public access-group endpoint](https://updates.ghub.logitechg.com/pipeline/v2/access/20d0dda2-4c0c-4f5a-98d0-f9cf0819544b/content.json). Only the required key fingerprints are pinned, so adding unrelated keys upstream does not invalidate this recipe. A missing or changed required key fails closed. The observed capsule format uses AES-128-GCM's stream with PBKDF2-HMAC-SHA512-derived IVs, but stores no GCM tag; integrity is checked using the pinned depot hash and the vendor header/member hashes. Nested capsules with known pinned keys are verified while their installed encoding is preserved.
 
-[Recorded validation](packaging/logitech-depots-verification.json): **100% of the 1,115 selected depot files** match the working cache byte-for-byte. Of the 438 assembled application files, 434 match the working application, two are the original tray resources that the runtime later patches, and two are legacy LED SDK DLLs absent from the working application directory. The original extraction validation passed **36 packaging tests**, including 12 depot/capsule tests. These figures measure extraction and file identity, not application-installation completeness.
+[Expanded-catalog verification](packaging/device-coverage-verification.json) confirms **10,205 extracted files**, **438 assembled application files**, a fresh **11,420-file managed prefix**, **8/8 activation checks**, **4/4 registry checks** and **6/6 isolated UI/tray checks**. No live desktop or physical devices were exposed.
 
-The **43 recorded installer declaration groups** are now classified by the clean-prefix recipe: two configured, one replaced, two frozen, one partial, 35 deferred and two unresolved. The deferred groups include eight extension packages and 17 conditional/external copy rules. Two core copy rules name `trueforce_sdk_x86.dll` and `trueforce_sdk_x64.dll`, which are absent from the core archive; the separate Trueforce manager's installation must be investigated before claiming those rules complete. Counts describe declaration groups of different sizes, not a percentage of installer functionality.
+[Original 30-depot validation](packaging/logitech-depots-verification.json): **100% of the 1,115 selected depot files** match the working cache byte-for-byte. Of the 438 assembled application files, 434 match the working application, two are the original tray resources that the runtime later patches, and two are legacy LED SDK DLLs absent from the working application directory. The original extraction validation passed **36 packaging tests**, including 12 depot/capsule tests. These figures measure extraction and file identity, not application-installation completeness.
+
+In the original 30-depot validation, the **43 recorded installer declaration groups** are now classified by the clean-prefix recipe: two configured, one replaced, two frozen, one partial, 35 deferred and two unresolved. The deferred groups include eight extension packages and 17 conditional/external copy rules. Two core copy rules name `trueforce_sdk_x86.dll` and `trueforce_sdk_x64.dll`, which are absent from the core archive; the separate Trueforce manager's installation must be investigated before claiming those rules complete. Counts describe declaration groups of different sizes, not a percentage of installer functionality.
 
 </details>
 
@@ -353,9 +387,9 @@ python tools/packaging/probe_clean_agent.py \
   --output /path/to/private-work/clean-agent-001
 ```
 
-Use new output directories outside the repository with existing parents. Preparation reserves 5 GiB above the 2 GiB free-space floor; the probe reserves another 4 GiB for its disposable clone. The candidate is left pristine; the agent test runs in that clone. Both use a read-only host filesystem, a private network and PID namespace, a private temporary directory and no physical device nodes. Wine processes are stopped within their own namespace after each check. The agent probe uses its own Xvfb with GLX disabled; it neither connects to the live desktop nor evaluates graphics performance. Acquisition inputs and host files remain readable inside this test environment: this is operational isolation, not a hardened sandbox for hostile executables.
+Use new output directories outside the repository with existing parents. Full-catalog preparation reserves 9 GiB above the 2 GiB free-space floor. Desktop/UI preparation also budgets 9 GiB per copy. Standalone development probes retain their outputs; the main installer disposes of verified temporary copies. The candidate is left pristine; the agent test runs in that clone. Both use a read-only host filesystem, a private network and PID namespace, a private temporary directory and no physical device nodes. Wine processes are stopped within their own namespace after each check. The agent probe uses its own Xvfb with GLX disabled; it neither connects to the live desktop nor evaluates graphics performance. Acquisition inputs and host files remain readable inside this test environment: this is operational isolation, not a hardened sandbox for hostile executables.
 
-[Initial validation](packaging/clean-prefix-verification.json) recorded 1,599 managed files with copied private builds. [Packaged-runtime validation](packaging/wine-runtime-verification.json) records 1,574 prefix files plus the separate 2,571-entry runtime inventory. Both pass **8/8 activation factories**, **4/4 registry routes**, **1/1 updater service configuration**, and **5/5 agent API routes**. The API test covers `/devices/list`, `/profiles`, `/profile/active`, `/profiles/auto_switching` and `/input/gshift`, each returning `SUCCESS`. No physical devices are exposed, so an empty device list is expected. These results establish fresh installation and backend startup; they do not establish working mouse bindings or profile switching on real hardware. The current combined packaging and desktop-device policy suite has **239 regression checks** locally; the CI badge reports the published revision’s result.
+[Initial validation](packaging/clean-prefix-verification.json) recorded 1,599 managed files with copied private builds. [Packaged-runtime validation](packaging/wine-runtime-verification.json) records 1,574 prefix files plus the separate 2,571-entry runtime inventory. Both pass **8/8 activation factories**, **4/4 registry routes**, **1/1 updater service configuration**, and **5/5 agent API routes**. The API test covers `/devices/list`, `/profiles`, `/profile/active`, `/profiles/auto_switching` and `/input/gshift`, each returning `SUCCESS`. No physical devices are exposed, so an empty device list is expected. These results establish fresh installation and backend startup; they do not establish working mouse bindings or profile switching on real hardware. The current combined packaging and desktop-device policy suite has **286 regression checks** locally; the CI badge reports the published revision’s result.
 
 The private output contains `clean-prefix.json`, `verification.json`, `installer-actions.json` and per-step logs. Verification checks the managed application/depot/artifact trees and four installed Wine fallback modules against its local receipt; it does not authenticate an edited receipt or qualify all stock Wine files and mutable registry state. The probe writes `agent-verification.json`, its API snapshot and logs separately. None of those populated prefixes, vendor files or downloaded keys belongs in Git.
 

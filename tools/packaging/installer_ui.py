@@ -59,6 +59,12 @@ class Presentation:
     def write(self,text):
         self.terminal_write(text+'\n')
 
+    def notice(self,text,error=False):
+        color='\033[31m' if error and self.color else ''
+        reset='\033[0m' if color else ''
+        self.write(color+text+reset)
+        self.log.write(text+'\n');self.log.flush()
+
     def terminal_write(self,text):
         with self._terminal_lock:
             self._clear_spinner()
@@ -123,7 +129,7 @@ class Presentation:
         if self.verbose:
             self.terminal_write(text)
 
-    def header(self):
+    def header(self, report_path=None):
         if self.stream.isatty():
             folder=ROOT/'assets/terminal';meta=json.loads((folder/'render.json').read_text())
             fmt=logo_format(os.environ);p=folder/(fmt+'.ansi');data=p.read_bytes()
@@ -132,7 +138,8 @@ class Presentation:
         white='\033[0;37m' if self.color else '';reset='\033[0m' if self.color else ''
         for text in (f"Penguin-LGHUB v{STYLE['project_version']}",
                      f"Installer version v{STYLE['installer_version']}.",
-                     f'Logitech G HUB v{GHUB_VERSION}', '', f'Log file: {self.log_path}', ''):
+                     f'Logitech G HUB v{GHUB_VERSION}', '',
+                     f'Report file: {report_path}' if report_path else f'Log file: {self.log_path}', ''):
             self.write(white+text+reset);self.log.write(text+'\n')
         self.log.flush()
 
