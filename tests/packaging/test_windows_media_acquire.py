@@ -86,7 +86,7 @@ class MediaTests(unittest.TestCase):
                 work = Path(d)
                 if error:
                     with self.assertRaisesRegex(ValueError, error):
-                        m.download_asset(work, self.asset(b'abcdef'), Opener(response))
+                        m.download_asset(work, self.asset(b'abcdef'), Opener(response), attempts=1)
                     self.assertFalse((work / 'fixture.esd').exists())
                 else:
                     m.download_asset(work, self.asset(data), Opener(response))
@@ -104,8 +104,48 @@ class MediaTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d, patch.object(m, 'space_check'):
             work = Path(d)
             with self.assertRaisesRegex(ValueError, 'Truncated'):
-                m.download_asset(work, self.asset(b'abcdef'), Opener(Response(b'abc', size=6)))
+                m.download_asset(work, self.asset(b'abcdef'), Opener(Response(b'abc', size=6)), attempts=1)
             self.assertFalse((work / 'fixture.esd').exists())
+
+    def test_truncated_download_resumes_before_transaction_can_roll_back(self):
+        with tempfile.TemporaryDirectory() as d, patch.object(m, 'space_check'), patch.object(m.time, 'sleep'):
+            responses=iter((Response(b'abc',size=6),Response(b'def',206,'bytes 3-5/6')))
+            requests=[]
+            class ResumingOpener:
+                def open(self,request,timeout):
+                    requests.append(request);return next(responses)
+            work=Path(d)
+            m.download_asset(work,self.asset(b'abcdef'),ResumingOpener())
+            self.assertEqual([r.get_header('Range') for r in requests],[None,'bytes=3-'])
+            self.assertEqual((work/'fixture.esd').read_bytes(),b'abcdef')
+            self.assertFalse((work/'fixture.esd.partial').exists())
+
+    def test_retry_exhaustion_retains_partial_and_never_promotes(self):
+        with tempfile.TemporaryDirectory() as d, patch.object(m, 'space_check'), patch.object(m.time, 'sleep'):
+            class EmptyOpener:
+                calls=0
+                def open(self,request,timeout):
+                    self.calls+=1;return Response(b'',size=6)
+            opener=EmptyOpener();work=Path(d)
+            with self.assertRaisesRegex(m.InterruptedDownload,'after 3 attempts'):
+                m.download_asset(work,self.asset(b'abcdef'),opener,attempts=3)
+            self.assertEqual(opener.calls,3);self.assertFalse((work/'fixture.esd').exists())
+            self.assertEqual((work/'fixture.esd.partial').read_bytes(),b'')
+
+    def test_http_retries_only_transient_errors_and_never_bad_hashes(self):
+        for code,retry in ((403,False),(404,False),(429,True),(503,True)):
+            with self.subTest(code=code),tempfile.TemporaryDirectory() as d,patch.object(m,'space_check'),patch.object(m.time,'sleep'):
+                class HTTPFailure:
+                    calls=0
+                    def open(self,request,timeout):
+                        self.calls+=1
+                        if self.calls==1:raise m.urllib.error.HTTPError(Response.url,code,'fixture',{},None)
+                        return Response(b'abcdef')
+                opener=HTTPFailure()
+                if retry:m.download_asset(Path(d),self.asset(b'abcdef'),opener)
+                else:
+                    with self.assertRaises(m.urllib.error.HTTPError):m.download_asset(Path(d),self.asset(b'abcdef'),opener)
+                self.assertEqual(opener.calls,2 if retry else 1)
 
     def test_disk_budget_includes_remaining_bytes(self):
         with patch.object(m.shutil, 'disk_usage') as disk:

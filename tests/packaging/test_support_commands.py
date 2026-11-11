@@ -1,5 +1,5 @@
 import contextlib
-import gzip
+import tarfile
 import hashlib
 import io
 import json
@@ -149,16 +149,22 @@ class DiagnosticTests(unittest.TestCase):
             result=diag.error_summary(root)
             self.assertNotIn('canary',str(result));self.assertEqual(result['bounded_error_excerpts']['PermissionError'],1)
 
-    def test_non_running_diag_exports_only_gzip_and_marks_live_checks_failed(self):
+    def test_non_running_diag_exports_one_tar_gzip_with_private_text_and_live_failures(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);project=root/'source';project.mkdir()
             out=io.StringIO()
             with patch.object(diag,'owned_agent',return_value=None),patch.object(diag,'package_query',return_value=[]),patch.object(devices,'discover',return_value=[]),contextlib.redirect_stdout(out):
                 result=diag.run(root/'missing',project=project)
             self.assertEqual(result,1)
-            files=list(project.iterdir());self.assertEqual(len(files),1);self.assertTrue(files[0].name.endswith('.txt.gz'))
+            files=list(project.iterdir());self.assertEqual(len(files),1);self.assertTrue(files[0].name.endswith('.tar.gz'))
             self.assertTrue(out.getvalue().startswith('Open Penguin-LGHUB first'))
-            report=json.loads(gzip.decompress(files[0].read_bytes()).decode().split('\n',1)[1])
+            with tarfile.open(files[0],'r:gz') as archive:
+                members=archive.getmembers();self.assertEqual(len(members),1)
+                member=members[0];self.assertEqual(member.name,'Penguin-LGHUB-diagnostics.txt')
+                self.assertTrue(member.isfile());self.assertEqual(member.mode,0o600)
+                self.assertEqual((member.uid,member.gid,member.uname,member.gname,member.mtime),(0,0,'','',0))
+                report=json.loads(archive.extractfile(member).read().decode().split('\n',1)[1])
+            self.assertEqual(files[0].stat().st_mode&0o777,0o600)
             live=[c for c in report['checks'] if c['step'] in ('Query running G HUB device recognition','Check live session device access')]
             self.assertEqual(len(live),2);self.assertTrue(all(x['status']=='FAIL' for x in live))
 

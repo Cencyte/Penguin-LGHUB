@@ -8,6 +8,7 @@ import argparse
 from contextlib import contextmanager
 import fcntl
 import hashlib
+import http.client
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,8 @@ import struct
 import time
 import urllib.parse
 import urllib.request
+import urllib.error
+import ssl
 from install_storage import FREE_SPACE_FLOOR
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -69,7 +72,42 @@ def check_asset(path, asset):
     return hashes
 
 
-def download_asset(work, asset, opener=None, validate=official_url):
+class InterruptedDownload(ValueError):
+    """An incomplete transfer can be resumed; an integrity failure cannot."""
+
+
+def download_asset(work, asset, opener=None, validate=official_url, *, attempts=6):
+    """Retry transient network failures before the installer rolls back.
+
+    Every attempt revalidates the partial-file boundary and HTTP range. Full
+    size and digest checks remain mandatory before a file is promoted.
+    """
+    if not 1 <= attempts <= 6:
+        raise ValueError('Download attempts must be between one and six')
+    for attempt in range(1, attempts + 1):
+        try:
+            return _download_asset_once(work, asset, opener, validate)
+        except (InterruptedDownload, http.client.IncompleteRead,
+                http.client.RemoteDisconnected, ConnectionError, TimeoutError,
+                urllib.error.URLError) as error:
+            if isinstance(error, urllib.error.HTTPError):
+                if error.code not in (408, 429, 500, 502, 503, 504):
+                    raise
+            elif isinstance(error, urllib.error.URLError):
+                if isinstance(error.reason, ssl.SSLCertVerificationError):
+                    raise
+            if attempt == attempts:
+                raise InterruptedDownload(f'{asset["local_name"]}: transfer failed after '
+                                          f'{attempts} attempts ({error}); partial retained until transaction cleanup') from error
+            partial = work / (asset['local_name'] + '.partial')
+            count = partial.stat().st_size if partial.is_file() and not partial.is_symlink() else 0
+            delay = min(2 ** (attempt - 1), 8)
+            print(f'{asset["local_name"]}: transfer interrupted at {count}/{asset["size"]} bytes; '
+                  f'retrying {attempt+1}/{attempts} in {delay}s', flush=True)
+            time.sleep(delay)
+
+
+def _download_asset_once(work, asset, opener=None, validate=official_url):
     name = asset['local_name']
     if Path(name).name != name or name in ('', '.', '..'):
         raise ValueError('Download must have a plain file name')
@@ -106,7 +144,7 @@ def download_asset(work, asset, opener=None, validate=official_url):
                                  f'expected {size-count}, received {length}')
             started = last = time.monotonic()
             initial = count
-            with partial.open('ab' if count else 'xb') as out:
+            with partial.open('ab' if partial.exists() else 'xb') as out:
                 while chunk := response.read(4 * 1024**2):
                     count += len(chunk)
                     if count > size:
@@ -119,7 +157,7 @@ def download_asset(work, asset, opener=None, validate=official_url):
                               f'{(count-initial)/(now-started)/1024**2:.1f} MiB/s', flush=True)
                         last = now
             if count != size:
-                raise ValueError('Truncated download; partial retained for resume')
+                raise InterruptedDownload(f'Truncated download: {name}, received {count}/{size} bytes')
     else:
         final_url = url
     hashes = check_asset(partial, asset)

@@ -1,0 +1,313 @@
+{
+  "schema": 1,
+  "checked": "2026-11-10",
+  "ghub_version": "2026.6.974819",
+  "build_id": "869589",
+  "scope": "Exact excluded depot metadata; shared key IDs indicate associations, not verified product names.",
+  "official_key_document": "https://updates.ghub.logitechg.com/pipeline/v2/access/20d0dda2-4c0c-4f5a-98d0-f9cf0819544b/content.json",
+  "official_key_count": 96,
+  "excluded_key_ids_available": 0,
+  "excluded_depots": 22,
+  "identified_product_names": 0,
+  "bytes": 190350654,
+  "evidence": [
+    "Pinned vendor build manifest: sizes and explicit dependency edges",
+    "Locally hash-verified depot capsule headers: key IDs; encrypted indexes cannot supply file or product names",
+    "Readable catalog contains no direct references to these 22 depot IDs",
+    "11 encrypted catalog sections use some of the same unavailable key IDs",
+    "Official public endpoint rechecked; no excluded key became available",
+    "Existing development-prefix key inventories also have no matching excluded key IDs"
+  ],
+  "depots": [
+    {
+      "depot": "0b6a73f1-6719-4ff8-99a6-6c89e85ac59b",
+      "bytes": 2744643,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "a08f9a55-3856-4ef9-b3e7-3bf203159a30",
+      "catalog_sections_using_same_key": [
+        "devices_0077.json"
+      ],
+      "depends_on": [],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "181d1831-dac5-4737-8be4-939d29c66320",
+      "bytes": 62136,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "f085fab2-489b-4b70-acb2-6d8ad7589ffc",
+      "catalog_sections_using_same_key": [],
+      "depends_on": [],
+      "required_by_excluded_depots": [
+        "225fe556-6765-47e3-96b5-5560f5b52ea3",
+        "c5b48853-83dd-4fea-ada9-eb2f995d52d5",
+        "ce6ebe4a-1db9-4df8-9dcf-f694b661279a",
+        "cedfcecb-9ff5-46fe-9d05-01b088640456"
+      ]
+    },
+    {
+      "depot": "182e9b98-2bad-4c15-9308-2be2ad800d93",
+      "bytes": 106657557,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "9d23e3cb-37a9-4817-9877-2ad176351ede",
+      "catalog_sections_using_same_key": [],
+      "depends_on": [],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "225fe556-6765-47e3-96b5-5560f5b52ea3",
+      "bytes": 2329568,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "59ac85ce-504d-43ae-b1b8-fab4c252d520",
+      "catalog_sections_using_same_key": [
+        "devices_0070.json"
+      ],
+      "depends_on": [
+        "181d1831-dac5-4737-8be4-939d29c66320",
+        "5b295da5-56a1-42e6-b706-aef16af8ce0b"
+      ],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "3417b651-4fac-4006-bdd3-981889ac234e",
+      "bytes": 18349,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "4eb18d4a-1c30-4a54-9812-8365bf8614b6",
+      "catalog_sections_using_same_key": [
+        "devices_0071.json"
+      ],
+      "depends_on": [
+        "67169382-f814-44dc-8df7-c0fd1e0b7e65"
+      ],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "3c3d6974-7518-47b6-b40c-997d14e07c14",
+      "bytes": 14018036,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "807bd41d-32a2-4840-a27c-8b16919b3387",
+      "catalog_sections_using_same_key": [],
+      "depends_on": [],
+      "required_by_excluded_depots": [
+        "c5b48853-83dd-4fea-ada9-eb2f995d52d5"
+      ]
+    },
+    {
+      "depot": "5b295da5-56a1-42e6-b706-aef16af8ce0b",
+      "bytes": 14018036,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "31c8aef9-56c9-4081-8b92-08b86ac8243a",
+      "catalog_sections_using_same_key": [],
+      "depends_on": [],
+      "required_by_excluded_depots": [
+        "225fe556-6765-47e3-96b5-5560f5b52ea3"
+      ]
+    },
+    {
+      "depot": "60dbbaaa-a8ab-41f9-8de6-07d0e8948fc8",
+      "bytes": 1786810,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "44b919d8-9b21-4ed8-ad9e-33ef62bb3047",
+      "catalog_sections_using_same_key": [
+        "devices_0072.json"
+      ],
+      "depends_on": [
+        "90f5da25-8071-4cf2-be37-4dc9a90cf80b"
+      ],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "67169382-f814-44dc-8df7-c0fd1e0b7e65",
+      "bytes": 46221,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "4eb18d4a-1c30-4a54-9812-8365bf8614b6",
+      "catalog_sections_using_same_key": [
+        "devices_0071.json"
+      ],
+      "depends_on": [],
+      "required_by_excluded_depots": [
+        "3417b651-4fac-4006-bdd3-981889ac234e",
+        "6d6cb52f-5055-4e45-b6e7-71115ba7a4e7"
+      ]
+    },
+    {
+      "depot": "6d6cb52f-5055-4e45-b6e7-71115ba7a4e7",
+      "bytes": 42527,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "4eb18d4a-1c30-4a54-9812-8365bf8614b6",
+      "catalog_sections_using_same_key": [
+        "devices_0071.json"
+      ],
+      "depends_on": [
+        "67169382-f814-44dc-8df7-c0fd1e0b7e65"
+      ],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "728c8c1c-0d99-4008-a9e2-704c10afdb81",
+      "bytes": 2744777,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "4f2197ca-256e-4b26-9964-c0aa45f2d05e",
+      "catalog_sections_using_same_key": [
+        "devices_0078.json"
+      ],
+      "depends_on": [],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "72e36f19-ee69-45ce-8528-95da79d63a13",
+      "bytes": 73661,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "c595091a-f73b-47af-af93-46a909dccddf",
+      "catalog_sections_using_same_key": [
+        "devices_0076.json"
+      ],
+      "depends_on": [],
+      "required_by_excluded_depots": [
+        "a5369c13-3732-442e-8b25-55f8f9c9da96"
+      ]
+    },
+    {
+      "depot": "90f5da25-8071-4cf2-be37-4dc9a90cf80b",
+      "bytes": 8882194,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "44b919d8-9b21-4ed8-ad9e-33ef62bb3047",
+      "catalog_sections_using_same_key": [
+        "devices_0072.json"
+      ],
+      "depends_on": [],
+      "required_by_excluded_depots": [
+        "60dbbaaa-a8ab-41f9-8de6-07d0e8948fc8"
+      ]
+    },
+    {
+      "depot": "a5369c13-3732-442e-8b25-55f8f9c9da96",
+      "bytes": 4226,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "c595091a-f73b-47af-af93-46a909dccddf",
+      "catalog_sections_using_same_key": [
+        "devices_0076.json"
+      ],
+      "depends_on": [
+        "72e36f19-ee69-45ce-8528-95da79d63a13"
+      ],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "b43c9763-30c5-4f74-a4e5-454ce3e15d2b",
+      "bytes": 397447,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "344e872b-e404-446d-be15-2298181afcf8",
+      "catalog_sections_using_same_key": [
+        "devices_0065.json"
+      ],
+      "depends_on": [],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "b4a313e2-68a5-4709-bcb5-8f039c8d266d",
+      "bytes": 239932,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "2f4ca1b8-4845-4e8a-8829-b04b7bc361c2",
+      "catalog_sections_using_same_key": [
+        "devices_0064.json"
+      ],
+      "depends_on": [],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "c5b48853-83dd-4fea-ada9-eb2f995d52d5",
+      "bytes": 2746010,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "63c76a05-a256-4938-bc40-7af685e6832e",
+      "catalog_sections_using_same_key": [
+        "devices_0069.json"
+      ],
+      "depends_on": [
+        "181d1831-dac5-4737-8be4-939d29c66320",
+        "3c3d6974-7518-47b6-b40c-997d14e07c14"
+      ],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "ce6ebe4a-1db9-4df8-9dcf-f694b661279a",
+      "bytes": 2681754,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "15cd20c2-4135-438c-9e2c-c693529bf390",
+      "catalog_sections_using_same_key": [
+        "devices_0067.json"
+      ],
+      "depends_on": [
+        "181d1831-dac5-4737-8be4-939d29c66320",
+        "f7748d7f-b334-4092-9329-302e0549b5b5"
+      ],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "cedfcecb-9ff5-46fe-9d05-01b088640456",
+      "bytes": 2746005,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "a6803f34-1d5d-41d1-a539-4fd8e882aaf4",
+      "catalog_sections_using_same_key": [
+        "devices_0068.json"
+      ],
+      "depends_on": [
+        "181d1831-dac5-4737-8be4-939d29c66320",
+        "eed65a5f-c2c5-4827-b17a-c3093548990c"
+      ],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "d95a0471-41f8-4c8b-b3d1-8c3765bd1c44",
+      "bytes": 74693,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "c1ac7ee1-99c6-4286-8b09-86c166e5dfd7",
+      "catalog_sections_using_same_key": [],
+      "depends_on": [],
+      "required_by_excluded_depots": []
+    },
+    {
+      "depot": "eed65a5f-c2c5-4827-b17a-c3093548990c",
+      "bytes": 14018036,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "ece05ef6-6557-4f09-a2ef-7e3b3efe74ba",
+      "catalog_sections_using_same_key": [],
+      "depends_on": [],
+      "required_by_excluded_depots": [
+        "cedfcecb-9ff5-46fe-9d05-01b088640456"
+      ]
+    },
+    {
+      "depot": "f7748d7f-b334-4092-9329-302e0549b5b5",
+      "bytes": 14018036,
+      "device_name": null,
+      "identity_status": "Not established: encrypted index and no match in readable device catalog",
+      "encryption_key_id": "03c89aee-d3e1-4990-a51f-17230ae815dc",
+      "catalog_sections_using_same_key": [],
+      "depends_on": [],
+      "required_by_excluded_depots": [
+        "ce6ebe4a-1db9-4df8-9dcf-f694b661279a"
+      ]
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "prepared_on": "2026-11-09",
+  "prepared_on": "2026-11-10",
   "development_revision": "124f80613f53424d752b3465cf9f5906ed2920cd",
-  "github_base_commit": "bd86d1090740c17cb9cd667f3f6a8611d0826bf6",
+  "github_base_commit": "9ea0d5a98f2d390c20deadfccbc0734ae030f753",
   "repository": "https://github.com/Cencyte/Penguin-LGHUB",
   "scope": "Source and installer recipe; no compiled runtime or proprietary inputs",
   "include_roots": [
@@ -44,8 +44,8 @@
     {
       "path": ".gitignore",
       "mode": "100644",
-      "sha256": "29225763900fcbd893e1c3b896a096ed165079239b7875b21caf13c8785edb7d",
-      "bytes": 465
+      "sha256": "983eae9e0de07e5aa06e4bfd8779fea9f22dc0e0a2c9df52265876790fe9db1f",
+      "bytes": 500
     },
     {
       "path": "LICENSE",
@@ -62,8 +62,8 @@
     {
       "path": "README.md",
       "mode": "100644",
-      "sha256": "77de9e1d7b752137ed8e76d9e58ebef8fffd8c9743ee0fa2a757fef6ce24ed51",
-      "bytes": 78965
+      "sha256": "40c4ea3cf62fa09baf0c4b1aa0e25cef902e1075fba8e555efb3ac359290f1a9",
+      "bytes": 81781
     },
     {
       "path": "assets/penguin-lghub-logo.png",
@@ -770,14 +770,14 @@
     {
       "path": "docs/packaging/release-installer-verification.json",
       "mode": "100644",
-      "sha256": "b02da16624822a32ed6579e324f61d1ded1de71a2d068a7fa72842194fbce113",
-      "bytes": 27665
+      "sha256": "7d05774ee6d5285d6cd2dcc7ebe4a90cb70067a7891ce7cb934d99763454679c",
+      "bytes": 28723
     },
     {
       "path": "docs/packaging/release-installer.md",
       "mode": "100644",
-      "sha256": "73c442ce63d5059d68825081adb8e08482e595a2c4c3669b4e69d5d1004bc14d",
-      "bytes": 25300
+      "sha256": "3bd16520ccd04b44860fd41a42b71a20f3577692467831f2dedbb08d71cb0e33",
+      "bytes": 26176
     },
     {
       "path": "docs/packaging/release-v1.0.0.md",
@@ -788,8 +788,8 @@
     {
       "path": "docs/packaging/source-publication.md",
       "mode": "100644",
-      "sha256": "6024659c85396cd89585eca90f760a58eeb07ac5079b8e1614267e45ea2339c1",
-      "bytes": 10059
+      "sha256": "23e812a269cb1ac14f6d41b90c551264a437b12d94acb8b735fa06b5f577d1c0",
+      "bytes": 10753
     },
     {
       "path": "docs/packaging/status-bazzite.svg",
@@ -900,6 +900,12 @@
       "bytes": 1208
     },
     {
+      "path": "packaging/excluded-depot-identities.json",
+      "mode": "100644",
+      "sha256": "70576a1a96467e3e68ecdc6f35db86672bf99814cd600e077aaa84d4d1970a6e",
+      "bytes": 11512
+    },
+    {
       "path": "packaging/first-run-ui-verification.json",
       "mode": "100644",
       "sha256": "b9c1658f0e7378a56d349291130b954c7546b183c9222d6cff2931080623fd67",
@@ -920,7 +926,7 @@
     {
       "path": "packaging/installer.json",
       "mode": "100644",
-      "sha256": "d5aca1cce0ed2c0a0a9177db498934f4124cdbf10e14645d5b714d6d5c981ecc",
+      "sha256": "a4753b1f004a2e5e62c3574ede2086eba2ed297424a772a012f33195e1cd1940",
       "bytes": 247
     },
     {
@@ -1472,8 +1478,8 @@
     {
       "path": "tests/packaging/test_support_commands.py",
       "mode": "100644",
-      "sha256": "a873be924cbc627481b8532cbd8117ed08458c6d06d7765f577aeb36bd99a9c4",
-      "bytes": 16569
+      "sha256": "2abd8c04302a731bf6ccb10377c27512d26c7f5c59ce39a28d547fded4040ef0",
+      "bytes": 17077
     },
     {
       "path": "tests/packaging/test_tray_registration.py",
@@ -1490,8 +1496,8 @@
     {
       "path": "tests/packaging/test_windows_media_acquire.py",
       "mode": "100644",
-      "sha256": "6c3185b2ed0ba481952b5a768e011a562a458d664517a0c1257e115615d810f8",
-      "bytes": 7272
+      "sha256": "8197efa7b6d44b231fd9f7691775507379cffe7b5dce547837fbf8e29c53dac1",
+      "bytes": 9739
     },
     {
       "path": "tests/packaging/test_windows_media_reconstruct.py",
@@ -2054,8 +2060,8 @@
     {
       "path": "tools/packaging/diagnostics.py",
       "mode": "100644",
-      "sha256": "eaa0bc020c08c7b43111d9898e90ccb86845908f56fcc0b73e044887cd049bc1",
-      "bytes": 15150
+      "sha256": "1e549274a87a6eb8f1e5f3d92b1042f8560e8a55f57e7de78d2da871e7357dc7",
+      "bytes": 15668
     },
     {
       "path": "tools/packaging/dockur_acquire.py",
@@ -2096,7 +2102,7 @@
     {
       "path": "tools/packaging/install.py",
       "mode": "100644",
-      "sha256": "0af33d4ef7cc76546a85572f8fed1b90727d70c9494ec8bb6ad0beafeff371b1",
+      "sha256": "d98aed381d7c8a540487d74ac45499d01db9c22e1233ed8ce82b6b3cc5a0d1e3",
       "bytes": 14259
     },
     {
@@ -2330,8 +2336,8 @@
     {
       "path": "tools/packaging/windows_media_acquire.py",
       "mode": "100644",
-      "sha256": "c8994be3b6f086a012b898c014bbb1e671d66a237472b3da1f87f66da890bb47",
-      "bytes": 10528
+      "sha256": "6cb499a97dc6934a61e020a7a880bff7923e679f9cc4e10a74d4f914e694f312",
+      "bytes": 12465
     },
     {
       "path": "tools/packaging/windows_media_reconstruct.py",

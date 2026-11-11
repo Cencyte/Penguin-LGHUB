@@ -647,5 +647,28 @@
       "root_cause_resolved": false,
       "status": "Earlier report retained for follow-up; no separate crash fix claimed."
     }
+  },
+  "installer_0_4_1_2026_11_10": {
+    "project": "1.0.1-rc.2",
+    "scope": "Diagnostic archive wrapper and downloader resilience; no runtime/device implementation change",
+    "regression_tests": {
+      "passed": 289,
+      "failed": 0,
+      "skipped": 0
+    },
+    "download_failure": {
+      "manjaro_vm": "install-20261110-015448-2055.log: core.depot truncated",
+      "cachyos": "install-20261110-021801-27298.log: core.depot truncated",
+      "shared_cause": "No automatic retry inside fetch; rollback removed the resumable partial"
+    },
+    "official_core_reproduction": {
+      "expected_bytes": 340506029,
+      "first_transfer_bytes": 127236016,
+      "requests_to_complete": 2,
+      "sha256": "f9df8d6fe0a50a40a7294d3e24b4faea8eebe14465d323d99b7f3a2a8452b5ea"
+    },
+    "archive": "gzip-compressed USTAR containing one neutral-metadata regular text report",
+    "full_install_acceptance": "Pending user tests",
+    "external_devices": "Recognition report pending diagnostics; resource match is not Wine protocol or physical acceptance"
   }
 }

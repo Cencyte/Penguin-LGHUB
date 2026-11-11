@@ -41,4 +41,5 @@ dist/
 *.swp
 .DS_Store
 Penguin-LGHUB-diagnostics-*.txt.gz
+Penguin-LGHUB-diagnostics-*.tar.gz
 .penguin-installer-update/

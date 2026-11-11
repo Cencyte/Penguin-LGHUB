@@ -38,7 +38,7 @@ FLAGS
   --install                Run the complete installation pipeline (default).
   --check                  Record host compatibility without installing anything.
   --uninstall              Remove a managed installation, including G HUB settings.
-  --diag                   Save a sanitized .txt.gz report in this project folder.
+  --diag                   Save a sanitized .tar.gz report in this project folder.
   --update                 Update installer source only; never the installed app.
   --directory <path>       Installation storage (default: ~/.local/share/penguin-lghub).
   --engine <bwrap|podman>   Private acquisition engine (default: bwrap).

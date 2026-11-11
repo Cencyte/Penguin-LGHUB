@@ -13,15 +13,15 @@ cd Penguin-LGHUB-release
 ./install.sh
 ```
 
-Installer 0.4.0 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall`, `--diag`, `--update` and `--help` keep their explicit behavior.
+Installer 0.4.1 defaults to installation when no action flag is supplied, including when only options such as `--verbose` are given. `--install` remains accepted; `--check`, `--uninstall`, `--diag`, `--update` and `--help` keep their explicit behavior.
 
-A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v1.0.1-rc.1) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
+A [source ZIP release](https://github.com/Cencyte/Penguin-LGHUB/releases/tag/v1.0.1-rc.2) is also available. Extract it, open a terminal in its folder, and run `./install.sh`. If extraction drops executable permissions, run `bash install.sh` instead. No Git metadata is needed.
 
 Version 1.0.0 promotes the tested Preview 8 implementation with installer 0.3.10. It includes automatic X11/Wayland profile observers, the shared keyboard connection, explicit profile prerequisites and payload verification, and receipt-scoped removal. It retains the untimed pause before sudo authentication and the Xwayland native-input route check. Window restoration, smaller native sizes with full-UI scaling, and a repaint after resize bursts are applied by the verified frontend transformation. No host Wine, graphics-driver or compositor change is required by those corrections.
 
 Final manual acceptance was reported November 1 for the Manjaro VM and CachyOS in X11/Plasma Wayland, and Bazzite in Plasma Wayland. It covers the requested uninstall/reinstall, profile switching, key delivery, tray actions and resize/restore checks. The VM supplies UI/session coverage; physical device results come from bare metal. [Release notes](release-v1.0.0.md).
 
-The earlier source-consolidation run rebuilt Wine patches and supplements in the pinned SDK, prepared a new prefix with host Wine hidden, and passed 8 activation checks, 4 registry checks and 6 isolated UI/tray checks. The current combined project suite has 286 tests. These automated results and the final manual acceptance are recorded separately in the [validation record](release-installer-verification.json).
+The earlier source-consolidation run rebuilt Wine patches and supplements in the pinned SDK, prepared a new prefix with host Wine hidden, and passed 8 activation checks, 4 registry checks and 6 isolated UI/tray checks. The current combined project suite has 289 tests. These automated results and the final manual acceptance are recorded separately in the [validation record](release-installer-verification.json).
 
 The repository and release downloads are public; no GitHub account is required.
 Run as your regular user. The installer requests sudo for its small Logitech
@@ -116,7 +116,7 @@ The 0.4.0 update expands resource acquisition to 757 publicly extractable depots
 Standalone commands:
 
 - `./install.sh --check` — record host readiness and explain blockers.
-- `./install.sh --diag` — save one minimized, sanitized `.txt.gz` report in the project root, without uploading it; live checks need G HUB running.
+- `./install.sh --diag` — save one minimized, sanitized `.tar.gz` report in the project root, without uploading it; live checks need G HUB running.
 - `./install.sh --update` — refresh installer source only, preserving the installed application and refusing edited source files.
 - `./install.sh --help` — show usage, switches and examples.
 - `./install.sh --uninstall` — remove the managed installation and its G HUB settings.
@@ -361,3 +361,9 @@ The [Bazzite readiness findings](bazzite-readiness.md) explain the remaining
 host-policy/driver boundaries. Existing [third-party use questions](third-party-use.md)
 are unchanged by local extraction or containerization; the repository contains
 no Microsoft or Logitech payload binaries.
+
+## Download recovery and diagnostic archive format (0.4.1)
+
+The Manjaro VM and CachyOS installation logs both showed a truncated `core.depot` transfer. Fetch now makes up to six bounded attempts for interrupted transfers and transient network/HTTP failures, resuming verified ranges. The required full size and SHA-256 remain unchanged. If recovery fails, ordinary installation rollback still applies. A fresh official download reproduced an interruption at 127,236,016 of 340,506,029 bytes and completed on the second request with the pinned hash. This is download recovery evidence, not a new full installation acceptance.
+
+Diagnostics now produce a conventional `.tar.gz` containing exactly one regular `Penguin-LGHUB-diagnostics.txt` member. Archive metadata has neutral owners and timestamps and a private file mode; no absolute paths or loose text report are included.

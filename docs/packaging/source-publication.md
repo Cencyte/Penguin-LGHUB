@@ -173,3 +173,8 @@ complete source tree is checked against that commit's manifest. This protects
 against corrupt/incomplete downloads and accidental local modifications; the
 manifest is not an independent digital signature. Repository/TLS trust remains
 required. Updating never installs the payload or changes an existing prefix.
+
+
+## November 10 follow-up testing release
+
+Version 1.0.1-rc.2 / installer 0.4.1 changes diagnostic delivery to a single `.tar.gz` containing the text report and adds bounded resume/retry handling for interrupted downloads. Both reported installer failures occurred while fetching `core.depot`; a fresh official transfer reproduced the interruption and passed full size/hash verification after automatic resumption. The 289 project tests pass. Device recognition beyond the tested hardware still requires reporter diagnostics; no new physical-device support is claimed. Exact excluded-depot identities and known metadata associations are recorded in `packaging/excluded-depot-identities.json`.

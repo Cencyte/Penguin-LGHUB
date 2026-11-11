@@ -1,6 +1,7 @@
 """Local, minimized support report. Never uploads or changes the installation."""
 import base64
 import gzip
+import io
 import hashlib
 import ipaddress
 import json
@@ -11,6 +12,7 @@ import re
 import socket
 import struct
 import subprocess
+import tarfile
 import time
 import uuid
 
@@ -184,10 +186,10 @@ def error_summary(directory):
 def run(directory, verbose=False, project=ROOT):
     directory=Path(directory).expanduser().absolute()
     stamp=time.strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:8]
-    target=project/f'Penguin-LGHUB-diagnostics-{stamp}.txt.gz'
+    target=project/f'Penguin-LGHUB-diagnostics-{stamp}.tar.gz'
     running=owned_agent(directory)
     sanitizer=Sanitizer();report={'schema':1,'installer':STYLE['installer_version'],'checks':[]}
-    # The single gzip is the only diagnostic artifact. Presentation's log is
+    # The single tar.gz is the only diagnostic artifact. Presentation's log is
     # private temporary output; sanitized content is added to the final report.
     import tempfile
     with tempfile.TemporaryDirectory(prefix='penguin-diag-') as temporary:
@@ -251,7 +253,14 @@ def run(directory, verbose=False, project=ROOT):
                 with target.open('xb') as out:
                     try:
                         os.chmod(target,0o600)
-                        with gzip.GzipFile(filename='Penguin-LGHUB-diagnostics.txt',mode='wb',fileobj=out,mtime=0) as archive:archive.write(text.encode())
+                        payload=text.encode()
+                        member=tarfile.TarInfo('Penguin-LGHUB-diagnostics.txt')
+                        member.size=len(payload);member.mode=0o600
+                        # Fixed neutral metadata avoids recording local account
+                        # names, UID/GID, timestamps or paths in the tar header.
+                        with gzip.GzipFile(filename='',mode='wb',fileobj=out,mtime=0) as compressed:
+                            with tarfile.open(fileobj=compressed,mode='w',format=tarfile.USTAR_FORMAT) as archive:
+                                archive.addfile(member,io.BytesIO(payload))
                     except BaseException:
                         target.unlink(missing_ok=True)
                         raise
